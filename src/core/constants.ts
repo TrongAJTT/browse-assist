@@ -90,7 +90,10 @@ export const MESSAGE_TYPES = {
   SUPER_DRAG_OPEN_LINK: "SUPER_DRAG_OPEN_LINK",
 
   // ColorPick Eyedropper
-  TRIGGER_COLOR_PICKER: "TRIGGER_COLOR_PICKER"
+  TRIGGER_COLOR_PICKER: "TRIGGER_COLOR_PICKER",
+
+  // Element Zapper
+  TRIGGER_ELEMENT_ZAPPER: "TRIGGER_ELEMENT_ZAPPER"
 } as const
 
 export type MessageType = (typeof MESSAGE_TYPES)[keyof typeof MESSAGE_TYPES]

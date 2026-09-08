@@ -67,6 +67,13 @@
           "mac": "Alt+Shift+C"
         },
         "description": "Pick color from screen"
+      },
+      "toggle_element_zapper": {
+        "suggested_key": {
+          "default": "Alt+Shift+Z",
+          "mac": "Alt+Shift+Z"
+        },
+        "description": "Activate Element Zapper to remove page clutter"
       }
     }
   }

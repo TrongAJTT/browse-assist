@@ -42,6 +42,11 @@ import {
   activate as activateColorPicker,
   deactivate as deactivateColorPicker
 } from "~features/color-picker/logic"
+import {
+  activate as activateElementZapper,
+  deactivate as deactivateElementZapper,
+  startZapping as startElementZapping
+} from "~features/element-zapper/logic"
 
 export const config: PlasmoCSConfig = {
   matches: ["http://*/*", "https://*/*"],
@@ -99,6 +104,13 @@ function applySettings(nextSettings: FeatureSettings): void {
   } else {
     deactivateColorPicker()
   }
+
+  // Element Zapper
+  if (nextSettings.elementZapper) {
+    activateElementZapper(nextSettings.elementZapperConfig)
+  } else {
+    deactivateElementZapper()
+  }
 }
 
 /**
@@ -145,6 +157,11 @@ async function init(): Promise<void> {
             toast.parentNode.removeChild(toast)
           }
         }
+        sendResponse({ success: true })
+        return true
+      }
+      if (msgType === MESSAGE_TYPES.TRIGGER_ELEMENT_ZAPPER) {
+        startElementZapping()
         sendResponse({ success: true })
         return true
       }

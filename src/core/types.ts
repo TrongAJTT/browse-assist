@@ -10,6 +10,7 @@ export type FeatureKey =
   | "pictureInPicture"
   | "quickScroll"
   | "colorPicker"
+  | "elementZapper"
 
 export type ContextMenuActionId =
   | "copyLinkText"
@@ -170,6 +171,19 @@ export const DEFAULT_COLOR_PICKER_CONFIG: ColorPickerConfig = {
 }
 
 /**
+ * Element Zapper configuration.
+ */
+export interface ElementZapperConfig {
+  autoUnfreezeScroll: boolean // Automatically remove overflow:hidden on body/html when an overlay is zapped
+  showToast: boolean // Show feedback toast when an element is zapped or mode cancelled
+}
+
+export const DEFAULT_ELEMENT_ZAPPER_CONFIG: ElementZapperConfig = {
+  autoUnfreezeScroll: true,
+  showToast: true
+}
+
+/**
  * Appearance theme options: "dark" | "light" | "system".
  */
 export type ThemeMode = "dark" | "light" | "system"
@@ -187,6 +201,7 @@ export interface FeatureSettings {
   pictureInPicture: boolean
   quickScroll: boolean
   colorPicker: boolean
+  elementZapper: boolean
   contextMenuActionsConfig: ContextMenuActionsConfig
   superDragConfig: SuperDragConfig
   smoothScrollConfig: SmoothScrollConfig
@@ -194,6 +209,7 @@ export interface FeatureSettings {
   pictureInPictureConfig: PictureInPictureConfig
   quickScrollConfig: QuickScrollConfig
   colorPickerConfig: ColorPickerConfig
+  elementZapperConfig: ElementZapperConfig
 }
 
 /**
@@ -210,6 +226,7 @@ export const DEFAULT_SETTINGS: FeatureSettings = {
   pictureInPicture: true,
   quickScroll: true,
   colorPicker: true,
+  elementZapper: true,
   contextMenuActionsConfig: DEFAULT_CONTEXT_MENU_ACTIONS_CONFIG,
   superDragConfig: DEFAULT_SUPER_DRAG_CONFIG,
   smoothScrollConfig: {
@@ -219,7 +236,8 @@ export const DEFAULT_SETTINGS: FeatureSettings = {
   mouseZoomConfig: DEFAULT_MOUSE_ZOOM_CONFIG,
   pictureInPictureConfig: DEFAULT_PICTURE_IN_PICTURE_CONFIG,
   quickScrollConfig: DEFAULT_QUICK_SCROLL_CONFIG,
-  colorPickerConfig: DEFAULT_COLOR_PICKER_CONFIG
+  colorPickerConfig: DEFAULT_COLOR_PICKER_CONFIG,
+  elementZapperConfig: DEFAULT_ELEMENT_ZAPPER_CONFIG
 }
 
 /**
@@ -303,6 +321,14 @@ export const FEATURES_LIST: FeatureMeta[] = [
     title: "Color Picker",
     description: "Pick any pixel color from the screen with instant multi-format copy.",
     icon: "🎨",
+    hasSettings: true
+  },
+  {
+    key: "elementZapper",
+    title: "Element Zapper",
+    description:
+      "Target and eliminate distracting overlays, banners, and sticky elements on any page.",
+    icon: "⚡",
     hasSettings: true
   }
 ]

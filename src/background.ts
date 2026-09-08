@@ -26,9 +26,14 @@ initPictureInPictureBackground().catch((err) => {
 })
 
 import { initColorPickerBackground } from "~features/color-picker/background"
+import { initElementZapperBackground } from "~features/element-zapper/background"
 
 initColorPickerBackground().catch((err) => {
   console.error("Failed to initialize color-picker background service:", err)
+})
+
+initElementZapperBackground().catch((err) => {
+  console.error("Failed to initialize element-zapper background service:", err)
 })
 
 

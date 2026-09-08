@@ -7,7 +7,8 @@ import {
   PictureInPicture2,
   Pipette,
   Settings as SettingsIcon,
-  X
+  X,
+  Zap
 } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 
@@ -32,6 +33,8 @@ import { ColorPickerSettingsView } from "~features/color-picker/SettingsView"
 import { ColorPickerToggle } from "~features/color-picker/Toggle"
 import { ContextMenuActionsSettingsView } from "~features/context-menu-actions/SettingsView"
 import { ContextMenuActionsToggle } from "~features/context-menu-actions/Toggle"
+import { ElementZapperSettingsView } from "~features/element-zapper/SettingsView"
+import { ElementZapperToggle } from "~features/element-zapper/Toggle"
 import { MouseZoomSettingsView } from "~features/mouse-zoom/SettingsView"
 import { MouseZoomToggle } from "~features/mouse-zoom/Toggle"
 import { PictureInPictureSettingsView } from "~features/picture-in-picture/SettingsView"
@@ -54,6 +57,7 @@ type ActiveView =
   | "smooth-scroll-settings"
   | "mouse-zoom-settings"
   | "color-picker-settings"
+  | "element-zapper-settings"
   | "preferences"
   | "about"
 
@@ -75,6 +79,8 @@ function IndexPopup() {
   const [pipShortcut, setPipShortcut] = useState<string>("Alt + P")
   const [colorPickerShortcut, setColorPickerShortcut] =
     useState<string>("Alt + Shift + C")
+  const [elementZapperShortcut, setElementZapperShortcut] =
+    useState<string>("Alt + Shift + Z")
 
   // Query background for active PiP session and command shortcuts
   useEffect(() => {
@@ -100,6 +106,13 @@ function IndexPopup() {
           setColorPickerShortcut(cpCmd.shortcut)
         } else {
           setColorPickerShortcut("")
+        }
+
+        const ezCmd = commands.find((c) => c.name === "toggle_element_zapper")
+        if (ezCmd?.shortcut) {
+          setElementZapperShortcut(ezCmd.shortcut)
+        } else {
+          setElementZapperShortcut("")
         }
       })
     }
@@ -240,6 +253,24 @@ function IndexPopup() {
               }}
               className="p-1.5 rounded-lg text-content-muted hover:text-accent hover:bg-app-surface active:scale-95 transition-all focus:outline-none">
               <Pipette className="w-4 h-4" />
+            </button>
+          )}
+
+          {/* Quick Trigger Element Zapper Button */}
+          {settings?.elementZapper && (
+            <button
+              type="button"
+              title={
+                elementZapperShortcut
+                  ? `Zap Element from Page (${elementZapperShortcut})`
+                  : "Zap Element from Page"
+              }
+              onClick={async () => {
+                await sendToActiveTab(MESSAGE_TYPES.TRIGGER_ELEMENT_ZAPPER)
+                window.close()
+              }}
+              className="p-1.5 rounded-lg text-content-muted hover:text-amber-400 hover:bg-app-surface active:scale-95 transition-all focus:outline-none">
+              <Zap className="w-4 h-4" />
             </button>
           )}
 
@@ -396,6 +427,9 @@ function IndexPopup() {
               <ColorPickerToggle
                 onConfigure={() => setCurrentView("color-picker-settings")}
               />
+              <ElementZapperToggle
+                onConfigure={() => setCurrentView("element-zapper-settings")}
+              />
             </main>
           </div>
         ) : currentView === "context-menu-actions-settings" ? (
@@ -414,6 +448,8 @@ function IndexPopup() {
           <MouseZoomSettingsView onBack={() => setCurrentView("main")} />
         ) : currentView === "color-picker-settings" ? (
           <ColorPickerSettingsView onBack={() => setCurrentView("main")} />
+        ) : currentView === "element-zapper-settings" ? (
+          <ElementZapperSettingsView onBack={() => setCurrentView("main")} />
         ) : currentView === "preferences" ? (
           <PreferencesSettingsView onBack={() => setCurrentView("main")} />
         ) : (

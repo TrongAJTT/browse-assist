@@ -78,6 +78,12 @@ export interface MessageRegistry {
     request: undefined
     response: { success: boolean }
   }
+
+  // Element Zapper
+  [MESSAGE_TYPES.TRIGGER_ELEMENT_ZAPPER]: {
+    request: undefined
+    response: { success: boolean }
+  }
 }
 
 /**

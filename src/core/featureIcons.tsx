@@ -6,6 +6,7 @@ import {
   PictureInPicture2,
   Pipette,
   Scroll,
+  Zap,
   ZoomIn
 } from "lucide-react"
 import type React from "react"
@@ -63,5 +64,10 @@ export const FEATURE_ICONS: Record<
     icon: Pipette,
     colorClass: "text-pink-400",
     bgClass: "bg-pink-500/10 border-pink-500/30"
+  },
+  elementZapper: {
+    icon: Zap,
+    colorClass: "text-amber-400",
+    bgClass: "bg-amber-500/10 border-amber-500/30"
   }
 }
