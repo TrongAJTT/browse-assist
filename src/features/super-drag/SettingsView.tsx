@@ -245,6 +245,51 @@ export const SuperDragSettingsView: React.FC<SuperDragSettingsViewProps> = ({
             </div>
           </div>
         </div>
+
+        {/* Section 3: Gesture Cheat Sheet */}
+        <div className="space-y-2 pt-2 border-t border-slate-800/80">
+          <span className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
+            Gesture Directions Guide
+          </span>
+
+          <div className="grid grid-cols-3 gap-2 text-center text-xs">
+            <div className="p-2 rounded-xl bg-slate-800/30 border border-slate-700/40 flex flex-col items-center">
+              <span className="font-mono text-[11px] text-indigo-400 font-semibold">
+                ↗ Up / Right
+              </span>
+              <span className="text-[10.5px] text-slate-300 mt-1 font-medium">
+                Background Tab
+              </span>
+              <span className="text-[9.5px] text-slate-500">
+                Search or Open link
+              </span>
+            </div>
+
+            <div className="p-2 rounded-xl bg-slate-800/30 border border-slate-700/40 flex flex-col items-center">
+              <span className="font-mono text-[11px] text-cyan-400 font-semibold">
+                ← Left
+              </span>
+              <span className="text-[10.5px] text-slate-300 mt-1 font-medium">
+                Active Tab
+              </span>
+              <span className="text-[9.5px] text-slate-500">
+                Switch to new tab
+              </span>
+            </div>
+
+            <div className="p-2 rounded-xl bg-slate-800/30 border border-slate-700/40 flex flex-col items-center">
+              <span className="font-mono text-[11px] text-emerald-400 font-semibold">
+                ↓ Down
+              </span>
+              <span className="text-[10.5px] text-slate-300 mt-1 font-medium">
+                Copy to Clipboard
+              </span>
+              <span className="text-[9.5px] text-slate-500">
+                Text or Clean Link
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
     </SubSettingsLayout>
   )

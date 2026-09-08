@@ -16,6 +16,7 @@ export interface SuperDragMessage {
   action: "SUPER_DRAG_SEARCH" | "SUPER_DRAG_OPEN_LINK"
   text?: string
   url?: string
+  openInBackground?: boolean
 }
 
 /**
@@ -24,9 +25,15 @@ export interface SuperDragMessage {
 async function handleSearch(
   text: string,
   config: SuperDragConfig,
-  senderTab?: chrome.tabs.Tab
+  senderTab?: chrome.tabs.Tab,
+  overrideBackground?: boolean
 ): Promise<void> {
   if (!text) return
+
+  const openInBackground =
+    typeof overrideBackground === "boolean"
+      ? overrideBackground
+      : config.openInBackground
 
   if (chrome.search?.query) {
     await chrome.search.query({
@@ -35,7 +42,7 @@ async function handleSearch(
     })
 
     // If configured to open in background, refocus the sender tab
-    if (config.openInBackground && senderTab?.id) {
+    if (openInBackground && senderTab?.id) {
       try {
         await chrome.tabs.update(senderTab.id, { active: true })
       } catch {
@@ -47,7 +54,7 @@ async function handleSearch(
     const fallbackUrl = `https://www.google.com/search?q=${encodeURIComponent(text)}`
     chrome.tabs.create({
       url: fallbackUrl,
-      active: !config.openInBackground
+      active: !openInBackground
     })
   }
 }
@@ -58,7 +65,8 @@ async function handleSearch(
 async function handleOpenLink(
   rawUrl: string,
   config: SuperDragConfig,
-  senderTab?: chrome.tabs.Tab
+  senderTab?: chrome.tabs.Tab,
+  overrideBackground?: boolean
 ): Promise<void> {
   if (!rawUrl) return
 
@@ -69,9 +77,14 @@ async function handleOpenLink(
     targetIndex = senderTab.index + 1
   }
 
+  const openInBackground =
+    typeof overrideBackground === "boolean"
+      ? overrideBackground
+      : config.openInBackground
+
   chrome.tabs.create({
     url,
-    active: !config.openInBackground,
+    active: !openInBackground,
     index: targetIndex
   })
 }
@@ -103,11 +116,21 @@ function onMessageListener(
 
       if (message.action === "SUPER_DRAG_SEARCH" && message.text) {
         if (config.searchSelectedText) {
-          handleSearch(message.text, config, sender.tab)
+          handleSearch(
+            message.text,
+            config,
+            sender.tab,
+            message.openInBackground
+          )
         }
       } else if (message.action === "SUPER_DRAG_OPEN_LINK" && message.url) {
         if (config.openHyperlinks) {
-          handleOpenLink(message.url, config, sender.tab)
+          handleOpenLink(
+            message.url,
+            config,
+            sender.tab,
+            message.openInBackground
+          )
         }
       }
       sendResponse({ success: true })
