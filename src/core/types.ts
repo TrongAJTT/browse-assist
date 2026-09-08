@@ -116,9 +116,15 @@ export const DEFAULT_PICTURE_IN_PICTURE_CONFIG: PictureInPictureConfig = {
 }
 
 /**
+ * Appearance theme options: "dark" | "light" | "system".
+ */
+export type ThemeMode = "dark" | "light" | "system"
+
+/**
  * Settings map tracking the enabled state of each feature and sub-configurations.
  */
 export interface FeatureSettings {
+  theme: ThemeMode
   allowRightClick: boolean
   contextMenuActions: boolean
   superDrag: boolean
@@ -137,6 +143,7 @@ export interface FeatureSettings {
  * All features are enabled by default upon installation.
  */
 export const DEFAULT_SETTINGS: FeatureSettings = {
+  theme: "system",
   allowRightClick: true,
   contextMenuActions: true,
   superDrag: true,

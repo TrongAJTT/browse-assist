@@ -5,6 +5,7 @@ import {
   Heart,
   HelpCircle,
   PictureInPicture2,
+  Settings as SettingsIcon,
   X
 } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
@@ -12,6 +13,7 @@ import { useEffect, useRef, useState } from "react"
 import { useStorage } from "@plasmohq/storage/hook"
 
 import { AboutView } from "~components/AboutView"
+import { PreferencesSettingsView } from "~components/PreferencesSettingsView"
 import { AppIcon } from "~core/assets"
 import { DONATE_OPTIONS } from "~core/constants"
 import {
@@ -40,6 +42,7 @@ type ActiveView =
   | "smooth-scroll-settings"
   | "mouse-zoom-settings"
   | "picture-in-picture-settings"
+  | "preferences"
   | "about"
 
 function IndexPopup() {
@@ -159,9 +162,28 @@ function IndexPopup() {
     }
   }
 
+  // Evaluate active theme ("dark" vs "light")
+  const activeThemeMode = settings?.theme ?? DEFAULT_SETTINGS.theme
+  const [systemPrefersDark, setSystemPrefersDark] = useState<boolean>(() => {
+    return window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? true
+  })
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
+    const handler = (e: MediaQueryListEvent) => setSystemPrefersDark(e.matches)
+    mediaQuery.addEventListener("change", handler)
+    return () => mediaQuery.removeEventListener("change", handler)
+  }, [])
+
+  const isDark =
+    activeThemeMode === "dark" ||
+    (activeThemeMode === "system" && systemPrefersDark)
+
+  const themeClass = isDark ? "theme-dark" : "theme-light"
+
   return (
     <div
-      className={`w-[444px] h-[600px] bg-app text-content-primary font-sans select-none antialiased flex flex-col overflow-hidden transition-opacity duration-150 ${
+      className={`w-[444px] h-[600px] bg-app text-content-primary font-sans select-none antialiased flex flex-col overflow-hidden transition-opacity duration-150 ${themeClass} ${
         isHydrated ? "opacity-100" : "opacity-0 pointer-events-none"
       }`}>
       {/* Header - Crisp and cleanly separated from content */}
@@ -178,7 +200,7 @@ function IndexPopup() {
           </div>
         </div>
 
-        {/* Action icons: PiP Trigger, Donate (Dropdown) & About (Sub-page) */}
+        {/* Action icons: PiP Trigger, Donate, Preferences & About */}
         <div className="flex items-center gap-1">
           {/* Quick Trigger PiP Button */}
           {settings?.pictureInPicture && (
@@ -239,6 +261,19 @@ function IndexPopup() {
               </div>
             )}
           </div>
+
+          {/* Preferences / Settings Button */}
+          <button
+            type="button"
+            title="Preferences & Theme"
+            onClick={() => setCurrentView("preferences")}
+            className={`p-1.5 rounded-lg transition-all focus:outline-none ${
+              currentView === "preferences"
+                ? "bg-accent-subtle text-accent ring-1 ring-accent-glow"
+                : "text-content-muted hover:text-content-primary hover:bg-app-surface active:scale-95"
+            }`}>
+            <SettingsIcon className="w-4 h-4" />
+          </button>
 
           {/* About Button */}
           <button
@@ -328,6 +363,8 @@ function IndexPopup() {
           <SmoothScrollSettingsView onBack={() => setCurrentView("main")} />
         ) : currentView === "mouse-zoom-settings" ? (
           <MouseZoomSettingsView onBack={() => setCurrentView("main")} />
+        ) : currentView === "preferences" ? (
+          <PreferencesSettingsView onBack={() => setCurrentView("main")} />
         ) : (
           <AboutView onBack={() => setCurrentView("main")} />
         )}

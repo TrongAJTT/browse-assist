@@ -75,7 +75,7 @@ export const SubSettingsLayout: React.FC<SubSettingsLayoutProps> = ({
               className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent-hover focus:ring-offset-2 focus:ring-offset-app ${
                 enabled
                   ? "bg-accent-hover shadow-accent-glow shadow-sm"
-                  : "bg-slate-700"
+                  : "bg-border-subtle"
               }`}>
               <span className="sr-only">Toggle {title}</span>
               <span

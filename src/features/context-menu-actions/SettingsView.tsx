@@ -35,7 +35,7 @@ const ACTION_METAS: Record<ContextMenuActionId, ActionMeta> = {
     id: "copyLinkText",
     title: "Copy Link Text",
     badge: "Text only",
-    badgeColor: "bg-slate-800 text-slate-400 border-slate-700/60",
+    badgeColor: "badge-muted",
     description: "Extracts and copies the anchor text without copying the URL.",
     icon: <Type className="w-5 h-5 text-cyan-400" />
   },
@@ -43,7 +43,7 @@ const ACTION_METAS: Record<ContextMenuActionId, ActionMeta> = {
     id: "cleanLinkCopy",
     title: "Clean Link Copy",
     badge: "Anti-Tracking",
-    badgeColor: "bg-emerald-950/60 text-emerald-400 border-emerald-800/50",
+    badgeColor: "badge-success",
     description: "Strips tracking parameters (utm_*, fbclid, si) before copying.",
     icon: <Sparkles className="w-5 h-5 text-emerald-400" />
   },
@@ -51,7 +51,7 @@ const ACTION_METAS: Record<ContextMenuActionId, ActionMeta> = {
     id: "markdownLinkCopy",
     title: "Markdown Link Copy",
     badge: "[Text](URL)",
-    badgeColor: "bg-indigo-950/60 text-indigo-400 border-indigo-800/50",
+    badgeColor: "badge-accent",
     description: "Copies formatted markdown hyperlink, ideal for Obsidian, Notion & GitHub.",
     icon: <FileCode className="w-5 h-5 text-indigo-400" />
   }
@@ -206,8 +206,7 @@ export const ContextMenuActionsSettingsView: React.FC<
                       <span className="text-xs font-semibold text-content-primary">
                         {item.title}
                       </span>
-                      <span
-                        className={`font-mono text-[10px] px-1.5 py-0.5 rounded border ${item.badgeColor}`}>
+                      <span className={`font-mono ${item.badgeColor}`}>
                         {item.badge}
                       </span>
                     </div>

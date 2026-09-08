@@ -60,7 +60,7 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
               {title}
             </span>
             {badge && (
-              <span className="px-1.5 py-0.5 text-[10px] font-semibold tracking-tight rounded bg-emerald-950/60 text-emerald-400 border border-emerald-800/50">
+              <span className="badge-success">
                 {badge}
               </span>
             )}
@@ -100,7 +100,7 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
           className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent-hover focus:ring-offset-2 focus:ring-offset-app ${
             enabled
               ? "bg-accent-hover shadow-accent-glow shadow-md"
-              : "bg-slate-700"
+              : "bg-border-subtle"
           } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}>
           <span className="sr-only">Toggle {title}</span>
           <span
