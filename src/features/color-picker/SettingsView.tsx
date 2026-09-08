@@ -17,6 +17,7 @@ import { GridPicker, type GridPickerItem } from "~components/GridPicker"
 import { ShortcutBadge } from "~components/ShortcutBadge"
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
 import { MESSAGE_TYPES, sendToActiveTab } from "~core/messaging"
+import { openBrowserShortcutsPage } from "~core/shortcutsHelper"
 import {
   DEFAULT_COLOR_PICKER_CONFIG,
   DEFAULT_SETTINGS,
@@ -179,7 +180,7 @@ export const ColorPickerSettingsView: React.FC<
   }
 
   const handleOpenShortcutsPage = () => {
-    chrome.tabs.create({ url: "chrome://extensions/shortcuts" })
+    openBrowserShortcutsPage().catch(() => {})
   }
 
   return (

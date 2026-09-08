@@ -6,6 +6,7 @@ import { useStorage } from "@plasmohq/storage/hook"
 
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
 import { MESSAGE_TYPES, sendToActiveTab } from "~core/messaging"
+import { openBrowserShortcutsPage } from "~core/shortcutsHelper"
 import {
   DEFAULT_ELEMENT_ZAPPER_CONFIG,
   DEFAULT_SETTINGS,
@@ -111,7 +112,7 @@ export const ElementZapperSettingsView: React.FC<
               type="button"
               title="Configure Extension Shortcuts"
               onClick={() => {
-                chrome.tabs.create({ url: "chrome://extensions/shortcuts" })
+                openBrowserShortcutsPage().catch(() => {})
               }}
               className="p-1 rounded text-content-muted hover:text-content-primary hover:bg-surface-elevated transition-colors">
               <RotateCcw className="w-3.5 h-3.5" />

@@ -16,6 +16,7 @@ import { useEffect, useRef, useState } from "react"
 import { useStorage } from "@plasmohq/storage/hook"
 
 import { AboutView } from "~components/AboutView"
+import { GlobalDialogHost } from "~components/GlobalDialogHost"
 import { PreferencesSettingsView } from "~components/PreferencesSettingsView"
 import { AppIcon } from "~core/assets"
 import { DONATE_OPTIONS } from "~core/constants"
@@ -158,10 +159,7 @@ function IndexPopup() {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node
-      if (
-        donateMenuRef.current &&
-        !donateMenuRef.current.contains(target)
-      ) {
+      if (donateMenuRef.current && !donateMenuRef.current.contains(target)) {
         setIsDonateOpen(false)
       }
       if (
@@ -358,7 +356,9 @@ function IndexPopup() {
                         </div>
                         <div className="flex flex-col">
                           <span className="font-medium text-[11px]">
-                            {activePiP ? "Exit PiP Video" : "Picture-in-Picture"}
+                            {activePiP
+                              ? "Exit PiP Video"
+                              : "Picture-in-Picture"}
                           </span>
                         </div>
                       </div>
@@ -535,6 +535,9 @@ function IndexPopup() {
           <AboutView onBack={() => setCurrentView("main")} />
         )}
       </div>
+
+      {/* Global Dialog Modal Host */}
+      <GlobalDialogHost />
     </div>
   )
 }

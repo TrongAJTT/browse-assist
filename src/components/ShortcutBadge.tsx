@@ -1,6 +1,8 @@
 import { Keyboard } from "lucide-react"
 import type React from "react"
 
+import { openBrowserShortcutsPage } from "~core/shortcutsHelper"
+
 interface ShortcutBadgeProps {
   /** The shortcut key combination string (e.g. "Alt+R", "Alt+P") or empty string if unassigned */
   shortcut?: string
@@ -25,16 +27,22 @@ export const ShortcutBadge: React.FC<ShortcutBadgeProps> = ({
   const handleOpenShortcutsPage = (e: React.MouseEvent) => {
     if (!interactive) return
     e.stopPropagation()
-    chrome.tabs.create({ url: "chrome://extensions/shortcuts" })
+    openBrowserShortcutsPage().catch(() => {})
   }
 
   if (isAssigned) {
     return (
       <kbd
         onClick={interactive ? handleOpenShortcutsPage : undefined}
-        title={interactive ? "Click to customize shortcut in browser settings" : undefined}
+        title={
+          interactive
+            ? "Click to customize shortcut in browser settings"
+            : undefined
+        }
         className={`badge-kbd ${
-          interactive ? "cursor-pointer hover:border-accent hover:text-accent active:scale-95 transition-all" : ""
+          interactive
+            ? "cursor-pointer hover:border-accent hover:text-accent active:scale-95 transition-all"
+            : ""
         } ${className}`}>
         {shortcut}
       </kbd>
@@ -47,7 +55,9 @@ export const ShortcutBadge: React.FC<ShortcutBadgeProps> = ({
       onClick={interactive ? handleOpenShortcutsPage : undefined}
       title="Shortcut conflict or unassigned. Click to configure in browser settings"
       className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/25 ${
-        interactive ? "cursor-pointer hover:bg-amber-500/20 hover:border-amber-500/40 active:scale-95 transition-all" : ""
+        interactive
+          ? "cursor-pointer hover:bg-amber-500/20 hover:border-amber-500/40 active:scale-95 transition-all"
+          : ""
       } ${className}`}>
       <Keyboard className="w-2.5 h-2.5" />
       <span>Unassigned</span>

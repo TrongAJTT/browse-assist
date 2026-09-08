@@ -97,3 +97,19 @@ export const MESSAGE_TYPES = {
 } as const
 
 export type MessageType = (typeof MESSAGE_TYPES)[keyof typeof MESSAGE_TYPES]
+
+// Browser shortcut configuration URLs
+export const BROWSER_SHORTCUT_URLS = {
+  chrome: "chrome://extensions/shortcuts",
+  edge: "edge://extensions/shortcuts",
+  brave: "brave://extensions/shortcuts",
+  opera: "opera://settings/keyboardShortcuts"
+} as const
+
+export type SupportedBrowser =
+  | "chrome"
+  | "edge"
+  | "brave"
+  | "opera"
+  | "firefox"
+  | "unknown"

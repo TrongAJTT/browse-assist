@@ -17,6 +17,7 @@ import {
   sendToActiveTab,
   sendToBackground
 } from "~core/messaging"
+import { openBrowserShortcutsPage } from "~core/shortcutsHelper"
 import {
   DEFAULT_SETTINGS,
   STORAGE_KEYS,
@@ -109,7 +110,7 @@ export const PictureInPictureSettingsView: React.FC<
   }
 
   const handleOpenShortcutsPage = () => {
-    chrome.tabs.create({ url: "chrome://extensions/shortcuts" })
+    openBrowserShortcutsPage().catch(() => {})
   }
 
   return (
