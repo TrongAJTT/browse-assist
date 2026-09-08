@@ -1,4 +1,4 @@
-import { Feather, Gauge, Scroll, Zap } from "lucide-react"
+import { Feather, Gauge, Scroll, Sliders, Zap } from "lucide-react"
 import type React from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
@@ -18,6 +18,25 @@ interface SmoothScrollSettingsViewProps {
 }
 
 /**
+ * Checks if the given stepSize and smoothness match one of the predefined profiles.
+ */
+function resolvePresetFromParams(
+  stepSize: number,
+  smoothness: number
+): SmoothScrollPreset {
+  const eps = 0.01
+  for (const [key, config] of Object.entries(SMOOTH_SCROLL_PRESETS)) {
+    if (
+      Math.abs(config.stepSize - stepSize) < eps &&
+      Math.abs(config.smoothness - smoothness) < eps
+    ) {
+      return key as SmoothScrollPreset
+    }
+  }
+  return "custom"
+}
+
+/**
  * Dedicated sub-settings view for Smooth Scrolling using the standardized layout.
  */
 export const SmoothScrollSettingsView: React.FC<
@@ -32,6 +51,17 @@ export const SmoothScrollSettingsView: React.FC<
     settings?.smoothScrollConfig ?? DEFAULT_SETTINGS.smoothScrollConfig
 
   const handleSelectPreset = (preset: SmoothScrollPreset) => {
+    if (preset === "custom") {
+      setSettings((prev) => ({
+        ...(prev ?? DEFAULT_SETTINGS),
+        smoothScrollConfig: {
+          ...(prev?.smoothScrollConfig ?? DEFAULT_SETTINGS.smoothScrollConfig),
+          preset: "custom"
+        }
+      }))
+      return
+    }
+
     const nextConfig = { ...SMOOTH_SCROLL_PRESETS[preset] }
     setSettings((prev) => ({
       ...(prev ?? DEFAULT_SETTINGS),
@@ -43,11 +73,16 @@ export const SmoothScrollSettingsView: React.FC<
     setSettings((prev) => {
       const baseConfig =
         prev?.smoothScrollConfig ?? DEFAULT_SETTINGS.smoothScrollConfig
+      const newStep = key === "stepSize" ? value : baseConfig.stepSize
+      const newSmooth = key === "smoothness" ? value : baseConfig.smoothness
+      const detectedPreset = resolvePresetFromParams(newStep, newSmooth)
+
       return {
         ...(prev ?? DEFAULT_SETTINGS),
         smoothScrollConfig: {
           ...baseConfig,
-          [key]: value
+          [key]: value,
+          preset: detectedPreset
         }
       }
     })
@@ -61,17 +96,22 @@ export const SmoothScrollSettingsView: React.FC<
     {
       id: "balanced",
       label: "Balanced",
-      icon: <Gauge className="w-4 h-4" />
+      icon: <Gauge className="w-3.5 h-3.5" />
     },
     {
       id: "ultra",
-      label: "Ultra Smooth",
-      icon: <Feather className="w-4 h-4" />
+      label: "Ultra",
+      icon: <Feather className="w-3.5 h-3.5" />
     },
     {
       id: "snappy",
       label: "Snappy",
-      icon: <Zap className="w-4 h-4" />
+      icon: <Zap className="w-3.5 h-3.5" />
+    },
+    {
+      id: "custom",
+      label: "Custom",
+      icon: <Sliders className="w-3.5 h-3.5" />
     }
   ]
 
@@ -80,13 +120,13 @@ export const SmoothScrollSettingsView: React.FC<
       title="Smooth Scroll Settings"
       icon={<Scroll className="w-4 h-4 text-amber-400" />}
       onBack={onBack}>
-      {/* 3-item Horizontal Grid Picker for Profiles */}
+      {/* 4-item Horizontal Grid Picker for Profiles including Custom */}
       <div className="space-y-2">
         <span className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
           Profiles
         </span>
 
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-4 gap-1.5">
           {profileGridItems.map((item) => {
             const isSelected = currentConfig.preset === item.id
             return (
@@ -94,7 +134,7 @@ export const SmoothScrollSettingsView: React.FC<
                 key={item.id}
                 type="button"
                 onClick={() => handleSelectPreset(item.id)}
-                className={`flex flex-col items-center justify-center gap-1.5 py-2.5 px-1 rounded-xl border transition-all ${
+                className={`flex flex-col items-center justify-center gap-1.5 py-2 px-1 rounded-xl border transition-all ${
                   isSelected
                     ? "bg-indigo-600/20 border-indigo-500 text-indigo-300 shadow-sm"
                     : "bg-slate-800/40 hover:bg-slate-800 border-slate-700/60 text-slate-400 hover:text-slate-200"
@@ -103,7 +143,7 @@ export const SmoothScrollSettingsView: React.FC<
                   className={isSelected ? "text-indigo-400" : "text-slate-400"}>
                   {item.icon}
                 </span>
-                <span className="text-xs font-semibold text-center leading-tight">
+                <span className="text-[11px] font-semibold text-center leading-tight truncate w-full">
                   {item.label}
                 </span>
               </button>

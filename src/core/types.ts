@@ -10,7 +10,7 @@ export type FeatureKey =
 /**
  * Smooth Scrolling preset options.
  */
-export type SmoothScrollPreset = "balanced" | "ultra" | "snappy"
+export type SmoothScrollPreset = "balanced" | "ultra" | "snappy" | "custom"
 
 export interface SmoothScrollConfig {
   preset: SmoothScrollPreset
@@ -18,7 +18,10 @@ export interface SmoothScrollConfig {
   smoothness: number // Easing factor (e.g. 0.18)
 }
 
-export const SMOOTH_SCROLL_PRESETS: Record<SmoothScrollPreset, SmoothScrollConfig> = {
+export const SMOOTH_SCROLL_PRESETS: Record<
+  Exclude<SmoothScrollPreset, "custom">,
+  SmoothScrollConfig
+> = {
   balanced: {
     preset: "balanced",
     stepSize: 1.0,
@@ -84,7 +87,8 @@ export const FEATURES_LIST: FeatureMeta[] = [
   {
     key: "allowRightClick",
     title: "Allow Right Click",
-    description: "Re-enable context menu, selection, and copy on restricted websites.",
+    description:
+      "Re-enable context menu, selection, and copy on restricted websites.",
     icon: "🖱️"
   },
   {
@@ -103,7 +107,8 @@ export const FEATURES_LIST: FeatureMeta[] = [
   {
     key: "mouseZoom",
     title: "Mouse Pin-to-Zoom",
-    description: "Hold Alt and scroll mouse wheel to zoom into cursor position.",
+    description:
+      "Hold Alt and scroll mouse wheel to zoom into cursor position.",
     icon: "🔍"
   }
 ]

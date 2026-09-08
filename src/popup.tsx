@@ -63,7 +63,7 @@ function IndexPopup() {
       </header>
 
       {/* Body Area - Swappable between Main List and Feature Settings */}
-      <div className="px-4 py-1 flex-1">
+      <div className="px-4 py-2.5 pb-3.5 flex-1">
         {currentView === "main" ? (
           <div>
             {/* PowerToys-style Utilities List with Dividers */}

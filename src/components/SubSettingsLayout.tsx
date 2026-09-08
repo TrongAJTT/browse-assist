@@ -1,4 +1,5 @@
 import { ChevronLeft } from "lucide-react"
+import { useEffect } from "react"
 import type React from "react"
 
 interface SubSettingsLayoutProps {
@@ -10,6 +11,7 @@ interface SubSettingsLayoutProps {
 
 /**
  * Standardized reusable sub-settings page layout for Browse Assist features.
+ * Listens for Backspace or Backquote (`) keys to navigate back quickly.
  */
 export const SubSettingsLayout: React.FC<SubSettingsLayoutProps> = ({
   title,
@@ -17,8 +19,31 @@ export const SubSettingsLayout: React.FC<SubSettingsLayoutProps> = ({
   onBack,
   children
 }) => {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger if user is actively typing in an input element
+      const target = e.target as HTMLElement | null
+      const isInput =
+        target?.tagName === "INPUT" ||
+        target?.tagName === "TEXTAREA" ||
+        target?.isContentEditable
+
+      if (isInput && e.key === "Backspace") {
+        return
+      }
+
+      if (e.key === "Backspace" || e.key === "`" || e.code === "Backquote") {
+        e.preventDefault()
+        onBack()
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [onBack])
+
   return (
-    <div className="flex flex-col space-y-4">
+    <div className="flex flex-col space-y-4 py-2">
       {/* Standard Sub-header with Back Button and Title */}
       <div className="flex items-center justify-between pb-2 border-b border-slate-800/80">
         <button
@@ -38,7 +63,7 @@ export const SubSettingsLayout: React.FC<SubSettingsLayoutProps> = ({
       </div>
 
       {/* Main Sub-settings content */}
-      <div className="space-y-4">{children}</div>
+      <div className="space-y-4 pb-2">{children}</div>
     </div>
   )
 }
