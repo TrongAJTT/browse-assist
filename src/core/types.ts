@@ -4,6 +4,7 @@
 export type FeatureKey =
   | "allowRightClick"
   | "contextMenuActions"
+  | "superDrag"
   | "smoothScroll"
   | "mouseZoom"
 
@@ -27,6 +28,23 @@ export const DEFAULT_CONTEXT_MENU_ACTIONS_CONFIG: ContextMenuActionsConfig = {
   cleanLinkCopy: true,
   markdownLinkCopy: true,
   order: ["copyLinkText", "cleanLinkCopy", "markdownLinkCopy"]
+}
+
+/**
+ * Super Drag sub-configuration.
+ */
+export interface SuperDragConfig {
+  openInBackground: boolean // Open tab silently in the background
+  openNextToActive: boolean // Open adjacent to current tab
+  searchSelectedText: boolean // Dragging highlighted text executes search
+  openHyperlinks: boolean // Dragging a link opens URL
+}
+
+export const DEFAULT_SUPER_DRAG_CONFIG: SuperDragConfig = {
+  openInBackground: true,
+  openNextToActive: true,
+  searchSelectedText: true,
+  openHyperlinks: true
 }
 
 /**
@@ -89,9 +107,11 @@ export const DEFAULT_MOUSE_ZOOM_CONFIG: MouseZoomConfig = {
 export interface FeatureSettings {
   allowRightClick: boolean
   contextMenuActions: boolean
+  superDrag: boolean
   smoothScroll: boolean
   mouseZoom: boolean
   contextMenuActionsConfig: ContextMenuActionsConfig
+  superDragConfig: SuperDragConfig
   smoothScrollConfig: SmoothScrollConfig
   mouseZoomConfig: MouseZoomConfig
 }
@@ -103,9 +123,11 @@ export interface FeatureSettings {
 export const DEFAULT_SETTINGS: FeatureSettings = {
   allowRightClick: true,
   contextMenuActions: true,
+  superDrag: true,
   smoothScroll: true,
   mouseZoom: true,
   contextMenuActionsConfig: DEFAULT_CONTEXT_MENU_ACTIONS_CONFIG,
+  superDragConfig: DEFAULT_SUPER_DRAG_CONFIG,
   smoothScrollConfig: {
     ...SMOOTH_SCROLL_PRESETS.balanced,
     interceptionMode: "smart"
@@ -148,6 +170,14 @@ export const FEATURES_LIST: FeatureMeta[] = [
     description:
       "Custom right-click menu actions for copying clean, formatted links.",
     icon: "📋",
+    hasSettings: true
+  },
+  {
+    key: "superDrag",
+    title: "Super Drag",
+    description:
+      "Drag selected text to search or drag hyperlinks to open in new tabs.",
+    icon: "👆",
     hasSettings: true
   },
   {

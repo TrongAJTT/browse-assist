@@ -24,12 +24,15 @@ import { MouseZoomSettingsView } from "~features/mouse-zoom/SettingsView"
 import { MouseZoomToggle } from "~features/mouse-zoom/Toggle"
 import { SmoothScrollSettingsView } from "~features/smooth-scroll/SettingsView"
 import { SmoothScrollToggle } from "~features/smooth-scroll/Toggle"
+import { SuperDragSettingsView } from "~features/super-drag/SettingsView"
+import { SuperDragToggle } from "~features/super-drag/Toggle"
 
 import "~style.css"
 
 type ActiveView =
   | "main"
   | "context-menu-actions-settings"
+  | "super-drag-settings"
   | "smooth-scroll-settings"
   | "mouse-zoom-settings"
   | "about"
@@ -162,6 +165,9 @@ function IndexPopup() {
                   setCurrentView("context-menu-actions-settings")
                 }
               />
+              <SuperDragToggle
+                onConfigure={() => setCurrentView("super-drag-settings")}
+              />
               <SmoothScrollToggle
                 onConfigure={() => setCurrentView("smooth-scroll-settings")}
               />
@@ -174,6 +180,8 @@ function IndexPopup() {
           <ContextMenuActionsSettingsView
             onBack={() => setCurrentView("main")}
           />
+        ) : currentView === "super-drag-settings" ? (
+          <SuperDragSettingsView onBack={() => setCurrentView("main")} />
         ) : currentView === "smooth-scroll-settings" ? (
           <SmoothScrollSettingsView onBack={() => setCurrentView("main")} />
         ) : currentView === "mouse-zoom-settings" ? (

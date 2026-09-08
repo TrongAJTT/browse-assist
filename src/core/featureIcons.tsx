@@ -1,4 +1,10 @@
-import { Link2, MousePointerClick, Scroll, ZoomIn } from "lucide-react"
+import {
+  Link2,
+  MousePointer2,
+  MousePointerClick,
+  Scroll,
+  ZoomIn
+} from "lucide-react"
 import type React from "react"
 
 import type { FeatureKey } from "./types"
@@ -24,6 +30,11 @@ export const FEATURE_ICONS: Record<
     icon: Link2,
     colorClass: "text-cyan-400",
     bgClass: "bg-cyan-500/10 border-cyan-500/30"
+  },
+  superDrag: {
+    icon: MousePointer2,
+    colorClass: "text-pink-400",
+    bgClass: "bg-pink-500/10 border-pink-500/30"
   },
   smoothScroll: {
     icon: Scroll,

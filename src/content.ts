@@ -24,6 +24,10 @@ import {
   activate as activateSmoothScroll,
   deactivate as deactivateSmoothScroll
 } from "~features/smooth-scroll/logic"
+import {
+  activate as activateSuperDrag,
+  deactivate as deactivateSuperDrag
+} from "~features/super-drag/logic"
 
 export const config: PlasmoCSConfig = {
   matches: ["http://*/*", "https://*/*"],
@@ -38,6 +42,13 @@ function applySettings(nextSettings: FeatureSettings): void {
     activateContextMenuActions()
   } else {
     deactivateContextMenuActions()
+  }
+
+  // Super Drag
+  if (nextSettings.superDrag) {
+    activateSuperDrag(nextSettings.superDragConfig)
+  } else {
+    deactivateSuperDrag()
   }
 
   // Smooth Scroll

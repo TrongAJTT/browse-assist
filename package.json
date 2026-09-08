@@ -43,7 +43,8 @@
     "permissions": [
       "storage",
       "contextMenus",
-      "clipboardWrite"
+      "clipboardWrite",
+      "search"
     ],
     "host_permissions": [
       "https://*/*",
