@@ -25,9 +25,13 @@ let styleElement: HTMLStyleElement | null = null
 // Mutation observer for theme changes on webpage
 let themeObserver: MutationObserver | null = null
 
-// State
-let lastScrollY = 0
-let isAtTopReturned = false
+// Single-slot return memory state
+interface ReturnMemorySlot {
+  scrollY: number
+  target: "top" | "bottom"
+}
+
+let returnMemory: ReturnMemorySlot | null = null
 let memoryTimer: number | null = null
 let hideTimer: number | null = null
 let isTicking = false
@@ -35,6 +39,7 @@ let detectedTheme: "dark" | "light" = "dark"
 
 const MIN_PAGE_RATIO = 1.6 // Minimum document height / viewport height
 const SCROLL_THRESHOLD = 300 // px threshold to show top or bottom button
+const EDGE_SAFE_THRESHOLD = 320 // px exclusion distance from top and bottom edges
 
 // SVG Icons
 const UP_ARROW_SVG = `
@@ -336,20 +341,27 @@ function handleScrollTopClick(e: MouseEvent): void {
   e.stopPropagation()
   e.preventDefault()
 
-  if (isAtTopReturned && lastScrollY > 0) {
+  if (returnMemory?.target === "top" && returnMemory.scrollY > 0) {
     // Return back to saved reading position
     window.scrollTo({
-      top: lastScrollY,
+      top: returnMemory.scrollY,
       behavior: "smooth"
     })
     resetReturnMemory()
     return
   }
 
-  // Save current scroll position
-  if (currentConfig.enableReturnMemory) {
-    lastScrollY = window.scrollY || document.documentElement.scrollTop || 0
-    isAtTopReturned = true
+  // Clear any existing opposite memory slot first (single slot invariant)
+  resetReturnMemory()
+
+  const scrollY = window.scrollY || document.documentElement.scrollTop || 0
+
+  // Save current scroll position before jumping to top
+  if (currentConfig.enableReturnMemory && scrollY > 0) {
+    returnMemory = {
+      scrollY,
+      target: "top"
+    }
 
     if (btnTop) {
       btnTop.title = "Return to previous position"
@@ -372,10 +384,42 @@ function handleScrollBottomClick(e: MouseEvent): void {
   e.stopPropagation()
   e.preventDefault()
 
+  if (returnMemory?.target === "bottom" && returnMemory.scrollY >= 0) {
+    // Return back to saved reading position
+    window.scrollTo({
+      top: returnMemory.scrollY,
+      behavior: "smooth"
+    })
+    resetReturnMemory()
+    return
+  }
+
+  // Clear any existing opposite memory slot first (single slot invariant)
+  resetReturnMemory()
+
+  const scrollY = window.scrollY || document.documentElement.scrollTop || 0
   const maxScroll = Math.max(
     document.body.scrollHeight,
     document.documentElement.scrollHeight
   )
+
+  // Save current scroll position before jumping to bottom
+  if (currentConfig.enableReturnMemory && scrollY < maxScroll - 100) {
+    returnMemory = {
+      scrollY,
+      target: "bottom"
+    }
+
+    if (btnBottom) {
+      btnBottom.title = "Return to previous position"
+      btnBottom.innerHTML = RETURN_SVG
+    }
+
+    if (memoryTimer) clearTimeout(memoryTimer)
+    memoryTimer = window.setTimeout(() => {
+      resetReturnMemory()
+    }, 6000)
+  }
 
   window.scrollTo({
     top: maxScroll,
@@ -384,7 +428,7 @@ function handleScrollBottomClick(e: MouseEvent): void {
 }
 
 function resetReturnMemory(): void {
-  isAtTopReturned = false
+  returnMemory = null
   if (memoryTimer) {
     clearTimeout(memoryTimer)
     memoryTimer = null
@@ -392,6 +436,10 @@ function resetReturnMemory(): void {
   if (btnTop) {
     btnTop.title = "Scroll to top"
     btnTop.innerHTML = UP_ARROW_SVG
+  }
+  if (btnBottom) {
+    btnBottom.title = "Scroll to bottom"
+    btnBottom.innerHTML = DOWN_ARROW_SVG
   }
 }
 
@@ -415,28 +463,45 @@ function updateButtonsVisibility(): void {
     containerElement.classList.add("qs-hidden")
     return
   }
+
+  const distanceToBottom = totalHeight - (scrollY + viewportHeight)
+  const inTopEdgeZone = scrollY <= EDGE_SAFE_THRESHOLD
+  const inBottomEdgeZone = distanceToBottom <= EDGE_SAFE_THRESHOLD
+
+  // Safe Edge Zones: if enabled, hide entire container when near very top or bottom,
+  // unless currently displaying an active return memory button!
+  if (currentConfig.safeEdgeZones && (inTopEdgeZone || inBottomEdgeZone) && !returnMemory) {
+    containerElement.classList.add("qs-hidden")
+    return
+  }
+
   containerElement.classList.remove("qs-hidden")
 
   // Top button visibility
-  const canScrollUp = scrollY > SCROLL_THRESHOLD || isAtTopReturned
+  const hasActiveTopReturn = returnMemory?.target === "top"
+  const canScrollUp = scrollY > SCROLL_THRESHOLD || hasActiveTopReturn
   if (canScrollUp) {
     btnTop.classList.remove("qs-hidden")
   } else {
     btnTop.classList.add("qs-hidden")
-    if (!isAtTopReturned) {
+    if (hasActiveTopReturn) {
       resetReturnMemory()
     }
   }
 
   // Bottom button visibility
-  const distanceToBottom = totalHeight - (scrollY + viewportHeight)
+  const hasActiveBottomReturn = returnMemory?.target === "bottom"
   const canScrollDown =
-    currentConfig.buttonsMode === "both" && distanceToBottom > SCROLL_THRESHOLD
+    (currentConfig.buttonsMode === "both" && distanceToBottom > SCROLL_THRESHOLD) ||
+    hasActiveBottomReturn
 
   if (canScrollDown) {
     btnBottom.classList.remove("qs-hidden")
   } else {
     btnBottom.classList.add("qs-hidden")
+    if (hasActiveBottomReturn) {
+      resetReturnMemory()
+    }
   }
 
   // Dimming on idle

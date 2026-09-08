@@ -132,14 +132,16 @@ export interface QuickScrollConfig {
   position: QuickScrollPosition
   buttonsMode: QuickScrollButtonsMode
   autoHide: boolean // Dim buttons when user stops scrolling
-  enableReturnMemory: boolean // Remember previous scroll position and allow return
+  enableReturnMemory: boolean // Remember previous scroll position and allow return for both top and bottom
+  safeEdgeZones: boolean // Hide buttons entirely when near page top or bottom edges
 }
 
 export const DEFAULT_QUICK_SCROLL_CONFIG: QuickScrollConfig = {
   position: "bottom-right",
   buttonsMode: "both",
   autoHide: true,
-  enableReturnMemory: true
+  enableReturnMemory: false,
+  safeEdgeZones: true
 }
 
 /**

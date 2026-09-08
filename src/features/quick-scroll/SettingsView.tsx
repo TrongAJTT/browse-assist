@@ -3,7 +3,8 @@ import {
   Compass,
   Eye,
   History,
-  LayoutTemplate
+  LayoutTemplate,
+  Shield
 } from "lucide-react"
 import type React from "react"
 
@@ -114,7 +115,7 @@ export const QuickScrollSettingsView: React.FC<
   }
 
   const handleToggleOption = (
-    key: keyof Pick<QuickScrollConfig, "autoHide" | "enableReturnMemory">
+    key: keyof Pick<QuickScrollConfig, "autoHide" | "enableReturnMemory" | "safeEdgeZones">
   ) => {
     setSettings((prev) => ({
       ...(prev ?? DEFAULT_SETTINGS),
@@ -176,6 +177,38 @@ export const QuickScrollSettingsView: React.FC<
         <div className="space-y-3 pt-3 border-t border-border-divider">
           <span className="section-header">Behavior & Intelligence</span>
 
+          {/* Safe Edge Zones */}
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-col min-w-0 flex-1">
+              <span className="text-xs font-semibold text-content-primary flex items-center gap-1.5">
+                <Shield className="w-3.5 h-3.5 text-emerald-400" />
+                Safe Edge Zones
+              </span>
+              <span className="text-[11px] text-content-muted leading-snug mt-0.5">
+                Hide buttons entirely near the very top or bottom of the page. Buttons only reveal when scrolling through the middle.
+              </span>
+            </div>
+
+            <button
+              type="button"
+              role="switch"
+              aria-checked={currentConfig.safeEdgeZones}
+              onClick={() => handleToggleOption("safeEdgeZones")}
+              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-app ${
+                currentConfig.safeEdgeZones
+                  ? "bg-accent shadow-accent-glow"
+                  : "bg-border-subtle"
+              }`}>
+              <span
+                className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                  currentConfig.safeEdgeZones
+                    ? "translate-x-4"
+                    : "translate-x-0"
+                }`}
+              />
+            </button>
+          </div>
+
           {/* Auto-Dim on Idle */}
           <div className="flex items-center justify-between gap-3">
             <div className="flex flex-col min-w-0 flex-1">
@@ -215,7 +248,7 @@ export const QuickScrollSettingsView: React.FC<
                 Scroll Position Memory
               </span>
               <span className="text-[11px] text-content-muted leading-snug mt-0.5">
-                After jumping to the top, click the button again within 6
+                After jumping to the top or bottom, click the return button within 6
                 seconds to return to where you were reading.
               </span>
             </div>
