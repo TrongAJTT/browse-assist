@@ -34,7 +34,7 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
         onClick={onConfigure}
         className={`flex items-start gap-3 flex-1 min-w-0 ${
           onConfigure ? "cursor-pointer" : ""
-        }`}>
+        } ${enabled ? "feature-row-active" : "feature-row-dimmed"}`}>
         <div className="shrink-0 mt-0.5 flex items-center justify-center transition-transform duration-200 ease-out group-hover:scale-110">
           {icon}
         </div>
@@ -42,7 +42,7 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
           <div className="flex items-center gap-1.5 flex-wrap">
             <span
               className={`text-sm font-semibold truncate transition-colors ${
-                enabled ? "text-slate-100" : "text-slate-400"
+                enabled ? "text-slate-100" : "text-slate-300"
               }`}>
               {title}
             </span>

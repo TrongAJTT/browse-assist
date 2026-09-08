@@ -1,4 +1,4 @@
-import { Feather, Gauge, Scroll, Sliders, Zap } from "lucide-react"
+import { Feather, Gauge, Sliders, Zap } from "lucide-react"
 import type React from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
@@ -115,10 +115,21 @@ export const SmoothScrollSettingsView: React.FC<
     }
   ]
 
+  const isSmoothScrollEnabled =
+    settings?.smoothScroll ?? DEFAULT_SETTINGS.smoothScroll
+
+  const handleToggleFeature = (enabled: boolean) => {
+    setSettings((prev) => ({
+      ...(prev ?? DEFAULT_SETTINGS),
+      smoothScroll: enabled
+    }))
+  }
+
   return (
     <SubSettingsLayout
-      title="Smooth Scroll Settings"
-      icon={<Scroll className="w-4 h-4 text-amber-400" />}
+      title="Smooth Scrolling"
+      enabled={isSmoothScrollEnabled}
+      onToggle={handleToggleFeature}
       onBack={onBack}>
       {/* 4-item Horizontal Grid Picker for Profiles including Custom */}
       <div className="space-y-2">
@@ -209,7 +220,8 @@ export const SmoothScrollSettingsView: React.FC<
               Aggressive Interception
             </span>
             <span className="text-[11px] text-slate-400 leading-snug mt-0.5">
-              Force smooth scrolling across all sites. Keep disabled to protect canvas & web apps (e.g. Konva, Figma, Maps).
+              Force smooth scrolling across all sites. Keep disabled to protect
+              canvas & web apps (e.g. Konva, Figma, Maps).
             </span>
           </div>
 
