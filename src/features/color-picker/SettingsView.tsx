@@ -223,23 +223,25 @@ export const ColorPickerSettingsView: React.FC<
 
           {colorHistory && colorHistory.length > 0 ? (
             <div className="grid grid-cols-5 gap-2 pt-1">
-              {colorHistory.slice(0, 15).map((item) => (
+              {colorHistory.slice(0, 18).map((item) => (
                 <button
                   key={item.hex + item.timestamp}
                   type="button"
                   onClick={() => handleCopyColor(item)}
                   title={`Click to copy ${getColorValueByFormat(item, currentConfig.defaultFormat)}`}
-                  className="group relative flex flex-col items-center p-1.5 rounded-lg bg-app-surface border border-border-subtle hover:border-accent hover:shadow-md transition-all active:scale-95">
+                  className="group relative flex flex-col items-center overflow-hidden rounded-md bg-app-surface border border-border-subtle hover:border-accent hover:shadow-md transition-all active:scale-95">
                   <div
-                    className="w-full h-7 rounded-md border border-white/20 shadow-inner mb-1 flex items-center justify-center"
+                    className="w-full h-7 border-b border-border-subtle flex items-center justify-center relative"
                     style={{ backgroundColor: item.hex }}>
                     {copiedHex === item.hex && (
-                      <Check className="w-3.5 h-3.5 text-white drop-shadow-md stroke-[3]" />
+                      <Check className="w-3.5 h-3.5 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] stroke-[3]" />
                     )}
                   </div>
-                  <span className="font-mono text-[9px] font-semibold text-content-secondary group-hover:text-accent truncate max-w-full">
-                    {item.hex}
-                  </span>
+                  <div className="w-full py-1 px-0.5 text-center">
+                    <span className="font-mono text-[12px] font-semibold text-content-secondary group-hover:text-accent truncate block max-w-full">
+                      {item.hex}
+                    </span>
+                  </div>
                 </button>
               ))}
             </div>

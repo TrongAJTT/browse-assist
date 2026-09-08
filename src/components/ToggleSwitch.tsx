@@ -2,6 +2,7 @@ import { ChevronRight } from "lucide-react"
 import type React from "react"
 
 import { ShortcutBadge } from "~components/ShortcutBadge"
+import { Switch } from "~components/Switch"
 
 interface ToggleSwitchProps {
   icon: React.ReactNode
@@ -88,27 +89,13 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
           </button>
         )}
 
-        <button
-          type="button"
-          role="switch"
-          aria-checked={enabled}
+        <Switch
+          checked={enabled}
+          onChange={(newChecked) => onChange(newChecked)}
           disabled={disabled}
-          onClick={(e) => {
-            e.stopPropagation()
-            onChange(!enabled)
-          }}
-          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent-hover focus:ring-offset-2 focus:ring-offset-app ${
-            enabled
-              ? "bg-accent-hover shadow-accent-glow shadow-md"
-              : "bg-border-subtle"
-          } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}>
-          <span className="sr-only">Toggle {title}</span>
-          <span
-            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
-              enabled ? "translate-x-5" : "translate-x-0"
-            }`}
-          />
-        </button>
+          size="md"
+          aria-label={`Toggle ${title}`}
+        />
       </div>
     </div>
   )

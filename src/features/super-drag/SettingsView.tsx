@@ -9,6 +9,7 @@ import type React from "react"
 import { useStorage } from "@plasmohq/storage/hook"
 
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
+import { SettingToggleRow } from "~components/SettingToggleRow"
 import {
   DEFAULT_SETTINGS,
   STORAGE_KEYS,
@@ -68,172 +69,40 @@ export const SuperDragSettingsView: React.FC<SuperDragSettingsViewProps> = ({
 
           <div className="divide-y divide-border-divider">
             {/* Search Selected Text */}
-            <div className="flex items-center justify-between gap-3 py-3 group">
-              <div
-                onClick={() => handleToggleOption("searchSelectedText")}
-                className={`flex items-start gap-3 flex-1 min-w-0 cursor-pointer ${
-                  currentConfig.searchSelectedText
-                    ? "feature-row-active"
-                    : "feature-row-dimmed"
-                }`}>
-                <div className="shrink-0 mt-0.5 flex items-center justify-center transition-transform duration-200 ease-out group-hover:scale-110">
-                  <Search className="w-5 h-5 text-amber-400" />
-                </div>
-                <div className="flex flex-col min-w-0 flex-1">
-                  <span className="text-xs font-semibold text-content-primary">
-                    Search Highlighted Text
-                  </span>
-                  <span className="text-[11px] text-content-muted leading-snug mt-0.5">
-                    Drag highlighted text to search using your default search engine.
-                  </span>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                role="switch"
-                aria-checked={currentConfig.searchSelectedText}
-                onClick={() => handleToggleOption("searchSelectedText")}
-                className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-app ${
-                  currentConfig.searchSelectedText
-                    ? "bg-accent shadow-accent-glow"
-                    : "bg-border-subtle"
-                }`}>
-                <span
-                  className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                    currentConfig.searchSelectedText
-                      ? "translate-x-4"
-                      : "translate-x-0"
-                  }`}
-                />
-              </button>
-            </div>
+            <SettingToggleRow
+              icon={<Search className="w-5 h-5 text-amber-400" />}
+              title="Search Highlighted Text"
+              description="Drag highlighted text to search using your default search engine."
+              enabled={currentConfig.searchSelectedText}
+              onToggle={() => handleToggleOption("searchSelectedText")}
+            />
 
             {/* Open Hyperlinks */}
-            <div className="flex items-center justify-between gap-3 py-3 group">
-              <div
-                onClick={() => handleToggleOption("openHyperlinks")}
-                className={`flex items-start gap-3 flex-1 min-w-0 cursor-pointer ${
-                  currentConfig.openHyperlinks
-                    ? "feature-row-active"
-                    : "feature-row-dimmed"
-                }`}>
-                <div className="shrink-0 mt-0.5 flex items-center justify-center transition-transform duration-200 ease-out group-hover:scale-110">
-                  <ExternalLink className="w-5 h-5 text-emerald-400" />
-                </div>
-                <div className="flex flex-col min-w-0 flex-1">
-                  <span className="text-xs font-semibold text-content-primary">
-                    Open Hyperlinks
-                  </span>
-                  <span className="text-[11px] text-content-muted leading-snug mt-0.5">
-                    Drag any hyperlink to immediately open the destination URL in a new tab.
-                  </span>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                role="switch"
-                aria-checked={currentConfig.openHyperlinks}
-                onClick={() => handleToggleOption("openHyperlinks")}
-                className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-app ${
-                  currentConfig.openHyperlinks
-                    ? "bg-accent shadow-accent-glow"
-                    : "bg-border-subtle"
-                }`}>
-                <span
-                  className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                    currentConfig.openHyperlinks
-                      ? "translate-x-4"
-                      : "translate-x-0"
-                  }`}
-                />
-              </button>
-            </div>
+            <SettingToggleRow
+              icon={<ExternalLink className="w-5 h-5 text-emerald-400" />}
+              title="Open Hyperlinks"
+              description="Drag any hyperlink to immediately open the destination URL in a new tab."
+              enabled={currentConfig.openHyperlinks}
+              onToggle={() => handleToggleOption("openHyperlinks")}
+            />
 
             {/* Drag Images */}
-            <div className="flex items-center justify-between gap-3 py-3 group">
-              <div
-                onClick={() => handleToggleOption("openImages")}
-                className={`flex items-start gap-3 flex-1 min-w-0 cursor-pointer ${
-                  currentConfig.openImages
-                    ? "feature-row-active"
-                    : "feature-row-dimmed"
-                }`}>
-                <div className="shrink-0 mt-0.5 flex items-center justify-center transition-transform duration-200 ease-out group-hover:scale-110">
-                  <ImageIcon className="w-5 h-5 text-amber-400" />
-                </div>
-                <div className="flex flex-col min-w-0 flex-1">
-                  <span className="text-xs font-semibold text-content-primary">
-                    Drag Images
-                  </span>
-                  <span className="text-[11px] text-content-muted leading-snug mt-0.5">
-                    Drag any image to view in a new tab or copy its direct image link.
-                  </span>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                role="switch"
-                aria-checked={currentConfig.openImages}
-                onClick={() => handleToggleOption("openImages")}
-                className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-app ${
-                  currentConfig.openImages
-                    ? "bg-accent shadow-accent-glow"
-                    : "bg-border-subtle"
-                }`}>
-                <span
-                  className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                    currentConfig.openImages
-                      ? "translate-x-4"
-                      : "translate-x-0"
-                  }`}
-                />
-              </button>
-            </div>
+            <SettingToggleRow
+              icon={<ImageIcon className="w-5 h-5 text-amber-400" />}
+              title="Drag Images"
+              description="Drag any image to view in a new tab or copy its direct image link."
+              enabled={currentConfig.openImages}
+              onToggle={() => handleToggleOption("openImages")}
+            />
 
             {/* Show Drag Indicator */}
-            <div className="flex items-center justify-between gap-3 py-3 group">
-              <div
-                onClick={() => handleToggleOption("showIndicator")}
-                className={`flex items-start gap-3 flex-1 min-w-0 cursor-pointer ${
-                  currentConfig.showIndicator
-                    ? "feature-row-active"
-                    : "feature-row-dimmed"
-                }`}>
-                <div className="shrink-0 mt-0.5 flex items-center justify-center transition-transform duration-200 ease-out group-hover:scale-110">
-                  <Eye className="w-5 h-5 text-violet-400" />
-                </div>
-                <div className="flex flex-col min-w-0 flex-1">
-                  <span className="text-xs font-semibold text-content-primary">
-                    Show Drag Indicator
-                  </span>
-                  <span className="text-[11px] text-content-muted leading-snug mt-0.5">
-                    Display floating badge previewing the action when dragged into valid range.
-                  </span>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                role="switch"
-                aria-checked={currentConfig.showIndicator}
-                onClick={() => handleToggleOption("showIndicator")}
-                className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-app ${
-                  currentConfig.showIndicator
-                    ? "bg-accent shadow-accent-glow"
-                    : "bg-border-subtle"
-                }`}>
-                <span
-                  className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                    currentConfig.showIndicator
-                      ? "translate-x-4"
-                      : "translate-x-0"
-                  }`}
-                />
-              </button>
-            </div>
+            <SettingToggleRow
+              icon={<Eye className="w-5 h-5 text-violet-400" />}
+              title="Show Drag Indicator"
+              description="Display floating badge previewing the action when dragged into valid range."
+              enabled={currentConfig.showIndicator}
+              onToggle={() => handleToggleOption("showIndicator")}
+            />
           </div>
         </div>
 

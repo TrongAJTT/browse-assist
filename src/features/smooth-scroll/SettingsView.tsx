@@ -4,6 +4,7 @@ import type React from "react"
 import { useStorage } from "@plasmohq/storage/hook"
 
 import { GridPicker } from "~components/GridPicker"
+import { SettingToggleRow } from "~components/SettingToggleRow"
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
 import {
   DEFAULT_SETTINGS,
@@ -196,50 +197,26 @@ export const SmoothScrollSettingsView: React.FC<
       </div>
 
       {/* Advanced Compatibility Mode */}
-      <div className="pt-3 border-t border-border-divider space-y-2">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex flex-col min-w-0 flex-1">
-            <span className="text-xs font-semibold text-content-primary">
-              Aggressive Interception
-            </span>
-            <span className="text-[11px] text-content-muted leading-snug mt-0.5">
-              Force smooth scrolling across all sites. Keep disabled to protect
-              canvas & web apps (e.g. Konva, Figma, Maps).
-            </span>
-          </div>
-
-          <button
-            type="button"
-            role="switch"
-            aria-checked={currentConfig.interceptionMode === "aggressive"}
-            onClick={() => {
-              const nextMode =
-                currentConfig.interceptionMode === "aggressive"
-                  ? "smart"
-                  : "aggressive"
-              setSettings((prev) => ({
-                ...(prev ?? DEFAULT_SETTINGS),
-                smoothScrollConfig: {
-                  ...(prev?.smoothScrollConfig ??
-                    DEFAULT_SETTINGS.smoothScrollConfig),
-                  interceptionMode: nextMode
-                }
-              }))
-            }}
-            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent ${
+      <div className="pt-3 border-t border-border-divider">
+        <SettingToggleRow
+          title="Aggressive Interception"
+          description="Force smooth scrolling across all sites. Keep disabled to protect canvas & web apps (e.g. Konva, Figma, Maps)."
+          enabled={currentConfig.interceptionMode === "aggressive"}
+          onToggle={() => {
+            const nextMode =
               currentConfig.interceptionMode === "aggressive"
-                ? "bg-accent shadow-accent-glow"
-                : "bg-border-subtle"
-            }`}>
-            <span
-              className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
-                currentConfig.interceptionMode === "aggressive"
-                  ? "translate-x-4"
-                  : "translate-x-0"
-              }`}
-            />
-          </button>
-        </div>
+                ? "smart"
+                : "aggressive"
+            setSettings((prev) => ({
+              ...(prev ?? DEFAULT_SETTINGS),
+              smoothScrollConfig: {
+                ...(prev?.smoothScrollConfig ??
+                  DEFAULT_SETTINGS.smoothScrollConfig),
+                interceptionMode: nextMode
+              }
+            }))
+          }}
+        />
       </div>
     </SubSettingsLayout>
   )

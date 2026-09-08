@@ -12,6 +12,7 @@ import { useState } from "react"
 import { useStorage } from "@plasmohq/storage/hook"
 
 import { GridPicker, type GridPickerItem } from "~components/GridPicker"
+import { SettingToggleRow } from "~components/SettingToggleRow"
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
 import { MESSAGE_TYPES, sendToActiveTab } from "~core/messaging"
 import {
@@ -173,99 +174,36 @@ export const MouseZoomSettingsView: React.FC<MouseZoomSettingsViewProps> = ({
       </div>
 
       {/* Behavior Toggles */}
-      <div className="space-y-3 pt-3 border-t border-border-divider">
+      <div className="space-y-1 pt-3 border-t border-border-divider">
         <span className="section-header">Behavior & Display</span>
 
-        {/* Smooth Transition */}
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex flex-col min-w-0 flex-1">
-            <span className="text-xs font-semibold text-content-primary flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              Smooth Animation
-            </span>
-            <span className="text-[11px] text-content-muted leading-snug mt-0.5">
-              Smoothly interpolate zoom transitions for a fluid feel.
-            </span>
-          </div>
+        <div className="divide-y divide-border-divider">
+          {/* Smooth Transition */}
+          <SettingToggleRow
+            icon={<Sparkles className="w-5 h-5 text-amber-400" />}
+            title="Smooth Animation"
+            description="Smoothly interpolate zoom transitions for a fluid feel."
+            enabled={currentConfig.smooth}
+            onToggle={() => handleToggleOption("smooth")}
+          />
 
-          <button
-            type="button"
-            role="switch"
-            aria-checked={currentConfig.smooth}
-            onClick={() => handleToggleOption("smooth")}
-            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-app ${
-              currentConfig.smooth
-                ? "bg-accent shadow-accent-glow"
-                : "bg-border-subtle"
-            }`}>
-            <span
-              className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                currentConfig.smooth ? "translate-x-4" : "translate-x-0"
-              }`}
-            />
-          </button>
-        </div>
+          {/* Invert Scroll Direction */}
+          <SettingToggleRow
+            icon={<ArrowUpDown className="w-5 h-5 text-cyan-400" />}
+            title="Invert Direction"
+            description="Scroll down to zoom in, scroll up to zoom out."
+            enabled={currentConfig.invertDirection}
+            onToggle={() => handleToggleOption("invertDirection")}
+          />
 
-        {/* Invert Scroll Direction */}
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex flex-col min-w-0 flex-1">
-            <span className="text-xs font-semibold text-content-primary flex items-center gap-1.5">
-              <ArrowUpDown className="w-3.5 h-3.5 text-cyan-400" />
-              Invert Direction
-            </span>
-            <span className="text-[11px] text-content-muted leading-snug mt-0.5">
-              Scroll down to zoom in, scroll up to zoom out.
-            </span>
-          </div>
-
-          <button
-            type="button"
-            role="switch"
-            aria-checked={currentConfig.invertDirection}
-            onClick={() => handleToggleOption("invertDirection")}
-            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-app ${
-              currentConfig.invertDirection
-                ? "bg-accent shadow-accent-glow"
-                : "bg-border-subtle"
-            }`}>
-            <span
-              className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                currentConfig.invertDirection
-                  ? "translate-x-4"
-                  : "translate-x-0"
-              }`}
-            />
-          </button>
-        </div>
-
-        {/* Show Zoom Toast Badge */}
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex flex-col min-w-0 flex-1">
-            <span className="text-xs font-semibold text-content-primary flex items-center gap-1.5">
-              <Eye className="w-3.5 h-3.5 text-violet-400" />
-              Show Zoom Toast
-            </span>
-            <span className="text-[11px] text-content-muted leading-snug mt-0.5">
-              Display floating percentage badge on the top-right of the page.
-            </span>
-          </div>
-
-          <button
-            type="button"
-            role="switch"
-            aria-checked={currentConfig.showToast}
-            onClick={() => handleToggleOption("showToast")}
-            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-app ${
-              currentConfig.showToast
-                ? "bg-accent shadow-accent-glow"
-                : "bg-border-subtle"
-            }`}>
-            <span
-              className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                currentConfig.showToast ? "translate-x-4" : "translate-x-0"
-              }`}
-            />
-          </button>
+          {/* Show Zoom Toast Badge */}
+          <SettingToggleRow
+            icon={<Eye className="w-5 h-5 text-violet-400" />}
+            title="Show Zoom Toast"
+            description="Display floating percentage badge on the top-right of the page."
+            enabled={currentConfig.showToast}
+            onToggle={() => handleToggleOption("showToast")}
+          />
         </div>
       </div>
     </SubSettingsLayout>

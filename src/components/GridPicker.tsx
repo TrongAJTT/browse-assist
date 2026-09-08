@@ -38,7 +38,7 @@ export function GridPicker<T extends string = string>({
             key={item.id}
             type="button"
             onClick={() => onChange(item.id)}
-            className={`flex flex-col items-center justify-center gap-1.5 py-2 px-1 rounded-xl border transition-all ${
+            className={`flex flex-col items-center justify-center gap-1.5 py-2 px-1 rounded-md border transition-all ${
               isSelected
                 ? "bg-accent-subtle border-accent text-accent-hover shadow-sm"
                 : "bg-app-surface hover:bg-app-card border-border-subtle text-content-muted hover:text-content-primary"

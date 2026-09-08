@@ -1,5 +1,6 @@
 import { useStorage } from "@plasmohq/storage/hook"
 
+import { Switch } from "~components/Switch"
 import { AppIcon } from "~core/assets"
 import { FEATURE_ICONS } from "~core/featureIcons"
 import {
@@ -100,21 +101,12 @@ function OptionsPage() {
                       </div>
                     </div>
 
-                    <button
-                      type="button"
-                      role="switch"
-                      aria-checked={isEnabled}
-                      onClick={() => handleToggle(feature.key)}
-                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-950 ${
-                        isEnabled ? "bg-indigo-600" : "bg-slate-700"
-                      }`}>
-                      <span className="sr-only">Toggle {feature.title}</span>
-                      <span
-                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
-                          isEnabled ? "translate-x-5" : "translate-x-0"
-                        }`}
-                      />
-                    </button>
+                    <Switch
+                      checked={isEnabled}
+                      onChange={() => handleToggle(feature.key)}
+                      size="md"
+                      aria-label={`Toggle ${feature.title}`}
+                    />
                   </div>
                 </div>
               )
