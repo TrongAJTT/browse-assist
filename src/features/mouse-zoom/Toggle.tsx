@@ -36,6 +36,7 @@ export const MouseZoomToggle: React.FC = () => {
       description={meta.description}
       enabled={isEnabled}
       onChange={handleChange}
+      shortcut="Alt + Scroll"
     />
   )
 }

@@ -8,39 +8,94 @@ import { SmoothScrollToggle } from "~features/smooth-scroll/Toggle"
 import "~style.css"
 
 function IndexPopup() {
-  const [, setSettings] = useStorage<FeatureSettings>(
+  const [settings, setSettings] = useStorage<FeatureSettings>(
     STORAGE_KEYS.SETTINGS,
     DEFAULT_SETTINGS
   )
+
+  const resolved = settings ?? DEFAULT_SETTINGS
+  const activeCount = Object.values(resolved).filter(Boolean).length
+  const totalCount = Object.keys(DEFAULT_SETTINGS).length
+
+  const handleEnableAll = () => {
+    setSettings({
+      allowRightClick: true,
+      copyLinkText: true,
+      smoothScroll: true,
+      mouseZoom: true
+    })
+  }
+
+  const handleDisableAll = () => {
+    setSettings({
+      allowRightClick: false,
+      copyLinkText: false,
+      smoothScroll: false,
+      mouseZoom: false
+    })
+  }
 
   const handleReset = () => {
     setSettings(DEFAULT_SETTINGS)
   }
 
   return (
-    <div className="w-[340px] bg-slate-900 text-slate-100 p-4 font-sans select-none antialiased">
+    <div className="w-[350px] bg-slate-900 text-slate-100 p-4 font-sans select-none antialiased">
       {/* Header */}
-      <header className="flex items-center justify-between pb-3 border-b border-slate-800">
+      <header className="flex items-center justify-between pb-3.5 border-b border-slate-800/80">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600/20 border border-indigo-500/40 flex items-center justify-center text-lg shadow-inner">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-lg shadow-lg shadow-indigo-500/20 ring-1 ring-white/20">
             ⚡
           </div>
           <div>
-            <h1 className="text-base font-bold tracking-tight text-white flex items-center gap-1.5">
+            <h1 className="text-sm font-bold tracking-tight text-white flex items-center gap-1.5">
               Browse Assist
             </h1>
-            <p className="text-[11px] text-slate-400">
-              Web Quality-of-Life Enhancements
+            <p className="text-[11px] text-slate-400 font-normal">
+              Quality-of-Life Web Toolkit
             </p>
           </div>
         </div>
-        <span className="px-2 py-0.5 text-[10px] font-semibold bg-slate-800 text-slate-400 rounded-full border border-slate-700/60">
-          v0.0.1
-        </span>
+
+        {/* Status indicator badge */}
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-800/90 border border-slate-700/60 shadow-inner">
+          <span
+            className={`w-1.5 h-1.5 rounded-full ${
+              activeCount > 0
+                ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)] animate-pulse"
+                : "bg-slate-500"
+            }`}
+          />
+          <span className="text-[10px] font-semibold text-slate-300">
+            {activeCount}/{totalCount} Active
+          </span>
+        </div>
       </header>
 
+      {/* Quick Actions Bar */}
+      <div className="flex items-center justify-between mt-3 px-1 text-[11px] text-slate-400">
+        <span className="font-medium text-slate-400">Features</span>
+        <div className="flex items-center gap-2">
+          {activeCount < totalCount ? (
+            <button
+              type="button"
+              onClick={handleEnableAll}
+              className="text-indigo-400 hover:text-indigo-300 transition-colors font-medium">
+              Enable all
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleDisableAll}
+              className="text-slate-400 hover:text-slate-200 transition-colors font-medium">
+              Disable all
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Feature Toggles List */}
-      <main className="mt-3.5 space-y-2.5">
+      <main className="mt-2 space-y-2.5">
         <AllowRightClickToggle />
         <CopyLinkTextToggle />
         <SmoothScrollToggle />
@@ -48,16 +103,18 @@ function IndexPopup() {
       </main>
 
       {/* Footer & Actions */}
-      <footer className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+      <footer className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
         <button
           type="button"
           onClick={handleReset}
           className="hover:text-slate-200 transition-colors focus:outline-none underline-offset-2 hover:underline">
-          Reset to defaults
+          Reset defaults
         </button>
-        <span className="text-[10px] text-slate-500">
-          Changes apply instantly
-        </span>
+        <div className="flex items-center gap-1 text-[10px] text-slate-500">
+          <span>v0.0.1</span>
+          <span>•</span>
+          <span>Manifest V3</span>
+        </div>
       </footer>
     </div>
   )
