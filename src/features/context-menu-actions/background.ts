@@ -42,53 +42,44 @@ export function updateContextMenus(
 
     if (!masterEnabled) return
 
-    // Register Copy Link Text
-    if (config.copyLinkText) {
-      chrome.contextMenus.create(
-        {
-          id: MENU_ITEMS.COPY_LINK_TEXT,
-          title: "Copy Link Text",
-          contexts: ["link"]
-        },
-        () => {
-          if (!chrome.runtime.lastError) {
-            registeredMenuIds.add(MENU_ITEMS.COPY_LINK_TEXT)
-          }
-        }
-      )
+    const order = config.order || ["copyLinkText", "cleanLinkCopy", "markdownLinkCopy"]
+
+    const actionDefinitions = {
+      copyLinkText: {
+        id: MENU_ITEMS.COPY_LINK_TEXT,
+        title: "Copy Link Text",
+        enabled: config.copyLinkText
+      },
+      cleanLinkCopy: {
+        id: MENU_ITEMS.CLEAN_LINK_COPY,
+        title: "Copy Clean Link",
+        enabled: config.cleanLinkCopy
+      },
+      markdownLinkCopy: {
+        id: MENU_ITEMS.MARKDOWN_LINK_COPY,
+        title: "Copy Link as Markdown",
+        enabled: config.markdownLinkCopy
+      }
     }
 
-    // Register Clean Link Copy
-    if (config.cleanLinkCopy) {
-      chrome.contextMenus.create(
-        {
-          id: MENU_ITEMS.CLEAN_LINK_COPY,
-          title: "Copy Clean Link",
-          contexts: ["link"]
-        },
-        () => {
-          if (!chrome.runtime.lastError) {
-            registeredMenuIds.add(MENU_ITEMS.CLEAN_LINK_COPY)
+    // Register items in the exact sequence specified by order
+    order.forEach((actionId) => {
+      const def = actionDefinitions[actionId]
+      if (def && def.enabled) {
+        chrome.contextMenus.create(
+          {
+            id: def.id,
+            title: def.title,
+            contexts: ["link"]
+          },
+          () => {
+            if (!chrome.runtime.lastError) {
+              registeredMenuIds.add(def.id)
+            }
           }
-        }
-      )
-    }
-
-    // Register Markdown Link Copy
-    if (config.markdownLinkCopy) {
-      chrome.contextMenus.create(
-        {
-          id: MENU_ITEMS.MARKDOWN_LINK_COPY,
-          title: "Copy Link as Markdown",
-          contexts: ["link"]
-        },
-        () => {
-          if (!chrome.runtime.lastError) {
-            registeredMenuIds.add(MENU_ITEMS.MARKDOWN_LINK_COPY)
-          }
-        }
-      )
-    }
+        )
+      }
+    })
   })
 }
 

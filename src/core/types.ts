@@ -7,19 +7,26 @@ export type FeatureKey =
   | "smoothScroll"
   | "mouseZoom"
 
+export type ContextMenuActionId =
+  | "copyLinkText"
+  | "cleanLinkCopy"
+  | "markdownLinkCopy"
+
 /**
- * Context Menu Actions sub-configuration.
+ * Context Menu Actions sub-configuration with custom ordering and toggle states.
  */
 export interface ContextMenuActionsConfig {
   copyLinkText: boolean // Copy plain anchor text
   cleanLinkCopy: boolean // Copy URL stripped of tracking parameters
   markdownLinkCopy: boolean // Copy formatted as [Anchor Text](Clean URL)
+  order: ContextMenuActionId[] // Display and menu registration order
 }
 
 export const DEFAULT_CONTEXT_MENU_ACTIONS_CONFIG: ContextMenuActionsConfig = {
   copyLinkText: true,
   cleanLinkCopy: true,
-  markdownLinkCopy: true
+  markdownLinkCopy: true,
+  order: ["copyLinkText", "cleanLinkCopy", "markdownLinkCopy"]
 }
 
 /**
