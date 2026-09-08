@@ -200,22 +200,7 @@ function onLeavePiP(): void {
 }
 
 /**
- * Keydown handler for fallback in-page hotkey Alt+P
- * (in addition to chrome.commands to ensure immediate responsiveness).
- */
-function onKeyDown(event: KeyboardEvent): void {
-  if (!isActive) return
-
-  // Alt + P (KeyP)
-  if (event.altKey && !event.ctrlKey && !event.metaKey && (event.key === "p" || event.key === "P")) {
-    event.preventDefault()
-    event.stopPropagation()
-    togglePictureInPicture()
-  }
-}
-
-/**
- * Message listener from background worker (e.g. when shortcut triggered via chrome.commands).
+ * Message listener from background worker (triggered dynamically via chrome.commands).
  */
 function onRuntimeMessage(
   message: { action: string },
@@ -257,7 +242,6 @@ export function activate(config?: PictureInPictureConfig): void {
   if (isActive || typeof window === "undefined") return
   isActive = true
 
-  window.addEventListener("keydown", onKeyDown, true)
   document.addEventListener("enterpictureinpicture", onEnterPiP, true)
   document.addEventListener("leavepictureinpicture", onLeavePiP, true)
   chrome.runtime.onMessage.addListener(onRuntimeMessage)
@@ -276,7 +260,6 @@ export function deactivate(): void {
     notifyPiPStatus(false)
   }
 
-  window.removeEventListener("keydown", onKeyDown, true)
   document.removeEventListener("enterpictureinpicture", onEnterPiP, true)
   document.removeEventListener("leavepictureinpicture", onLeavePiP, true)
   chrome.runtime.onMessage.removeListener(onRuntimeMessage)

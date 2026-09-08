@@ -1,5 +1,6 @@
 import { ExternalLink, Eye, Keyboard, ShieldAlert } from "lucide-react"
 import type React from "react"
+import { useEffect, useState } from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
@@ -25,6 +26,22 @@ export const PictureInPictureSettingsView: React.FC<
     STORAGE_KEYS.SETTINGS,
     DEFAULT_SETTINGS
   )
+  const [shortcut, setShortcut] = useState<string>("Alt + P")
+
+  useEffect(() => {
+    if (chrome.commands?.getAll) {
+      chrome.commands.getAll((commands) => {
+        const cmd = commands.find(
+          (c) => c.name === "toggle_picture_in_picture"
+        )
+        if (cmd?.shortcut) {
+          setShortcut(cmd.shortcut)
+        } else {
+          setShortcut("Not configured")
+        }
+      })
+    }
+  }, [])
 
   const isMasterEnabled =
     settings?.pictureInPicture ?? DEFAULT_SETTINGS.pictureInPicture
@@ -83,7 +100,7 @@ export const PictureInPictureSettingsView: React.FC<
 
             <div className="flex items-center gap-2">
               <kbd className="px-2 py-1 text-[11px] font-mono font-bold text-slate-200 bg-slate-800 rounded border border-slate-600 shadow-sm">
-                Alt + P
+                {shortcut}
               </kbd>
               <button
                 type="button"

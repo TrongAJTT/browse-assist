@@ -1,5 +1,6 @@
 import { PictureInPicture2 } from "lucide-react"
 import type React from "react"
+import { useEffect, useState } from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
@@ -27,6 +28,22 @@ export const PictureInPictureToggle: React.FC<PictureInPictureToggleProps> = ({
     STORAGE_KEYS.SETTINGS,
     DEFAULT_SETTINGS
   )
+  const [shortcut, setShortcut] = useState<string>("Alt + P")
+
+  useEffect(() => {
+    if (chrome.commands?.getAll) {
+      chrome.commands.getAll((commands) => {
+        const cmd = commands.find(
+          (c) => c.name === "toggle_picture_in_picture"
+        )
+        if (cmd?.shortcut) {
+          setShortcut(cmd.shortcut)
+        } else {
+          setShortcut("")
+        }
+      })
+    }
+  }, [])
 
   const isEnabled =
     settings?.pictureInPicture ?? DEFAULT_SETTINGS.pictureInPicture
@@ -45,7 +62,7 @@ export const PictureInPictureToggle: React.FC<PictureInPictureToggleProps> = ({
       description={meta.description}
       enabled={isEnabled}
       onChange={handleToggle}
-      shortcut="Alt + P"
+      shortcut={shortcut || undefined}
       onConfigure={onOpenSettings}
     />
   )

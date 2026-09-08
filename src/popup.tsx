@@ -57,8 +57,9 @@ function IndexPopup() {
     tabId: number
     title: string
   } | null>(null)
+  const [pipShortcut, setPipShortcut] = useState<string>("Alt + P")
 
-  // Query background for active PiP session
+  // Query background for active PiP session and command shortcut
   useEffect(() => {
     chrome.runtime.sendMessage(
       { action: "GET_ACTIVE_PIP_SESSION" },
@@ -68,6 +69,19 @@ function IndexPopup() {
         }
       }
     )
+
+    if (chrome.commands?.getAll) {
+      chrome.commands.getAll((commands) => {
+        const cmd = commands.find(
+          (c) => c.name === "toggle_picture_in_picture"
+        )
+        if (cmd?.shortcut) {
+          setPipShortcut(cmd.shortcut)
+        } else {
+          setPipShortcut("")
+        }
+      })
+    }
   }, [])
 
   const handleFocusPiPTab = () => {
@@ -173,7 +187,9 @@ function IndexPopup() {
               title={
                 activePiP
                   ? "Exit Picture-in-Picture"
-                  : "Toggle Picture-in-Picture (Alt+P)"
+                  : pipShortcut
+                    ? `Toggle Picture-in-Picture (${pipShortcut})`
+                    : "Toggle Picture-in-Picture"
               }
               onClick={handleTogglePiPOnCurrentTab}
               className={`p-1.5 rounded-lg transition-all focus:outline-none ${

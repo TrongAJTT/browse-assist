@@ -217,7 +217,7 @@ export const FEATURES_LIST: FeatureMeta[] = [
     key: "pictureInPicture",
     title: "Universal Picture-in-Picture",
     description:
-      "Toggle floating video window using customizable hotkey (default Alt+P).",
+      "Toggle floating video window using customizable shortcut.",
     icon: "📺",
     hasSettings: true
   }
