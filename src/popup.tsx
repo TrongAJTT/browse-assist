@@ -20,19 +20,33 @@ type ActiveView = "main" | "smooth-scroll-settings"
 
 function IndexPopup() {
   const [currentView, setCurrentView] = useState<ActiveView>("main")
+  const [isRightClickActiveInTab, setIsRightClickActiveInTab] = useState(false)
+  const [isTabReady, setIsTabReady] = useState(false)
+
   const [settings] = useStorage<FeatureSettings>(
     STORAGE_KEYS.SETTINGS,
     DEFAULT_SETTINGS
   )
 
+  // Ready when both storage settings and active tab state are hydrated
+  const isHydrated = isTabReady && settings !== undefined
+
   const resolved = settings ?? DEFAULT_SETTINGS
-  const activeCount = Object.values(resolved).filter(
-    (v) => typeof v === "boolean" && v
-  ).length
+  // Calculate active count: 3 persistent features + 1 on-demand tab feature
+  const persistentActiveCount = [
+    resolved.copyLinkText,
+    resolved.smoothScroll,
+    resolved.mouseZoom
+  ].filter(Boolean).length
+
+  const activeCount = persistentActiveCount + (isRightClickActiveInTab ? 1 : 0)
   const totalCount = 4
 
   return (
-    <div className="w-[370px] bg-slate-900 text-slate-100 font-sans select-none antialiased flex flex-col">
+    <div
+      className={`w-[370px] bg-slate-900 text-slate-100 font-sans select-none antialiased flex flex-col transition-opacity duration-150 ${
+        isHydrated ? "opacity-100" : "opacity-0 pointer-events-none"
+      }`}>
       {/* Header - Crisp and cleanly separated from content */}
       <header className="px-4 py-3 bg-slate-900/95 border-b border-slate-800 flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center gap-2.5">
@@ -68,7 +82,10 @@ function IndexPopup() {
           <div>
             {/* PowerToys-style Utilities List with Dividers */}
             <main className="divide-y divide-slate-800/80">
-              <AllowRightClickToggle />
+              <AllowRightClickToggle
+                onStatusChange={setIsRightClickActiveInTab}
+                onReady={() => setIsTabReady(true)}
+              />
               <CopyLinkTextToggle />
               <SmoothScrollToggle
                 onConfigure={() => setCurrentView("smooth-scroll-settings")}
