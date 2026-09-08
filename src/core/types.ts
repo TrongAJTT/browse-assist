@@ -16,6 +16,7 @@ export interface SmoothScrollConfig {
   preset: SmoothScrollPreset
   stepSize: number // Wheel multiplier (e.g. 1.0)
   smoothness: number // Easing factor (e.g. 0.18)
+  interceptionMode?: "smart" | "aggressive" // 'smart' (bubble + respect apps) vs 'aggressive' (capture phase)
 }
 
 export const SMOOTH_SCROLL_PRESETS: Record<
@@ -59,7 +60,10 @@ export const DEFAULT_SETTINGS: FeatureSettings = {
   copyLinkText: true,
   smoothScroll: true,
   mouseZoom: true,
-  smoothScrollConfig: SMOOTH_SCROLL_PRESETS.balanced
+  smoothScrollConfig: {
+    ...SMOOTH_SCROLL_PRESETS.balanced,
+    interceptionMode: "smart"
+  }
 }
 
 /**
