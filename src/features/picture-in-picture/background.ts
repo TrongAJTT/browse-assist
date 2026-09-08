@@ -160,4 +160,16 @@ export async function initPictureInPictureBackground(): Promise<void> {
   chrome.runtime.onMessage.addListener(onMessageListener)
   chrome.tabs.onRemoved.addListener(onTabRemovedListener)
   chrome.commands.onCommand.addListener(onCommandListener)
+
+  // Watch storage: If pictureInPicture is turned off while a video is in PiP, close it immediately
+  extensionStorage.watch({
+    [STORAGE_KEYS.SETTINGS]: (change) => {
+      const newSettings = change.newValue as FeatureSettings | undefined
+      if (newSettings && !newSettings.pictureInPicture && activeSession) {
+        closeActivePiP().catch(() => {})
+      } else if (newSettings && !newSettings.pictureInPictureConfig?.showBadge) {
+        chrome.action.setBadgeText({ text: "" }).catch(() => {})
+      }
+    }
+  })
 }

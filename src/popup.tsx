@@ -53,15 +53,21 @@ function IndexPopup() {
     DEFAULT_SETTINGS
   )
 
-  const [activePiP, setActivePiP] = useState<{ tabId: number; title: string } | null>(null)
+  const [activePiP, setActivePiP] = useState<{
+    tabId: number
+    title: string
+  } | null>(null)
 
   // Query background for active PiP session
   useEffect(() => {
-    chrome.runtime.sendMessage({ action: "GET_ACTIVE_PIP_SESSION" }, (response) => {
-      if (response?.session) {
-        setActivePiP(response.session)
+    chrome.runtime.sendMessage(
+      { action: "GET_ACTIVE_PIP_SESSION" },
+      (response) => {
+        if (response?.session) {
+          setActivePiP(response.session)
+        }
       }
-    })
+    )
   }, [])
 
   const handleFocusPiPTab = () => {
@@ -74,6 +80,38 @@ function IndexPopup() {
     e.stopPropagation()
     chrome.runtime.sendMessage({ action: "CLOSE_PIP" }, () => {
       setActivePiP(null)
+    })
+  }
+
+  const handleTogglePiPOnCurrentTab = () => {
+    if (activePiP) {
+      chrome.runtime.sendMessage({ action: "CLOSE_PIP" }, () => {
+        setActivePiP(null)
+      })
+      return
+    }
+
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const activeTab = tabs[0]
+      if (activeTab?.id) {
+        chrome.tabs.sendMessage(
+          activeTab.id,
+          { action: "TOGGLE_PICTURE_IN_PICTURE" },
+          () => {
+            // Re-check PiP state after small delay
+            setTimeout(() => {
+              chrome.runtime.sendMessage(
+                { action: "GET_ACTIVE_PIP_SESSION" },
+                (response) => {
+                  if (response?.session) {
+                    setActivePiP(response.session)
+                  }
+                }
+              )
+            }, 300)
+          }
+        )
+      }
     })
   }
 
@@ -126,8 +164,27 @@ function IndexPopup() {
           </div>
         </div>
 
-        {/* Action icons: Donate (Dropdown) & About (Sub-page) */}
+        {/* Action icons: PiP Trigger, Donate (Dropdown) & About (Sub-page) */}
         <div className="flex items-center gap-1">
+          {/* Quick Trigger PiP Button */}
+          {settings?.pictureInPicture && (
+            <button
+              type="button"
+              title={
+                activePiP
+                  ? "Exit Picture-in-Picture"
+                  : "Toggle Picture-in-Picture (Alt+P)"
+              }
+              onClick={handleTogglePiPOnCurrentTab}
+              className={`p-1.5 rounded-lg transition-all focus:outline-none ${
+                activePiP
+                  ? "bg-indigo-600/30 text-indigo-400 ring-1 ring-indigo-500/50 hover:bg-indigo-600/40 animate-pulse"
+                  : "text-slate-400 hover:text-indigo-400 hover:bg-slate-800/80 active:scale-95"
+              }`}>
+              <PictureInPicture2 className="w-4 h-4" />
+            </button>
+          )}
+
           {/* Donate Button & Dropdown */}
           <div className="relative" ref={donateMenuRef}>
             <button
@@ -188,10 +245,11 @@ function IndexPopup() {
         {activePiP && currentView === "main" && (
           <div
             onClick={handleFocusPiPTab}
-            className="mb-3 p-2.5 rounded-xl bg-indigo-950/60 border border-indigo-500/30 hover:border-indigo-500/60 transition-all cursor-pointer group flex items-center justify-between gap-2.5 shadow-lg shadow-indigo-950/20">
-            <div className="flex items-center gap-2.5 min-w-0 flex-1">
-              <div className="p-1.5 rounded-lg bg-indigo-500/20 text-indigo-400 group-hover:scale-105 transition-transform shrink-0">
-                <PictureInPicture2 className="w-4 h-4 animate-pulse" />
+            title="Click to jump to this video tab"
+            className="mb-1.5 py-1.5 px-2.5 rounded-md bg-indigo-950/60 border border-indigo-500/30 hover:border-indigo-500/60 transition-all cursor-pointer group flex items-center justify-between gap-2.5 shadow-lg shadow-indigo-950/20">
+            <div className="flex items-center gap-1.5 min-w-0 flex-1">
+              <div className="p-1.5 text-indigo-400 group-hover:scale-105 transition-transform shrink-0">
+                <PictureInPicture2 className="w-5 h-5 animate-pulse" />
               </div>
               <div className="flex flex-col min-w-0">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 leading-none">
@@ -203,16 +261,14 @@ function IndexPopup() {
               </div>
             </div>
 
-            <div className="flex items-center gap-1.5 shrink-0">
-              <span className="text-[10.5px] font-medium text-indigo-300 bg-indigo-900/60 px-2 py-0.5 rounded-md border border-indigo-700/50 group-hover:bg-indigo-600 group-hover:text-white transition-all">
-                Focus Tab
-              </span>
+            <div className="flex items-center shrink-0">
               <button
                 type="button"
                 onClick={handleClosePiP}
-                title="Exit Picture-in-Picture"
-                className="p-1 rounded-md text-slate-400 hover:text-rose-400 hover:bg-slate-800/80 transition-colors">
-                <X className="w-3.5 h-3.5" />
+                title="Exit Picture-in-Picture window"
+                className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-300 bg-slate-800/90 border border-slate-700/80 px-2.5 py-1 rounded-lg transition-all duration-150 hover:bg-rose-500 hover:text-white hover:border-rose-500 hover:shadow-md hover:shadow-rose-500/25 hover:scale-[1.02] active:scale-95 focus:outline-none focus:ring-2 focus:ring-rose-500/50">
+                <X className="w-3.5 h-3.5 stroke-[2.5]" />
+                <span>Exit PiP</span>
               </button>
             </div>
           </div>

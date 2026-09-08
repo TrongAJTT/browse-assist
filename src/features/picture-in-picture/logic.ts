@@ -264,11 +264,17 @@ export function activate(config?: PictureInPictureConfig): void {
 }
 
 /**
- * Deactivates Picture-in-Picture listeners and cleans up state.
+ * Deactivates Picture-in-Picture listeners, exits PiP immediately if active, and cleans up state.
  */
 export function deactivate(): void {
-  if (!isActive || typeof window === "undefined") return
+  if (!isActive && !document.pictureInPictureElement) return
   isActive = false
+
+  // If a video is currently playing in PiP, immediately exit it upon feature deactivation
+  if (document.pictureInPictureElement) {
+    document.exitPictureInPicture().catch(() => {})
+    notifyPiPStatus(false)
+  }
 
   window.removeEventListener("keydown", onKeyDown, true)
   document.removeEventListener("enterpictureinpicture", onEnterPiP, true)
