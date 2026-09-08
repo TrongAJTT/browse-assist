@@ -1,5 +1,6 @@
 import { useStorage } from "@plasmohq/storage/hook"
 
+import { AppIcon } from "~core/assets"
 import {
   DEFAULT_SETTINGS,
   FEATURES_LIST,
@@ -34,9 +35,7 @@ function OptionsPage() {
         {/* Header */}
         <header className="flex items-center justify-between pb-6 border-b border-slate-800">
           <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-2xl shadow-xl shadow-indigo-500/20 ring-1 ring-white/20">
-              ⚡
-            </div>
+            <AppIcon className="w-12 h-12 rounded-2xl object-contain shadow-xl shadow-indigo-500/20 ring-1 ring-white/20" />
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-white">
                 Browse Assist Settings

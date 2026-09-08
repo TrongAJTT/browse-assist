@@ -1,5 +1,6 @@
 import { useStorage } from "@plasmohq/storage/hook"
 
+import { AppIcon } from "~core/assets"
 import { DEFAULT_SETTINGS, STORAGE_KEYS, type FeatureSettings } from "~core/types"
 import { AllowRightClickToggle } from "~features/allow-right-click/Toggle"
 import { CopyLinkTextToggle } from "~features/copy-link-text/Toggle"
@@ -44,9 +45,7 @@ function IndexPopup() {
       {/* Header */}
       <header className="flex items-center justify-between pb-3.5 border-b border-slate-800/80">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-lg shadow-lg shadow-indigo-500/20 ring-1 ring-white/20">
-            ⚡
-          </div>
+          <AppIcon className="w-9 h-9 rounded-xl object-contain shadow-lg shadow-indigo-500/20 ring-1 ring-white/20" />
           <div>
             <h1 className="text-sm font-bold tracking-tight text-white flex items-center gap-1.5">
               Browse Assist
