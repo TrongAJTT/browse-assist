@@ -7,6 +7,7 @@ import {
   PictureInPicture2,
   Pipette,
   Settings as SettingsIcon,
+  Sparkles,
   X,
   Zap
 } from "lucide-react"
@@ -66,6 +67,8 @@ function IndexPopup() {
   const [isTabReady, setIsTabReady] = useState(false)
   const [isDonateOpen, setIsDonateOpen] = useState(false)
   const donateMenuRef = useRef<HTMLDivElement>(null)
+  const [isQuickToolsOpen, setIsQuickToolsOpen] = useState(false)
+  const quickToolsMenuRef = useRef<HTMLDivElement>(null)
 
   const [settings] = useStorage<FeatureSettings>(
     STORAGE_KEYS.SETTINGS,
@@ -151,21 +154,28 @@ function IndexPopup() {
   // Ready when both storage settings and active tab state are hydrated
   const isHydrated = isTabReady && settings !== undefined
 
-  // Close donate menu when clicking outside
+  // Close dropdown menus when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node
       if (
         donateMenuRef.current &&
-        !donateMenuRef.current.contains(event.target as Node)
+        !donateMenuRef.current.contains(target)
       ) {
         setIsDonateOpen(false)
       }
+      if (
+        quickToolsMenuRef.current &&
+        !quickToolsMenuRef.current.contains(target)
+      ) {
+        setIsQuickToolsOpen(false)
+      }
     }
-    if (isDonateOpen) {
+    if (isDonateOpen || isQuickToolsOpen) {
       document.addEventListener("mousedown", handleClickOutside)
     }
     return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [isDonateOpen])
+  }, [isDonateOpen, isQuickToolsOpen])
 
   const getDonateIcon = (iconName: string) => {
     switch (iconName) {
@@ -216,84 +226,153 @@ function IndexPopup() {
           </div>
         </div>
 
-        {/* Action icons: Quick Pipette, PiP Trigger, Donate, Preferences & About */}
+        {/* Action icons: Quick Tools, Preferences, About & Donate */}
         <div className="flex items-center gap-1">
-          {/* Quick Trigger Color Picker Button */}
-          {settings?.colorPicker && (
+          {/* Quick Tools Dropdown */}
+          <div className="relative" ref={quickToolsMenuRef}>
             <button
               type="button"
-              title={
-                colorPickerShortcut
-                  ? `Pick Color from Screen (${colorPickerShortcut})`
-                  : "Pick Color from Screen"
-              }
-              onClick={async () => {
-                if (typeof window !== "undefined" && "EyeDropper" in window) {
-                  try {
-                    const EyeDropperClass = (
-                      window as unknown as {
-                        EyeDropper: new () => {
-                          open: () => Promise<{ sRGBHex: string }>
-                        }
-                      }
-                    ).EyeDropper
-                    const eyeDropper = new EyeDropperClass()
-                    const result = await eyeDropper.open()
-                    if (result?.sRGBHex) {
-                      const hex = result.sRGBHex.toUpperCase()
-                      await navigator.clipboard.writeText(hex).catch(() => {})
-                    }
-                  } catch {
-                    // User cancelled
-                  }
-                  return
-                }
-                await sendToActiveTab(MESSAGE_TYPES.TRIGGER_COLOR_PICKER)
-                window.close()
-              }}
-              className="p-1.5 rounded-lg text-content-muted hover:text-accent hover:bg-app-surface active:scale-95 transition-all focus:outline-none">
-              <Pipette className="w-4 h-4" />
-            </button>
-          )}
-
-          {/* Quick Trigger Element Zapper Button */}
-          {settings?.elementZapper && (
-            <button
-              type="button"
-              title={
-                elementZapperShortcut
-                  ? `Zap Element from Page (${elementZapperShortcut})`
-                  : "Zap Element from Page"
-              }
-              onClick={async () => {
-                await sendToActiveTab(MESSAGE_TYPES.TRIGGER_ELEMENT_ZAPPER)
-                window.close()
-              }}
-              className="p-1.5 rounded-lg text-content-muted hover:text-amber-400 hover:bg-app-surface active:scale-95 transition-all focus:outline-none">
-              <Zap className="w-4 h-4" />
-            </button>
-          )}
-
-          {/* Quick Trigger PiP Button */}
-          {settings?.pictureInPicture && (
-            <button
-              type="button"
-              title={
-                activePiP
-                  ? "Exit Picture-in-Picture"
-                  : pipShortcut
-                    ? `Toggle Picture-in-Picture (${pipShortcut})`
-                    : "Toggle Picture-in-Picture"
-              }
-              onClick={handleTogglePiPOnCurrentTab}
+              title="Quick Tools (Instant Actions)"
+              onClick={() => setIsQuickToolsOpen((prev) => !prev)}
               className={`p-1.5 rounded-lg transition-all focus:outline-none ${
-                activePiP
-                  ? "bg-accent-subtle text-accent ring-1 ring-accent-glow hover:bg-accent-hover/20 animate-pulse"
-                  : "text-content-muted hover:text-accent hover:bg-app-surface active:scale-95"
+                isQuickToolsOpen
+                  ? "bg-accent-subtle text-accent ring-1 ring-accent-glow"
+                  : activePiP
+                    ? "bg-indigo-500/20 text-indigo-400 ring-1 ring-indigo-500/30 animate-pulse"
+                    : "text-content-muted hover:text-accent hover:bg-app-surface active:scale-95"
               }`}>
-              <PictureInPicture2 className="w-4 h-4" />
+              <Sparkles className="w-4 h-4 fill-current/20" />
             </button>
-          )}
+
+            {/* Quick Tools Dropdown Menu */}
+            {isQuickToolsOpen && (
+              <div className="absolute right-0 mt-2 w-64 rounded-xl bg-app-elevated border border-border-subtle shadow-2xl shadow-black/50 py-1.5 z-30 animate-in fade-in zoom-in-95 duration-100">
+                <div className="px-3 py-1.5 border-b border-border-divider/50 mb-1 flex items-center justify-between">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-content-muted">
+                    Quick Tools
+                  </span>
+                  <span className="text-[10px] text-content-muted">
+                    Click to launch on page
+                  </span>
+                </div>
+
+                <div className="space-y-0.5 px-1">
+                  {/* Pick Color from Screen */}
+                  {settings?.colorPicker && (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        setIsQuickToolsOpen(false)
+                        if (
+                          typeof window !== "undefined" &&
+                          "EyeDropper" in window
+                        ) {
+                          try {
+                            const EyeDropperClass = (
+                              window as unknown as {
+                                EyeDropper: new () => {
+                                  open: () => Promise<{ sRGBHex: string }>
+                                }
+                              }
+                            ).EyeDropper
+                            const eyeDropper = new EyeDropperClass()
+                            const result = await eyeDropper.open()
+                            if (result?.sRGBHex) {
+                              const hex = result.sRGBHex.toUpperCase()
+                              await navigator.clipboard
+                                .writeText(hex)
+                                .catch(() => {})
+                            }
+                          } catch {
+                            // User cancelled
+                          }
+                          return
+                        }
+                        await sendToActiveTab(
+                          MESSAGE_TYPES.TRIGGER_COLOR_PICKER
+                        )
+                        window.close()
+                      }}
+                      className="w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs hover:bg-app-surface text-content-primary transition-colors group text-left">
+                      <div className="flex items-center gap-2.5">
+                        <div className="p-1 rounded-md bg-pink-500/10 text-pink-400 group-hover:scale-105 transition-transform">
+                          <Pipette className="w-3.5 h-3.5" />
+                        </div>
+                        <span className="font-medium text-[11px]">
+                          Pick Color
+                        </span>
+                      </div>
+                      {colorPickerShortcut && (
+                        <kbd className="px-1.5 py-0.5 bg-surface-elevated text-content-muted rounded text-[10px] font-mono border border-border-subtle">
+                          {colorPickerShortcut}
+                        </kbd>
+                      )}
+                    </button>
+                  )}
+
+                  {/* Zap Element from Page */}
+                  {settings?.elementZapper && (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        setIsQuickToolsOpen(false)
+                        await sendToActiveTab(
+                          MESSAGE_TYPES.TRIGGER_ELEMENT_ZAPPER
+                        )
+                        window.close()
+                      }}
+                      className="w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs hover:bg-app-surface text-content-primary transition-colors group text-left">
+                      <div className="flex items-center gap-2.5">
+                        <div className="p-1 rounded-md bg-amber-500/10 text-amber-400 group-hover:scale-105 transition-transform">
+                          <Zap className="w-3.5 h-3.5" />
+                        </div>
+                        <span className="font-medium text-[11px]">
+                          Element Zapper
+                        </span>
+                      </div>
+                      {elementZapperShortcut && (
+                        <kbd className="px-1.5 py-0.5 bg-surface-elevated text-content-muted rounded text-[10px] font-mono border border-border-subtle">
+                          {elementZapperShortcut}
+                        </kbd>
+                      )}
+                    </button>
+                  )}
+
+                  {/* Toggle Picture-in-Picture */}
+                  {settings?.pictureInPicture && (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        setIsQuickToolsOpen(false)
+                        await handleTogglePiPOnCurrentTab()
+                      }}
+                      className="w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs hover:bg-app-surface text-content-primary transition-colors group text-left">
+                      <div className="flex items-center gap-2.5">
+                        <div
+                          className={`p-1 rounded-md transition-transform group-hover:scale-105 ${
+                            activePiP
+                              ? "bg-indigo-500/20 text-indigo-400 animate-pulse"
+                              : "bg-indigo-500/10 text-indigo-400"
+                          }`}>
+                          <PictureInPicture2 className="w-3.5 h-3.5" />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="font-medium text-[11px]">
+                            {activePiP ? "Exit PiP Video" : "Picture-in-Picture"}
+                          </span>
+                        </div>
+                      </div>
+                      {pipShortcut && (
+                        <kbd className="px-1.5 py-0.5 bg-surface-elevated text-content-muted rounded text-[10px] font-mono border border-border-subtle">
+                          {pipShortcut}
+                        </kbd>
+                      )}
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Preferences / Settings Button */}
           <button
