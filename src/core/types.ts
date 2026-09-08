@@ -119,7 +119,13 @@ export const DEFAULT_PICTURE_IN_PICTURE_CONFIG: PictureInPictureConfig = {
 /**
  * Quick Scroll Buttons sub-configuration.
  */
-export type QuickScrollPosition = "bottom-right" | "bottom-left" | "bottom-center"
+export type QuickScrollPosition =
+  | "top-left"
+  | "top-right"
+  | "center-left"
+  | "center-right"
+  | "bottom-left"
+  | "bottom-right"
 export type QuickScrollButtonsMode = "both" | "top-only"
 
 export interface QuickScrollConfig {
@@ -241,8 +247,7 @@ export const FEATURES_LIST: FeatureMeta[] = [
   {
     key: "pictureInPicture",
     title: "Universal Picture-in-Picture",
-    description:
-      "Toggle floating video window using customizable shortcut.",
+    description: "Toggle floating video window using customizable shortcut.",
     icon: "📺",
     hasSettings: true
   },

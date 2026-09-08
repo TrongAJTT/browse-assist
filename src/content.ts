@@ -61,7 +61,7 @@ function applySettings(nextSettings: FeatureSettings): void {
 
   // Quick Scroll Buttons
   if (nextSettings.quickScroll) {
-    activateQuickScroll(nextSettings.quickScrollConfig)
+    activateQuickScroll(nextSettings.quickScrollConfig, nextSettings.theme)
   } else {
     deactivateQuickScroll()
   }

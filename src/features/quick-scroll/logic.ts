@@ -1,15 +1,18 @@
 /**
  * Quick Scroll Buttons - Content Script Logic
  * Creates isolated floating scroll-to-top & bottom buttons using Shadow DOM.
+ * Features smart page luminance detection for dynamic light/dark contrast.
  */
 
 import {
   DEFAULT_QUICK_SCROLL_CONFIG,
-  type QuickScrollConfig
+  type QuickScrollConfig,
+  type ThemeMode
 } from "~core/types"
 
 let isActive = false
 let currentConfig: QuickScrollConfig = DEFAULT_QUICK_SCROLL_CONFIG
+let extensionTheme: ThemeMode = "system"
 
 // DOM References
 let hostElement: HTMLDivElement | null = null
@@ -17,6 +20,10 @@ let shadowRoot: ShadowRoot | null = null
 let containerElement: HTMLDivElement | null = null
 let btnTop: HTMLButtonElement | null = null
 let btnBottom: HTMLButtonElement | null = null
+let styleElement: HTMLStyleElement | null = null
+
+// Mutation observer for theme changes on webpage
+let themeObserver: MutationObserver | null = null
 
 // State
 let lastScrollY = 0
@@ -24,6 +31,7 @@ let isAtTopReturned = false
 let memoryTimer: number | null = null
 let hideTimer: number | null = null
 let isTicking = false
+let detectedTheme: "dark" | "light" = "dark"
 
 const MIN_PAGE_RATIO = 1.6 // Minimum document height / viewport height
 const SCROLL_THRESHOLD = 300 // px threshold to show top or bottom button
@@ -46,17 +54,111 @@ const DOWN_ARROW_SVG = `
   </svg>
 `
 
-function createShadowDOM(): void {
-  if (hostElement && document.documentElement.contains(hostElement)) return
+/**
+ * Parses RGB / RGBA color string and returns luminance (0 - 255), or null if transparent.
+ */
+function parseRgbLuminance(colorStr: string): number | null {
+  if (
+    !colorStr ||
+    colorStr === "transparent" ||
+    colorStr === "rgba(0, 0, 0, 0)"
+  ) {
+    return null
+  }
+  const match = colorStr.match(
+    /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/
+  )
+  if (!match) return null
 
-  hostElement = document.createElement("div")
-  hostElement.id = "browse-assist-quick-scroll-host"
-  hostElement.style.all = "initial"
+  const r = parseInt(match[1], 10)
+  const g = parseInt(match[2], 10)
+  const b = parseInt(match[3], 10)
+  const a = match[4] !== undefined ? parseFloat(match[4]) : 1
 
-  shadowRoot = hostElement.attachShadow({ mode: "closed" })
+  if (a < 0.1) return null // Virtually transparent
 
-  const style = document.createElement("style")
-  style.textContent = `
+  // Standard perception-weighted formula
+  return 0.299 * r + 0.587 * g + 0.114 * b
+}
+
+/**
+ * Inspects page background color and dark mode attributes.
+ * Falls back to extension / OS theme if page background is ambiguous.
+ */
+function detectPageTheme(): "dark" | "light" {
+  try {
+    const htmlEl = document.documentElement
+    const bodyEl = document.body
+
+    // 1. Check known explicit dark attributes on <html> or <body>
+    const htmlClass = htmlEl?.className?.toLowerCase?.() || ""
+    const bodyClass = bodyEl?.className?.toLowerCase?.() || ""
+    const dataTheme =
+      htmlEl?.getAttribute("data-theme") ||
+      htmlEl?.getAttribute("data-color-mode") ||
+      bodyEl?.getAttribute("data-theme") ||
+      bodyEl?.getAttribute("data-color-mode")
+
+    if (
+      dataTheme === "dark" ||
+      htmlClass.includes("dark") ||
+      bodyClass.includes("dark")
+    ) {
+      return "dark"
+    }
+    if (
+      dataTheme === "light" ||
+      htmlClass.includes("light") ||
+      bodyClass.includes("light")
+    ) {
+      return "light"
+    }
+
+    // 2. Check meta color-scheme
+    const metaTheme = document
+      .querySelector('meta[name="color-scheme"]')
+      ?.getAttribute("content")
+    if (metaTheme) {
+      if (metaTheme.includes("dark") && !metaTheme.includes("light"))
+        return "dark"
+      if (metaTheme.includes("light") && !metaTheme.includes("dark"))
+        return "light"
+    }
+
+    // 3. Inspect computed background colors
+    if (bodyEl) {
+      const bodyBg = window.getComputedStyle(bodyEl).backgroundColor
+      const bodyLum = parseRgbLuminance(bodyBg)
+      if (bodyLum !== null) {
+        return bodyLum < 130 ? "dark" : "light"
+      }
+    }
+
+    if (htmlEl) {
+      const htmlBg = window.getComputedStyle(htmlEl).backgroundColor
+      const htmlLum = parseRgbLuminance(htmlBg)
+      if (htmlLum !== null) {
+        return htmlLum < 130 ? "dark" : "light"
+      }
+    }
+  } catch (err) {
+    // Fail silently on security/frame boundaries
+  }
+
+  // 4. Fallback to extension theme setting
+  if (extensionTheme === "dark") return "dark"
+  if (extensionTheme === "light") return "light"
+
+  // 5. Final fallback to OS system preference
+  const prefersDark =
+    window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? true
+  return prefersDark ? "dark" : "light"
+}
+
+function getStyles(theme: "dark" | "light"): string {
+  const isDark = theme === "dark"
+
+  return `
     :host {
       all: initial;
       z-index: 2147483645;
@@ -77,9 +179,27 @@ function createShadowDOM(): void {
       -webkit-user-select: none;
     }
 
-    .qs-pos-bottom-right {
+    /* 6 Screen Positions (3 rows x 2 columns) */
+    .qs-pos-top-left {
+      left: 18px;
+      top: 24px;
+    }
+
+    .qs-pos-top-right {
       right: 18px;
-      bottom: 24px;
+      top: 24px;
+    }
+
+    .qs-pos-center-left {
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .qs-pos-center-right {
+      right: 18px;
+      top: 50%;
+      transform: translateY(-50%);
     }
 
     .qs-pos-bottom-left {
@@ -87,10 +207,9 @@ function createShadowDOM(): void {
       bottom: 24px;
     }
 
-    .qs-pos-bottom-center {
-      left: 50%;
+    .qs-pos-bottom-right {
+      right: 18px;
       bottom: 24px;
-      transform: translateX(-50%);
     }
 
     .qs-dimmed {
@@ -109,25 +228,36 @@ function createShadowDOM(): void {
       align-items: center;
       justify-content: center;
       border-radius: 9999px;
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      background: rgba(15, 23, 42, 0.72);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      color: #f8fafc;
       cursor: pointer;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.15);
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       outline: none;
       padding: 0;
       margin: 0;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      ${
+        isDark
+          ? `
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        background: rgba(15, 23, 42, 0.72);
+        color: #f8fafc;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.2);
+      `
+          : `
+        border: 1px solid rgba(0, 0, 0, 0.12);
+        background: rgba(255, 255, 255, 0.84);
+        color: #0f172a;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08);
+      `
+      }
     }
 
     .qs-button:hover {
-      background: #6366f1;
+      background: ${isDark ? "#6366f1" : "#4f46e5"};
       color: #ffffff;
-      border-color: rgba(99, 102, 241, 0.6);
+      border-color: ${isDark ? "rgba(99, 102, 241, 0.6)" : "rgba(79, 70, 229, 0.6)"};
       transform: scale(1.1);
-      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+      box-shadow: 0 6px 20px ${isDark ? "rgba(99, 102, 241, 0.45)" : "rgba(79, 70, 229, 0.35)"};
     }
 
     .qs-button:active {
@@ -137,21 +267,31 @@ function createShadowDOM(): void {
     .qs-hidden {
       display: none !important;
     }
-
-    /* Subtle light mode support if document background is predominantly bright */
-    @media (prefers-color-scheme: light) {
-      .qs-button {
-        background: rgba(255, 255, 255, 0.82);
-        border: 1px solid rgba(0, 0, 0, 0.1);
-        color: #1e293b;
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
-      }
-      .qs-button:hover {
-        background: #4f46e5;
-        color: #ffffff;
-      }
-    }
   `
+}
+
+function updateThemeStyles(): void {
+  const newTheme = detectPageTheme()
+  if (newTheme !== detectedTheme || !styleElement) {
+    detectedTheme = newTheme
+    if (styleElement) {
+      styleElement.textContent = getStyles(detectedTheme)
+    }
+  }
+}
+
+function createShadowDOM(): void {
+  if (hostElement && document.documentElement.contains(hostElement)) return
+
+  hostElement = document.createElement("div")
+  hostElement.id = "browse-assist-quick-scroll-host"
+  hostElement.style.all = "initial"
+
+  shadowRoot = hostElement.attachShadow({ mode: "closed" })
+
+  detectedTheme = detectPageTheme()
+  styleElement = document.createElement("style")
+  styleElement.textContent = getStyles(detectedTheme)
 
   containerElement = document.createElement("div")
   containerElement.className = `qs-container qs-pos-${currentConfig.position}`
@@ -175,10 +315,21 @@ function createShadowDOM(): void {
   containerElement.appendChild(btnTop)
   containerElement.appendChild(btnBottom)
 
-  shadowRoot.appendChild(style)
+  shadowRoot.appendChild(styleElement)
   shadowRoot.appendChild(containerElement)
 
   document.documentElement.appendChild(hostElement)
+
+  // Observe potential page theme changes (e.g. user clicks dark/light mode button on site)
+  if (!themeObserver && document.documentElement) {
+    themeObserver = new MutationObserver(() => {
+      updateThemeStyles()
+    })
+    themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class", "data-theme", "data-color-mode", "style"]
+    })
+  }
 }
 
 function handleScrollTopClick(e: MouseEvent): void {
@@ -248,7 +399,8 @@ function updateButtonsVisibility(): void {
   if (!containerElement || !btnTop || !btnBottom) return
 
   const scrollY = window.scrollY || document.documentElement.scrollTop || 0
-  const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0
+  const viewportHeight =
+    window.innerHeight || document.documentElement.clientHeight || 0
   const totalHeight = Math.max(
     document.body.scrollHeight,
     document.documentElement.scrollHeight,
@@ -310,8 +462,12 @@ function onScroll(): void {
   }
 }
 
-export function activate(config: QuickScrollConfig = DEFAULT_QUICK_SCROLL_CONFIG): void {
+export function activate(
+  config: QuickScrollConfig = DEFAULT_QUICK_SCROLL_CONFIG,
+  theme: ThemeMode = "system"
+): void {
   currentConfig = config
+  extensionTheme = theme
 
   if (!isActive) {
     isActive = true
@@ -319,8 +475,8 @@ export function activate(config: QuickScrollConfig = DEFAULT_QUICK_SCROLL_CONFIG
     window.addEventListener("scroll", onScroll, { passive: true })
     window.addEventListener("resize", onScroll, { passive: true })
   } else if (containerElement) {
-    // Update position classes
     containerElement.className = `qs-container qs-pos-${currentConfig.position}`
+    updateThemeStyles()
   }
 
   updateButtonsVisibility()
@@ -332,6 +488,11 @@ export function deactivate(): void {
 
   window.removeEventListener("scroll", onScroll)
   window.removeEventListener("resize", onScroll)
+
+  if (themeObserver) {
+    themeObserver.disconnect()
+    themeObserver = null
+  }
 
   if (hideTimer) {
     clearTimeout(hideTimer)
@@ -351,4 +512,5 @@ export function deactivate(): void {
   containerElement = null
   btnTop = null
   btnBottom = null
+  styleElement = null
 }

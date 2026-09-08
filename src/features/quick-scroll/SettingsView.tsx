@@ -26,8 +26,13 @@ interface QuickScrollSettingsViewProps {
 
 const POSITION_ITEMS: GridPickerItem<QuickScrollPosition>[] = [
   {
-    id: "bottom-right",
-    label: "Bottom Right",
+    id: "top-left",
+    label: "Top Left",
+    icon: <LayoutTemplate className="w-3.5 h-3.5" />
+  },
+  {
+    id: "center-left",
+    label: "Center Left",
     icon: <LayoutTemplate className="w-3.5 h-3.5" />
   },
   {
@@ -36,8 +41,18 @@ const POSITION_ITEMS: GridPickerItem<QuickScrollPosition>[] = [
     icon: <LayoutTemplate className="w-3.5 h-3.5" />
   },
   {
-    id: "bottom-center",
-    label: "Bottom Center",
+    id: "top-right",
+    label: "Top Right",
+    icon: <LayoutTemplate className="w-3.5 h-3.5" />
+  },
+  {
+    id: "center-right",
+    label: "Center Right",
+    icon: <LayoutTemplate className="w-3.5 h-3.5" />
+  },
+  {
+    id: "bottom-right",
+    label: "Bottom Right",
     icon: <LayoutTemplate className="w-3.5 h-3.5" />
   }
 ]
@@ -67,8 +82,7 @@ export const QuickScrollSettingsView: React.FC<
     DEFAULT_SETTINGS
   )
 
-  const isMasterEnabled =
-    settings?.quickScroll ?? DEFAULT_SETTINGS.quickScroll
+  const isMasterEnabled = settings?.quickScroll ?? DEFAULT_SETTINGS.quickScroll
   const currentConfig: QuickScrollConfig =
     settings?.quickScrollConfig ?? DEFAULT_SETTINGS.quickScrollConfig
 
@@ -99,7 +113,9 @@ export const QuickScrollSettingsView: React.FC<
     }))
   }
 
-  const handleToggleOption = (key: keyof Pick<QuickScrollConfig, "autoHide" | "enableReturnMemory">) => {
+  const handleToggleOption = (
+    key: keyof Pick<QuickScrollConfig, "autoHide" | "enableReturnMemory">
+  ) => {
     setSettings((prev) => ({
       ...(prev ?? DEFAULT_SETTINGS),
       quickScrollConfig: {
@@ -124,7 +140,8 @@ export const QuickScrollSettingsView: React.FC<
               Button Placement
             </span>
             <p className="text-[11px] text-content-muted leading-snug">
-              Choose where floating scroll buttons anchor on your browser screen.
+              Choose where floating scroll buttons anchor on your browser
+              screen.
             </p>
             <GridPicker<QuickScrollPosition>
               items={POSITION_ITEMS}
@@ -143,7 +160,8 @@ export const QuickScrollSettingsView: React.FC<
               Button Selection
             </span>
             <p className="text-[11px] text-content-muted leading-snug">
-              Choose whether to display both top & bottom buttons or only scroll to top.
+              Choose whether to display both top & bottom buttons or only scroll
+              to top.
             </p>
             <GridPicker<QuickScrollButtonsMode>
               items={BUTTON_ITEMS}
@@ -166,7 +184,8 @@ export const QuickScrollSettingsView: React.FC<
                 Auto-Dim on Idle
               </span>
               <span className="text-[11px] text-content-muted leading-snug mt-0.5">
-                Fade buttons to subtle opacity when you pause scrolling; restore instantly on hover.
+                Fade buttons to subtle opacity when you pause scrolling; restore
+                instantly on hover.
               </span>
             </div>
 
@@ -196,7 +215,8 @@ export const QuickScrollSettingsView: React.FC<
                 Scroll Position Memory
               </span>
               <span className="text-[11px] text-content-muted leading-snug mt-0.5">
-                After jumping to the top, click the button again within 6 seconds to return to where you were reading.
+                After jumping to the top, click the button again within 6
+                seconds to return to where you were reading.
               </span>
             </div>
 
@@ -212,7 +232,9 @@ export const QuickScrollSettingsView: React.FC<
               }`}>
               <span
                 className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                  currentConfig.enableReturnMemory ? "translate-x-4" : "translate-x-0"
+                  currentConfig.enableReturnMemory
+                    ? "translate-x-4"
+                    : "translate-x-0"
                 }`}
               />
             </button>
