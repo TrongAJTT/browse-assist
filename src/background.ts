@@ -25,4 +25,10 @@ initPictureInPictureBackground().catch((err) => {
   console.error("Failed to initialize picture-in-picture background service:", err)
 })
 
+import { initColorPickerBackground } from "~features/color-picker/background"
+
+initColorPickerBackground().catch((err) => {
+  console.error("Failed to initialize color-picker background service:", err)
+})
+
 

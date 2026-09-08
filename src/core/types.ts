@@ -9,6 +9,7 @@ export type FeatureKey =
   | "mouseZoom"
   | "pictureInPicture"
   | "quickScroll"
+  | "colorPicker"
 
 export type ContextMenuActionId =
   | "copyLinkText"
@@ -145,6 +146,30 @@ export const DEFAULT_QUICK_SCROLL_CONFIG: QuickScrollConfig = {
 }
 
 /**
+ * Color format options for ColorPick Eyedropper.
+ */
+export type ColorFormat = "hex" | "rgb" | "hsl"
+
+export interface ColorHistoryItem {
+  hex: string
+  rgb: string
+  hsl: string
+  timestamp: number
+}
+
+export interface ColorPickerConfig {
+  defaultFormat: ColorFormat // Default format copied on pick
+  autoCopy: boolean // Automatically copy default format to clipboard immediately upon picking
+  showToast: boolean // Show notification toast upon picking
+}
+
+export const DEFAULT_COLOR_PICKER_CONFIG: ColorPickerConfig = {
+  defaultFormat: "hex",
+  autoCopy: true,
+  showToast: true
+}
+
+/**
  * Appearance theme options: "dark" | "light" | "system".
  */
 export type ThemeMode = "dark" | "light" | "system"
@@ -161,12 +186,14 @@ export interface FeatureSettings {
   mouseZoom: boolean
   pictureInPicture: boolean
   quickScroll: boolean
+  colorPicker: boolean
   contextMenuActionsConfig: ContextMenuActionsConfig
   superDragConfig: SuperDragConfig
   smoothScrollConfig: SmoothScrollConfig
   mouseZoomConfig: MouseZoomConfig
   pictureInPictureConfig: PictureInPictureConfig
   quickScrollConfig: QuickScrollConfig
+  colorPickerConfig: ColorPickerConfig
 }
 
 /**
@@ -182,6 +209,7 @@ export const DEFAULT_SETTINGS: FeatureSettings = {
   mouseZoom: true,
   pictureInPicture: true,
   quickScroll: true,
+  colorPicker: true,
   contextMenuActionsConfig: DEFAULT_CONTEXT_MENU_ACTIONS_CONFIG,
   superDragConfig: DEFAULT_SUPER_DRAG_CONFIG,
   smoothScrollConfig: {
@@ -190,14 +218,16 @@ export const DEFAULT_SETTINGS: FeatureSettings = {
   },
   mouseZoomConfig: DEFAULT_MOUSE_ZOOM_CONFIG,
   pictureInPictureConfig: DEFAULT_PICTURE_IN_PICTURE_CONFIG,
-  quickScrollConfig: DEFAULT_QUICK_SCROLL_CONFIG
+  quickScrollConfig: DEFAULT_QUICK_SCROLL_CONFIG,
+  colorPickerConfig: DEFAULT_COLOR_PICKER_CONFIG
 }
 
 /**
  * Storage keys used across extension contexts.
  */
 export const STORAGE_KEYS = {
-  SETTINGS: "browse_assist_settings"
+  SETTINGS: "browse_assist_settings",
+  COLOR_HISTORY: "browse_assist_color_history"
 } as const
 
 /**
@@ -266,6 +296,13 @@ export const FEATURES_LIST: FeatureMeta[] = [
     description:
       "Hold modifier key and scroll mouse wheel to zoom into cursor position.",
     icon: "🔍",
+    hasSettings: true
+  },
+  {
+    key: "colorPicker",
+    title: "ColorPick Eyedropper",
+    description: "Pick any pixel color from the screen with instant multi-format copy.",
+    icon: "🎨",
     hasSettings: true
   }
 ]

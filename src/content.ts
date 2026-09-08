@@ -38,6 +38,10 @@ import {
   activate as activateSuperDrag,
   deactivate as deactivateSuperDrag
 } from "~features/super-drag/logic"
+import {
+  activate as activateColorPicker,
+  deactivate as deactivateColorPicker
+} from "~features/color-picker/logic"
 
 export const config: PlasmoCSConfig = {
   matches: ["http://*/*", "https://*/*"],
@@ -87,6 +91,13 @@ function applySettings(nextSettings: FeatureSettings): void {
     activatePiP(nextSettings.pictureInPictureConfig)
   } else {
     deactivatePiP()
+  }
+
+  // ColorPick Eyedropper
+  if (nextSettings.colorPicker) {
+    activateColorPicker(nextSettings.colorPickerConfig)
+  } else {
+    deactivateColorPicker()
   }
 }
 

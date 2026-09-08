@@ -60,6 +60,13 @@
           "mac": "Alt+R"
         },
         "description": "Toggle Allow Right Click on current tab"
+      },
+      "toggle_color_picker": {
+        "suggested_key": {
+          "default": "Alt+Shift+C",
+          "mac": "Alt+Shift+C"
+        },
+        "description": "Pick color from screen"
       }
     }
   }

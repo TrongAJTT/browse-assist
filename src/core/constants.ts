@@ -87,7 +87,10 @@ export const MESSAGE_TYPES = {
 
   // Super Drag
   SUPER_DRAG_SEARCH: "SUPER_DRAG_SEARCH",
-  SUPER_DRAG_OPEN_LINK: "SUPER_DRAG_OPEN_LINK"
+  SUPER_DRAG_OPEN_LINK: "SUPER_DRAG_OPEN_LINK",
+
+  // ColorPick Eyedropper
+  TRIGGER_COLOR_PICKER: "TRIGGER_COLOR_PICKER"
 } as const
 
 export type MessageType = (typeof MESSAGE_TYPES)[keyof typeof MESSAGE_TYPES]

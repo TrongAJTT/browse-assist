@@ -4,6 +4,7 @@ import {
   MousePointer2,
   MousePointerClick,
   PictureInPicture2,
+  Pipette,
   Scroll,
   ZoomIn
 } from "lucide-react"
@@ -57,5 +58,10 @@ export const FEATURE_ICONS: Record<
     icon: PictureInPicture2,
     colorClass: "text-indigo-400",
     bgClass: "bg-indigo-500/10 border-indigo-500/30"
+  },
+  colorPicker: {
+    icon: Pipette,
+    colorClass: "text-pink-400",
+    bgClass: "bg-pink-500/10 border-pink-500/30"
   }
 }

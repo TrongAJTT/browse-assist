@@ -5,6 +5,7 @@ import {
   Heart,
   HelpCircle,
   PictureInPicture2,
+  Pipette,
   Settings as SettingsIcon,
   X
 } from "lucide-react"
@@ -27,6 +28,8 @@ import {
   type FeatureSettings
 } from "~core/types"
 import { AllowRightClickToggle } from "~features/allow-right-click/Toggle"
+import { ColorPickerSettingsView } from "~features/color-picker/SettingsView"
+import { ColorPickerToggle } from "~features/color-picker/Toggle"
 import { ContextMenuActionsSettingsView } from "~features/context-menu-actions/SettingsView"
 import { ContextMenuActionsToggle } from "~features/context-menu-actions/Toggle"
 import { MouseZoomSettingsView } from "~features/mouse-zoom/SettingsView"
@@ -50,6 +53,7 @@ type ActiveView =
   | "picture-in-picture-settings"
   | "smooth-scroll-settings"
   | "mouse-zoom-settings"
+  | "color-picker-settings"
   | "preferences"
   | "about"
 
@@ -188,8 +192,22 @@ function IndexPopup() {
           </div>
         </div>
 
-        {/* Action icons: PiP Trigger, Donate, Preferences & About */}
+        {/* Action icons: Quick Pipette, PiP Trigger, Donate, Preferences & About */}
         <div className="flex items-center gap-1">
+          {/* Quick Trigger Color Picker Button */}
+          {settings?.colorPicker && (
+            <button
+              type="button"
+              title="Pick Color from Screen (Alt + Shift + C)"
+              onClick={async () => {
+                await sendToActiveTab(MESSAGE_TYPES.TRIGGER_COLOR_PICKER)
+                window.close()
+              }}
+              className="p-1.5 rounded-lg text-content-muted hover:text-pink-400 hover:bg-app-surface active:scale-95 transition-all focus:outline-none">
+              <Pipette className="w-4 h-4" />
+            </button>
+          )}
+
           {/* Quick Trigger PiP Button */}
           {settings?.pictureInPicture && (
             <button
@@ -340,6 +358,9 @@ function IndexPopup() {
               <MouseZoomToggle
                 onConfigure={() => setCurrentView("mouse-zoom-settings")}
               />
+              <ColorPickerToggle
+                onConfigure={() => setCurrentView("color-picker-settings")}
+              />
             </main>
           </div>
         ) : currentView === "context-menu-actions-settings" ? (
@@ -356,6 +377,8 @@ function IndexPopup() {
           <SmoothScrollSettingsView onBack={() => setCurrentView("main")} />
         ) : currentView === "mouse-zoom-settings" ? (
           <MouseZoomSettingsView onBack={() => setCurrentView("main")} />
+        ) : currentView === "color-picker-settings" ? (
+          <ColorPickerSettingsView onBack={() => setCurrentView("main")} />
         ) : currentView === "preferences" ? (
           <PreferencesSettingsView onBack={() => setCurrentView("main")} />
         ) : (

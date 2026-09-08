@@ -72,6 +72,12 @@ export interface MessageRegistry {
     request: { url: string; openInBackground: boolean }
     response: { ok: boolean }
   }
+
+  // ColorPick Eyedropper
+  [MESSAGE_TYPES.TRIGGER_COLOR_PICKER]: {
+    request: undefined
+    response: { success: boolean }
+  }
 }
 
 /**
