@@ -3,9 +3,24 @@
  */
 export type FeatureKey =
   | "allowRightClick"
-  | "copyLinkText"
+  | "contextMenuActions"
   | "smoothScroll"
   | "mouseZoom"
+
+/**
+ * Context Menu Actions sub-configuration.
+ */
+export interface ContextMenuActionsConfig {
+  copyLinkText: boolean // Copy plain anchor text
+  cleanLinkCopy: boolean // Copy URL stripped of tracking parameters
+  markdownLinkCopy: boolean // Copy formatted as [Anchor Text](Clean URL)
+}
+
+export const DEFAULT_CONTEXT_MENU_ACTIONS_CONFIG: ContextMenuActionsConfig = {
+  copyLinkText: true,
+  cleanLinkCopy: true,
+  markdownLinkCopy: true
+}
 
 /**
  * Smooth Scrolling preset options.
@@ -66,9 +81,10 @@ export const DEFAULT_MOUSE_ZOOM_CONFIG: MouseZoomConfig = {
  */
 export interface FeatureSettings {
   allowRightClick: boolean
-  copyLinkText: boolean
+  contextMenuActions: boolean
   smoothScroll: boolean
   mouseZoom: boolean
+  contextMenuActionsConfig: ContextMenuActionsConfig
   smoothScrollConfig: SmoothScrollConfig
   mouseZoomConfig: MouseZoomConfig
 }
@@ -79,9 +95,10 @@ export interface FeatureSettings {
  */
 export const DEFAULT_SETTINGS: FeatureSettings = {
   allowRightClick: true,
-  copyLinkText: true,
+  contextMenuActions: true,
   smoothScroll: true,
   mouseZoom: true,
+  contextMenuActionsConfig: DEFAULT_CONTEXT_MENU_ACTIONS_CONFIG,
   smoothScrollConfig: {
     ...SMOOTH_SCROLL_PRESETS.balanced,
     interceptionMode: "smart"
@@ -119,10 +136,12 @@ export const FEATURES_LIST: FeatureMeta[] = [
     icon: "🖱️"
   },
   {
-    key: "copyLinkText",
-    title: "Copy Link Text",
-    description: "Right-click any hyperlink to quickly copy its display text.",
-    icon: "📋"
+    key: "contextMenuActions",
+    title: "Context Menu Actions",
+    description:
+      "Custom right-click menu actions for copying clean, formatted links.",
+    icon: "📋",
+    hasSettings: true
   },
   {
     key: "smoothScroll",

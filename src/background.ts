@@ -3,9 +3,10 @@
  * Orchestrates background workers and services across extension features.
  */
 
-import { initCopyLinkBackground } from "~features/copy-link-text/background"
+import { initContextMenuActionsBackground } from "~features/context-menu-actions/background"
 
 // Initialize background handlers
-initCopyLinkBackground().catch((err) => {
-  console.error("Failed to initialize copy-link background service:", err)
+initContextMenuActionsBackground().catch((err) => {
+  console.error("Failed to initialize context-menu-actions background service:", err)
 })
+

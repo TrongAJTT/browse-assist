@@ -13,9 +13,9 @@ import {
   isRightClickActive
 } from "~features/allow-right-click/logic"
 import {
-  activate as activateCopyLink,
-  deactivate as deactivateCopyLink
-} from "~features/copy-link-text/logic"
+  activate as activateContextMenuActions,
+  deactivate as deactivateContextMenuActions
+} from "~features/context-menu-actions/logic"
 import {
   activate as activateMouseZoom,
   deactivate as deactivateMouseZoom
@@ -33,11 +33,11 @@ export const config: PlasmoCSConfig = {
 function applySettings(nextSettings: FeatureSettings): void {
   // Allow Right Click is managed per-tab on-demand, not auto-activated globally.
 
-  // Copy Link Text
-  if (nextSettings.copyLinkText) {
-    activateCopyLink()
+  // Context Menu Actions
+  if (nextSettings.contextMenuActions) {
+    activateContextMenuActions()
   } else {
-    deactivateCopyLink()
+    deactivateContextMenuActions()
   }
 
   // Smooth Scroll

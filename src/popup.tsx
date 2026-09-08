@@ -18,7 +18,8 @@ import {
   type FeatureSettings
 } from "~core/types"
 import { AllowRightClickToggle } from "~features/allow-right-click/Toggle"
-import { CopyLinkTextToggle } from "~features/copy-link-text/Toggle"
+import { ContextMenuActionsSettingsView } from "~features/context-menu-actions/SettingsView"
+import { ContextMenuActionsToggle } from "~features/context-menu-actions/Toggle"
 import { MouseZoomSettingsView } from "~features/mouse-zoom/SettingsView"
 import { MouseZoomToggle } from "~features/mouse-zoom/Toggle"
 import { SmoothScrollSettingsView } from "~features/smooth-scroll/SettingsView"
@@ -26,7 +27,12 @@ import { SmoothScrollToggle } from "~features/smooth-scroll/Toggle"
 
 import "~style.css"
 
-type ActiveView = "main" | "smooth-scroll-settings" | "mouse-zoom-settings" | "about"
+type ActiveView =
+  | "main"
+  | "context-menu-actions-settings"
+  | "smooth-scroll-settings"
+  | "mouse-zoom-settings"
+  | "about"
 
 function IndexPopup() {
   const [currentView, setCurrentView] = useState<ActiveView>("main")
@@ -151,7 +157,11 @@ function IndexPopup() {
             {/* PowerToys-style Utilities List with Dividers */}
             <main className="divide-y divide-slate-800/80">
               <AllowRightClickToggle onReady={() => setIsTabReady(true)} />
-              <CopyLinkTextToggle />
+              <ContextMenuActionsToggle
+                onConfigure={() =>
+                  setCurrentView("context-menu-actions-settings")
+                }
+              />
               <SmoothScrollToggle
                 onConfigure={() => setCurrentView("smooth-scroll-settings")}
               />
@@ -160,6 +170,10 @@ function IndexPopup() {
               />
             </main>
           </div>
+        ) : currentView === "context-menu-actions-settings" ? (
+          <ContextMenuActionsSettingsView
+            onBack={() => setCurrentView("main")}
+          />
         ) : currentView === "smooth-scroll-settings" ? (
           <SmoothScrollSettingsView onBack={() => setCurrentView("main")} />
         ) : currentView === "mouse-zoom-settings" ? (

@@ -20,7 +20,7 @@ export const FEATURE_ICONS: Record<
     colorClass: "text-emerald-400",
     bgClass: "bg-emerald-500/10 border-emerald-500/30"
   },
-  copyLinkText: {
+  contextMenuActions: {
     icon: Link2,
     colorClass: "text-cyan-400",
     bgClass: "bg-cyan-500/10 border-cyan-500/30"

@@ -1,8 +1,10 @@
 /**
- * Copy Link Text - Content Script Logic
- * Tracks right-clicked elements, receives context menu commands from background,
- * extracts the exact anchor text, copies it to clipboard, and shows user feedback.
+ * Context Menu Actions - Content Script Logic
+ * Tracks right-clicked elements, resolves link text/URL, performs formatting & clipboard writes,
+ * and shows floating toast feedback.
  */
+
+import { cleanUrl } from "./cleanUrl"
 
 let isActive = false
 let lastContextMenuTarget: EventTarget | null = null
@@ -10,9 +12,9 @@ let toastElement: HTMLDivElement | null = null
 let toastTimeoutId: number | null = null
 
 /**
- * Shows a brief floating toast notification confirming the text was copied.
+ * Shows a floating toast notification with the copied preview.
  */
-function showCopiedToast(text: string): void {
+function showCopiedToast(label: string, text: string): void {
   if (typeof document === "undefined") return
 
   if (!toastElement) {
@@ -36,7 +38,7 @@ function showCopiedToast(text: string): void {
       transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
       opacity: 0;
       transform: translateY(6px);
-      max-width: 320px;
+      max-width: 360px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -44,8 +46,8 @@ function showCopiedToast(text: string): void {
     document.documentElement.appendChild(toastElement)
   }
 
-  const preview = text.length > 35 ? text.slice(0, 32) + "..." : text
-  toastElement.textContent = `Copied: "${preview}"`
+  const preview = text.length > 40 ? text.slice(0, 37) + "..." : text
+  toastElement.textContent = `${label}: "${preview}"`
   toastElement.style.opacity = "1"
   toastElement.style.transform = "translateY(0)"
 
@@ -59,7 +61,7 @@ function showCopiedToast(text: string): void {
       toastElement.style.transform = "translateY(6px)"
     }
     toastTimeoutId = null
-  }, 1500)
+  }, 1600)
 }
 
 /**
@@ -70,9 +72,9 @@ function onContextMenu(event: MouseEvent): void {
 }
 
 /**
- * Resolves the link text from the last clicked target or URL fallback.
+ * Resolves the link element from the last clicked target or URL fallback.
  */
-function resolveLinkText(linkUrl: string): string {
+function resolveAnchor(linkUrl: string): HTMLAnchorElement | null {
   let anchor: HTMLAnchorElement | null = null
 
   if (lastContextMenuTarget instanceof Element) {
@@ -87,49 +89,85 @@ function resolveLinkText(linkUrl: string): string {
     }
   }
 
+  return anchor
+}
+
+/**
+ * Extracts visible text content from an anchor or falls back to URL.
+ */
+function resolveLinkText(linkUrl: string): string {
+  const anchor = resolveAnchor(linkUrl)
   const extracted = anchor?.innerText?.trim() || anchor?.textContent?.trim()
   return extracted || linkUrl || ""
 }
 
 /**
- * Handles incoming messages from background script.
+ * Writes text to clipboard with fallback.
  */
-function onMessage(
-  message: { action?: string; linkUrl?: string },
-  _sender: chrome.runtime.MessageSender,
-  _sendResponse: (response?: unknown) => void
-): void {
-  if (message?.action === "COPY_LINK_TEXT") {
-    const textToCopy = resolveLinkText(message.linkUrl || "")
-
-    if (textToCopy) {
-      navigator.clipboard
-        .writeText(textToCopy)
-        .then(() => {
-          showCopiedToast(textToCopy)
-        })
-        .catch(() => {
-          // Fallback via textarea for environments restricting asynchronous clipboard writes
-          try {
-            const textarea = document.createElement("textarea")
-            textarea.value = textToCopy
-            textarea.style.position = "fixed"
-            textarea.style.opacity = "0"
-            document.body.appendChild(textarea)
-            textarea.select()
-            document.execCommand("copy")
-            document.body.removeChild(textarea)
-            showCopiedToast(textToCopy)
-          } catch (fallbackErr) {
-            console.warn("Failed to copy link text:", fallbackErr)
-          }
-        })
+async function writeToClipboard(text: string): Promise<boolean> {
+  try {
+    await navigator.clipboard.writeText(text)
+    return true
+  } catch {
+    try {
+      const textarea = document.createElement("textarea")
+      textarea.value = text
+      textarea.style.position = "fixed"
+      textarea.style.opacity = "0"
+      document.body.appendChild(textarea)
+      textarea.select()
+      const successful = document.execCommand("copy")
+      document.body.removeChild(textarea)
+      return successful
+    } catch (err) {
+      console.warn("Browse Assist: Failed to write to clipboard:", err)
+      return false
     }
   }
 }
 
 /**
- * Activates the Copy Link Text content handler.
+ * Handles incoming messages from background service worker.
+ */
+async function onMessage(
+  message: { action?: string; linkUrl?: string },
+  _sender: chrome.runtime.MessageSender,
+  _sendResponse: (response?: unknown) => void
+): Promise<void> {
+  const rawUrl = message?.linkUrl || ""
+
+  switch (message?.action) {
+    case "browse_assist_copy_link_text": {
+      const linkText = resolveLinkText(rawUrl)
+      if (linkText) {
+        const success = await writeToClipboard(linkText)
+        if (success) showCopiedToast("Copied Text", linkText)
+      }
+      break
+    }
+
+    case "browse_assist_clean_link_copy": {
+      const cleaned = cleanUrl(rawUrl)
+      if (cleaned) {
+        const success = await writeToClipboard(cleaned)
+        if (success) showCopiedToast("Copied Clean Link", cleaned)
+      }
+      break
+    }
+
+    case "browse_assist_markdown_link_copy": {
+      const linkText = resolveLinkText(rawUrl)
+      const cleanedUrl = cleanUrl(rawUrl)
+      const markdown = `[${linkText}](${cleanedUrl})`
+      const success = await writeToClipboard(markdown)
+      if (success) showCopiedToast("Copied Markdown", markdown)
+      break
+    }
+  }
+}
+
+/**
+ * Activates the Context Menu Actions content handler.
  */
 export function activate(): void {
   if (isActive || typeof window === "undefined") return
@@ -143,7 +181,7 @@ export function activate(): void {
 }
 
 /**
- * Deactivates the Copy Link Text content handler.
+ * Deactivates the Context Menu Actions content handler.
  */
 export function deactivate(): void {
   if (!isActive || typeof window === "undefined") return
