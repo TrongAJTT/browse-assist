@@ -1,6 +1,7 @@
 import {
   Compass,
   ExternalLink,
+  Eye,
   Layers,
   Search
 } from "lucide-react"
@@ -237,6 +238,48 @@ export const SuperDragSettingsView: React.FC<SuperDragSettingsViewProps> = ({
                 <span
                   className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
                     currentConfig.openHyperlinks
+                      ? "translate-x-4"
+                      : "translate-x-0"
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Show Drag Indicator */}
+            <div className="flex items-center justify-between gap-3 py-3 group">
+              <div
+                onClick={() => handleToggleOption("showIndicator")}
+                className={`flex items-start gap-3 flex-1 min-w-0 cursor-pointer ${
+                  currentConfig.showIndicator
+                    ? "feature-row-active"
+                    : "feature-row-dimmed"
+                }`}>
+                <div className="shrink-0 mt-0.5 flex items-center justify-center transition-transform duration-200 ease-out group-hover:scale-110">
+                  <Eye className="w-5 h-5 text-violet-400" />
+                </div>
+                <div className="flex flex-col min-w-0 flex-1">
+                  <span className="text-xs font-semibold text-slate-200">
+                    Show Drag Indicator
+                  </span>
+                  <span className="text-[11px] text-slate-400 leading-snug mt-0.5">
+                    Display floating badge previewing the action when dragged into valid range.
+                  </span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                role="switch"
+                aria-checked={currentConfig.showIndicator}
+                onClick={() => handleToggleOption("showIndicator")}
+                className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${
+                  currentConfig.showIndicator
+                    ? "bg-indigo-600 shadow-indigo-500/20 shadow-sm"
+                    : "bg-slate-700"
+                }`}>
+                <span
+                  className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                    currentConfig.showIndicator
                       ? "translate-x-4"
                       : "translate-x-0"
                   }`}

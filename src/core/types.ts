@@ -38,13 +38,15 @@ export interface SuperDragConfig {
   openNextToActive: boolean // Open adjacent to current tab
   searchSelectedText: boolean // Dragging highlighted text executes search
   openHyperlinks: boolean // Dragging a link opens URL
+  showIndicator: boolean // Display live floating indicator badge during drag
 }
 
 export const DEFAULT_SUPER_DRAG_CONFIG: SuperDragConfig = {
   openInBackground: true,
   openNextToActive: true,
   searchSelectedText: true,
-  openHyperlinks: true
+  openHyperlinks: true,
+  showIndicator: true
 }
 
 /**

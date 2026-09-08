@@ -30,60 +30,119 @@ interface DragSession {
 }
 
 let activeSession: DragSession | null = null
-let toastElement: HTMLDivElement | null = null
-let toastTimeoutId: number | null = null
+let indicatorElement: HTMLDivElement | null = null
+let indicatorTimeoutId: number | null = null
 
 /**
- * Floating feedback toast for Super Drag actions (e.g. Copied).
+ * Gets or lazily creates the floating indicator badge element.
  */
-function showToast(label: string, text: string): void {
-  if (typeof document === "undefined") return
-
-  if (!toastElement) {
-    toastElement = document.createElement("div")
-    toastElement.id = "browse-assist-drag-toast"
-    toastElement.style.cssText = `
+function getOrCreateIndicator(): HTMLDivElement {
+  if (!indicatorElement || !document.documentElement.contains(indicatorElement)) {
+    indicatorElement = document.createElement("div")
+    indicatorElement.id = "browse-assist-drag-indicator"
+    indicatorElement.style.cssText = `
       position: fixed;
-      bottom: 24px;
-      right: 24px;
       z-index: 2147483647;
-      background: rgba(15, 23, 42, 0.92);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 14px;
+      border-radius: 9999px;
+      background: rgba(15, 23, 42, 0.94);
       color: #f8fafc;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      font-size: 13px;
-      font-weight: 500;
-      padding: 8px 16px;
-      border-radius: 8px;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(8px);
       pointer-events: none;
-      transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+      user-select: none;
       opacity: 0;
-      transform: translateY(6px);
-      max-width: 360px;
+      transform: translate3d(-50%, -100%, 0) scale(0.92);
+      transition: opacity 0.15s ease-out, transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease;
       white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     `
-    document.documentElement.appendChild(toastElement)
+    document.documentElement.appendChild(indicatorElement)
+  }
+  return indicatorElement
+}
+
+/**
+ * Updates or shows the live floating drag indicator at the cursor.
+ */
+function updateIndicator(
+  clientX: number,
+  clientY: number,
+  text: string,
+  iconSvg: string,
+  badgeTheme: "indigo" | "emerald" | "amber" | "sky" = "indigo"
+): void {
+  if (!currentConfig.showIndicator || typeof document === "undefined") return
+
+  const el = getOrCreateIndicator()
+  if (indicatorTimeoutId !== null) {
+    window.clearTimeout(indicatorTimeoutId)
+    indicatorTimeoutId = null
   }
 
-  const preview = text.length > 40 ? text.slice(0, 37) + "..." : text
-  toastElement.textContent = `${label}: "${preview}"`
-  toastElement.style.opacity = "1"
-  toastElement.style.transform = "translateY(0)"
+  const themeBorder =
+    badgeTheme === "emerald"
+      ? "rgba(52, 211, 153, 0.4)"
+      : badgeTheme === "amber"
+      ? "rgba(251, 191, 36, 0.4)"
+      : badgeTheme === "sky"
+      ? "rgba(56, 189, 248, 0.4)"
+      : "rgba(129, 140, 248, 0.4)"
 
-  if (toastTimeoutId !== null) {
-    window.clearTimeout(toastTimeoutId)
+  el.style.borderColor = themeBorder
+  el.innerHTML = `
+    <span style="display:flex;align-items:center;justify-content:center;width:16px;height:16px;flex-shrink:0;">
+      ${iconSvg}
+    </span>
+    <span>${text}</span>
+  `
+
+  // Position 24px above the cursor
+  el.style.left = `${clientX}px`
+  el.style.top = `${clientY - 20}px`
+  el.style.opacity = "1"
+  el.style.transform = "translate3d(-50%, -100%, 0) scale(1)"
+}
+
+/**
+ * Hides the floating drag indicator.
+ */
+function hideIndicator(immediately = false): void {
+  if (!indicatorElement) return
+
+  if (immediately) {
+    indicatorElement.style.opacity = "0"
+    indicatorElement.style.transform = "translate3d(-50%, -100%, 0) scale(0.92)"
+    return
   }
 
-  toastTimeoutId = window.setTimeout(() => {
-    if (toastElement) {
-      toastElement.style.opacity = "0"
-      toastElement.style.transform = "translateY(6px)"
+  if (indicatorTimeoutId !== null) {
+    window.clearTimeout(indicatorTimeoutId)
+  }
+
+  indicatorTimeoutId = window.setTimeout(() => {
+    if (indicatorElement) {
+      indicatorElement.style.opacity = "0"
+      indicatorElement.style.transform = "translate3d(-50%, -100%, 0) scale(0.92)"
     }
-    toastTimeoutId = null
-  }, 1600)
+    indicatorTimeoutId = null
+  }, 180)
+}
+
+// Inline SVGs for indicator icons
+const ICONS = {
+  searchBackground: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><path d="M11 8v6"/><path d="M8 11h6"/></svg>`,
+  searchForeground: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>`,
+  linkBackground: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>`,
+  linkForeground: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="m10 14 11-11"/></svg>`,
+  copy: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`
 }
 
 /**
@@ -179,7 +238,7 @@ function onDragStart(event: DragEvent): void {
 }
 
 /**
- * Allows dropping anywhere by preventing default when an active drag session exists.
+ * Updates live indicator on drag and enables dropping anywhere.
  */
 function onDragOver(event: DragEvent): void {
   if (!isActive || !activeSession) return
@@ -187,12 +246,44 @@ function onDragOver(event: DragEvent): void {
   if (event.dataTransfer) {
     event.dataTransfer.dropEffect = "copy"
   }
+
+  const deltaX = event.clientX - activeSession.startX
+  const deltaY = event.clientY - activeSession.startY
+  const distance = Math.hypot(deltaX, deltaY)
+
+  // Only show indicator if drag is within valid activation zone [MIN_DRAG_DISTANCE, MAX_DRAG_DISTANCE]
+  if (distance >= MIN_DRAG_DISTANCE && distance <= MAX_DRAG_DISTANCE) {
+    const direction = getDragDirection(deltaX, deltaY)
+
+    if (direction === "down") {
+      // DRAG DOWN: Copy to Clipboard
+      const label = activeSession.type === "text" ? "Drop to Copy Text" : "Drop to Copy Link"
+      updateIndicator(event.clientX, event.clientY, label, ICONS.copy, "emerald")
+    } else if (direction === "left") {
+      // DRAG LEFT: Open in Foreground (Active) Tab
+      const label =
+        activeSession.type === "text"
+          ? "Drop to Search (New Tab)"
+          : "Drop to Open (New Tab)"
+      updateIndicator(event.clientX, event.clientY, label, ICONS.searchForeground, "sky")
+    } else {
+      // DRAG RIGHT / UP: Open in Background Tab
+      const label =
+        activeSession.type === "text"
+          ? "Drop to Search (Background)"
+          : "Drop to Open (Background)"
+      updateIndicator(event.clientX, event.clientY, label, ICONS.searchBackground, "indigo")
+    }
+  } else {
+    hideIndicator(true)
+  }
 }
 
 /**
  * Calculates vector distance, determines direction, and dispatches action.
  */
 async function onDragEnd(event: DragEvent): Promise<void> {
+  hideIndicator(true)
   if (!isActive || !activeSession) return
 
   const deltaX = event.clientX - activeSession.startX
@@ -206,12 +297,10 @@ async function onDragEnd(event: DragEvent): Promise<void> {
     if (direction === "down") {
       // DRAG DOWN: Copy to Clipboard
       if (activeSession.type === "text") {
-        const success = await copyToClipboard(activeSession.payload)
-        if (success) showToast("Copied Text", activeSession.payload)
+        await copyToClipboard(activeSession.payload)
       } else if (activeSession.type === "link") {
         const cleaned = cleanUrl(activeSession.payload)
-        const success = await copyToClipboard(cleaned)
-        if (success) showToast("Copied Clean Link", cleaned)
+        await copyToClipboard(cleaned)
       }
     } else {
       // DRAG RIGHT / UP: Open in Background Tab
@@ -272,13 +361,13 @@ export function deactivate(): void {
   window.removeEventListener("dragover", onDragOver, true)
   window.removeEventListener("dragend", onDragEnd, true)
 
-  if (toastElement && toastElement.parentNode) {
-    toastElement.parentNode.removeChild(toastElement)
-    toastElement = null
+  if (indicatorElement && indicatorElement.parentNode) {
+    indicatorElement.parentNode.removeChild(indicatorElement)
+    indicatorElement = null
   }
-  if (toastTimeoutId !== null) {
-    window.clearTimeout(toastTimeoutId)
-    toastTimeoutId = null
+  if (indicatorTimeoutId !== null) {
+    window.clearTimeout(indicatorTimeoutId)
+    indicatorTimeoutId = null
   }
 
   activeSession = null
