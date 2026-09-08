@@ -2,6 +2,7 @@ import {
   DEFAULT_MOUSE_ZOOM_CONFIG,
   type MouseZoomConfig
 } from "~core/types"
+import { removeContentToast, showContentToast } from "~core/toast"
 
 let isActive = false
 let currentConfig: MouseZoomConfig = { ...DEFAULT_MOUSE_ZOOM_CONFIG }
@@ -11,8 +12,6 @@ const MIN_ZOOM = 0.5 // 50%
 const MAX_ZOOM = 3.0 // 300%
 
 let currentZoom = 1.0
-let toastElement: HTMLDivElement | null = null
-let toastTimeoutId: number | null = null
 
 let isLeftMouseDown = false
 let isRightMouseDown = false
@@ -38,53 +37,23 @@ function isModifierPressed(event: WheelEvent): boolean {
   }
 }
 
+const ZOOM_ICON_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>`
+
 /**
  * Creates or updates a floating badge indicating the current zoom percentage.
  */
 function showZoomToast(zoomLevel: number): void {
-  if (!currentConfig.showToast || typeof document === "undefined") return
-
-  if (!toastElement) {
-    toastElement = document.createElement("div")
-    toastElement.id = "browse-assist-zoom-toast"
-    toastElement.style.cssText = `
-      position: fixed;
-      top: 24px;
-      right: 24px;
-      z-index: 2147483647;
-      background: rgba(15, 23, 42, 0.88);
-      color: #f8fafc;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      font-size: 13px;
-      font-weight: 600;
-      padding: 6px 14px;
-      border-radius: 9999px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      pointer-events: none;
-      transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
-      opacity: 0;
-      transform: translateY(-4px);
-    `
-    document.documentElement.appendChild(toastElement)
-  }
+  if (!currentConfig.showToast) return
 
   const percent = Math.round(zoomLevel * 100)
-  toastElement.textContent = `Zoom: ${percent}%`
-  toastElement.style.opacity = "1"
-  toastElement.style.transform = "translateY(0)"
-
-  if (toastTimeoutId !== null) {
-    window.clearTimeout(toastTimeoutId)
-  }
-
-  toastTimeoutId = window.setTimeout(() => {
-    if (toastElement) {
-      toastElement.style.opacity = "0"
-      toastElement.style.transform = "translateY(-4px)"
-    }
-    toastTimeoutId = null
-  }, 1200)
+  showContentToast({
+    message: "Page Zoom",
+    detail: `${percent}%`,
+    type: "info",
+    iconSvg: ZOOM_ICON_SVG,
+    position: "top-right",
+    duration: 1200
+  })
 }
 
 /**
@@ -234,13 +203,6 @@ export function deactivate(): void {
   }
   currentZoom = 1.0
 
-  if (toastElement && toastElement.parentNode) {
-    toastElement.parentNode.removeChild(toastElement)
-    toastElement = null
-  }
-  if (toastTimeoutId !== null) {
-    window.clearTimeout(toastTimeoutId)
-    toastTimeoutId = null
-  }
+  removeContentToast()
 }
 

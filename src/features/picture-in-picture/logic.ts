@@ -9,78 +9,29 @@ import {
   type PictureInPictureConfig
 } from "~core/types"
 
+import { removeContentToast, showContentToast } from "~core/toast"
+
 let isActive = false
 let currentConfig: PictureInPictureConfig = {
   ...DEFAULT_PICTURE_IN_PICTURE_CONFIG
 }
-let toastElement: HTMLDivElement | null = null
-let toastTimeoutId: number | null = null
+
+const PIP_ICON_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><rect width="8" height="5" x="12" y="10" rx="1"/><path d="m2 17 20 0"/></svg>`
 
 /**
- * Displays a lightweight feedback toast when PiP is toggled.
+ * Displays feedback toast when PiP is toggled using standardized toast system.
  */
-function showToast(message: string, isError = false): void {
-  if (!currentConfig.showToast || typeof document === "undefined") return
+function showToast(message: string, isError = false, detail?: string): void {
+  if (!currentConfig.showToast) return
 
-  if (!toastElement || !document.documentElement.contains(toastElement)) {
-    toastElement = document.createElement("div")
-    toastElement.id = "browse-assist-pip-toast"
-    toastElement.style.cssText = `
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      z-index: 2147483647;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 16px;
-      border-radius: 9999px;
-      background: rgba(15, 23, 42, 0.94);
-      color: #f8fafc;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
-      backdrop-filter: blur(8px);
-      pointer-events: none;
-      user-select: none;
-      opacity: 0;
-      transform: translateY(6px);
-      transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
-      white-space: nowrap;
-    `
-    document.documentElement.appendChild(toastElement)
-  }
-
-  toastElement.style.borderColor = isError
-    ? "rgba(248, 113, 113, 0.4)"
-    : "rgba(99, 102, 241, 0.4)"
-  toastElement.innerHTML = `
-    <span style="display:flex;align-items:center;justify-content:center;width:16px;height:16px;flex-shrink:0;">
-      ${
-        isError
-          ? `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`
-          : `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><rect width="8" height="5" x="12" y="10" rx="1"/><path d="m2 17 20 0"/></svg>`
-      }
-    </span>
-    <span>${message}</span>
-  `
-
-  toastElement.style.opacity = "1"
-  toastElement.style.transform = "translateY(0)"
-
-  if (toastTimeoutId !== null) {
-    window.clearTimeout(toastTimeoutId)
-  }
-
-  toastTimeoutId = window.setTimeout(() => {
-    if (toastElement) {
-      toastElement.style.opacity = "0"
-      toastElement.style.transform = "translateY(6px)"
-    }
-    toastTimeoutId = null
-  }, 1600)
+  showContentToast({
+    message,
+    detail,
+    type: isError ? "error" : "info",
+    iconSvg: isError ? undefined : PIP_ICON_SVG,
+    position: "bottom-right",
+    duration: isError ? 2200 : 1600
+  })
 }
 
 /**
@@ -264,12 +215,5 @@ export function deactivate(): void {
   document.removeEventListener("leavepictureinpicture", onLeavePiP, true)
   chrome.runtime.onMessage.removeListener(onRuntimeMessage)
 
-  if (toastElement && toastElement.parentNode) {
-    toastElement.parentNode.removeChild(toastElement)
-    toastElement = null
-  }
-  if (toastTimeoutId !== null) {
-    window.clearTimeout(toastTimeoutId)
-    toastTimeoutId = null
-  }
+  removeContentToast()
 }
