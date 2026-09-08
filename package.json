@@ -46,10 +46,6 @@
       "clipboardWrite",
       "search"
     ],
-    "host_permissions": [
-      "https://*/*",
-      "http://*/*"
-    ],
     "commands": {
       "toggle_picture_in_picture": {
         "suggested_key": {
