@@ -2,6 +2,7 @@ import {
   ArrowUpDown,
   Command,
   Eye,
+  MousePointer,
   RotateCcw,
   Sparkles
 } from "lucide-react"
@@ -30,14 +31,19 @@ const MODIFIER_ITEMS: GridPickerItem<MouseZoomModifier>[] = [
     icon: <Command className="w-3.5 h-3.5" />
   },
   {
-    id: "ctrl",
-    label: "Ctrl Key",
-    icon: <Command className="w-3.5 h-3.5" />
-  },
-  {
     id: "shift",
     label: "Shift Key",
     icon: <Command className="w-3.5 h-3.5" />
+  },
+  {
+    id: "right-click",
+    label: "Right Click",
+    icon: <MousePointer className="w-3.5 h-3.5" />
+  },
+  {
+    id: "left-click",
+    label: "Left Click",
+    icon: <MousePointer className="w-3.5 h-3.5" />
   }
 ]
 
@@ -111,7 +117,7 @@ export const MouseZoomSettingsView: React.FC<MouseZoomSettingsViewProps> = ({
           items={MODIFIER_ITEMS}
           value={currentConfig.modifier}
           onChange={handleSelectModifier}
-          columns={3}
+          columns={4}
         />
       </div>
 
@@ -249,11 +255,13 @@ export const MouseZoomSettingsView: React.FC<MouseZoomSettingsViewProps> = ({
           Reset Zoom Shortcut
         </span>
         <span className="font-mono text-[11px] px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300">
-          {currentConfig.modifier === "ctrl"
-            ? "Ctrl + 0"
-            : currentConfig.modifier === "shift"
-              ? "Shift + 0"
-              : "Alt + 0"}
+          {currentConfig.modifier === "shift"
+            ? "Shift + 0"
+            : currentConfig.modifier === "right-click"
+              ? "Right Click + 0"
+              : currentConfig.modifier === "left-click"
+                ? "Left Click + 0"
+                : "Alt + 0"}
         </span>
       </div>
     </SubSettingsLayout>

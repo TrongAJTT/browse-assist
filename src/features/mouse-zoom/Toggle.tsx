@@ -31,7 +31,13 @@ export const MouseZoomToggle: React.FC<MouseZoomToggleProps> = ({
   const isEnabled = settings?.mouseZoom ?? DEFAULT_SETTINGS.mouseZoom
   const modifier = settings?.mouseZoomConfig?.modifier ?? "alt"
   const modifierLabel =
-    modifier === "ctrl" ? "Ctrl" : modifier === "shift" ? "Shift" : "Alt"
+    modifier === "shift"
+      ? "Shift"
+      : modifier === "right-click"
+        ? "Right Click"
+        : modifier === "left-click"
+          ? "Left Click"
+          : "Alt"
 
   const handleChange = (enabled: boolean) => {
     setSettings((prev) => ({

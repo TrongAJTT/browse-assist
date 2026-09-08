@@ -41,9 +41,9 @@ export const SMOOTH_SCROLL_PRESETS: Record<
 }
 
 /**
- * Mouse Pin-to-Zoom modifier key option.
+ * Mouse Pin-to-Zoom trigger modifier options (Alt, Shift, Left Mouse Button, Right Mouse Button).
  */
-export type MouseZoomModifier = "alt" | "ctrl" | "shift"
+export type MouseZoomModifier = "alt" | "shift" | "right-click" | "left-click"
 
 export interface MouseZoomConfig {
   modifier: MouseZoomModifier

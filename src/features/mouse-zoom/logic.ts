@@ -14,15 +14,24 @@ let currentZoom = 1.0
 let toastElement: HTMLDivElement | null = null
 let toastTimeoutId: number | null = null
 
+let isLeftMouseDown = false
+let isRightMouseDown = false
+let suppressNextContextMenu = false
+let didZoomWhileRightDown = false
+
 /**
- * Checks if the configured modifier key is pressed on the event.
+ * Checks if the configured modifier (key or mouse button) is pressed.
  */
-function isModifierPressed(event: MouseEvent | KeyboardEvent): boolean {
+function isModifierPressed(event: WheelEvent): boolean {
   switch (currentConfig.modifier) {
-    case "ctrl":
-      return event.ctrlKey
     case "shift":
       return event.shiftKey
+    case "left-click":
+      // Check event.buttons (1: primary/left) or mouse tracker
+      return (event.buttons & 1) === 1 || isLeftMouseDown
+    case "right-click":
+      // Check event.buttons (2: secondary/right) or mouse tracker
+      return (event.buttons & 2) === 2 || isRightMouseDown
     case "alt":
     default:
       return event.altKey
@@ -114,6 +123,43 @@ export function resetZoom(): void {
 }
 
 /**
+ * Mouse button tracking to support Left Click & Right Click as zoom modifiers.
+ */
+function onMouseDown(event: MouseEvent): void {
+  if (event.button === 0) {
+    isLeftMouseDown = true
+  } else if (event.button === 2) {
+    isRightMouseDown = true
+    didZoomWhileRightDown = false
+  }
+}
+
+function onMouseUp(event: MouseEvent): void {
+  if (event.button === 0) {
+    isLeftMouseDown = false
+  } else if (event.button === 2) {
+    isRightMouseDown = false
+    if (didZoomWhileRightDown) {
+      suppressNextContextMenu = true
+      // Reset suppress flag after short delay to not permanently block right clicks
+      setTimeout(() => {
+        suppressNextContextMenu = false
+        didZoomWhileRightDown = false
+      }, 50)
+    }
+  }
+}
+
+function onContextMenu(event: MouseEvent): void {
+  if (suppressNextContextMenu || didZoomWhileRightDown) {
+    event.preventDefault()
+    event.stopPropagation()
+    suppressNextContextMenu = false
+    didZoomWhileRightDown = false
+  }
+}
+
+/**
  * Wheel event handler for Modifier + Wheel zoom.
  */
 function onWheel(event: WheelEvent): void {
@@ -121,8 +167,14 @@ function onWheel(event: WheelEvent): void {
     return
   }
 
+  // Prevent default scroll behavior and text selection during zoom
   event.preventDefault()
   event.stopPropagation()
+
+  if (currentConfig.modifier === "right-click") {
+    didZoomWhileRightDown = true
+    suppressNextContextMenu = true
+  }
 
   let direction = event.deltaY < 0 ? 1 : -1
   if (currentConfig.invertDirection) {
@@ -134,12 +186,18 @@ function onWheel(event: WheelEvent): void {
 }
 
 /**
- * Keyboard shortcuts to reset zoom (Modifier + 0).
+ * Keyboard shortcuts to reset zoom.
+ * Alt + 0 or Shift + 0 depending on key modifier, or universally Alt + 0.
  */
 function onKeyDown(event: KeyboardEvent): void {
-  if (isModifierPressed(event) && (event.key === "0" || event.code === "Digit0")) {
-    event.preventDefault()
-    resetZoom()
+  if (event.key === "0" || event.code === "Digit0") {
+    const isModifier =
+      (currentConfig.modifier === "shift" && event.shiftKey) ||
+      event.altKey // Always allow Alt + 0 as fallback reset
+    if (isModifier) {
+      event.preventDefault()
+      resetZoom()
+    }
   }
 }
 
@@ -164,6 +222,9 @@ export function activate(config?: MouseZoomConfig): void {
 
   window.addEventListener("wheel", onWheel, { passive: false, capture: true })
   window.addEventListener("keydown", onKeyDown, { capture: true })
+  window.addEventListener("mousedown", onMouseDown, { capture: true })
+  window.addEventListener("mouseup", onMouseUp, { capture: true })
+  window.addEventListener("contextmenu", onContextMenu, { capture: true })
 }
 
 /**
@@ -175,6 +236,14 @@ export function deactivate(): void {
 
   window.removeEventListener("wheel", onWheel, true)
   window.removeEventListener("keydown", onKeyDown, true)
+  window.removeEventListener("mousedown", onMouseDown, true)
+  window.removeEventListener("mouseup", onMouseUp, true)
+  window.removeEventListener("contextmenu", onContextMenu, true)
+
+  isLeftMouseDown = false
+  isRightMouseDown = false
+  suppressNextContextMenu = false
+  didZoomWhileRightDown = false
 
   // Reset zoom back to normal
   if (document.body) {
@@ -192,3 +261,4 @@ export function deactivate(): void {
     toastTimeoutId = null
   }
 }
+
