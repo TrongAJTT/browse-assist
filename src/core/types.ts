@@ -8,6 +8,7 @@ export type FeatureKey =
   | "smoothScroll"
   | "mouseZoom"
   | "pictureInPicture"
+  | "quickScroll"
 
 export type ContextMenuActionId =
   | "copyLinkText"
@@ -116,6 +117,26 @@ export const DEFAULT_PICTURE_IN_PICTURE_CONFIG: PictureInPictureConfig = {
 }
 
 /**
+ * Quick Scroll Buttons sub-configuration.
+ */
+export type QuickScrollPosition = "bottom-right" | "bottom-left" | "bottom-center"
+export type QuickScrollButtonsMode = "both" | "top-only"
+
+export interface QuickScrollConfig {
+  position: QuickScrollPosition
+  buttonsMode: QuickScrollButtonsMode
+  autoHide: boolean // Dim buttons when user stops scrolling
+  enableReturnMemory: boolean // Remember previous scroll position and allow return
+}
+
+export const DEFAULT_QUICK_SCROLL_CONFIG: QuickScrollConfig = {
+  position: "bottom-right",
+  buttonsMode: "both",
+  autoHide: true,
+  enableReturnMemory: true
+}
+
+/**
  * Appearance theme options: "dark" | "light" | "system".
  */
 export type ThemeMode = "dark" | "light" | "system"
@@ -131,11 +152,13 @@ export interface FeatureSettings {
   smoothScroll: boolean
   mouseZoom: boolean
   pictureInPicture: boolean
+  quickScroll: boolean
   contextMenuActionsConfig: ContextMenuActionsConfig
   superDragConfig: SuperDragConfig
   smoothScrollConfig: SmoothScrollConfig
   mouseZoomConfig: MouseZoomConfig
   pictureInPictureConfig: PictureInPictureConfig
+  quickScrollConfig: QuickScrollConfig
 }
 
 /**
@@ -150,6 +173,7 @@ export const DEFAULT_SETTINGS: FeatureSettings = {
   smoothScroll: true,
   mouseZoom: true,
   pictureInPicture: true,
+  quickScroll: true,
   contextMenuActionsConfig: DEFAULT_CONTEXT_MENU_ACTIONS_CONFIG,
   superDragConfig: DEFAULT_SUPER_DRAG_CONFIG,
   smoothScrollConfig: {
@@ -157,7 +181,8 @@ export const DEFAULT_SETTINGS: FeatureSettings = {
     interceptionMode: "smart"
   },
   mouseZoomConfig: DEFAULT_MOUSE_ZOOM_CONFIG,
-  pictureInPictureConfig: DEFAULT_PICTURE_IN_PICTURE_CONFIG
+  pictureInPictureConfig: DEFAULT_PICTURE_IN_PICTURE_CONFIG,
+  quickScrollConfig: DEFAULT_QUICK_SCROLL_CONFIG
 }
 
 /**
@@ -206,6 +231,22 @@ export const FEATURES_LIST: FeatureMeta[] = [
     hasSettings: true
   },
   {
+    key: "quickScroll",
+    title: "Quick Scroll Buttons",
+    description:
+      "Floating smart buttons to smoothly jump to page top or bottom.",
+    icon: "🧭",
+    hasSettings: true
+  },
+  {
+    key: "pictureInPicture",
+    title: "Universal Picture-in-Picture",
+    description:
+      "Toggle floating video window using customizable shortcut.",
+    icon: "📺",
+    hasSettings: true
+  },
+  {
     key: "smoothScroll",
     title: "Smooth Scrolling",
     description: "Enhanced, fluid page scrolling with interpolated physics.",
@@ -218,14 +259,6 @@ export const FEATURES_LIST: FeatureMeta[] = [
     description:
       "Hold modifier key and scroll mouse wheel to zoom into cursor position.",
     icon: "🔍",
-    hasSettings: true
-  },
-  {
-    key: "pictureInPicture",
-    title: "Universal Picture-in-Picture",
-    description:
-      "Toggle floating video window using customizable shortcut.",
-    icon: "📺",
     hasSettings: true
   }
 ]

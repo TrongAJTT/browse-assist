@@ -25,6 +25,10 @@ import {
   deactivate as deactivatePiP
 } from "~features/picture-in-picture/logic"
 import {
+  activate as activateQuickScroll,
+  deactivate as deactivateQuickScroll
+} from "~features/quick-scroll/logic"
+import {
   activate as activateSmoothScroll,
   deactivate as deactivateSmoothScroll
 } from "~features/smooth-scroll/logic"
@@ -53,6 +57,13 @@ function applySettings(nextSettings: FeatureSettings): void {
     activateSuperDrag(nextSettings.superDragConfig)
   } else {
     deactivateSuperDrag()
+  }
+
+  // Quick Scroll Buttons
+  if (nextSettings.quickScroll) {
+    activateQuickScroll(nextSettings.quickScrollConfig)
+  } else {
+    deactivateQuickScroll()
   }
 
   // Smooth Scroll

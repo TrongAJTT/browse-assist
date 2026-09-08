@@ -28,6 +28,8 @@ import { MouseZoomSettingsView } from "~features/mouse-zoom/SettingsView"
 import { MouseZoomToggle } from "~features/mouse-zoom/Toggle"
 import { PictureInPictureSettingsView } from "~features/picture-in-picture/SettingsView"
 import { PictureInPictureToggle } from "~features/picture-in-picture/Toggle"
+import { QuickScrollSettingsView } from "~features/quick-scroll/SettingsView"
+import { QuickScrollToggle } from "~features/quick-scroll/Toggle"
 import { SmoothScrollSettingsView } from "~features/smooth-scroll/SettingsView"
 import { SmoothScrollToggle } from "~features/smooth-scroll/Toggle"
 import { SuperDragSettingsView } from "~features/super-drag/SettingsView"
@@ -39,9 +41,10 @@ type ActiveView =
   | "main"
   | "context-menu-actions-settings"
   | "super-drag-settings"
+  | "quick-scroll-settings"
+  | "picture-in-picture-settings"
   | "smooth-scroll-settings"
   | "mouse-zoom-settings"
-  | "picture-in-picture-settings"
   | "preferences"
   | "about"
 
@@ -338,6 +341,9 @@ function IndexPopup() {
               <SuperDragToggle
                 onConfigure={() => setCurrentView("super-drag-settings")}
               />
+              <QuickScrollToggle
+                onConfigure={() => setCurrentView("quick-scroll-settings")}
+              />
               <PictureInPictureToggle
                 onOpenSettings={() =>
                   setCurrentView("picture-in-picture-settings")
@@ -357,6 +363,8 @@ function IndexPopup() {
           />
         ) : currentView === "super-drag-settings" ? (
           <SuperDragSettingsView onBack={() => setCurrentView("main")} />
+        ) : currentView === "quick-scroll-settings" ? (
+          <QuickScrollSettingsView onBack={() => setCurrentView("main")} />
         ) : currentView === "picture-in-picture-settings" ? (
           <PictureInPictureSettingsView onBack={() => setCurrentView("main")} />
         ) : currentView === "smooth-scroll-settings" ? (

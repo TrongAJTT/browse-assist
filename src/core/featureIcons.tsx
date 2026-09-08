@@ -1,4 +1,5 @@
 import {
+  Compass,
   Link2,
   MousePointer2,
   MousePointerClick,
@@ -36,6 +37,11 @@ export const FEATURE_ICONS: Record<
     icon: MousePointer2,
     colorClass: "text-pink-400",
     bgClass: "bg-pink-500/10 border-pink-500/30"
+  },
+  quickScroll: {
+    icon: Compass,
+    colorClass: "text-indigo-400",
+    bgClass: "bg-indigo-500/10 border-indigo-500/30"
   },
   smoothScroll: {
     icon: Scroll,
