@@ -13,16 +13,25 @@ import {
 
 const meta = FEATURES_LIST.find((f) => f.key === "mouseZoom")!
 
+interface MouseZoomToggleProps {
+  onConfigure?: () => void
+}
+
 /**
  * Mouse Pin-to-Zoom toggle row component for Popup UI.
  */
-export const MouseZoomToggle: React.FC = () => {
+export const MouseZoomToggle: React.FC<MouseZoomToggleProps> = ({
+  onConfigure
+}) => {
   const [settings, setSettings] = useStorage<FeatureSettings>(
     STORAGE_KEYS.SETTINGS,
     DEFAULT_SETTINGS
   )
 
   const isEnabled = settings?.mouseZoom ?? DEFAULT_SETTINGS.mouseZoom
+  const modifier = settings?.mouseZoomConfig?.modifier ?? "alt"
+  const modifierLabel =
+    modifier === "ctrl" ? "Ctrl" : modifier === "shift" ? "Shift" : "Alt"
 
   const handleChange = (enabled: boolean) => {
     setSettings((prev) => ({
@@ -38,7 +47,8 @@ export const MouseZoomToggle: React.FC = () => {
       description={meta.description}
       enabled={isEnabled}
       onChange={handleChange}
-      shortcut="Alt + Scroll"
+      shortcut={`${modifierLabel} + Scroll`}
+      onConfigure={onConfigure}
     />
   )
 }

@@ -1,25 +1,39 @@
-/**
- * Mouse Pin-to-Zoom - Core Logic
- * Allows users to effortlessly zoom in and out of the webpage around the cursor position
- * by holding the Alt key and rotating the mouse wheel.
- */
+import {
+  DEFAULT_MOUSE_ZOOM_CONFIG,
+  type MouseZoomConfig
+} from "~core/types"
 
 let isActive = false
+let currentConfig: MouseZoomConfig = { ...DEFAULT_MOUSE_ZOOM_CONFIG }
 
-// Zoom parameters
+// Zoom parameters limits
 const MIN_ZOOM = 0.5 // 50%
 const MAX_ZOOM = 3.0 // 300%
-const ZOOM_STEP = 0.1 // 10% step
 
 let currentZoom = 1.0
 let toastElement: HTMLDivElement | null = null
 let toastTimeoutId: number | null = null
 
 /**
+ * Checks if the configured modifier key is pressed on the event.
+ */
+function isModifierPressed(event: MouseEvent | KeyboardEvent): boolean {
+  switch (currentConfig.modifier) {
+    case "ctrl":
+      return event.ctrlKey
+    case "shift":
+      return event.shiftKey
+    case "alt":
+    default:
+      return event.altKey
+  }
+}
+
+/**
  * Creates or updates a floating badge indicating the current zoom percentage.
  */
 function showZoomToast(zoomLevel: number): void {
-  if (typeof document === "undefined") return
+  if (!currentConfig.showToast || typeof document === "undefined") return
 
   if (!toastElement) {
     toastElement = document.createElement("div")
@@ -71,6 +85,12 @@ function applyZoom(newZoom: number): void {
   currentZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, Number(newZoom.toFixed(2))))
 
   if (document.body) {
+    if (currentConfig.smooth) {
+      document.body.style.transition = "zoom 0.1s ease-out"
+    } else {
+      document.body.style.transition = "none"
+    }
+
     if (currentZoom === 1.0) {
       document.body.style.removeProperty("zoom")
     } else {
@@ -88,42 +108,57 @@ export function resetZoom(): void {
   currentZoom = 1.0
   if (document.body) {
     document.body.style.removeProperty("zoom")
+    document.body.style.removeProperty("transition")
   }
   showZoomToast(1.0)
 }
 
 /**
- * Wheel event handler for Alt + Wheel zoom.
+ * Wheel event handler for Modifier + Wheel zoom.
  */
 function onWheel(event: WheelEvent): void {
-  // Only trigger when Alt key is held
-  if (!event.altKey) {
+  if (!isModifierPressed(event)) {
     return
   }
 
   event.preventDefault()
   event.stopPropagation()
 
-  const direction = event.deltaY < 0 ? 1 : -1
-  const nextZoom = currentZoom + direction * ZOOM_STEP
+  let direction = event.deltaY < 0 ? 1 : -1
+  if (currentConfig.invertDirection) {
+    direction = -direction
+  }
 
+  const nextZoom = currentZoom + direction * currentConfig.stepSize
   applyZoom(nextZoom)
 }
 
 /**
- * Keyboard shortcuts to reset zoom (Alt + 0).
+ * Keyboard shortcuts to reset zoom (Modifier + 0).
  */
 function onKeyDown(event: KeyboardEvent): void {
-  if (event.altKey && (event.key === "0" || event.code === "Digit0")) {
+  if (isModifierPressed(event) && (event.key === "0" || event.code === "Digit0")) {
     event.preventDefault()
     resetZoom()
   }
 }
 
 /**
- * Activates the Mouse Pin-to-Zoom feature.
+ * Hot updates runtime zoom config without reattaching listeners.
  */
-export function activate(): void {
+export function updateMouseZoomConfig(config?: Partial<MouseZoomConfig>): void {
+  if (!config) return
+  currentConfig = { ...currentConfig, ...config }
+}
+
+/**
+ * Activates the Mouse Pin-to-Zoom feature with optional custom configuration.
+ */
+export function activate(config?: MouseZoomConfig): void {
+  if (config) {
+    updateMouseZoomConfig(config)
+  }
+
   if (isActive || typeof window === "undefined") return
   isActive = true
 
@@ -144,6 +179,7 @@ export function deactivate(): void {
   // Reset zoom back to normal
   if (document.body) {
     document.body.style.removeProperty("zoom")
+    document.body.style.removeProperty("transition")
   }
   currentZoom = 1.0
 

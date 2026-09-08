@@ -41,6 +41,27 @@ export const SMOOTH_SCROLL_PRESETS: Record<
 }
 
 /**
+ * Mouse Pin-to-Zoom modifier key option.
+ */
+export type MouseZoomModifier = "alt" | "ctrl" | "shift"
+
+export interface MouseZoomConfig {
+  modifier: MouseZoomModifier
+  stepSize: number // e.g. 0.1 (10%)
+  invertDirection: boolean
+  smooth: boolean
+  showToast: boolean
+}
+
+export const DEFAULT_MOUSE_ZOOM_CONFIG: MouseZoomConfig = {
+  modifier: "alt",
+  stepSize: 0.1,
+  invertDirection: false,
+  smooth: true,
+  showToast: true
+}
+
+/**
  * Settings map tracking the enabled state of each feature and sub-configurations.
  */
 export interface FeatureSettings {
@@ -49,6 +70,7 @@ export interface FeatureSettings {
   smoothScroll: boolean
   mouseZoom: boolean
   smoothScrollConfig: SmoothScrollConfig
+  mouseZoomConfig: MouseZoomConfig
 }
 
 /**
@@ -63,7 +85,8 @@ export const DEFAULT_SETTINGS: FeatureSettings = {
   smoothScrollConfig: {
     ...SMOOTH_SCROLL_PRESETS.balanced,
     interceptionMode: "smart"
-  }
+  },
+  mouseZoomConfig: DEFAULT_MOUSE_ZOOM_CONFIG
 }
 
 /**
@@ -112,7 +135,8 @@ export const FEATURES_LIST: FeatureMeta[] = [
     key: "mouseZoom",
     title: "Mouse Pin-to-Zoom",
     description:
-      "Hold Alt and scroll mouse wheel to zoom into cursor position.",
-    icon: "🔍"
+      "Hold modifier key and scroll mouse wheel to zoom into cursor position.",
+    icon: "🔍",
+    hasSettings: true
   }
 ]

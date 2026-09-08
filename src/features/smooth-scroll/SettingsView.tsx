@@ -3,6 +3,7 @@ import type React from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
+import { GridPicker } from "~components/GridPicker"
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
 import {
   DEFAULT_SETTINGS,
@@ -137,30 +138,12 @@ export const SmoothScrollSettingsView: React.FC<
           Profiles
         </span>
 
-        <div className="grid grid-cols-4 gap-1.5">
-          {profileGridItems.map((item) => {
-            const isSelected = currentConfig.preset === item.id
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => handleSelectPreset(item.id)}
-                className={`flex flex-col items-center justify-center gap-1.5 py-2 px-1 rounded-xl border transition-all ${
-                  isSelected
-                    ? "bg-indigo-600/20 border-indigo-500 text-indigo-300 shadow-sm"
-                    : "bg-slate-800/40 hover:bg-slate-800 border-slate-700/60 text-slate-400 hover:text-slate-200"
-                }`}>
-                <span
-                  className={isSelected ? "text-indigo-400" : "text-slate-400"}>
-                  {item.icon}
-                </span>
-                <span className="text-[11px] font-semibold text-center leading-tight truncate w-full">
-                  {item.label}
-                </span>
-              </button>
-            )
-          })}
-        </div>
+        <GridPicker
+          items={profileGridItems}
+          value={currentConfig.preset}
+          onChange={handleSelectPreset}
+          columns={4}
+        />
       </div>
 
       {/* Fine-Tuning Physics Sliders (without enclosing cards) */}

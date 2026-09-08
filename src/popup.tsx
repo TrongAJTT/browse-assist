@@ -19,13 +19,14 @@ import {
 } from "~core/types"
 import { AllowRightClickToggle } from "~features/allow-right-click/Toggle"
 import { CopyLinkTextToggle } from "~features/copy-link-text/Toggle"
+import { MouseZoomSettingsView } from "~features/mouse-zoom/SettingsView"
 import { MouseZoomToggle } from "~features/mouse-zoom/Toggle"
 import { SmoothScrollSettingsView } from "~features/smooth-scroll/SettingsView"
 import { SmoothScrollToggle } from "~features/smooth-scroll/Toggle"
 
 import "~style.css"
 
-type ActiveView = "main" | "smooth-scroll-settings" | "about"
+type ActiveView = "main" | "smooth-scroll-settings" | "mouse-zoom-settings" | "about"
 
 function IndexPopup() {
   const [currentView, setCurrentView] = useState<ActiveView>("main")
@@ -154,11 +155,15 @@ function IndexPopup() {
               <SmoothScrollToggle
                 onConfigure={() => setCurrentView("smooth-scroll-settings")}
               />
-              <MouseZoomToggle />
+              <MouseZoomToggle
+                onConfigure={() => setCurrentView("mouse-zoom-settings")}
+              />
             </main>
           </div>
         ) : currentView === "smooth-scroll-settings" ? (
           <SmoothScrollSettingsView onBack={() => setCurrentView("main")} />
+        ) : currentView === "mouse-zoom-settings" ? (
+          <MouseZoomSettingsView onBack={() => setCurrentView("main")} />
         ) : (
           <AboutView onBack={() => setCurrentView("main")} />
         )}

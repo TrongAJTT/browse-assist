@@ -49,7 +49,7 @@ function applySettings(nextSettings: FeatureSettings): void {
 
   // Mouse Pin-to-Zoom
   if (nextSettings.mouseZoom) {
-    activateMouseZoom()
+    activateMouseZoom(nextSettings.mouseZoomConfig)
   } else {
     deactivateMouseZoom()
   }
