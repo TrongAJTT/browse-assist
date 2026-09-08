@@ -71,7 +71,7 @@ function IndexPopup() {
 
   return (
     <div
-      className={`w-[370px] bg-slate-900 text-slate-100 font-sans select-none antialiased flex flex-col transition-opacity duration-150 ${
+      className={`w-[444px] h-[600px] bg-slate-900 text-slate-100 font-sans select-none antialiased flex flex-col overflow-hidden transition-opacity duration-150 ${
         isHydrated ? "opacity-100" : "opacity-0 pointer-events-none"
       }`}>
       {/* Header - Crisp and cleanly separated from content */}
@@ -145,7 +145,7 @@ function IndexPopup() {
       </header>
 
       {/* Body Area - Swappable between Main List, Smooth Scroll Settings and About View */}
-      <div className="px-4 py-2.5 pb-3.5 flex-1">
+      <div className="px-4 py-2.5 pb-3.5 flex-1 overflow-y-auto">
         {currentView === "main" ? (
           <div>
             {/* PowerToys-style Utilities List with Dividers */}

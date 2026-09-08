@@ -27,11 +27,24 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
   badge,
   onConfigure
 }) => {
+  const handleItemClick = () => {
+    if (disabled) return
+    if (onConfigure) {
+      onConfigure()
+    } else {
+      onChange(!enabled)
+    }
+  }
+
   return (
-    <div className="flex items-center justify-between gap-3 py-3 group">
+    <div
+      onClick={!onConfigure ? handleItemClick : undefined}
+      className={`flex items-center justify-between gap-3 py-3 group ${
+        !onConfigure && !disabled ? "cursor-pointer" : ""
+      }`}>
       {/* Clickable info area */}
       <div
-        onClick={onConfigure}
+        onClick={onConfigure ? handleItemClick : undefined}
         className={`flex items-start gap-3 flex-1 min-w-0 ${
           onConfigure ? "cursor-pointer" : ""
         } ${enabled ? "feature-row-active" : "feature-row-dimmed"}`}>
@@ -80,7 +93,10 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
           role="switch"
           aria-checked={enabled}
           disabled={disabled}
-          onClick={() => onChange(!enabled)}
+          onClick={(e) => {
+            e.stopPropagation()
+            onChange(!enabled)
+          }}
           className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${
             enabled
               ? "bg-indigo-600 shadow-indigo-500/20 shadow-md"
