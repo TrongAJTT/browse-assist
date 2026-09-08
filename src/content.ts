@@ -10,7 +10,8 @@ import type { FeatureSettings } from "~core/types"
 import {
   activate as activateRightClick,
   deactivate as deactivateRightClick,
-  isRightClickActive
+  isRightClickActive,
+  toggleRightClick
 } from "~features/allow-right-click/logic"
 import {
   activate as activateContextMenuActions,
@@ -114,6 +115,11 @@ async function init(): Promise<void> {
           deactivateRightClick()
         }
         sendResponse({ active: isRightClickActive() })
+        return true
+      }
+      if (message?.type === "TOGGLE_RIGHT_CLICK_SHORTCUT") {
+        const nextState = toggleRightClick(true)
+        sendResponse({ active: nextState })
         return true
       }
       if (message?.type === "RESET_MOUSE_ZOOM") {

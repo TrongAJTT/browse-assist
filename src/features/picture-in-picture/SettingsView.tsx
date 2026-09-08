@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
+import { ShortcutBadge } from "~components/ShortcutBadge"
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
 import {
   DEFAULT_SETTINGS,
@@ -99,9 +100,7 @@ export const PictureInPictureSettingsView: React.FC<
             </div>
 
             <div className="flex items-center gap-2">
-              <kbd className="badge-kbd">
-                {shortcut}
-              </kbd>
+              <ShortcutBadge shortcut={shortcut} />
               <button
                 type="button"
                 onClick={handleOpenShortcutsPage}

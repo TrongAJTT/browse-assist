@@ -3,11 +3,16 @@
  * Orchestrates background workers and services across extension features.
  */
 
+import { initAllowRightClickBackground } from "~features/allow-right-click/background"
 import { initContextMenuActionsBackground } from "~features/context-menu-actions/background"
 import { initPictureInPictureBackground } from "~features/picture-in-picture/background"
 import { initSuperDragBackground } from "~features/super-drag/background"
 
 // Initialize background handlers
+initAllowRightClickBackground().catch((err) => {
+  console.error("Failed to initialize allow-right-click background service:", err)
+})
+
 initContextMenuActionsBackground().catch((err) => {
   console.error("Failed to initialize context-menu-actions background service:", err)
 })

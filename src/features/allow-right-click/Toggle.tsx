@@ -22,8 +22,22 @@ export const AllowRightClickToggle: React.FC<AllowRightClickToggleProps> = ({
 }) => {
   const [isActiveInTab, setIsActiveInTab] = useState(false)
   const [currentTabId, setCurrentTabId] = useState<number | null>(null)
+  const [shortcut, setShortcut] = useState<string>("Alt + R")
 
   useEffect(() => {
+    if (chrome.commands?.getAll) {
+      chrome.commands.getAll((commands) => {
+        const cmd = commands.find(
+          (c) => c.name === "toggle_allow_right_click"
+        )
+        if (cmd?.shortcut) {
+          setShortcut(cmd.shortcut)
+        } else {
+          setShortcut("")
+        }
+      })
+    }
+
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const activeTab = tabs[0]
       if (!activeTab?.id) {
@@ -72,6 +86,7 @@ export const AllowRightClickToggle: React.FC<AllowRightClickToggleProps> = ({
       description="Enable context menu and copy on the current tab without breaking other apps."
       enabled={isActiveInTab}
       onChange={handleChange}
+      shortcut={shortcut}
       badge="On-Demand"
     />
   )

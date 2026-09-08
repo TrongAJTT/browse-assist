@@ -57,6 +57,13 @@
           "mac": "Alt+P"
         },
         "description": "Toggle Picture-in-Picture for current playing video"
+      },
+      "toggle_allow_right_click": {
+        "suggested_key": {
+          "default": "Alt+R",
+          "mac": "Alt+R"
+        },
+        "description": "Toggle Allow Right Click on current tab"
       }
     }
   }

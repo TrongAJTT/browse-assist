@@ -1,6 +1,8 @@
 import { ChevronRight } from "lucide-react"
 import type React from "react"
 
+import { ShortcutBadge } from "~components/ShortcutBadge"
+
 interface ToggleSwitchProps {
   icon: React.ReactNode
   title: string
@@ -64,10 +66,8 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
                 {badge}
               </span>
             )}
-            {shortcut && (
-              <span className="badge-kbd">
-                {shortcut}
-              </span>
+            {shortcut !== undefined && (
+              <ShortcutBadge shortcut={shortcut} />
             )}
           </div>
           <span className="text-xs text-content-muted line-clamp-2 leading-relaxed mt-0.5">

@@ -62,7 +62,7 @@ export const PictureInPictureToggle: React.FC<PictureInPictureToggleProps> = ({
       description={meta.description}
       enabled={isEnabled}
       onChange={handleToggle}
-      shortcut={shortcut || undefined}
+      shortcut={shortcut}
       onConfigure={onOpenSettings}
     />
   )

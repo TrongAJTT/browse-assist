@@ -4,6 +4,8 @@
  * on websites that attempt to disable or restrict them via JavaScript or CSS.
  */
 
+import { showContentToast } from "~core/toast"
+
 let isActive = false
 let styleElement: HTMLStyleElement | null = null
 
@@ -122,9 +124,43 @@ export function deactivate(): void {
   removeSelectionStyles()
 }
 
+const RIGHT_CLICK_ICON_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="m13 13 6 6"/></svg>`
+
 /**
  * Returns current activation status in the current tab session.
  */
 export function isRightClickActive(): boolean {
+  return isActive
+}
+
+/**
+ * Toggles Allow Right Click on demand and displays a feedback toast.
+ */
+export function toggleRightClick(showFeedback = true): boolean {
+  if (isActive) {
+    deactivate()
+    if (showFeedback) {
+      showContentToast({
+        message: "Right Click Disabled",
+        detail: "Current Tab",
+        type: "info",
+        iconSvg: RIGHT_CLICK_ICON_SVG,
+        position: "bottom-right",
+        duration: 1600
+      })
+    }
+  } else {
+    activate()
+    if (showFeedback) {
+      showContentToast({
+        message: "Right Click Enabled",
+        detail: "Current Tab",
+        type: "success",
+        iconSvg: RIGHT_CLICK_ICON_SVG,
+        position: "bottom-right",
+        duration: 1800
+      })
+    }
+  }
   return isActive
 }
