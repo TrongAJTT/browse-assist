@@ -27,7 +27,7 @@ import {
   type FeatureSettings
 } from "~core/types"
 
-import { getColorValueByFormat } from "./colorUtils"
+import { getColorValueByFormat, parseColor } from "./colorUtils"
 
 interface ColorPickerSettingsViewProps {
   onBack: () => void
@@ -116,8 +116,51 @@ export const ColorPickerSettingsView: React.FC<
   }
 
   const handlePickNow = async () => {
-    await sendToActiveTab(MESSAGE_TYPES.TRIGGER_COLOR_PICKER)
-    window.close()
+    // 1. If EyeDropper API is available directly in the current window (popup context),
+    // calling it synchronously preserves user activation gesture and never fails!
+    if (typeof window !== "undefined" && "EyeDropper" in window) {
+      try {
+        const EyeDropperClass = (
+          window as unknown as {
+            EyeDropper: new () => { open: () => Promise<{ sRGBHex: string }> }
+          }
+        ).EyeDropper
+        const eyeDropper = new EyeDropperClass()
+        const result = await eyeDropper.open()
+
+        if (result?.sRGBHex) {
+          const colorItem = parseColor(result.sRGBHex)
+
+          // Save to persistent storage history
+          setColorHistory((prev) => {
+            const existing = prev ?? []
+            const filtered = existing.filter((c) => c.hex !== colorItem.hex)
+            return [colorItem, ...filtered].slice(0, 20)
+          })
+
+          // Auto-copy to clipboard if enabled
+          if (currentConfig.autoCopy) {
+            const val = getColorValueByFormat(
+              colorItem,
+              currentConfig.defaultFormat
+            )
+            await navigator.clipboard.writeText(val).catch(() => {})
+          }
+        }
+      } catch {
+        // User cancelled or pressed Escape
+      } finally {
+        window.close()
+      }
+      return
+    }
+
+    // 2. Fallback: Dispatch message to active tab content script
+    try {
+      await sendToActiveTab(MESSAGE_TYPES.TRIGGER_COLOR_PICKER)
+    } finally {
+      window.close()
+    }
   }
 
   const handleCopyColor = async (item: ColorHistoryItem) => {

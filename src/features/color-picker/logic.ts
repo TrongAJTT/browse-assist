@@ -322,13 +322,11 @@ function showPaletteModal(color: ColorHistoryItem): void {
  * Triggers the native window.EyeDropper picker.
  */
 export async function pickColor(): Promise<void> {
-  if (!isActive && !("EyeDropper" in window)) return
-
   // Check if browser supports EyeDropper
-  if (!("EyeDropper" in window)) {
+  if (typeof window === "undefined" || !("EyeDropper" in window)) {
     if (currentConfig.showToast) {
       showContentToast({
-        message: "EyeDropper not supported in this browser",
+        message: "EyeDropper not supported on this page/browser",
         type: "error",
         duration: 2500
       })
@@ -382,8 +380,20 @@ export async function pickColor(): Promise<void> {
       // 4. Show floating palette modal with all formats
       showPaletteModal(colorItem)
     }
-  } catch {
-    // User cancelled eyedropper selection (e.g. pressed Escape)
+  } catch (err: unknown) {
+    const error = err as { name?: string; message?: string }
+    // AbortError is thrown when user presses Escape or cancels
+    if (error?.name !== "AbortError") {
+      console.warn("Browse Assist Color Picker error:", err)
+      if (currentConfig.showToast) {
+        showContentToast({
+          message: "Could not open Color Picker",
+          detail: error?.message || "User interaction required or not permitted",
+          type: "error",
+          duration: 2500
+        })
+      }
+    }
   }
 }
 

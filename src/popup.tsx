@@ -215,6 +215,26 @@ function IndexPopup() {
                   : "Pick Color from Screen"
               }
               onClick={async () => {
+                if (typeof window !== "undefined" && "EyeDropper" in window) {
+                  try {
+                    const EyeDropperClass = (
+                      window as unknown as {
+                        EyeDropper: new () => {
+                          open: () => Promise<{ sRGBHex: string }>
+                        }
+                      }
+                    ).EyeDropper
+                    const eyeDropper = new EyeDropperClass()
+                    const result = await eyeDropper.open()
+                    if (result?.sRGBHex) {
+                      const hex = result.sRGBHex.toUpperCase()
+                      await navigator.clipboard.writeText(hex).catch(() => {})
+                    }
+                  } catch {
+                    // User cancelled
+                  }
+                  return
+                }
                 await sendToActiveTab(MESSAGE_TYPES.TRIGGER_COLOR_PICKER)
                 window.close()
               }}
