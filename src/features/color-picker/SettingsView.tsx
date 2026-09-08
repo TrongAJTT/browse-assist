@@ -187,20 +187,19 @@ export const ColorPickerSettingsView: React.FC<
       title="Color Picker"
       enabled={isMasterEnabled}
       onToggle={handleToggleMaster}
-      onBack={onBack}>
+      onBack={onBack}
+      rightActions={
+        <button
+          type="button"
+          onClick={handlePickNow}
+          disabled={!isMasterEnabled}
+          title="Pick Color from Screen"
+          className="px-2.5 py-1 rounded-lg bg-accent hover:bg-accent-hover text-white font-semibold text-xs shadow-sm shadow-accent-glow active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none flex items-center gap-1.5">
+          <Pipette className="w-3.5 h-3.5" />
+          <span>Pick</span>
+        </button>
+      }>
       <div className="space-y-4">
-        {/* Quick Launch Button */}
-        <div className="pt-1">
-          <button
-            type="button"
-            onClick={handlePickNow}
-            disabled={!isMasterEnabled}
-            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-accent hover:bg-accent-hover text-white font-semibold text-xs shadow-md shadow-accent-glow active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none">
-            <Pipette className="w-4 h-4" />
-            <span>Pick Color From Screen</span>
-          </button>
-        </div>
-
         {/* Section 1: Keyboard Shortcut */}
         <div className="space-y-2">
           <span className="section-header">Keyboard Shortcut</span>

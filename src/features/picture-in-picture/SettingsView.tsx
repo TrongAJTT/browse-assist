@@ -43,9 +43,7 @@ export const PictureInPictureSettingsView: React.FC<
   useEffect(() => {
     if (chrome.commands?.getAll) {
       chrome.commands.getAll((commands) => {
-        const cmd = commands.find(
-          (c) => c.name === "toggle_picture_in_picture"
-        )
+        const cmd = commands.find((c) => c.name === "toggle_picture_in_picture")
         if (cmd?.shortcut) {
           setShortcut(cmd.shortcut)
         } else {
@@ -119,32 +117,28 @@ export const PictureInPictureSettingsView: React.FC<
       title="Picture-in-Picture"
       enabled={isMasterEnabled}
       onToggle={handleToggleMaster}
-      onBack={onBack}>
+      onBack={onBack}
+      rightActions={
+        <button
+          type="button"
+          onClick={handleTogglePiP}
+          disabled={!isMasterEnabled}
+          title={
+            activePiP ? "Exit Picture-in-Picture" : "Toggle Picture-in-Picture"
+          }
+          className={`px-2.5 py-1 rounded-lg font-semibold text-xs transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none flex items-center gap-1.5 shadow-sm ${
+            activePiP
+              ? "bg-rose-500 hover:bg-rose-600 text-white shadow-rose-500/25"
+              : "bg-accent hover:bg-accent-hover text-white shadow-accent-glow"
+          }`}>
+          <PictureInPicture2 className="w-3.5 h-3.5" />
+          <span>{activePiP ? "Exit PiP" : "Launch"}</span>
+        </button>
+      }>
       <div className="space-y-4">
-        {/* Quick Trigger Button */}
-        <div className="pt-1">
-          <button
-            type="button"
-            onClick={handleTogglePiP}
-            disabled={!isMasterEnabled}
-            className={`w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-semibold text-xs transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none ${
-              activePiP
-                ? "bg-rose-500 hover:bg-rose-600 text-white shadow-md shadow-rose-500/25"
-                : "bg-accent hover:bg-accent-hover text-white shadow-md shadow-accent-glow"
-            }`}>
-            <PictureInPicture2 className="w-4 h-4" />
-            <span>
-              {activePiP
-                ? "Exit Picture-in-Picture"
-                : "Toggle Picture-in-Picture"}
-            </span>
-          </button>
-        </div>
         {/* Shortcut Section */}
         <div className="space-y-2">
-          <span className="section-header">
-            Keyboard Shortcut
-          </span>
+          <span className="section-header">Keyboard Shortcut</span>
 
           <div className="card-subtle p-3 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
@@ -176,9 +170,7 @@ export const PictureInPictureSettingsView: React.FC<
 
         {/* Options */}
         <div className="space-y-2 pt-2 border-t border-border-divider">
-          <span className="section-header">
-            Display & Feedback
-          </span>
+          <span className="section-header">Display & Feedback</span>
 
           <div className="divide-y divide-border-divider">
             {/* Show Badge */}
@@ -198,7 +190,8 @@ export const PictureInPictureSettingsView: React.FC<
                     Extension Badge Indicator
                   </span>
                   <span className="text-[11px] text-content-muted leading-snug mt-0.5">
-                    Show &ldquo;PiP&rdquo; badge on extension icon whenever a video is playing in PiP.
+                    Show &ldquo;PiP&rdquo; badge on extension icon whenever a
+                    video is playing in PiP.
                   </span>
                 </div>
               </div>
@@ -215,9 +208,7 @@ export const PictureInPictureSettingsView: React.FC<
                 }`}>
                 <span
                   className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                    currentConfig.showBadge
-                      ? "translate-x-4"
-                      : "translate-x-0"
+                    currentConfig.showBadge ? "translate-x-4" : "translate-x-0"
                   }`}
                 />
               </button>
@@ -240,7 +231,8 @@ export const PictureInPictureSettingsView: React.FC<
                     Action Toast Notification
                   </span>
                   <span className="text-[11px] text-content-muted leading-snug mt-0.5">
-                    Display brief confirmation toast when entering or exiting PiP.
+                    Display brief confirmation toast when entering or exiting
+                    PiP.
                   </span>
                 </div>
               </div>
@@ -257,9 +249,7 @@ export const PictureInPictureSettingsView: React.FC<
                 }`}>
                 <span
                   className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                    currentConfig.showToast
-                      ? "translate-x-4"
-                      : "translate-x-0"
+                    currentConfig.showToast ? "translate-x-4" : "translate-x-0"
                   }`}
                 />
               </button>
@@ -274,7 +264,9 @@ export const PictureInPictureSettingsView: React.FC<
             <span>Universal Compatibility</span>
           </div>
           <p className="leading-relaxed">
-            Automatically finds currently active playing videos, unlocks restricted players, and allows single-click tab refocusing right from the extension popup.
+            Automatically finds currently active playing videos, unlocks
+            restricted players, and allows single-click tab refocusing right
+            from the extension popup.
           </p>
         </div>
       </div>

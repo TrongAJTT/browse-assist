@@ -75,24 +75,19 @@ export const ElementZapperSettingsView: React.FC<
       title="Element Zapper"
       enabled={isMasterEnabled}
       onToggle={handleToggleMaster}
-      onBack={onBack}>
+      onBack={onBack}
+      rightActions={
+        <button
+          type="button"
+          onClick={handleZapNow}
+          disabled={!isMasterEnabled}
+          title="Zap Element from Page"
+          className="px-2.5 py-1 rounded-lg bg-accent hover:bg-accent-hover text-white font-semibold text-xs shadow-sm shadow-accent-glow active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none flex items-center gap-1.5">
+          <Zap className="w-3.5 h-3.5 fill-current" />
+          <span>Zap</span>
+        </button>
+      }>
       <div className="space-y-4">
-        {/* Quick Launch Button */}
-        <div className="pt-1">
-          <button
-            type="button"
-            onClick={handleZapNow}
-            disabled={!isMasterEnabled}
-            className={`w-full py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 font-medium text-xs transition-all shadow-sm ${
-              isMasterEnabled
-                ? "bg-accent-primary text-content-inverted hover:brightness-105 active:scale-[0.99]"
-                : "bg-surface-elevated text-content-muted cursor-not-allowed border border-border-subtle"
-            }`}>
-            <Zap className="w-4 h-4 fill-current" />
-            <span>Zap Element from Page</span>
-          </button>
-        </div>
-
         {/* Keyboard Shortcut Banner */}
         <div className="p-3 bg-surface-subtle/50 rounded-xl border border-border-subtle flex items-center justify-between">
           <div className="flex items-center gap-2.5">
