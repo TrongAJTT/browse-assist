@@ -134,17 +134,17 @@ export const MouseZoomSettingsView: React.FC<MouseZoomSettingsViewProps> = ({
           type="button"
           onClick={handleResetZoom}
           title="Reset Zoom to 100% on current tab"
-          className="flex items-center justify-center p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 active:scale-95 transition-all focus:outline-none focus:ring-1 focus:ring-indigo-500/50">
+          className="flex items-center justify-center p-1.5 rounded-lg text-content-muted hover:text-content-primary hover:bg-app-card active:scale-95 transition-all focus:outline-none focus:ring-1 focus:ring-accent">
           <RotateCcw
             className={`w-3.5 h-3.5 transition-transform duration-500 ${
-              isResetting ? "-rotate-180 text-indigo-400" : ""
+              isResetting ? "-rotate-180 text-accent" : ""
             }`}
           />
         </button>
       }>
       {/* Modifier Key Grid Picker */}
       <div className="space-y-2">
-        <span className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
+        <span className="section-header">
           Trigger Modifier Key
         </span>
 
@@ -157,15 +157,15 @@ export const MouseZoomSettingsView: React.FC<MouseZoomSettingsViewProps> = ({
       </div>
 
       {/* Zoom Sensitivity / Step Size Slider */}
-      <div className="space-y-4 pt-3 border-t border-slate-800/80">
-        <span className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
+      <div className="space-y-4 pt-3 border-t border-border-divider">
+        <span className="section-header">
           Zoom Sensitivity
         </span>
 
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-xs">
-            <span className="text-slate-300 font-medium">Step Increment</span>
-            <span className="font-mono text-indigo-400 font-semibold">
+            <span className="text-content-secondary font-medium">Step Increment</span>
+            <span className="font-mono text-accent font-semibold">
               {Math.round(currentConfig.stepSize * 100)}%
             </span>
           </div>
@@ -176,9 +176,9 @@ export const MouseZoomSettingsView: React.FC<MouseZoomSettingsViewProps> = ({
             step="0.01"
             value={currentConfig.stepSize}
             onChange={(e) => handleUpdateStepSize(parseFloat(e.target.value))}
-            className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400"
+            className="w-full h-1.5 bg-app-card rounded-lg appearance-none cursor-pointer accent-accent hover:accent-accent-hover"
           />
-          <div className="flex justify-between text-[10px] text-slate-400">
+          <div className="flex justify-between text-[10px] text-content-muted">
             <span>4% (Fine)</span>
             <span>10% (Default)</span>
             <span>25% (Fast)</span>
@@ -187,19 +187,19 @@ export const MouseZoomSettingsView: React.FC<MouseZoomSettingsViewProps> = ({
       </div>
 
       {/* Behavior Toggles */}
-      <div className="space-y-3 pt-3 border-t border-slate-800/80">
-        <span className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
+      <div className="space-y-3 pt-3 border-t border-border-divider">
+        <span className="section-header">
           Behavior & Display
         </span>
 
         {/* Smooth Transition */}
         <div className="flex items-center justify-between gap-3">
           <div className="flex flex-col min-w-0 flex-1">
-            <span className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
+            <span className="text-xs font-semibold text-content-primary flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
               Smooth Animation
             </span>
-            <span className="text-[11px] text-slate-400 leading-snug mt-0.5">
+            <span className="text-[11px] text-content-muted leading-snug mt-0.5">
               Smoothly interpolate zoom transitions for a fluid feel.
             </span>
           </div>
@@ -209,10 +209,10 @@ export const MouseZoomSettingsView: React.FC<MouseZoomSettingsViewProps> = ({
             role="switch"
             aria-checked={currentConfig.smooth}
             onClick={() => handleToggleOption("smooth")}
-            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${
+            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-app ${
               currentConfig.smooth
-                ? "bg-indigo-600 shadow-indigo-500/20 shadow-sm"
-                : "bg-slate-700"
+                ? "bg-accent shadow-accent-glow"
+                : "bg-border-subtle"
             }`}>
             <span
               className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
@@ -225,11 +225,11 @@ export const MouseZoomSettingsView: React.FC<MouseZoomSettingsViewProps> = ({
         {/* Invert Scroll Direction */}
         <div className="flex items-center justify-between gap-3">
           <div className="flex flex-col min-w-0 flex-1">
-            <span className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
+            <span className="text-xs font-semibold text-content-primary flex items-center gap-1.5">
               <ArrowUpDown className="w-3.5 h-3.5 text-cyan-400" />
               Invert Direction
             </span>
-            <span className="text-[11px] text-slate-400 leading-snug mt-0.5">
+            <span className="text-[11px] text-content-muted leading-snug mt-0.5">
               Scroll down to zoom in, scroll up to zoom out.
             </span>
           </div>
@@ -239,10 +239,10 @@ export const MouseZoomSettingsView: React.FC<MouseZoomSettingsViewProps> = ({
             role="switch"
             aria-checked={currentConfig.invertDirection}
             onClick={() => handleToggleOption("invertDirection")}
-            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${
+            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-app ${
               currentConfig.invertDirection
-                ? "bg-indigo-600 shadow-indigo-500/20 shadow-sm"
-                : "bg-slate-700"
+                ? "bg-accent shadow-accent-glow"
+                : "bg-border-subtle"
             }`}>
             <span
               className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
@@ -255,11 +255,11 @@ export const MouseZoomSettingsView: React.FC<MouseZoomSettingsViewProps> = ({
         {/* Show Zoom Toast Badge */}
         <div className="flex items-center justify-between gap-3">
           <div className="flex flex-col min-w-0 flex-1">
-            <span className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
+            <span className="text-xs font-semibold text-content-primary flex items-center gap-1.5">
               <Eye className="w-3.5 h-3.5 text-violet-400" />
               Show Zoom Toast
             </span>
-            <span className="text-[11px] text-slate-400 leading-snug mt-0.5">
+            <span className="text-[11px] text-content-muted leading-snug mt-0.5">
               Display floating percentage badge on the top-right of the page.
             </span>
           </div>
@@ -269,10 +269,10 @@ export const MouseZoomSettingsView: React.FC<MouseZoomSettingsViewProps> = ({
             role="switch"
             aria-checked={currentConfig.showToast}
             onClick={() => handleToggleOption("showToast")}
-            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${
+            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-app ${
               currentConfig.showToast
-                ? "bg-indigo-600 shadow-indigo-500/20 shadow-sm"
-                : "bg-slate-700"
+                ? "bg-accent shadow-accent-glow"
+                : "bg-border-subtle"
             }`}>
             <span
               className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${

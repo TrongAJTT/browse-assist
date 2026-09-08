@@ -50,14 +50,14 @@ export const SubSettingsLayout: React.FC<SubSettingsLayoutProps> = ({
   return (
     <div className="flex flex-col space-y-4 py-2">
       {/* Header: Title on the left with Chevron Back, Optional Actions & Switch on the right */}
-      <div className="flex items-center justify-between pb-2 border-b border-slate-800/80">
+      <div className="flex items-center justify-between pb-2 border-b border-border-divider">
         <button
           type="button"
           onClick={onBack}
           title="Back (Backspace or `)"
-          className="flex items-center gap-1.5 px-1 py-1 -ml-1 text-xs font-semibold text-slate-300 hover:text-white rounded-lg hover:bg-slate-800/60 transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
-          <ChevronLeft className="w-4 h-4 text-slate-400" />
-          <span className="text-xs font-semibold tracking-tight text-white">
+          className="flex items-center gap-1.5 px-1.5 py-1 -ml-1 text-xs font-semibold text-content-secondary hover:text-content-primary rounded-lg hover:bg-app-surface transition-all focus:outline-none focus:ring-2 focus:ring-border-focus">
+          <ChevronLeft className="w-4 h-4 text-content-muted" />
+          <span className="text-[13px] font-semibold tracking-tight text-content-primary">
             {title}
           </span>
         </button>
@@ -72,9 +72,9 @@ export const SubSettingsLayout: React.FC<SubSettingsLayoutProps> = ({
               role="switch"
               aria-checked={enabled}
               onClick={() => onToggle(!enabled)}
-              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${
+              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent-hover focus:ring-offset-2 focus:ring-offset-app ${
                 enabled
-                  ? "bg-indigo-600 shadow-indigo-500/20 shadow-sm"
+                  ? "bg-accent-hover shadow-accent-glow shadow-sm"
                   : "bg-slate-700"
               }`}>
               <span className="sr-only">Toggle {title}</span>

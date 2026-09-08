@@ -134,7 +134,7 @@ export const SmoothScrollSettingsView: React.FC<
       onBack={onBack}>
       {/* 4-item Horizontal Grid Picker for Profiles including Custom */}
       <div className="space-y-2">
-        <span className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
+        <span className="section-header">
           Profiles
         </span>
 
@@ -147,16 +147,16 @@ export const SmoothScrollSettingsView: React.FC<
       </div>
 
       {/* Fine-Tuning Physics Sliders (without enclosing cards) */}
-      <div className="space-y-4 pt-3 border-t border-slate-800/80">
-        <span className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
+      <div className="space-y-4 pt-3 border-t border-border-divider">
+        <span className="section-header">
           Fine Tuning
         </span>
 
         {/* Step Size Slider */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-xs">
-            <span className="text-slate-300 font-medium">Scroll Distance</span>
-            <span className="font-mono text-indigo-400 font-semibold">
+            <span className="text-content-secondary font-medium">Scroll Distance</span>
+            <span className="font-mono text-accent font-semibold">
               {currentConfig.stepSize.toFixed(1)}x
             </span>
           </div>
@@ -169,15 +169,15 @@ export const SmoothScrollSettingsView: React.FC<
             onChange={(e) =>
               handleUpdateParam("stepSize", parseFloat(e.target.value))
             }
-            className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 focus:outline-none"
+            className="w-full h-1.5 bg-app-card rounded-lg appearance-none cursor-pointer accent-accent focus:outline-none"
           />
         </div>
 
         {/* Smoothness Slider */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-xs">
-            <span className="text-slate-300 font-medium">Gliding Duration</span>
-            <span className="font-mono text-indigo-400 font-semibold">
+            <span className="text-content-secondary font-medium">Gliding Duration</span>
+            <span className="font-mono text-accent font-semibold">
               {Math.round((1 - currentConfig.smoothness) * 100)}%
             </span>
           </div>
@@ -190,19 +190,19 @@ export const SmoothScrollSettingsView: React.FC<
             onChange={(e) =>
               handleUpdateParam("smoothness", parseFloat(e.target.value))
             }
-            className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 focus:outline-none"
+            className="w-full h-1.5 bg-app-card rounded-lg appearance-none cursor-pointer accent-accent focus:outline-none"
           />
         </div>
       </div>
 
       {/* Advanced Compatibility Mode */}
-      <div className="pt-3 border-t border-slate-800/80 space-y-2">
+      <div className="pt-3 border-t border-border-divider space-y-2">
         <div className="flex items-center justify-between gap-3">
           <div className="flex flex-col min-w-0 flex-1">
-            <span className="text-xs font-semibold text-slate-200">
+            <span className="text-xs font-semibold text-content-primary">
               Aggressive Interception
             </span>
-            <span className="text-[11px] text-slate-400 leading-snug mt-0.5">
+            <span className="text-[11px] text-content-muted leading-snug mt-0.5">
               Force smooth scrolling across all sites. Keep disabled to protect
               canvas & web apps (e.g. Konva, Figma, Maps).
             </span>
@@ -226,10 +226,10 @@ export const SmoothScrollSettingsView: React.FC<
                 }
               }))
             }}
-            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent ${
               currentConfig.interceptionMode === "aggressive"
-                ? "bg-indigo-600 shadow-indigo-500/20 shadow-md"
-                : "bg-slate-700"
+                ? "bg-accent shadow-accent-glow"
+                : "bg-border-subtle"
             }`}>
             <span
               className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${

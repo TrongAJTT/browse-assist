@@ -161,18 +161,18 @@ function IndexPopup() {
 
   return (
     <div
-      className={`w-[444px] h-[600px] bg-slate-900 text-slate-100 font-sans select-none antialiased flex flex-col overflow-hidden transition-opacity duration-150 ${
+      className={`w-[444px] h-[600px] bg-app text-content-primary font-sans select-none antialiased flex flex-col overflow-hidden transition-opacity duration-150 ${
         isHydrated ? "opacity-100" : "opacity-0 pointer-events-none"
       }`}>
       {/* Header - Crisp and cleanly separated from content */}
-      <header className="px-4 py-3 bg-slate-900/95 border-b border-slate-800 flex items-center justify-between sticky top-0 z-20">
+      <header className="px-4 py-3 bg-app-header border-b border-border-divider flex items-center justify-between sticky top-0 z-20 backdrop-blur-md">
         <div className="flex items-center gap-2.5">
-          <AppIcon className="w-8 h-8 rounded-xl object-contain shadow-md shadow-indigo-500/10 ring-1 ring-white/10" />
+          <AppIcon className="w-8 h-8 rounded-xl object-contain shadow-md shadow-accent-glow ring-1 ring-white/10" />
           <div>
-            <h1 className="text-sm font-bold tracking-tight text-white leading-none">
+            <h1 className="text-sm font-bold tracking-tight text-content-primary leading-none">
               Browse Assist
             </h1>
-            <p className="text-[10.5px] text-slate-400 font-normal mt-1">
+            <p className="text-[11px] text-content-muted font-normal mt-1">
               PowerToys for Web Browsing
             </p>
           </div>
@@ -194,8 +194,8 @@ function IndexPopup() {
               onClick={handleTogglePiPOnCurrentTab}
               className={`p-1.5 rounded-lg transition-all focus:outline-none ${
                 activePiP
-                  ? "bg-indigo-600/30 text-indigo-400 ring-1 ring-indigo-500/50 hover:bg-indigo-600/40 animate-pulse"
-                  : "text-slate-400 hover:text-indigo-400 hover:bg-slate-800/80 active:scale-95"
+                  ? "bg-accent-subtle text-accent ring-1 ring-accent-glow hover:bg-accent-hover/20 animate-pulse"
+                  : "text-content-muted hover:text-accent hover:bg-app-surface active:scale-95"
               }`}>
               <PictureInPicture2 className="w-4 h-4" />
             </button>
@@ -210,15 +210,15 @@ function IndexPopup() {
               className={`p-1.5 rounded-lg transition-all focus:outline-none ${
                 isDonateOpen
                   ? "bg-rose-500/20 text-rose-400 ring-1 ring-rose-500/40"
-                  : "text-slate-400 hover:text-rose-400 hover:bg-slate-800/80 active:scale-95"
+                  : "text-content-muted hover:text-rose-400 hover:bg-app-surface active:scale-95"
               }`}>
               <Heart className="w-4 h-4 fill-current/20" />
             </button>
 
             {/* Donate Popup Menu */}
             {isDonateOpen && (
-              <div className="absolute right-0 mt-2 w-48 rounded-xl bg-slate-800 border border-slate-700/80 shadow-xl shadow-black/40 py-1.5 z-30 animate-in fade-in zoom-in-95 duration-100">
-                <div className="px-3 py-1 text-[10px] font-semibold text-slate-400 tracking-wider uppercase border-b border-slate-700/50 mb-1">
+              <div className="absolute right-0 mt-2 w-48 rounded-xl bg-app-elevated border border-border-subtle shadow-xl shadow-black/40 py-1.5 z-30 animate-in fade-in zoom-in-95 duration-100">
+                <div className="px-3 py-1 text-[10px] font-semibold text-content-muted tracking-wider uppercase border-b border-border-divider mb-1">
                   Support the Project
                 </div>
                 {DONATE_OPTIONS.map((option) => (
@@ -228,12 +228,12 @@ function IndexPopup() {
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => setIsDonateOpen(false)}
-                    className="flex items-center justify-between px-3 py-2 text-xs text-slate-200 hover:text-white hover:bg-slate-700/60 transition-colors">
+                    className="flex items-center justify-between px-3 py-2 text-xs text-content-secondary hover:text-content-primary hover:bg-app-surface transition-colors">
                     <div className="flex items-center gap-2">
                       {getDonateIcon(option.iconName)}
                       <span className="font-medium">{option.label}</span>
                     </div>
-                    <ExternalLink className="w-3 h-3 text-slate-400" />
+                    <ExternalLink className="w-3 h-3 text-content-muted" />
                   </a>
                 ))}
               </div>
@@ -247,8 +247,8 @@ function IndexPopup() {
             onClick={() => setCurrentView("about")}
             className={`p-1.5 rounded-lg transition-all focus:outline-none ${
               currentView === "about"
-                ? "bg-indigo-600/20 text-indigo-400 ring-1 ring-indigo-500/40"
-                : "text-slate-400 hover:text-slate-100 hover:bg-slate-800/80 active:scale-95"
+                ? "bg-accent-subtle text-accent ring-1 ring-accent-glow"
+                : "text-content-muted hover:text-content-primary hover:bg-app-surface active:scale-95"
             }`}>
             <HelpCircle className="w-4 h-4" />
           </button>
@@ -262,16 +262,16 @@ function IndexPopup() {
           <div
             onClick={handleFocusPiPTab}
             title="Click to jump to this video tab"
-            className="mb-1.5 py-1.5 px-2.5 rounded-md bg-indigo-950/60 border border-indigo-500/30 hover:border-indigo-500/60 transition-all cursor-pointer group flex items-center justify-between gap-2.5 shadow-lg shadow-indigo-950/20">
-            <div className="flex items-center gap-1.5 min-w-0 flex-1">
-              <div className="p-1.5 text-indigo-400 group-hover:scale-105 transition-transform shrink-0">
-                <PictureInPicture2 className="w-5 h-5 animate-pulse" />
+            className="mb-2 py-1.5 px-2.5 rounded-lg bg-accent-subtle border border-accent/40 hover:border-accent transition-all cursor-pointer group flex items-center justify-between gap-2.5 shadow-lg shadow-black/20">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <div className="p-1 text-accent group-hover:scale-105 transition-transform shrink-0">
+                <PictureInPicture2 className="w-4 h-4 animate-pulse" />
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 leading-none">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-accent leading-none">
                   Video in PiP Mode
                 </span>
-                <span className="text-xs font-semibold text-slate-200 truncate mt-0.5 group-hover:text-indigo-200 transition-colors">
+                <span className="text-xs font-semibold text-content-primary truncate mt-0.5 group-hover:text-accent transition-colors">
                   {activePiP.title}
                 </span>
               </div>
@@ -282,7 +282,7 @@ function IndexPopup() {
                 type="button"
                 onClick={handleClosePiP}
                 title="Exit Picture-in-Picture window"
-                className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-300 bg-slate-800/90 border border-slate-700/80 px-2.5 py-1 rounded-lg transition-all duration-150 hover:bg-rose-500 hover:text-white hover:border-rose-500 hover:shadow-md hover:shadow-rose-500/25 hover:scale-[1.02] active:scale-95 focus:outline-none focus:ring-2 focus:ring-rose-500/50">
+                className="flex items-center gap-1.5 text-[11px] font-semibold text-content-secondary bg-app-elevated border border-border-subtle px-2.5 py-1 rounded-lg transition-all duration-150 hover:bg-rose-500 hover:text-white hover:border-rose-500 hover:shadow-md hover:shadow-rose-500/25 hover:scale-[1.02] active:scale-95 focus:outline-none focus:ring-2 focus:ring-rose-500/50">
                 <X className="w-3.5 h-3.5 stroke-[2.5]" />
                 <span>Exit PiP</span>
               </button>
@@ -293,7 +293,7 @@ function IndexPopup() {
         {currentView === "main" ? (
           <div>
             {/* PowerToys-style Utilities List with Dividers */}
-            <main className="divide-y divide-slate-800/80">
+            <main className="divide-y divide-border-divider">
               <AllowRightClickToggle onReady={() => setIsTabReady(true)} />
               <ContextMenuActionsToggle
                 onConfigure={() =>

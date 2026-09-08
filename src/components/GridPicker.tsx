@@ -40,12 +40,12 @@ export function GridPicker<T extends string = string>({
             onClick={() => onChange(item.id)}
             className={`flex flex-col items-center justify-center gap-1.5 py-2 px-1 rounded-xl border transition-all ${
               isSelected
-                ? "bg-indigo-600/20 border-indigo-500 text-indigo-300 shadow-sm"
-                : "bg-slate-800/40 hover:bg-slate-800 border-slate-700/60 text-slate-400 hover:text-slate-200"
+                ? "bg-accent-subtle border-accent text-accent-hover shadow-sm"
+                : "bg-app-surface hover:bg-app-card border-border-subtle text-content-muted hover:text-content-primary"
             }`}>
             {item.icon && (
               <span
-                className={isSelected ? "text-indigo-400" : "text-slate-400"}>
+                className={isSelected ? "text-accent" : "text-content-muted"}>
                 {item.icon}
               </span>
             )}

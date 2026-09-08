@@ -158,16 +158,16 @@ export const ContextMenuActionsSettingsView: React.FC<
       onBack={onBack}>
       <div className="space-y-4">
         <div>
-          <span className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
+          <span className="section-header">
             Right-Click Menu Items
           </span>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-content-muted mt-1">
             Drag items to reorder or toggle their visibility in your right-click context menu.
           </p>
         </div>
 
         {/* Clean, flat list separated by dividers with native drag & drop */}
-        <div className="divide-y divide-slate-800/80">
+        <div className="divide-y divide-border-divider">
           {order.map((actionId, index) => {
             const item = ACTION_METAS[actionId]
             if (!item) return null
@@ -188,7 +188,7 @@ export const ContextMenuActionsSettingsView: React.FC<
                   isDragging ? "opacity-30 scale-[0.98]" : "opacity-100"
                 } ${
                   isDragOver
-                    ? "border-t-2 border-t-indigo-500 bg-indigo-500/5"
+                    ? "border-t-2 border-t-accent bg-accent-subtle"
                     : ""
                 }`}>
                 {/* Left side: Icon + Title + Description */}
@@ -203,15 +203,15 @@ export const ContextMenuActionsSettingsView: React.FC<
 
                   <div className="flex flex-col min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-semibold text-slate-200">
+                      <span className="text-xs font-semibold text-content-primary">
                         {item.title}
                       </span>
                       <span
-                        className={`font-mono text-[10px] px-1.5 py-0.2 rounded border ${item.badgeColor}`}>
+                        className={`font-mono text-[10px] px-1.5 py-0.5 rounded border ${item.badgeColor}`}>
                         {item.badge}
                       </span>
                     </div>
-                    <span className="text-[11px] text-slate-400 leading-snug mt-0.5">
+                    <span className="text-[11px] text-content-muted leading-snug mt-0.5">
                       {item.description}
                     </span>
                   </div>
@@ -227,10 +227,10 @@ export const ContextMenuActionsSettingsView: React.FC<
                       e.stopPropagation()
                       handleToggleAction(actionId)
                     }}
-                    className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${
+                    className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-app ${
                       isItemEnabled
-                        ? "bg-indigo-600 shadow-indigo-500/20 shadow-sm"
-                        : "bg-slate-700"
+                        ? "bg-accent shadow-accent-glow"
+                        : "bg-border-subtle"
                     }`}>
                     <span
                       className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
