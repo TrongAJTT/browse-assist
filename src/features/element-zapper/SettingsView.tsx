@@ -1,9 +1,11 @@
-import { HelpCircle, Keyboard, RotateCcw, Sparkles, Zap } from "lucide-react"
+import { HelpCircle, Sparkles, Zap } from "lucide-react"
 import type React from "react"
 import { useEffect, useState } from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
+import { FeatureShortcutRow } from "~components/FeatureShortcutRow"
+import { SettingToggleRow } from "~components/SettingToggleRow"
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
 import { MESSAGE_TYPES, sendToActiveTab } from "~core/messaging"
 import { openBrowserShortcutsPage } from "~core/shortcutsHelper"
@@ -89,91 +91,38 @@ export const ElementZapperSettingsView: React.FC<
         </button>
       }>
       <div className="space-y-4">
-        {/* Keyboard Shortcut Banner */}
-        <div className="p-3 bg-surface-subtle/50 rounded-xl border border-border-subtle flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">
-              <Keyboard className="w-4 h-4" />
-            </div>
-            <div>
-              <span className="text-xs font-semibold text-content-primary block">
-                Zapper Shortcut
-              </span>
-              <span className="text-[11px] text-content-muted">
-                Activate crosshair cursor on page
-              </span>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <kbd className="px-2 py-1 bg-surface-elevated text-content-primary rounded text-[11px] font-mono border border-border-subtle shadow-sm font-semibold">
-              {shortcut || "Not set"}
-            </kbd>
-            <button
-              type="button"
-              title="Configure Extension Shortcuts"
-              onClick={() => {
-                openBrowserShortcutsPage().catch(() => {})
-              }}
-              className="p-1 rounded text-content-muted hover:text-content-primary hover:bg-surface-elevated transition-colors">
-              <RotateCcw className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
+        {/* Keyboard Shortcut Row */}
+        <FeatureShortcutRow
+          title="Zapper Shortcut"
+          description="Activate crosshair cursor on page"
+          shortcut={shortcut}
+          iconColorClass="text-amber-400"
+          onConfigureShortcuts={() => {
+            openBrowserShortcutsPage().catch(() => {})
+          }}
+        />
 
         {/* Behavior Options */}
-        <div className="space-y-2 pt-1">
-          <span className="text-[11px] font-semibold text-content-muted uppercase tracking-wider block px-1">
-            Zapper Behavior
-          </span>
+        <div className="space-y-1 pt-2 border-t border-border-divider">
+          <span className="section-header">Zapper Behavior</span>
 
-          {/* Auto Unfreeze Scroll */}
-          <div
-            onClick={() => handleToggleConfig("autoUnfreezeScroll")}
-            className="p-3 rounded-xl bg-surface-elevated border border-border-subtle hover:border-border-strong cursor-pointer transition-all flex items-center justify-between">
-            <div className="flex items-start gap-3">
-              <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mt-0.5">
-                <Sparkles className="w-4 h-4" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs font-medium text-content-primary">
-                  Auto Unfreeze Page Scroll
-                </span>
-                <span className="text-[11px] text-content-muted leading-snug">
-                  Restore scrollability (overflow: auto) if zapped element was a
-                  locking modal overlay
-                </span>
-              </div>
-            </div>
-            <input
-              type="checkbox"
-              checked={currentConfig.autoUnfreezeScroll}
-              onChange={() => {}}
-              className="rounded border-border-subtle text-accent-primary focus:ring-accent-primary h-4 w-4 bg-surface-elevated"
+          <div className="divide-y divide-border-divider">
+            {/* Auto Unfreeze Scroll Switch */}
+            <SettingToggleRow
+              icon={<Sparkles className="w-5 h-5 text-emerald-400" />}
+              title="Auto Unfreeze Page Scroll"
+              description="Restore scrollability (overflow: auto) if zapped element was a locking modal overlay"
+              enabled={currentConfig.autoUnfreezeScroll}
+              onToggle={() => handleToggleConfig("autoUnfreezeScroll")}
             />
-          </div>
 
-          {/* Show Toast Notifications */}
-          <div
-            onClick={() => handleToggleConfig("showToast")}
-            className="p-3 rounded-xl bg-surface-elevated border border-border-subtle hover:border-border-strong cursor-pointer transition-all flex items-center justify-between">
-            <div className="flex items-start gap-3">
-              <div className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 mt-0.5">
-                <Zap className="w-4 h-4" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs font-medium text-content-primary">
-                  Show Floating Toast
-                </span>
-                <span className="text-[11px] text-content-muted leading-snug">
-                  Display confirmation banner on page when an element is zapped
-                </span>
-              </div>
-            </div>
-            <input
-              type="checkbox"
-              checked={currentConfig.showToast}
-              onChange={() => {}}
-              className="rounded border-border-subtle text-accent-primary focus:ring-accent-primary h-4 w-4 bg-surface-elevated"
+            {/* Show Toast Notifications Switch */}
+            <SettingToggleRow
+              icon={<Zap className="w-5 h-5 text-indigo-400" />}
+              title="Show Floating Toast"
+              description="Display confirmation banner on page when an element is zapped"
+              enabled={currentConfig.showToast}
+              onToggle={() => handleToggleConfig("showToast")}
             />
           </div>
         </div>

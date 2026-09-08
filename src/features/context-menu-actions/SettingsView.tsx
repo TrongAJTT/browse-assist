@@ -1,14 +1,11 @@
-import {
-  FileCode,
-  Sparkles,
-  Type
-} from "lucide-react"
+import { FileCode, Sparkles, Type } from "lucide-react"
 import type React from "react"
 import { useState } from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
+import { Switch } from "~components/Switch"
 import {
   DEFAULT_SETTINGS,
   STORAGE_KEYS,
@@ -218,25 +215,11 @@ export const ContextMenuActionsSettingsView: React.FC<
 
                 {/* Right side: Switch toggle */}
                 <div className="flex items-center shrink-0">
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={isItemEnabled}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleToggleAction(actionId)
-                    }}
-                    className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-app ${
-                      isItemEnabled
-                        ? "bg-accent shadow-accent-glow"
-                        : "bg-border-subtle"
-                    }`}>
-                    <span
-                      className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                        isItemEnabled ? "translate-x-4" : "translate-x-0"
-                      }`}
-                    />
-                  </button>
+                  <Switch
+                    checked={isItemEnabled}
+                    onChange={() => handleToggleAction(actionId)}
+                    ariaLabel={`Toggle ${item.title}`}
+                  />
                 </div>
               </div>
             )

@@ -1,20 +1,12 @@
-import {
-  Bell,
-  Check,
-  Copy,
-  ExternalLink,
-  History,
-  Keyboard,
-  Pipette,
-  Trash2
-} from "lucide-react"
+import { Bell, Check, Copy, History, Pipette, Trash2 } from "lucide-react"
 import type React from "react"
 import { useEffect, useState } from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
+import { FeatureShortcutRow } from "~components/FeatureShortcutRow"
 import { GridPicker, type GridPickerItem } from "~components/GridPicker"
-import { ShortcutBadge } from "~components/ShortcutBadge"
+import { SettingToggleRow } from "~components/SettingToggleRow"
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
 import { MESSAGE_TYPES, sendToActiveTab } from "~core/messaging"
 import { openBrowserShortcutsPage } from "~core/shortcutsHelper"
@@ -202,35 +194,13 @@ export const ColorPickerSettingsView: React.FC<
       }>
       <div className="space-y-4">
         {/* Section 1: Keyboard Shortcut */}
-        <div className="space-y-2">
-          <span className="section-header">Keyboard Shortcut</span>
-          <div className="flex items-center justify-between gap-3 py-1">
-            <div className="flex items-center gap-2.5">
-              <div className="p-1.5 rounded-lg bg-pink-500/10 text-pink-400">
-                <Keyboard className="w-4 h-4" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs font-semibold text-content-primary">
-                  Eyedropper Shortcut
-                </span>
-                <span className="text-[11px] text-content-muted">
-                  Quickly activate screen color picker
-                </span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <ShortcutBadge shortcut={shortcut} />
-              <button
-                type="button"
-                onClick={handleOpenShortcutsPage}
-                title="Customize in browser shortcut settings"
-                className="p-1 text-content-muted hover:text-accent transition-colors">
-                <ExternalLink className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
-        </div>
+        <FeatureShortcutRow
+          title="Eyedropper Shortcut"
+          description="Quickly activate screen color picker"
+          shortcut={shortcut}
+          iconColorClass="text-pink-400"
+          onConfigureShortcuts={handleOpenShortcutsPage}
+        />
 
         {/* Section 2: Recent Colors Palette History (Flat Layout) */}
         <div className="space-y-2 pt-2 border-t border-border-divider">
@@ -302,73 +272,28 @@ export const ColorPickerSettingsView: React.FC<
           />
         </div>
 
-        {/* Section 4: Behavior Toggles */}
-        <div className="space-y-3 pt-2 border-t border-border-divider">
+        {/* Section 4: Behavior & Feedback */}
+        <div className="space-y-1 pt-2 border-t border-border-divider">
           <span className="section-header">Behavior & Feedback</span>
 
-          {/* Auto Copy Toggle */}
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-start gap-3 flex-1 min-w-0">
-              <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 mt-0.5">
-                <Copy className="w-4 h-4" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs font-semibold text-content-primary">
-                  Auto-Copy to Clipboard
-                </span>
-                <span className="text-[11px] text-content-muted">
-                  Automatically copy selected color value immediately upon
-                  picking
-                </span>
-              </div>
-            </div>
+          <div className="divide-y divide-border-divider">
+            {/* Auto-Copy to Clipboard */}
+            <SettingToggleRow
+              icon={<Copy className="w-5 h-5 text-emerald-400" />}
+              title="Auto-Copy to Clipboard"
+              description="Automatically copy selected color value immediately upon picking"
+              enabled={currentConfig.autoCopy}
+              onToggle={() => handleToggleOption("autoCopy")}
+            />
 
-            <button
-              type="button"
-              role="switch"
-              aria-checked={currentConfig.autoCopy}
-              onClick={() => handleToggleOption("autoCopy")}
-              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                currentConfig.autoCopy ? "bg-accent-hover" : "bg-border-subtle"
-              }`}>
-              <span
-                className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                  currentConfig.autoCopy ? "translate-x-4" : "translate-x-0"
-                }`}
-              />
-            </button>
-          </div>
-
-          {/* Show Toast Toggle */}
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-start gap-3 flex-1 min-w-0">
-              <div className="p-1.5 rounded-lg bg-pink-500/10 text-pink-400 mt-0.5">
-                <Bell className="w-4 h-4" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs font-semibold text-content-primary">
-                  Feedback Notification
-                </span>
-                <span className="text-[11px] text-content-muted">
-                  Display confirmation toast and floating palette modal on page
-                </span>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              role="switch"
-              aria-checked={currentConfig.showToast}
-              onClick={() => handleToggleOption("showToast")}
-              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                currentConfig.showToast ? "bg-accent-hover" : "bg-border-subtle"
-              }`}>
-              <span
-                className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                  currentConfig.showToast ? "translate-x-4" : "translate-x-0"
-                }`}
-              />
-            </button>
+            {/* Feedback Notification */}
+            <SettingToggleRow
+              icon={<Bell className="w-5 h-5 text-pink-400" />}
+              title="Feedback Notification"
+              description="Display confirmation toast and floating palette modal on page"
+              enabled={currentConfig.showToast}
+              onToggle={() => handleToggleOption("showToast")}
+            />
           </div>
         </div>
       </div>

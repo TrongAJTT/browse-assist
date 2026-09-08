@@ -1,16 +1,11 @@
-import {
-  ExternalLink,
-  Eye,
-  Keyboard,
-  PictureInPicture2,
-  ShieldAlert
-} from "lucide-react"
+import { Eye, PictureInPicture2, ShieldAlert } from "lucide-react"
 import type React from "react"
 import { useEffect, useState } from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
-import { ShortcutBadge } from "~components/ShortcutBadge"
+import { FeatureShortcutRow } from "~components/FeatureShortcutRow"
+import { SettingToggleRow } from "~components/SettingToggleRow"
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
 import {
   MESSAGE_TYPES,
@@ -138,36 +133,13 @@ export const PictureInPictureSettingsView: React.FC<
       }>
       <div className="space-y-4">
         {/* Shortcut Section */}
-        <div className="space-y-2">
-          <span className="section-header">Keyboard Shortcut</span>
-
-          <div className="card-subtle p-3 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5">
-              <div className="p-1.5 rounded-lg bg-accent-subtle text-accent">
-                <Keyboard className="w-4 h-4" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs font-semibold text-content-primary">
-                  Global Shortcut
-                </span>
-                <span className="text-[11px] text-content-muted">
-                  Toggle floating video window
-                </span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <ShortcutBadge shortcut={shortcut} />
-              <button
-                type="button"
-                onClick={handleOpenShortcutsPage}
-                title="Customize in browser shortcut settings"
-                className="p-1 text-content-muted hover:text-accent transition-colors">
-                <ExternalLink className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
-        </div>
+        <FeatureShortcutRow
+          title="Global Shortcut"
+          description="Toggle floating video window"
+          shortcut={shortcut}
+          iconColorClass="text-indigo-400"
+          onConfigureShortcuts={handleOpenShortcutsPage}
+        />
 
         {/* Options */}
         <div className="space-y-2 pt-2 border-t border-border-divider">
@@ -175,86 +147,22 @@ export const PictureInPictureSettingsView: React.FC<
 
           <div className="divide-y divide-border-divider">
             {/* Show Badge */}
-            <div className="flex items-center justify-between gap-3 py-3 group">
-              <div
-                onClick={() => handleToggleOption("showBadge")}
-                className={`flex items-start gap-3 flex-1 min-w-0 cursor-pointer ${
-                  currentConfig.showBadge
-                    ? "feature-row-active"
-                    : "feature-row-dimmed"
-                }`}>
-                <div className="shrink-0 mt-0.5 flex items-center justify-center transition-transform duration-200 ease-out group-hover:scale-110">
-                  <Eye className="w-5 h-5 text-accent" />
-                </div>
-                <div className="flex flex-col min-w-0 flex-1">
-                  <span className="text-xs font-semibold text-content-primary">
-                    Extension Badge Indicator
-                  </span>
-                  <span className="text-[11px] text-content-muted leading-snug mt-0.5">
-                    Show &ldquo;PiP&rdquo; badge on extension icon whenever a
-                    video is playing in PiP.
-                  </span>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                role="switch"
-                aria-checked={currentConfig.showBadge}
-                onClick={() => handleToggleOption("showBadge")}
-                className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-app ${
-                  currentConfig.showBadge
-                    ? "bg-accent shadow-accent-glow"
-                    : "bg-border-subtle"
-                }`}>
-                <span
-                  className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                    currentConfig.showBadge ? "translate-x-4" : "translate-x-0"
-                  }`}
-                />
-              </button>
-            </div>
+            <SettingToggleRow
+              icon={<Eye className="w-5 h-5 text-accent" />}
+              title="Extension Badge Indicator"
+              description="Show “PiP” badge on extension icon whenever a video is playing in PiP."
+              enabled={currentConfig.showBadge}
+              onToggle={() => handleToggleOption("showBadge")}
+            />
 
             {/* Show Action Toast */}
-            <div className="flex items-center justify-between gap-3 py-3 group">
-              <div
-                onClick={() => handleToggleOption("showToast")}
-                className={`flex items-start gap-3 flex-1 min-w-0 cursor-pointer ${
-                  currentConfig.showToast
-                    ? "feature-row-active"
-                    : "feature-row-dimmed"
-                }`}>
-                <div className="shrink-0 mt-0.5 flex items-center justify-center transition-transform duration-200 ease-out group-hover:scale-110">
-                  <Eye className="w-5 h-5 text-emerald-400" />
-                </div>
-                <div className="flex flex-col min-w-0 flex-1">
-                  <span className="text-xs font-semibold text-content-primary">
-                    Action Toast Notification
-                  </span>
-                  <span className="text-[11px] text-content-muted leading-snug mt-0.5">
-                    Display brief confirmation toast when entering or exiting
-                    PiP.
-                  </span>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                role="switch"
-                aria-checked={currentConfig.showToast}
-                onClick={() => handleToggleOption("showToast")}
-                className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-app ${
-                  currentConfig.showToast
-                    ? "bg-accent shadow-accent-glow"
-                    : "bg-border-subtle"
-                }`}>
-                <span
-                  className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                    currentConfig.showToast ? "translate-x-4" : "translate-x-0"
-                  }`}
-                />
-              </button>
-            </div>
+            <SettingToggleRow
+              icon={<Eye className="w-5 h-5 text-emerald-400" />}
+              title="Action Toast Notification"
+              description="Display brief confirmation toast when entering or exiting PiP."
+              enabled={currentConfig.showToast}
+              onToggle={() => handleToggleOption("showToast")}
+            />
           </div>
         </div>
 
