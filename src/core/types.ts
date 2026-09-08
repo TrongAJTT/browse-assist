@@ -34,18 +34,16 @@ export const DEFAULT_CONTEXT_MENU_ACTIONS_CONFIG: ContextMenuActionsConfig = {
  * Super Drag sub-configuration.
  */
 export interface SuperDragConfig {
-  openInBackground: boolean // Open tab silently in the background
-  openNextToActive: boolean // Open adjacent to current tab
   searchSelectedText: boolean // Dragging highlighted text executes search
   openHyperlinks: boolean // Dragging a link opens URL
+  openImages: boolean // Dragging an image opens URL or copies image link
   showIndicator: boolean // Display live floating indicator badge during drag
 }
 
 export const DEFAULT_SUPER_DRAG_CONFIG: SuperDragConfig = {
-  openInBackground: true,
-  openNextToActive: true,
   searchSelectedText: true,
   openHyperlinks: true,
+  openImages: false,
   showIndicator: true
 }
 

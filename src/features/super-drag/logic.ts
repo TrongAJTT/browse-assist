@@ -6,26 +6,23 @@
  * - Drag Down: Copy Text or Clean Link to clipboard
  */
 
+import { DEFAULT_SUPER_DRAG_CONFIG, type SuperDragConfig } from "~core/types"
 import { cleanUrl } from "~features/context-menu-actions/cleanUrl"
-import {
-  DEFAULT_SUPER_DRAG_CONFIG,
-  type SuperDragConfig
-} from "~core/types"
 
 let isActive = false
 let currentConfig: SuperDragConfig = { ...DEFAULT_SUPER_DRAG_CONFIG }
 
 // Minimum distance threshold in pixels to distinguish deliberate drag from text selection
-const MIN_DRAG_DISTANCE = 25
+const MIN_DRAG_DISTANCE = 50
 // Maximum distance threshold in pixels to prevent stray cross-screen drags from executing
-const MAX_DRAG_DISTANCE = 600
+const MAX_DRAG_DISTANCE = 200
 
 export type DragDirection = "up" | "down" | "left" | "right"
 
 interface DragSession {
   startX: number
   startY: number
-  type: "text" | "link"
+  type: "text" | "link" | "image"
   payload: string
 }
 
@@ -37,7 +34,10 @@ let indicatorTimeoutId: number | null = null
  * Gets or lazily creates the floating indicator badge element.
  */
 function getOrCreateIndicator(): HTMLDivElement {
-  if (!indicatorElement || !document.documentElement.contains(indicatorElement)) {
+  if (
+    !indicatorElement ||
+    !document.documentElement.contains(indicatorElement)
+  ) {
     indicatorElement = document.createElement("div")
     indicatorElement.id = "browse-assist-drag-indicator"
     indicatorElement.style.cssText = `
@@ -91,10 +91,10 @@ function updateIndicator(
     badgeTheme === "emerald"
       ? "rgba(52, 211, 153, 0.4)"
       : badgeTheme === "amber"
-      ? "rgba(251, 191, 36, 0.4)"
-      : badgeTheme === "sky"
-      ? "rgba(56, 189, 248, 0.4)"
-      : "rgba(129, 140, 248, 0.4)"
+        ? "rgba(251, 191, 36, 0.4)"
+        : badgeTheme === "sky"
+          ? "rgba(56, 189, 248, 0.4)"
+          : "rgba(129, 140, 248, 0.4)"
 
   el.style.borderColor = themeBorder
   el.innerHTML = `
@@ -104,7 +104,7 @@ function updateIndicator(
     <span>${text}</span>
   `
 
-  // Position 24px above the cursor
+  // Position 20px above the cursor
   el.style.left = `${clientX}px`
   el.style.top = `${clientY - 20}px`
   el.style.opacity = "1"
@@ -130,7 +130,8 @@ function hideIndicator(immediately = false): void {
   indicatorTimeoutId = window.setTimeout(() => {
     if (indicatorElement) {
       indicatorElement.style.opacity = "0"
-      indicatorElement.style.transform = "translate3d(-50%, -100%, 0) scale(0.92)"
+      indicatorElement.style.transform =
+        "translate3d(-50%, -100%, 0) scale(0.92)"
     }
     indicatorTimeoutId = null
   }, 180)
@@ -142,6 +143,8 @@ const ICONS = {
   searchForeground: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>`,
   linkBackground: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>`,
   linkForeground: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="m10 14 11-11"/></svg>`,
+  imageBackground: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>`,
+  imageForeground: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>`,
   copy: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`
 }
 
@@ -195,7 +198,7 @@ function isEditableElement(target: EventTarget | null): boolean {
 }
 
 /**
- * Captures drag start coordinates and extracts link or selected text.
+ * Captures drag start coordinates and extracts link, image, or selected text.
  */
 function onDragStart(event: DragEvent): void {
   if (!isActive) return
@@ -207,9 +210,24 @@ function onDragStart(event: DragEvent): void {
   }
 
   const target = event.target as HTMLElement | null
-  const anchor = target?.closest?.("a")
 
-  // Check if dragging a hyperlink
+  // 1. Check if dragging an image element (<img>)
+  if (currentConfig.openImages) {
+    const img = target instanceof HTMLImageElement ? target : target?.querySelector?.("img")
+    const imgSrc = img?.currentSrc || img?.src
+    if (imgSrc && (imgSrc.startsWith("http://") || imgSrc.startsWith("https://") || imgSrc.startsWith("data:") || imgSrc.startsWith("blob:"))) {
+      activeSession = {
+        startX: event.clientX,
+        startY: event.clientY,
+        type: "image",
+        payload: imgSrc
+      }
+      return
+    }
+  }
+
+  // 2. Check if dragging a hyperlink (<a>)
+  const anchor = target?.closest?.("a")
   if (currentConfig.openHyperlinks && anchor && anchor.href) {
     activeSession = {
       startX: event.clientX,
@@ -220,7 +238,7 @@ function onDragStart(event: DragEvent): void {
     return
   }
 
-  // Check if dragging highlighted text
+  // 3. Check if dragging highlighted text
   if (currentConfig.searchSelectedText) {
     const selectedText = window.getSelection()?.toString().trim()
     if (selectedText) {
@@ -257,22 +275,61 @@ function onDragOver(event: DragEvent): void {
 
     if (direction === "down") {
       // DRAG DOWN: Copy to Clipboard
-      const label = activeSession.type === "text" ? "Drop to Copy Text" : "Drop to Copy Link"
-      updateIndicator(event.clientX, event.clientY, label, ICONS.copy, "emerald")
+      const label =
+        activeSession.type === "text"
+          ? "Drop to Copy Text"
+          : activeSession.type === "image"
+            ? "Drop to Copy Image Link"
+            : "Drop to Copy Link"
+      updateIndicator(
+        event.clientX,
+        event.clientY,
+        label,
+        ICONS.copy,
+        "emerald"
+      )
     } else if (direction === "left") {
       // DRAG LEFT: Open in Foreground (Active) Tab
       const label =
         activeSession.type === "text"
           ? "Drop to Search (New Tab)"
-          : "Drop to Open (New Tab)"
-      updateIndicator(event.clientX, event.clientY, label, ICONS.searchForeground, "sky")
+          : activeSession.type === "image"
+            ? "Drop to Open Image (New Tab)"
+            : "Drop to Open (New Tab)"
+      const icon =
+        activeSession.type === "image"
+          ? ICONS.imageForeground
+          : activeSession.type === "link"
+            ? ICONS.linkForeground
+            : ICONS.searchForeground
+      updateIndicator(
+        event.clientX,
+        event.clientY,
+        label,
+        icon,
+        "sky"
+      )
     } else {
       // DRAG RIGHT / UP: Open in Background Tab
       const label =
         activeSession.type === "text"
           ? "Drop to Search (Background)"
-          : "Drop to Open (Background)"
-      updateIndicator(event.clientX, event.clientY, label, ICONS.searchBackground, "indigo")
+          : activeSession.type === "image"
+            ? "Drop to Open Image (Background)"
+            : "Drop to Open (Background)"
+      const icon =
+        activeSession.type === "image"
+          ? ICONS.imageBackground
+          : activeSession.type === "link"
+            ? ICONS.linkBackground
+            : ICONS.searchBackground
+      updateIndicator(
+        event.clientX,
+        event.clientY,
+        label,
+        icon,
+        "indigo"
+      )
     }
   } else {
     hideIndicator(true)
@@ -298,7 +355,7 @@ async function onDragEnd(event: DragEvent): Promise<void> {
       // DRAG DOWN: Copy to Clipboard
       if (activeSession.type === "text") {
         await copyToClipboard(activeSession.payload)
-      } else if (activeSession.type === "link") {
+      } else if (activeSession.type === "link" || activeSession.type === "image") {
         const cleaned = cleanUrl(activeSession.payload)
         await copyToClipboard(cleaned)
       }
@@ -313,7 +370,10 @@ async function onDragEnd(event: DragEvent): Promise<void> {
           text: activeSession.payload,
           openInBackground
         })
-      } else if (activeSession.type === "link" && currentConfig.openHyperlinks) {
+      } else if (
+        (activeSession.type === "link" && currentConfig.openHyperlinks) ||
+        (activeSession.type === "image" && currentConfig.openImages)
+      ) {
         chrome.runtime.sendMessage({
           action: "SUPER_DRAG_OPEN_LINK",
           url: activeSession.payload,
@@ -372,4 +432,3 @@ export function deactivate(): void {
 
   activeSession = null
 }
-

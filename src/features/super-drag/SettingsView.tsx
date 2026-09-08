@@ -1,8 +1,7 @@
 import {
-  Compass,
   ExternalLink,
   Eye,
-  Layers,
+  ImageIcon,
   Search
 } from "lucide-react"
 import type React from "react"
@@ -23,7 +22,7 @@ interface SuperDragSettingsViewProps {
 
 /**
  * Sub-settings view for Super Drag.
- * Configures background tab behavior, placement, and drag targets.
+ * Configures drag targets and indicator visibility.
  */
 export const SuperDragSettingsView: React.FC<SuperDragSettingsViewProps> = ({
   onBack
@@ -49,7 +48,7 @@ export const SuperDragSettingsView: React.FC<SuperDragSettingsViewProps> = ({
       ...(prev ?? DEFAULT_SETTINGS),
       superDragConfig: {
         ...(prev?.superDragConfig ?? DEFAULT_SETTINGS.superDragConfig),
-        [key]: !((prev?.superDragConfig ?? DEFAULT_SETTINGS.superDragConfig)[key])
+        [key]: !currentConfig[key]
       }
     }))
   }
@@ -61,101 +60,8 @@ export const SuperDragSettingsView: React.FC<SuperDragSettingsViewProps> = ({
       onToggle={handleToggleMaster}
       onBack={onBack}>
       <div className="space-y-4">
-        {/* Section 1: Tab Opening Behavior */}
+        {/* Drag Targets */}
         <div className="space-y-2">
-          <span className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
-            Tab Opening Behavior
-          </span>
-
-          <div className="divide-y divide-slate-800/80">
-            {/* Open in Background Tab */}
-            <div className="flex items-center justify-between gap-3 py-3 group">
-              <div
-                onClick={() => handleToggleOption("openInBackground")}
-                className={`flex items-start gap-3 flex-1 min-w-0 cursor-pointer ${
-                  currentConfig.openInBackground
-                    ? "feature-row-active"
-                    : "feature-row-dimmed"
-                }`}>
-                <div className="shrink-0 mt-0.5 flex items-center justify-center transition-transform duration-200 ease-out group-hover:scale-110">
-                  <Layers className="w-5 h-5 text-indigo-400" />
-                </div>
-                <div className="flex flex-col min-w-0 flex-1">
-                  <span className="text-xs font-semibold text-slate-200">
-                    Open in Background Tab
-                  </span>
-                  <span className="text-[11px] text-slate-400 leading-snug mt-0.5">
-                    Open new tabs silently in the background without stealing focus.
-                  </span>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                role="switch"
-                aria-checked={currentConfig.openInBackground}
-                onClick={() => handleToggleOption("openInBackground")}
-                className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${
-                  currentConfig.openInBackground
-                    ? "bg-indigo-600 shadow-indigo-500/20 shadow-sm"
-                    : "bg-slate-700"
-                }`}>
-                <span
-                  className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                    currentConfig.openInBackground
-                      ? "translate-x-4"
-                      : "translate-x-0"
-                  }`}
-                />
-              </button>
-            </div>
-
-            {/* Open Next to Current Tab */}
-            <div className="flex items-center justify-between gap-3 py-3 group">
-              <div
-                onClick={() => handleToggleOption("openNextToActive")}
-                className={`flex items-start gap-3 flex-1 min-w-0 cursor-pointer ${
-                  currentConfig.openNextToActive
-                    ? "feature-row-active"
-                    : "feature-row-dimmed"
-                }`}>
-                <div className="shrink-0 mt-0.5 flex items-center justify-center transition-transform duration-200 ease-out group-hover:scale-110">
-                  <Compass className="w-5 h-5 text-cyan-400" />
-                </div>
-                <div className="flex flex-col min-w-0 flex-1">
-                  <span className="text-xs font-semibold text-slate-200">
-                    Open Next to Current Tab
-                  </span>
-                  <span className="text-[11px] text-slate-400 leading-snug mt-0.5">
-                    Place newly opened tab immediately adjacent to current tab.
-                  </span>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                role="switch"
-                aria-checked={currentConfig.openNextToActive}
-                onClick={() => handleToggleOption("openNextToActive")}
-                className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${
-                  currentConfig.openNextToActive
-                    ? "bg-indigo-600 shadow-indigo-500/20 shadow-sm"
-                    : "bg-slate-700"
-                }`}>
-                <span
-                  className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                    currentConfig.openNextToActive
-                      ? "translate-x-4"
-                      : "translate-x-0"
-                  }`}
-                />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Section 2: Drag Targets */}
-        <div className="space-y-2 pt-2 border-t border-slate-800/80">
           <span className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
             Drag Targets
           </span>
@@ -245,6 +151,48 @@ export const SuperDragSettingsView: React.FC<SuperDragSettingsViewProps> = ({
               </button>
             </div>
 
+            {/* Drag Images */}
+            <div className="flex items-center justify-between gap-3 py-3 group">
+              <div
+                onClick={() => handleToggleOption("openImages")}
+                className={`flex items-start gap-3 flex-1 min-w-0 cursor-pointer ${
+                  currentConfig.openImages
+                    ? "feature-row-active"
+                    : "feature-row-dimmed"
+                }`}>
+                <div className="shrink-0 mt-0.5 flex items-center justify-center transition-transform duration-200 ease-out group-hover:scale-110">
+                  <ImageIcon className="w-5 h-5 text-amber-400" />
+                </div>
+                <div className="flex flex-col min-w-0 flex-1">
+                  <span className="text-xs font-semibold text-slate-200">
+                    Drag Images
+                  </span>
+                  <span className="text-[11px] text-slate-400 leading-snug mt-0.5">
+                    Drag any image to view in a new tab or copy its direct image link.
+                  </span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                role="switch"
+                aria-checked={currentConfig.openImages}
+                onClick={() => handleToggleOption("openImages")}
+                className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${
+                  currentConfig.openImages
+                    ? "bg-indigo-600 shadow-indigo-500/20 shadow-sm"
+                    : "bg-slate-700"
+                }`}>
+                <span
+                  className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                    currentConfig.openImages
+                      ? "translate-x-4"
+                      : "translate-x-0"
+                  }`}
+                />
+              </button>
+            </div>
+
             {/* Show Drag Indicator */}
             <div className="flex items-center justify-between gap-3 py-3 group">
               <div
@@ -304,7 +252,7 @@ export const SuperDragSettingsView: React.FC<SuperDragSettingsViewProps> = ({
                 Background Tab
               </span>
               <span className="text-[9.5px] text-slate-500">
-                Search or Open link
+                Search, Link, or Image
               </span>
             </div>
 
@@ -328,7 +276,7 @@ export const SuperDragSettingsView: React.FC<SuperDragSettingsViewProps> = ({
                 Copy to Clipboard
               </span>
               <span className="text-[9.5px] text-slate-500">
-                Text or Clean Link
+                Text, Link, or Image URL
               </span>
             </div>
           </div>

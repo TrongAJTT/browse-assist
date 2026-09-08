@@ -24,16 +24,13 @@ export interface SuperDragMessage {
  */
 async function handleSearch(
   text: string,
-  config: SuperDragConfig,
+  _config: SuperDragConfig,
   senderTab?: chrome.tabs.Tab,
-  overrideBackground?: boolean
+  overrideBackground = true
 ): Promise<void> {
   if (!text) return
 
-  const openInBackground =
-    typeof overrideBackground === "boolean"
-      ? overrideBackground
-      : config.openInBackground
+  const openInBackground = overrideBackground
 
   if (chrome.search?.query) {
     await chrome.search.query({
@@ -64,23 +61,21 @@ async function handleSearch(
  */
 async function handleOpenLink(
   rawUrl: string,
-  config: SuperDragConfig,
+  _config: SuperDragConfig,
   senderTab?: chrome.tabs.Tab,
-  overrideBackground?: boolean
+  overrideBackground = true
 ): Promise<void> {
   if (!rawUrl) return
 
   const url = cleanUrl(rawUrl)
   let targetIndex: number | undefined
 
-  if (config.openNextToActive && senderTab && typeof senderTab.index === "number") {
+  // Default natural behavior: open adjacent to current tab if possible
+  if (senderTab && typeof senderTab.index === "number") {
     targetIndex = senderTab.index + 1
   }
 
-  const openInBackground =
-    typeof overrideBackground === "boolean"
-      ? overrideBackground
-      : config.openInBackground
+  const openInBackground = overrideBackground
 
   chrome.tabs.create({
     url,
