@@ -3,23 +3,14 @@
  * Listens for browser shortcut commands to toggle Allow Right Click on the active tab.
  */
 
+import { sendToActiveTab } from "~core/messaging"
+
 /**
  * Listens for commands registered in manifest.
  */
 function onCommandListener(command: string): void {
   if (command === "toggle_allow_right_click") {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      const activeTab = tabs[0]
-      if (activeTab?.id) {
-        chrome.tabs
-          .sendMessage(activeTab.id, {
-            type: "TOGGLE_RIGHT_CLICK_SHORTCUT"
-          })
-          .catch(() => {
-            // Tab may not have content script injected (e.g. chrome:// or restricted pages)
-          })
-      }
-    })
+    sendToActiveTab("TOGGLE_RIGHT_CLICK_SHORTCUT").catch(() => {})
   }
 }
 

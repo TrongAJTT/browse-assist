@@ -16,6 +16,7 @@ import { AboutView } from "~components/AboutView"
 import { PreferencesSettingsView } from "~components/PreferencesSettingsView"
 import { AppIcon } from "~core/assets"
 import { DONATE_OPTIONS } from "~core/constants"
+import { sendToActiveTab, sendToBackground } from "~core/messaging"
 import {
   DEFAULT_SETTINGS,
   STORAGE_KEYS,
@@ -67,20 +68,15 @@ function IndexPopup() {
 
   // Query background for active PiP session and command shortcut
   useEffect(() => {
-    chrome.runtime.sendMessage(
-      { action: "GET_ACTIVE_PIP_SESSION" },
-      (response) => {
-        if (response?.session) {
-          setActivePiP(response.session)
-        }
+    sendToBackground("GET_ACTIVE_PIP_SESSION").then((response) => {
+      if (response?.session) {
+        setActivePiP(response.session)
       }
-    )
+    })
 
     if (chrome.commands?.getAll) {
       chrome.commands.getAll((commands) => {
-        const cmd = commands.find(
-          (c) => c.name === "toggle_picture_in_picture"
-        )
+        const cmd = commands.find((c) => c.name === "toggle_picture_in_picture")
         if (cmd?.shortcut) {
           setPipShortcut(cmd.shortcut)
         } else {
@@ -90,49 +86,32 @@ function IndexPopup() {
     }
   }, [])
 
-  const handleFocusPiPTab = () => {
-    chrome.runtime.sendMessage({ action: "FOCUS_PIP_TAB" }, () => {
-      window.close()
-    })
+  const handleFocusPiPTab = async () => {
+    await sendToBackground("FOCUS_PIP_TAB")
+    window.close()
   }
 
-  const handleClosePiP = (e: React.MouseEvent) => {
+  const handleClosePiP = async (e: React.MouseEvent) => {
     e.stopPropagation()
-    chrome.runtime.sendMessage({ action: "CLOSE_PIP" }, () => {
-      setActivePiP(null)
-    })
+    await sendToBackground("CLOSE_PIP")
+    setActivePiP(null)
   }
 
-  const handleTogglePiPOnCurrentTab = () => {
+  const handleTogglePiPOnCurrentTab = async () => {
     if (activePiP) {
-      chrome.runtime.sendMessage({ action: "CLOSE_PIP" }, () => {
-        setActivePiP(null)
-      })
+      await sendToBackground("CLOSE_PIP")
+      setActivePiP(null)
       return
     }
 
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      const activeTab = tabs[0]
-      if (activeTab?.id) {
-        chrome.tabs.sendMessage(
-          activeTab.id,
-          { action: "TOGGLE_PICTURE_IN_PICTURE" },
-          () => {
-            // Re-check PiP state after small delay
-            setTimeout(() => {
-              chrome.runtime.sendMessage(
-                { action: "GET_ACTIVE_PIP_SESSION" },
-                (response) => {
-                  if (response?.session) {
-                    setActivePiP(response.session)
-                  }
-                }
-              )
-            }, 300)
-          }
-        )
+    await sendToActiveTab("TOGGLE_PICTURE_IN_PICTURE")
+    // Re-check PiP state after small delay
+    setTimeout(async () => {
+      const response = await sendToBackground("GET_ACTIVE_PIP_SESSION")
+      if (response?.session) {
+        setActivePiP(response.session)
       }
-    })
+    }, 300)
   }
 
   // Ready when both storage settings and active tab state are hydrated

@@ -13,6 +13,7 @@ import { useStorage } from "@plasmohq/storage/hook"
 
 import { GridPicker, type GridPickerItem } from "~components/GridPicker"
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
+import { sendToActiveTab } from "~core/messaging"
 import {
   DEFAULT_SETTINGS,
   STORAGE_KEYS,
@@ -104,23 +105,10 @@ export const MouseZoomSettingsView: React.FC<MouseZoomSettingsViewProps> = ({
 
   const [isResetting, setIsResetting] = useState(false)
 
-  const handleResetZoom = () => {
+  const handleResetZoom = async () => {
     setIsResetting(true)
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      const activeTabId = tabs[0]?.id
-      if (activeTabId) {
-        chrome.tabs.sendMessage(
-          activeTabId,
-          { type: "RESET_MOUSE_ZOOM" },
-          () => {
-            if (chrome.runtime.lastError) {
-              // Suppress if tab doesn't have content script
-            }
-          }
-        )
-      }
-      setTimeout(() => setIsResetting(false), 500)
-    })
+    await sendToActiveTab("RESET_MOUSE_ZOOM")
+    setTimeout(() => setIsResetting(false), 500)
   }
 
   return (

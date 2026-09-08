@@ -3,6 +3,7 @@ import type React from "react"
 import { useEffect, useState } from "react"
 
 import { ToggleSwitch } from "~components/ToggleSwitch"
+import { sendToActiveTab } from "~core/messaging"
 import { FEATURES_LIST } from "~core/types"
 
 const meta = FEATURES_LIST.find((f) => f.key === "allowRightClick")!
@@ -21,7 +22,6 @@ export const AllowRightClickToggle: React.FC<AllowRightClickToggleProps> = ({
   onReady
 }) => {
   const [isActiveInTab, setIsActiveInTab] = useState(false)
-  const [currentTabId, setCurrentTabId] = useState<number | null>(null)
   const [shortcut, setShortcut] = useState<string>("Alt + R")
 
   useEffect(() => {
@@ -38,45 +38,19 @@ export const AllowRightClickToggle: React.FC<AllowRightClickToggleProps> = ({
       })
     }
 
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      const activeTab = tabs[0]
-      if (!activeTab?.id) {
-        onReady?.()
-        return
+    sendToActiveTab("GET_RIGHT_CLICK_STATUS").then((response) => {
+      if (typeof response?.active === "boolean") {
+        setIsActiveInTab(response.active)
+        onStatusChange?.(response.active)
       }
-
-      const tabId = activeTab.id
-      setCurrentTabId(tabId)
-
-      chrome.tabs.sendMessage(
-        tabId,
-        { type: "GET_RIGHT_CLICK_STATUS" },
-        (response) => {
-          if (!chrome.runtime.lastError && typeof response?.active === "boolean") {
-            setIsActiveInTab(response.active)
-            onStatusChange?.(response.active)
-          }
-          onReady?.()
-        }
-      )
+      onReady?.()
     })
   }, [onStatusChange, onReady])
 
-  const handleChange = (enabled: boolean) => {
+  const handleChange = async (enabled: boolean) => {
     setIsActiveInTab(enabled)
     onStatusChange?.(enabled)
-
-    if (currentTabId) {
-      chrome.tabs.sendMessage(
-        currentTabId,
-        { type: "TOGGLE_RIGHT_CLICK", enabled },
-        () => {
-          if (chrome.runtime.lastError) {
-            // Suppress error if tab doesn't have content script injected (e.g. chrome:// URL)
-          }
-        }
-      )
-    }
+    await sendToActiveTab("TOGGLE_RIGHT_CLICK", { enabled })
   }
 
   return (

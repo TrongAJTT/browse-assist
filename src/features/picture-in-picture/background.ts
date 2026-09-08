@@ -4,6 +4,7 @@
  * chrome.commands routing, and tracking the single active PiP tab.
  */
 
+import { sendToActiveTab, sendToTab } from "~core/messaging"
 import { extensionStorage } from "~core/storage"
 import {
   DEFAULT_SETTINGS,
@@ -70,13 +71,7 @@ export async function focusPiPTab(): Promise<boolean> {
 export async function closeActivePiP(): Promise<void> {
   if (!activeSession) return
 
-  try {
-    await chrome.tabs.sendMessage(activeSession.tabId, {
-      action: "EXIT_PICTURE_IN_PICTURE"
-    })
-  } catch {
-    // Suppress tab communication errors
-  }
+  await sendToTab(activeSession.tabId, "EXIT_PICTURE_IN_PICTURE")
 
   activeSession = null
   await updateBadge(false)
@@ -138,18 +133,7 @@ function onTabRemovedListener(tabId: number): void {
  */
 function onCommandListener(command: string): void {
   if (command === "toggle_picture_in_picture") {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      const activeTab = tabs[0]
-      if (activeTab?.id) {
-        chrome.tabs
-          .sendMessage(activeTab.id, {
-            action: "TOGGLE_PICTURE_IN_PICTURE"
-          })
-          .catch(() => {
-            // Tab may not have content script injected (e.g. chrome://)
-          })
-      }
-    })
+    sendToActiveTab("TOGGLE_PICTURE_IN_PICTURE").catch(() => {})
   }
 }
 

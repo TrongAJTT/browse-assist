@@ -9,6 +9,7 @@ import {
   type PictureInPictureConfig
 } from "~core/types"
 
+import { sendToBackground } from "~core/messaging"
 import { removeContentToast, showContentToast } from "~core/toast"
 
 let isActive = false
@@ -125,15 +126,10 @@ export async function togglePictureInPicture(): Promise<void> {
  * Notifies background service worker about PiP state change.
  */
 function notifyPiPStatus(isPip: boolean): void {
-  try {
-    chrome.runtime.sendMessage({
-      action: "PIP_STATUS_CHANGED",
-      isPip,
-      title: document.title || window.location.hostname
-    })
-  } catch {
-    // Suppress context invalidated errors during reload
-  }
+  sendToBackground("PIP_STATUS_CHANGED", {
+    isPip,
+    title: document.title || window.location.hostname
+  }).catch(() => {})
 }
 
 /**

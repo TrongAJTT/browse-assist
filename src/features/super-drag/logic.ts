@@ -6,6 +6,7 @@
  * - Drag Down: Copy Text or Clean Link to clipboard
  */
 
+import { sendToBackground } from "~core/messaging"
 import { DEFAULT_SUPER_DRAG_CONFIG, type SuperDragConfig } from "~core/types"
 import { cleanUrl } from "~features/context-menu-actions/cleanUrl"
 
@@ -365,20 +366,18 @@ async function onDragEnd(event: DragEvent): Promise<void> {
       const openInBackground = direction === "left" ? false : true
 
       if (activeSession.type === "text" && currentConfig.searchSelectedText) {
-        chrome.runtime.sendMessage({
-          action: "SUPER_DRAG_SEARCH",
+        sendToBackground("SUPER_DRAG_SEARCH", {
           text: activeSession.payload,
           openInBackground
-        })
+        }).catch(() => {})
       } else if (
         (activeSession.type === "link" && currentConfig.openHyperlinks) ||
         (activeSession.type === "image" && currentConfig.openImages)
       ) {
-        chrome.runtime.sendMessage({
-          action: "SUPER_DRAG_OPEN_LINK",
+        sendToBackground("SUPER_DRAG_OPEN_LINK", {
           url: activeSession.payload,
           openInBackground
-        })
+        }).catch(() => {})
       }
     }
   }
