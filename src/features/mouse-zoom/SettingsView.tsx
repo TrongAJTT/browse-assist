@@ -7,6 +7,7 @@ import {
   Sparkles
 } from "lucide-react"
 import type React from "react"
+import { useState } from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
@@ -101,12 +102,46 @@ export const MouseZoomSettingsView: React.FC<MouseZoomSettingsViewProps> = ({
     }))
   }
 
+  const [isResetting, setIsResetting] = useState(false)
+
+  const handleResetZoom = () => {
+    setIsResetting(true)
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const activeTabId = tabs[0]?.id
+      if (activeTabId) {
+        chrome.tabs.sendMessage(
+          activeTabId,
+          { type: "RESET_MOUSE_ZOOM" },
+          () => {
+            if (chrome.runtime.lastError) {
+              // Suppress if tab doesn't have content script
+            }
+          }
+        )
+      }
+      setTimeout(() => setIsResetting(false), 500)
+    })
+  }
+
   return (
     <SubSettingsLayout
       title="Mouse Pin-to-Zoom"
       enabled={isEnabled}
       onToggle={handleToggleFeature}
-      onBack={onBack}>
+      onBack={onBack}
+      rightActions={
+        <button
+          type="button"
+          onClick={handleResetZoom}
+          title="Reset Zoom to 100% on current tab"
+          className="flex items-center justify-center p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 active:scale-95 transition-all focus:outline-none focus:ring-1 focus:ring-indigo-500/50">
+          <RotateCcw
+            className={`w-3.5 h-3.5 transition-transform duration-500 ${
+              isResetting ? "-rotate-180 text-indigo-400" : ""
+            }`}
+          />
+        </button>
+      }>
       {/* Modifier Key Grid Picker */}
       <div className="space-y-2">
         <span className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
@@ -246,23 +281,6 @@ export const MouseZoomSettingsView: React.FC<MouseZoomSettingsViewProps> = ({
             />
           </button>
         </div>
-      </div>
-
-      {/* Shortcut hint */}
-      <div className="p-2.5 rounded-xl bg-slate-800/40 border border-slate-700/50 flex items-center justify-between text-xs text-slate-400">
-        <span className="flex items-center gap-1.5">
-          <RotateCcw className="w-3.5 h-3.5 text-slate-400" />
-          Reset Zoom Shortcut
-        </span>
-        <span className="font-mono text-[11px] px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300">
-          {currentConfig.modifier === "shift"
-            ? "Shift + 0"
-            : currentConfig.modifier === "right-click"
-              ? "Right Click + 0"
-              : currentConfig.modifier === "left-click"
-                ? "Left Click + 0"
-                : "Alt + 0"}
-        </span>
       </div>
     </SubSettingsLayout>
   )

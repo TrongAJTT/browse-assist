@@ -83,6 +83,18 @@ async function init(): Promise<void> {
         sendResponse({ active: isRightClickActive() })
         return true
       }
+      if (message?.type === "RESET_MOUSE_ZOOM") {
+        if (typeof window !== "undefined" && document.body) {
+          document.body.style.removeProperty("zoom")
+          document.body.style.removeProperty("transition")
+          const toast = document.getElementById("browse-assist-zoom-toast")
+          if (toast && toast.parentNode) {
+            toast.parentNode.removeChild(toast)
+          }
+        }
+        sendResponse({ success: true })
+        return true
+      }
     })
   } catch (error) {
     console.error("Browse Assist: Failed to initialize content features", error)

@@ -7,6 +7,7 @@ interface SubSettingsLayoutProps {
   onBack: () => void
   enabled?: boolean
   onToggle?: (enabled: boolean) => void
+  rightActions?: React.ReactNode
   children: React.ReactNode
 }
 
@@ -20,6 +21,7 @@ export const SubSettingsLayout: React.FC<SubSettingsLayoutProps> = ({
   onBack,
   enabled,
   onToggle,
+  rightActions,
   children
 }) => {
   useEffect(() => {
@@ -47,7 +49,7 @@ export const SubSettingsLayout: React.FC<SubSettingsLayoutProps> = ({
 
   return (
     <div className="flex flex-col space-y-4 py-2">
-      {/* Header: Title on the left with Chevron Back, Optional Switch on the right */}
+      {/* Header: Title on the left with Chevron Back, Optional Actions & Switch on the right */}
       <div className="flex items-center justify-between pb-2 border-b border-slate-800/80">
         <button
           type="button"
@@ -60,26 +62,30 @@ export const SubSettingsLayout: React.FC<SubSettingsLayoutProps> = ({
           </span>
         </button>
 
-        {/* Optional Toggle Switch on the right */}
-        {onToggle !== undefined && enabled !== undefined && (
-          <button
-            type="button"
-            role="switch"
-            aria-checked={enabled}
-            onClick={() => onToggle(!enabled)}
-            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${
-              enabled
-                ? "bg-indigo-600 shadow-indigo-500/20 shadow-sm"
-                : "bg-slate-700"
-            }`}>
-            <span className="sr-only">Toggle {title}</span>
-            <span
-              className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                enabled ? "translate-x-4" : "translate-x-0"
-              }`}
-            />
-          </button>
-        )}
+        {/* Right header controls: custom action buttons + toggle switch */}
+        <div className="flex items-center gap-2">
+          {rightActions}
+
+          {onToggle !== undefined && enabled !== undefined && (
+            <button
+              type="button"
+              role="switch"
+              aria-checked={enabled}
+              onClick={() => onToggle(!enabled)}
+              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${
+                enabled
+                  ? "bg-indigo-600 shadow-indigo-500/20 shadow-sm"
+                  : "bg-slate-700"
+              }`}>
+              <span className="sr-only">Toggle {title}</span>
+              <span
+                className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                  enabled ? "translate-x-4" : "translate-x-0"
+                }`}
+              />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Main Sub-settings content */}

@@ -186,22 +186,6 @@ function onWheel(event: WheelEvent): void {
 }
 
 /**
- * Keyboard shortcuts to reset zoom.
- * Alt + 0 or Shift + 0 depending on key modifier, or universally Alt + 0.
- */
-function onKeyDown(event: KeyboardEvent): void {
-  if (event.key === "0" || event.code === "Digit0") {
-    const isModifier =
-      (currentConfig.modifier === "shift" && event.shiftKey) ||
-      event.altKey // Always allow Alt + 0 as fallback reset
-    if (isModifier) {
-      event.preventDefault()
-      resetZoom()
-    }
-  }
-}
-
-/**
  * Hot updates runtime zoom config without reattaching listeners.
  */
 export function updateMouseZoomConfig(config?: Partial<MouseZoomConfig>): void {
@@ -221,7 +205,6 @@ export function activate(config?: MouseZoomConfig): void {
   isActive = true
 
   window.addEventListener("wheel", onWheel, { passive: false, capture: true })
-  window.addEventListener("keydown", onKeyDown, { capture: true })
   window.addEventListener("mousedown", onMouseDown, { capture: true })
   window.addEventListener("mouseup", onMouseUp, { capture: true })
   window.addEventListener("contextmenu", onContextMenu, { capture: true })
@@ -235,7 +218,6 @@ export function deactivate(): void {
   isActive = false
 
   window.removeEventListener("wheel", onWheel, true)
-  window.removeEventListener("keydown", onKeyDown, true)
   window.removeEventListener("mousedown", onMouseDown, true)
   window.removeEventListener("mouseup", onMouseUp, true)
   window.removeEventListener("contextmenu", onContextMenu, true)
