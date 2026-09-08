@@ -9,7 +9,8 @@ import { getStoredSettings, subscribeToSettings } from "~core/storage"
 import type { FeatureSettings } from "~core/types"
 import {
   activate as activateRightClick,
-  deactivate as deactivateRightClick
+  deactivate as deactivateRightClick,
+  isRightClickActive
 } from "~features/allow-right-click/logic"
 import {
   activate as activateCopyLink,
@@ -30,12 +31,7 @@ export const config: PlasmoCSConfig = {
 }
 
 function applySettings(nextSettings: FeatureSettings): void {
-  // Allow Right Click
-  if (nextSettings.allowRightClick) {
-    activateRightClick()
-  } else {
-    deactivateRightClick()
-  }
+  // Allow Right Click is managed per-tab on-demand, not auto-activated globally.
 
   // Copy Link Text
   if (nextSettings.copyLinkText) {
@@ -70,6 +66,23 @@ async function init(): Promise<void> {
     // Watch for live setting updates from popup
     subscribeToSettings((updatedSettings) => {
       applySettings(updatedSettings)
+    })
+
+    // Listen for tab-scoped commands (e.g. per-tab Allow Right Click)
+    chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+      if (message?.type === "GET_RIGHT_CLICK_STATUS") {
+        sendResponse({ active: isRightClickActive() })
+        return true
+      }
+      if (message?.type === "TOGGLE_RIGHT_CLICK") {
+        if (message.enabled) {
+          activateRightClick()
+        } else {
+          deactivateRightClick()
+        }
+        sendResponse({ active: isRightClickActive() })
+        return true
+      }
     })
   } catch (error) {
     console.error("Browse Assist: Failed to initialize content features", error)

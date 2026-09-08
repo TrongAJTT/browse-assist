@@ -32,7 +32,7 @@ function IndexPopup() {
   const totalCount = 4
 
   return (
-    <div className="w-[350px] bg-slate-900 text-slate-100 font-sans select-none antialiased flex flex-col">
+    <div className="w-[370px] bg-slate-900 text-slate-100 font-sans select-none antialiased flex flex-col">
       {/* Header - Crisp and cleanly separated from content */}
       <header className="px-4 py-3 bg-slate-900/95 border-b border-slate-800 flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center gap-2.5">

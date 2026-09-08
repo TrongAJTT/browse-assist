@@ -9,6 +9,7 @@ interface ToggleSwitchProps {
   onChange: (enabled: boolean) => void
   disabled?: boolean
   shortcut?: string
+  badge?: string
   onConfigure?: () => void
 }
 
@@ -23,6 +24,7 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
   onChange,
   disabled = false,
   shortcut,
+  badge,
   onConfigure
 }) => {
   return (
@@ -44,6 +46,11 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
               }`}>
               {title}
             </span>
+            {badge && (
+              <span className="px-1.5 py-0.5 text-[10px] font-medium tracking-tight rounded bg-emerald-950/60 text-emerald-400 border border-emerald-800/50">
+                {badge}
+              </span>
+            )}
             {shortcut && (
               <span className="px-1.5 py-0.5 text-[10px] font-mono font-medium rounded bg-slate-800 text-slate-400 border border-slate-700/60">
                 {shortcut}

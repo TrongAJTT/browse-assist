@@ -121,3 +121,10 @@ export function deactivate(): void {
 
   removeSelectionStyles()
 }
+
+/**
+ * Returns current activation status in the current tab session.
+ */
+export function isRightClickActive(): boolean {
+  return isActive
+}
