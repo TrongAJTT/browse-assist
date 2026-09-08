@@ -39,7 +39,7 @@ export const SmoothScrollToggle: React.FC<SmoothScrollToggleProps> = ({
 
   return (
     <ToggleSwitch
-      icon={<Scroll className="w-4 h-4 text-amber-400" />}
+      icon={<Scroll className="w-5 h-5 text-amber-400" />}
       title={meta.title}
       description={meta.description}
       enabled={isEnabled}

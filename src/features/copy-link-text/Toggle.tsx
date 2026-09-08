@@ -33,7 +33,7 @@ export const CopyLinkTextToggle: React.FC = () => {
 
   return (
     <ToggleSwitch
-      icon={<Link2 className="w-4 h-4 text-cyan-400" />}
+      icon={<Link2 className="w-5 h-5 text-cyan-400" />}
       title={meta.title}
       description={meta.description}
       enabled={isEnabled}

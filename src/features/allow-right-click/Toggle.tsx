@@ -34,7 +34,7 @@ export const AllowRightClickToggle: React.FC = () => {
 
   return (
     <ToggleSwitch
-      icon={<MousePointerClick className="w-4 h-4 text-emerald-400" />}
+      icon={<MousePointerClick className="w-5 h-5 text-emerald-400" />}
       title={meta.title}
       description={meta.description}
       enabled={isEnabled}

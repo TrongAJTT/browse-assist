@@ -33,7 +33,7 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
         className={`flex items-start gap-3 flex-1 min-w-0 ${
           onConfigure ? "cursor-pointer" : ""
         }`}>
-        <div className="shrink-0 mt-0.5 flex items-center justify-center w-8 h-8 rounded-lg bg-slate-800/80 border border-slate-700/50 shadow-sm transition-all group-hover:scale-105 group-hover:border-slate-600">
+        <div className="shrink-0 mt-0.5 flex items-center justify-center transition-transform duration-200 ease-out group-hover:scale-110">
           {icon}
         </div>
         <div className="flex flex-col min-w-0 flex-1">

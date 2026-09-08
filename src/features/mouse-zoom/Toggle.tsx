@@ -33,7 +33,7 @@ export const MouseZoomToggle: React.FC = () => {
 
   return (
     <ToggleSwitch
-      icon={<ZoomIn className="w-4 h-4 text-violet-400" />}
+      icon={<ZoomIn className="w-5 h-5 text-violet-400" />}
       title={meta.title}
       description={meta.description}
       enabled={isEnabled}
