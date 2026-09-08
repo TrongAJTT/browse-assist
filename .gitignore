@@ -31,4 +31,7 @@ dist/
 
 # typescript
 .tsbuildinfo
+tsconfig.tsbuildinfo
+
+# Misc
 SPECIFICATION.md

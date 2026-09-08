@@ -15,6 +15,7 @@ Browse Assist là tiện ích mở rộng trình duyệt (Manifest V3) tổng h�
 - **UI**: React 18 + Tailwind CSS v3. Không cài thêm các thư viện UI component nặng (như MUI, AntD, Chakra) để giữ dung lượng extension gọn nhẹ nhất có thể.
 - **Styling**: Utility classes của Tailwind CSS. Popup chạy trong sandbox riêng biệt nên class Tailwind không bị xung đột với trang web gốc.
 - **Package Manager**: PNPM. Luôn dùng `pnpm` để cài đặt và quản lý dependencies.
+- **Verification**: Dùng `pnpm lint` và `pnpm typecheck` để kiểm tra nhanh cú pháp, quy tắc và type safety trong quá trình phát triển thay vì phải chạy full build.
 
 ---
 
