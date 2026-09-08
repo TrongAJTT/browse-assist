@@ -1,4 +1,10 @@
-import { ExternalLink, Eye, Keyboard, ShieldAlert } from "lucide-react"
+import {
+  ExternalLink,
+  Eye,
+  Keyboard,
+  PictureInPicture2,
+  ShieldAlert
+} from "lucide-react"
 import type React from "react"
 import { useEffect, useState } from "react"
 
@@ -6,6 +12,11 @@ import { useStorage } from "@plasmohq/storage/hook"
 
 import { ShortcutBadge } from "~components/ShortcutBadge"
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
+import {
+  MESSAGE_TYPES,
+  sendToActiveTab,
+  sendToBackground
+} from "~core/messaging"
 import {
   DEFAULT_SETTINGS,
   STORAGE_KEYS,
@@ -67,6 +78,38 @@ export const PictureInPictureSettingsView: React.FC<
     }))
   }
 
+  const [activePiP, setActivePiP] = useState<{
+    tabId: number
+    title: string
+  } | null>(null)
+
+  useEffect(() => {
+    sendToBackground(MESSAGE_TYPES.GET_ACTIVE_PIP_SESSION).then((response) => {
+      if (response?.session) {
+        setActivePiP(response.session)
+      }
+    })
+  }, [])
+
+  const handleTogglePiP = async () => {
+    if (activePiP) {
+      await sendToBackground(MESSAGE_TYPES.CLOSE_PIP)
+      setActivePiP(null)
+      return
+    }
+
+    await sendToActiveTab(MESSAGE_TYPES.TOGGLE_PICTURE_IN_PICTURE)
+    setTimeout(async () => {
+      const response = await sendToBackground(
+        MESSAGE_TYPES.GET_ACTIVE_PIP_SESSION
+      )
+      if (response?.session) {
+        setActivePiP(response.session)
+      }
+    }, 300)
+    window.close()
+  }
+
   const handleOpenShortcutsPage = () => {
     chrome.tabs.create({ url: "chrome://extensions/shortcuts" })
   }
@@ -78,6 +121,25 @@ export const PictureInPictureSettingsView: React.FC<
       onToggle={handleToggleMaster}
       onBack={onBack}>
       <div className="space-y-4">
+        {/* Quick Trigger Button */}
+        <div className="pt-1">
+          <button
+            type="button"
+            onClick={handleTogglePiP}
+            disabled={!isMasterEnabled}
+            className={`w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-semibold text-xs transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none ${
+              activePiP
+                ? "bg-rose-500 hover:bg-rose-600 text-white shadow-md shadow-rose-500/25"
+                : "bg-accent hover:bg-accent-hover text-white shadow-md shadow-accent-glow"
+            }`}>
+            <PictureInPicture2 className="w-4 h-4" />
+            <span>
+              {activePiP
+                ? "Exit Picture-in-Picture"
+                : "Toggle Picture-in-Picture"}
+            </span>
+          </button>
+        </div>
         {/* Shortcut Section */}
         <div className="space-y-2">
           <span className="section-header">

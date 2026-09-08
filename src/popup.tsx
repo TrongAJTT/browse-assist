@@ -73,8 +73,10 @@ function IndexPopup() {
     title: string
   } | null>(null)
   const [pipShortcut, setPipShortcut] = useState<string>("Alt + P")
+  const [colorPickerShortcut, setColorPickerShortcut] =
+    useState<string>("Alt + Shift + C")
 
-  // Query background for active PiP session and command shortcut
+  // Query background for active PiP session and command shortcuts
   useEffect(() => {
     sendToBackground(MESSAGE_TYPES.GET_ACTIVE_PIP_SESSION).then((response) => {
       if (response?.session) {
@@ -84,11 +86,20 @@ function IndexPopup() {
 
     if (chrome.commands?.getAll) {
       chrome.commands.getAll((commands) => {
-        const cmd = commands.find((c) => c.name === "toggle_picture_in_picture")
-        if (cmd?.shortcut) {
-          setPipShortcut(cmd.shortcut)
+        const pipCmd = commands.find(
+          (c) => c.name === "toggle_picture_in_picture"
+        )
+        if (pipCmd?.shortcut) {
+          setPipShortcut(pipCmd.shortcut)
         } else {
           setPipShortcut("")
+        }
+
+        const cpCmd = commands.find((c) => c.name === "toggle_color_picker")
+        if (cpCmd?.shortcut) {
+          setColorPickerShortcut(cpCmd.shortcut)
+        } else {
+          setColorPickerShortcut("")
         }
       })
     }
@@ -198,12 +209,16 @@ function IndexPopup() {
           {settings?.colorPicker && (
             <button
               type="button"
-              title="Pick Color from Screen (Alt + Shift + C)"
+              title={
+                colorPickerShortcut
+                  ? `Pick Color from Screen (${colorPickerShortcut})`
+                  : "Pick Color from Screen"
+              }
               onClick={async () => {
                 await sendToActiveTab(MESSAGE_TYPES.TRIGGER_COLOR_PICKER)
                 window.close()
               }}
-              className="p-1.5 rounded-lg text-content-muted hover:text-pink-400 hover:bg-app-surface active:scale-95 transition-all focus:outline-none">
+              className="p-1.5 rounded-lg text-content-muted hover:text-accent hover:bg-app-surface active:scale-95 transition-all focus:outline-none">
               <Pipette className="w-4 h-4" />
             </button>
           )}
@@ -229,7 +244,33 @@ function IndexPopup() {
             </button>
           )}
 
-          {/* Donate Button & Dropdown */}
+          {/* Preferences / Settings Button */}
+          <button
+            type="button"
+            title="Preferences & Theme"
+            onClick={() => setCurrentView("preferences")}
+            className={`p-1.5 rounded-lg transition-all focus:outline-none ${
+              currentView === "preferences"
+                ? "bg-accent-subtle text-accent ring-1 ring-accent-glow"
+                : "text-content-muted hover:text-content-primary hover:bg-app-surface active:scale-95"
+            }`}>
+            <SettingsIcon className="w-4 h-4" />
+          </button>
+
+          {/* About Button */}
+          <button
+            type="button"
+            title="About Browse Assist"
+            onClick={() => setCurrentView("about")}
+            className={`p-1.5 rounded-lg transition-all focus:outline-none ${
+              currentView === "about"
+                ? "bg-accent-subtle text-accent ring-1 ring-accent-glow"
+                : "text-content-muted hover:text-content-primary hover:bg-app-surface active:scale-95"
+            }`}>
+            <HelpCircle className="w-4 h-4" />
+          </button>
+
+          {/* Donate Button & Dropdown (Last item) */}
           <div className="relative" ref={donateMenuRef}>
             <button
               type="button"
@@ -267,32 +308,6 @@ function IndexPopup() {
               </div>
             )}
           </div>
-
-          {/* Preferences / Settings Button */}
-          <button
-            type="button"
-            title="Preferences & Theme"
-            onClick={() => setCurrentView("preferences")}
-            className={`p-1.5 rounded-lg transition-all focus:outline-none ${
-              currentView === "preferences"
-                ? "bg-accent-subtle text-accent ring-1 ring-accent-glow"
-                : "text-content-muted hover:text-content-primary hover:bg-app-surface active:scale-95"
-            }`}>
-            <SettingsIcon className="w-4 h-4" />
-          </button>
-
-          {/* About Button */}
-          <button
-            type="button"
-            title="About Browse Assist"
-            onClick={() => setCurrentView("about")}
-            className={`p-1.5 rounded-lg transition-all focus:outline-none ${
-              currentView === "about"
-                ? "bg-accent-subtle text-accent ring-1 ring-accent-glow"
-                : "text-content-muted hover:text-content-primary hover:bg-app-surface active:scale-95"
-            }`}>
-            <HelpCircle className="w-4 h-4" />
-          </button>
         </div>
       </header>
 

@@ -141,7 +141,7 @@ export const ColorPickerSettingsView: React.FC<
 
   return (
     <SubSettingsLayout
-      title="ColorPick Eyedropper"
+      title="Color Picker"
       enabled={isMasterEnabled}
       onToggle={handleToggleMaster}
       onBack={onBack}>
@@ -152,7 +152,7 @@ export const ColorPickerSettingsView: React.FC<
             type="button"
             onClick={handlePickNow}
             disabled={!isMasterEnabled}
-            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gradient-to-r from-pink-500 to-indigo-600 text-white font-semibold text-xs shadow-md shadow-indigo-500/25 hover:from-pink-600 hover:to-indigo-700 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none">
+            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-accent hover:bg-accent-hover text-white font-semibold text-xs shadow-md shadow-accent-glow active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none">
             <Pipette className="w-4 h-4" />
             <span>Pick Color From Screen</span>
           </button>

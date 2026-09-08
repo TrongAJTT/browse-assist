@@ -300,7 +300,7 @@ export const FEATURES_LIST: FeatureMeta[] = [
   },
   {
     key: "colorPicker",
-    title: "ColorPick Eyedropper",
+    title: "Color Picker",
     description: "Pick any pixel color from the screen with instant multi-format copy.",
     icon: "🎨",
     hasSettings: true
