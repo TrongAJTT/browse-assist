@@ -1,4 +1,6 @@
+import { Scroll } from "lucide-react"
 import type React from "react"
+
 import { useStorage } from "@plasmohq/storage/hook"
 
 import { ToggleSwitch } from "~components/ToggleSwitch"
@@ -37,7 +39,7 @@ export const SmoothScrollToggle: React.FC<SmoothScrollToggleProps> = ({
 
   return (
     <ToggleSwitch
-      icon={meta.icon}
+      icon={<Scroll className="w-4 h-4 text-amber-400" />}
       title={meta.title}
       description={meta.description}
       enabled={isEnabled}

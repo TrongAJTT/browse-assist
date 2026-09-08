@@ -1,4 +1,6 @@
+import { Link2 } from "lucide-react"
 import type React from "react"
+
 import { useStorage } from "@plasmohq/storage/hook"
 
 import { ToggleSwitch } from "~components/ToggleSwitch"
@@ -31,7 +33,7 @@ export const CopyLinkTextToggle: React.FC = () => {
 
   return (
     <ToggleSwitch
-      icon={meta.icon}
+      icon={<Link2 className="w-4 h-4 text-cyan-400" />}
       title={meta.title}
       description={meta.description}
       enabled={isEnabled}

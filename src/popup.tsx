@@ -1,13 +1,19 @@
 import { useState } from "react"
+
 import { useStorage } from "@plasmohq/storage/hook"
 
 import { AppIcon } from "~core/assets"
-import { DEFAULT_SETTINGS, STORAGE_KEYS, type FeatureSettings } from "~core/types"
+import {
+  DEFAULT_SETTINGS,
+  STORAGE_KEYS,
+  type FeatureSettings
+} from "~core/types"
 import { AllowRightClickToggle } from "~features/allow-right-click/Toggle"
 import { CopyLinkTextToggle } from "~features/copy-link-text/Toggle"
 import { MouseZoomToggle } from "~features/mouse-zoom/Toggle"
 import { SmoothScrollSettingsView } from "~features/smooth-scroll/SettingsView"
 import { SmoothScrollToggle } from "~features/smooth-scroll/Toggle"
+
 import "~style.css"
 
 type ActiveView = "main" | "smooth-scroll-settings"
@@ -20,7 +26,9 @@ function IndexPopup() {
   )
 
   const resolved = settings ?? DEFAULT_SETTINGS
-  const activeCount = Object.values(resolved).filter((v) => typeof v === "boolean" && v).length
+  const activeCount = Object.values(resolved).filter(
+    (v) => typeof v === "boolean" && v
+  ).length
   const totalCount = 4
 
   const handleEnableAll = () => {
@@ -102,8 +110,8 @@ function IndexPopup() {
               </div>
             </div>
 
-            {/* PowerToys-style Utilities List */}
-            <main className="space-y-2.5">
+            {/* PowerToys-style Utilities List with Dividers */}
+            <main className="divide-y divide-slate-800/80 border-t border-slate-800/80">
               <AllowRightClickToggle />
               <CopyLinkTextToggle />
               <SmoothScrollToggle

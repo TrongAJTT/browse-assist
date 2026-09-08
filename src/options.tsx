@@ -1,6 +1,7 @@
 import { useStorage } from "@plasmohq/storage/hook"
 
 import { AppIcon } from "~core/assets"
+import { FEATURE_ICONS } from "~core/featureIcons"
 import {
   DEFAULT_SETTINGS,
   FEATURES_LIST,
@@ -8,6 +9,7 @@ import {
   type FeatureKey,
   type FeatureSettings
 } from "~core/types"
+
 import "~style.css"
 
 function OptionsPage() {
@@ -63,6 +65,8 @@ function OptionsPage() {
           <div className="grid gap-3.5">
             {FEATURES_LIST.map((feature) => {
               const isEnabled = resolved[feature.key]
+              const IconComp = FEATURE_ICONS[feature.key].icon
+              const iconColor = FEATURE_ICONS[feature.key].colorClass
               return (
                 <div
                   key={feature.key}
@@ -73,9 +77,9 @@ function OptionsPage() {
                   }`}>
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-4">
-                      <span className="text-2xl mt-0.5" role="img" aria-label={feature.title}>
-                        {feature.icon}
-                      </span>
+                      <div className="shrink-0 p-2.5 rounded-xl bg-slate-800/80 border border-slate-700/60 shadow-inner mt-0.5">
+                        <IconComp className={`w-5 h-5 ${iconColor}`} />
+                      </div>
                       <div>
                         <div className="flex items-center gap-2">
                           <h3 className="text-base font-semibold text-white">
@@ -156,7 +160,9 @@ function OptionsPage() {
                   </td>
                 </tr>
                 <tr>
-                  <td className="py-3 font-medium text-white">Copy Link Text</td>
+                  <td className="py-3 font-medium text-white">
+                    Copy Link Text
+                  </td>
                   <td className="py-3">
                     <kbd className="px-2 py-1 text-xs font-mono font-semibold rounded bg-slate-800 border border-slate-700 text-indigo-300">
                       Right Click Link
@@ -167,7 +173,9 @@ function OptionsPage() {
                   </td>
                 </tr>
                 <tr>
-                  <td className="py-3 font-medium text-white">Smooth Scrolling</td>
+                  <td className="py-3 font-medium text-white">
+                    Smooth Scrolling
+                  </td>
                   <td className="py-3">
                     <kbd className="px-2 py-1 text-xs font-mono font-semibold rounded bg-slate-800 border border-slate-700 text-indigo-300">
                       Mouse Wheel

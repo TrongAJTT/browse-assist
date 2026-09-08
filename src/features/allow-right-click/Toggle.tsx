@@ -1,4 +1,6 @@
+import { MousePointerClick } from "lucide-react"
 import type React from "react"
+
 import { useStorage } from "@plasmohq/storage/hook"
 
 import { ToggleSwitch } from "~components/ToggleSwitch"
@@ -20,7 +22,8 @@ export const AllowRightClickToggle: React.FC = () => {
     DEFAULT_SETTINGS
   )
 
-  const isEnabled = settings?.allowRightClick ?? DEFAULT_SETTINGS.allowRightClick
+  const isEnabled =
+    settings?.allowRightClick ?? DEFAULT_SETTINGS.allowRightClick
 
   const handleChange = (enabled: boolean) => {
     setSettings((prev) => ({
@@ -31,7 +34,7 @@ export const AllowRightClickToggle: React.FC = () => {
 
   return (
     <ToggleSwitch
-      icon={meta.icon}
+      icon={<MousePointerClick className="w-4 h-4 text-emerald-400" />}
       title={meta.title}
       description={meta.description}
       enabled={isEnabled}
