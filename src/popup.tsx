@@ -16,7 +16,11 @@ import { AboutView } from "~components/AboutView"
 import { PreferencesSettingsView } from "~components/PreferencesSettingsView"
 import { AppIcon } from "~core/assets"
 import { DONATE_OPTIONS } from "~core/constants"
-import { sendToActiveTab, sendToBackground } from "~core/messaging"
+import {
+  MESSAGE_TYPES,
+  sendToActiveTab,
+  sendToBackground
+} from "~core/messaging"
 import {
   DEFAULT_SETTINGS,
   STORAGE_KEYS,
@@ -68,7 +72,7 @@ function IndexPopup() {
 
   // Query background for active PiP session and command shortcut
   useEffect(() => {
-    sendToBackground("GET_ACTIVE_PIP_SESSION").then((response) => {
+    sendToBackground(MESSAGE_TYPES.GET_ACTIVE_PIP_SESSION).then((response) => {
       if (response?.session) {
         setActivePiP(response.session)
       }
@@ -87,27 +91,29 @@ function IndexPopup() {
   }, [])
 
   const handleFocusPiPTab = async () => {
-    await sendToBackground("FOCUS_PIP_TAB")
+    await sendToBackground(MESSAGE_TYPES.FOCUS_PIP_TAB)
     window.close()
   }
 
   const handleClosePiP = async (e: React.MouseEvent) => {
     e.stopPropagation()
-    await sendToBackground("CLOSE_PIP")
+    await sendToBackground(MESSAGE_TYPES.CLOSE_PIP)
     setActivePiP(null)
   }
 
   const handleTogglePiPOnCurrentTab = async () => {
     if (activePiP) {
-      await sendToBackground("CLOSE_PIP")
+      await sendToBackground(MESSAGE_TYPES.CLOSE_PIP)
       setActivePiP(null)
       return
     }
 
-    await sendToActiveTab("TOGGLE_PICTURE_IN_PICTURE")
+    await sendToActiveTab(MESSAGE_TYPES.TOGGLE_PICTURE_IN_PICTURE)
     // Re-check PiP state after small delay
     setTimeout(async () => {
-      const response = await sendToBackground("GET_ACTIVE_PIP_SESSION")
+      const response = await sendToBackground(
+        MESSAGE_TYPES.GET_ACTIVE_PIP_SESSION
+      )
       if (response?.session) {
         setActivePiP(response.session)
       }

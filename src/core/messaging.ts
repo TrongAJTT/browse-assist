@@ -4,6 +4,10 @@
  * Handles active tab discovery, errors, and Promise-based async workflows.
  */
 
+import { MESSAGE_TYPES, type MessageType } from "~core/constants"
+
+export { MESSAGE_TYPES, type MessageType }
+
 export interface PiPSession {
   tabId: number
   title: string
@@ -14,57 +18,57 @@ export interface PiPSession {
  */
 export interface MessageRegistry {
   // Picture-in-Picture
-  FOCUS_PIP_TAB: {
+  [MESSAGE_TYPES.FOCUS_PIP_TAB]: {
     request: undefined
     response: { ok: boolean }
   }
-  CLOSE_PIP: {
+  [MESSAGE_TYPES.CLOSE_PIP]: {
     request: undefined
     response: { ok: boolean }
   }
-  GET_ACTIVE_PIP_SESSION: {
+  [MESSAGE_TYPES.GET_ACTIVE_PIP_SESSION]: {
     request: undefined
     response: { session: PiPSession | null }
   }
-  TOGGLE_PICTURE_IN_PICTURE: {
+  [MESSAGE_TYPES.TOGGLE_PICTURE_IN_PICTURE]: {
     request: undefined
     response: { ok: boolean }
   }
-  EXIT_PICTURE_IN_PICTURE: {
+  [MESSAGE_TYPES.EXIT_PICTURE_IN_PICTURE]: {
     request: undefined
     response: { ok: boolean }
   }
-  PIP_STATUS_CHANGED: {
+  [MESSAGE_TYPES.PIP_STATUS_CHANGED]: {
     request: { isPip: boolean; title?: string }
     response: { ok: boolean }
   }
 
   // Allow Right Click
-  GET_RIGHT_CLICK_STATUS: {
+  [MESSAGE_TYPES.GET_RIGHT_CLICK_STATUS]: {
     request: undefined
     response: { active: boolean }
   }
-  TOGGLE_RIGHT_CLICK: {
+  [MESSAGE_TYPES.TOGGLE_RIGHT_CLICK]: {
     request: { enabled: boolean }
     response: { active: boolean }
   }
-  TOGGLE_RIGHT_CLICK_SHORTCUT: {
+  [MESSAGE_TYPES.TOGGLE_RIGHT_CLICK_SHORTCUT]: {
     request: undefined
     response: { active: boolean }
   }
 
   // Mouse Pin-to-Zoom
-  RESET_MOUSE_ZOOM: {
+  [MESSAGE_TYPES.RESET_MOUSE_ZOOM]: {
     request: undefined
     response: { success: boolean }
   }
 
   // Super Drag
-  SUPER_DRAG_SEARCH: {
+  [MESSAGE_TYPES.SUPER_DRAG_SEARCH]: {
     request: { text: string; openInBackground: boolean }
     response: { ok: boolean }
   }
-  SUPER_DRAG_OPEN_LINK: {
+  [MESSAGE_TYPES.SUPER_DRAG_OPEN_LINK]: {
     request: { url: string; openInBackground: boolean }
     response: { ok: boolean }
   }

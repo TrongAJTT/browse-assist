@@ -3,14 +3,14 @@
  * Listens for browser shortcut commands to toggle Allow Right Click on the active tab.
  */
 
-import { sendToActiveTab } from "~core/messaging"
+import { MESSAGE_TYPES, sendToActiveTab } from "~core/messaging"
 
 /**
  * Listens for commands registered in manifest.
  */
 function onCommandListener(command: string): void {
   if (command === "toggle_allow_right_click") {
-    sendToActiveTab("TOGGLE_RIGHT_CLICK_SHORTCUT").catch(() => {})
+    sendToActiveTab(MESSAGE_TYPES.TOGGLE_RIGHT_CLICK_SHORTCUT).catch(() => {})
   }
 }
 

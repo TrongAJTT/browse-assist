@@ -13,7 +13,7 @@ import { useStorage } from "@plasmohq/storage/hook"
 
 import { GridPicker, type GridPickerItem } from "~components/GridPicker"
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
-import { sendToActiveTab } from "~core/messaging"
+import { MESSAGE_TYPES, sendToActiveTab } from "~core/messaging"
 import {
   DEFAULT_SETTINGS,
   STORAGE_KEYS,
@@ -98,7 +98,7 @@ export const MouseZoomSettingsView: React.FC<MouseZoomSettingsViewProps> = ({
       ...(prev ?? DEFAULT_SETTINGS),
       mouseZoomConfig: {
         ...(prev?.mouseZoomConfig ?? DEFAULT_SETTINGS.mouseZoomConfig),
-        [key]: !((prev?.mouseZoomConfig ?? DEFAULT_SETTINGS.mouseZoomConfig)[key])
+        [key]: !(prev?.mouseZoomConfig ?? DEFAULT_SETTINGS.mouseZoomConfig)[key]
       }
     }))
   }
@@ -107,7 +107,7 @@ export const MouseZoomSettingsView: React.FC<MouseZoomSettingsViewProps> = ({
 
   const handleResetZoom = async () => {
     setIsResetting(true)
-    await sendToActiveTab("RESET_MOUSE_ZOOM")
+    await sendToActiveTab(MESSAGE_TYPES.RESET_MOUSE_ZOOM)
     setTimeout(() => setIsResetting(false), 500)
   }
 
@@ -132,9 +132,7 @@ export const MouseZoomSettingsView: React.FC<MouseZoomSettingsViewProps> = ({
       }>
       {/* Modifier Key Grid Picker */}
       <div className="space-y-2">
-        <span className="section-header">
-          Trigger Modifier Key
-        </span>
+        <span className="section-header">Trigger Modifier Key</span>
 
         <GridPicker<MouseZoomModifier>
           items={MODIFIER_ITEMS}
@@ -146,13 +144,13 @@ export const MouseZoomSettingsView: React.FC<MouseZoomSettingsViewProps> = ({
 
       {/* Zoom Sensitivity / Step Size Slider */}
       <div className="space-y-4 pt-3 border-t border-border-divider">
-        <span className="section-header">
-          Zoom Sensitivity
-        </span>
+        <span className="section-header">Zoom Sensitivity</span>
 
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-xs">
-            <span className="text-content-secondary font-medium">Step Increment</span>
+            <span className="text-content-secondary font-medium">
+              Step Increment
+            </span>
             <span className="font-mono text-accent font-semibold">
               {Math.round(currentConfig.stepSize * 100)}%
             </span>
@@ -176,9 +174,7 @@ export const MouseZoomSettingsView: React.FC<MouseZoomSettingsViewProps> = ({
 
       {/* Behavior Toggles */}
       <div className="space-y-3 pt-3 border-t border-border-divider">
-        <span className="section-header">
-          Behavior & Display
-        </span>
+        <span className="section-header">Behavior & Display</span>
 
         {/* Smooth Transition */}
         <div className="flex items-center justify-between gap-3">
@@ -234,7 +230,9 @@ export const MouseZoomSettingsView: React.FC<MouseZoomSettingsViewProps> = ({
             }`}>
             <span
               className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                currentConfig.invertDirection ? "translate-x-4" : "translate-x-0"
+                currentConfig.invertDirection
+                  ? "translate-x-4"
+                  : "translate-x-0"
               }`}
             />
           </button>

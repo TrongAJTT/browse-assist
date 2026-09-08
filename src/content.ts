@@ -5,6 +5,7 @@
 
 import type { PlasmoCSConfig } from "plasmo"
 
+import { MESSAGE_TYPES } from "~core/messaging"
 import { getStoredSettings, subscribeToSettings } from "~core/storage"
 import type { FeatureSettings } from "~core/types"
 import {
@@ -104,11 +105,13 @@ async function init(): Promise<void> {
 
     // Listen for tab-scoped commands (e.g. per-tab Allow Right Click)
     chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-      if (message?.type === "GET_RIGHT_CLICK_STATUS") {
+      const msgType = message?.type || message?.action
+
+      if (msgType === MESSAGE_TYPES.GET_RIGHT_CLICK_STATUS) {
         sendResponse({ active: isRightClickActive() })
         return true
       }
-      if (message?.type === "TOGGLE_RIGHT_CLICK") {
+      if (msgType === MESSAGE_TYPES.TOGGLE_RIGHT_CLICK) {
         if (message.enabled) {
           activateRightClick()
         } else {
@@ -117,12 +120,12 @@ async function init(): Promise<void> {
         sendResponse({ active: isRightClickActive() })
         return true
       }
-      if (message?.type === "TOGGLE_RIGHT_CLICK_SHORTCUT") {
+      if (msgType === MESSAGE_TYPES.TOGGLE_RIGHT_CLICK_SHORTCUT) {
         const nextState = toggleRightClick(true)
         sendResponse({ active: nextState })
         return true
       }
-      if (message?.type === "RESET_MOUSE_ZOOM") {
+      if (msgType === MESSAGE_TYPES.RESET_MOUSE_ZOOM) {
         if (typeof window !== "undefined" && document.body) {
           document.body.style.removeProperty("zoom")
           document.body.style.removeProperty("transition")

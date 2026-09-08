@@ -4,13 +4,12 @@
  * and dispatching status updates to the background service worker.
  */
 
+import { MESSAGE_TYPES, sendToBackground } from "~core/messaging"
+import { removeContentToast, showContentToast } from "~core/toast"
 import {
   DEFAULT_PICTURE_IN_PICTURE_CONFIG,
   type PictureInPictureConfig
 } from "~core/types"
-
-import { sendToBackground } from "~core/messaging"
-import { removeContentToast, showContentToast } from "~core/toast"
 
 let isActive = false
 let currentConfig: PictureInPictureConfig = {
@@ -126,7 +125,7 @@ export async function togglePictureInPicture(): Promise<void> {
  * Notifies background service worker about PiP state change.
  */
 function notifyPiPStatus(isPip: boolean): void {
-  sendToBackground("PIP_STATUS_CHANGED", {
+  sendToBackground(MESSAGE_TYPES.PIP_STATUS_CHANGED, {
     isPip,
     title: document.title || window.location.hostname
   }).catch(() => {})
@@ -150,16 +149,18 @@ function onLeavePiP(): void {
  * Message listener from background worker (triggered dynamically via chrome.commands).
  */
 function onRuntimeMessage(
-  message: { action: string },
+  message: { action?: string; type?: string },
   _sender: chrome.runtime.MessageSender,
   sendResponse: (response?: unknown) => void
 ): boolean | void {
-  if (message?.action === "TOGGLE_PICTURE_IN_PICTURE") {
+  const msgType = message?.type || message?.action
+
+  if (msgType === MESSAGE_TYPES.TOGGLE_PICTURE_IN_PICTURE) {
     togglePictureInPicture()
     sendResponse({ ok: true })
     return true
   }
-  if (message?.action === "EXIT_PICTURE_IN_PICTURE") {
+  if (msgType === MESSAGE_TYPES.EXIT_PICTURE_IN_PICTURE) {
     if (document.pictureInPictureElement) {
       document.exitPictureInPicture().catch(() => {})
     }

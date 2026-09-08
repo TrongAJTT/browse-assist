@@ -63,3 +63,31 @@ export const APP_INFO = {
     }
   ]
 }
+
+/**
+ * Standardized cross-context message type identifiers.
+ * Central single-source-of-truth for all Chrome runtime / tabs messages.
+ */
+export const MESSAGE_TYPES = {
+  // Universal Picture-in-Picture
+  FOCUS_PIP_TAB: "FOCUS_PIP_TAB",
+  CLOSE_PIP: "CLOSE_PIP",
+  GET_ACTIVE_PIP_SESSION: "GET_ACTIVE_PIP_SESSION",
+  TOGGLE_PICTURE_IN_PICTURE: "TOGGLE_PICTURE_IN_PICTURE",
+  EXIT_PICTURE_IN_PICTURE: "EXIT_PICTURE_IN_PICTURE",
+  PIP_STATUS_CHANGED: "PIP_STATUS_CHANGED",
+
+  // Allow Right Click
+  GET_RIGHT_CLICK_STATUS: "GET_RIGHT_CLICK_STATUS",
+  TOGGLE_RIGHT_CLICK: "TOGGLE_RIGHT_CLICK",
+  TOGGLE_RIGHT_CLICK_SHORTCUT: "TOGGLE_RIGHT_CLICK_SHORTCUT",
+
+  // Mouse Pin-to-Zoom
+  RESET_MOUSE_ZOOM: "RESET_MOUSE_ZOOM",
+
+  // Super Drag
+  SUPER_DRAG_SEARCH: "SUPER_DRAG_SEARCH",
+  SUPER_DRAG_OPEN_LINK: "SUPER_DRAG_OPEN_LINK"
+} as const
+
+export type MessageType = (typeof MESSAGE_TYPES)[keyof typeof MESSAGE_TYPES]

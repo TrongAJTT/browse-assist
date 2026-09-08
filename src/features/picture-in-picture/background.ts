@@ -4,7 +4,7 @@
  * chrome.commands routing, and tracking the single active PiP tab.
  */
 
-import { sendToActiveTab, sendToTab } from "~core/messaging"
+import { MESSAGE_TYPES, sendToActiveTab, sendToTab } from "~core/messaging"
 import { extensionStorage } from "~core/storage"
 import {
   DEFAULT_SETTINGS,
@@ -24,8 +24,11 @@ let activeSession: ActivePiPSession | null = null
  * Updates extension action badge for Picture-in-Picture.
  */
 async function updateBadge(isPip: boolean, title?: string): Promise<void> {
-  const settings = await extensionStorage.get<FeatureSettings>(STORAGE_KEYS.SETTINGS)
-  const isMasterEnabled = settings?.pictureInPicture ?? DEFAULT_SETTINGS.pictureInPicture
+  const settings = await extensionStorage.get<FeatureSettings>(
+    STORAGE_KEYS.SETTINGS
+  )
+  const isMasterEnabled =
+    settings?.pictureInPicture ?? DEFAULT_SETTINGS.pictureInPicture
   const config: PictureInPictureConfig =
     settings?.pictureInPictureConfig ?? DEFAULT_SETTINGS.pictureInPictureConfig
 
@@ -71,7 +74,7 @@ export async function focusPiPTab(): Promise<boolean> {
 export async function closeActivePiP(): Promise<void> {
   if (!activeSession) return
 
-  await sendToTab(activeSession.tabId, "EXIT_PICTURE_IN_PICTURE")
+  await sendToTab(activeSession.tabId, MESSAGE_TYPES.EXIT_PICTURE_IN_PICTURE)
 
   activeSession = null
   await updateBadge(false)
@@ -81,11 +84,13 @@ export async function closeActivePiP(): Promise<void> {
  * Message listener for PiP events across tabs and popup queries.
  */
 function onMessageListener(
-  message: { action: string; isPip?: boolean; title?: string },
+  message: { action?: string; type?: string; isPip?: boolean; title?: string },
   sender: chrome.runtime.MessageSender,
   sendResponse: (response?: unknown) => void
 ): boolean | void {
-  if (message?.action === "PIP_STATUS_CHANGED") {
+  const msgType = message?.type || message?.action
+
+  if (msgType === MESSAGE_TYPES.PIP_STATUS_CHANGED) {
     if (message.isPip && sender.tab?.id) {
       activeSession = {
         tabId: sender.tab.id,
@@ -102,17 +107,17 @@ function onMessageListener(
     return true
   }
 
-  if (message?.action === "GET_ACTIVE_PIP_SESSION") {
+  if (msgType === MESSAGE_TYPES.GET_ACTIVE_PIP_SESSION) {
     sendResponse({ session: activeSession })
     return true
   }
 
-  if (message?.action === "FOCUS_PIP_TAB") {
+  if (msgType === MESSAGE_TYPES.FOCUS_PIP_TAB) {
     focusPiPTab().then((success) => sendResponse({ ok: success }))
     return true
   }
 
-  if (message?.action === "CLOSE_PIP") {
+  if (msgType === MESSAGE_TYPES.CLOSE_PIP) {
     closeActivePiP().then(() => sendResponse({ ok: true }))
     return true
   }
@@ -133,7 +138,7 @@ function onTabRemovedListener(tabId: number): void {
  */
 function onCommandListener(command: string): void {
   if (command === "toggle_picture_in_picture") {
-    sendToActiveTab("TOGGLE_PICTURE_IN_PICTURE").catch(() => {})
+    sendToActiveTab(MESSAGE_TYPES.TOGGLE_PICTURE_IN_PICTURE).catch(() => {})
   }
 }
 
@@ -151,7 +156,10 @@ export async function initPictureInPictureBackground(): Promise<void> {
       const newSettings = change.newValue as FeatureSettings | undefined
       if (newSettings && !newSettings.pictureInPicture && activeSession) {
         closeActivePiP().catch(() => {})
-      } else if (newSettings && !newSettings.pictureInPictureConfig?.showBadge) {
+      } else if (
+        newSettings &&
+        !newSettings.pictureInPictureConfig?.showBadge
+      ) {
         chrome.action.setBadgeText({ text: "" }).catch(() => {})
       }
     }

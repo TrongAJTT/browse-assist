@@ -3,7 +3,7 @@ import type React from "react"
 import { useEffect, useState } from "react"
 
 import { ToggleSwitch } from "~components/ToggleSwitch"
-import { sendToActiveTab } from "~core/messaging"
+import { MESSAGE_TYPES, sendToActiveTab } from "~core/messaging"
 import { FEATURES_LIST } from "~core/types"
 
 const meta = FEATURES_LIST.find((f) => f.key === "allowRightClick")!
@@ -27,9 +27,7 @@ export const AllowRightClickToggle: React.FC<AllowRightClickToggleProps> = ({
   useEffect(() => {
     if (chrome.commands?.getAll) {
       chrome.commands.getAll((commands) => {
-        const cmd = commands.find(
-          (c) => c.name === "toggle_allow_right_click"
-        )
+        const cmd = commands.find((c) => c.name === "toggle_allow_right_click")
         if (cmd?.shortcut) {
           setShortcut(cmd.shortcut)
         } else {
@@ -38,7 +36,7 @@ export const AllowRightClickToggle: React.FC<AllowRightClickToggleProps> = ({
       })
     }
 
-    sendToActiveTab("GET_RIGHT_CLICK_STATUS").then((response) => {
+    sendToActiveTab(MESSAGE_TYPES.GET_RIGHT_CLICK_STATUS).then((response) => {
       if (typeof response?.active === "boolean") {
         setIsActiveInTab(response.active)
         onStatusChange?.(response.active)
@@ -50,7 +48,7 @@ export const AllowRightClickToggle: React.FC<AllowRightClickToggleProps> = ({
   const handleChange = async (enabled: boolean) => {
     setIsActiveInTab(enabled)
     onStatusChange?.(enabled)
-    await sendToActiveTab("TOGGLE_RIGHT_CLICK", { enabled })
+    await sendToActiveTab(MESSAGE_TYPES.TOGGLE_RIGHT_CLICK, { enabled })
   }
 
   return (

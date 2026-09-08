@@ -6,7 +6,7 @@
  * - Drag Down: Copy Text or Clean Link to clipboard
  */
 
-import { sendToBackground } from "~core/messaging"
+import { MESSAGE_TYPES, sendToBackground } from "~core/messaging"
 import { DEFAULT_SUPER_DRAG_CONFIG, type SuperDragConfig } from "~core/types"
 import { cleanUrl } from "~features/context-menu-actions/cleanUrl"
 
@@ -214,9 +214,18 @@ function onDragStart(event: DragEvent): void {
 
   // 1. Check if dragging an image element (<img>)
   if (currentConfig.openImages) {
-    const img = target instanceof HTMLImageElement ? target : target?.querySelector?.("img")
+    const img =
+      target instanceof HTMLImageElement
+        ? target
+        : target?.querySelector?.("img")
     const imgSrc = img?.currentSrc || img?.src
-    if (imgSrc && (imgSrc.startsWith("http://") || imgSrc.startsWith("https://") || imgSrc.startsWith("data:") || imgSrc.startsWith("blob:"))) {
+    if (
+      imgSrc &&
+      (imgSrc.startsWith("http://") ||
+        imgSrc.startsWith("https://") ||
+        imgSrc.startsWith("data:") ||
+        imgSrc.startsWith("blob:"))
+    ) {
       activeSession = {
         startX: event.clientX,
         startY: event.clientY,
@@ -303,13 +312,7 @@ function onDragOver(event: DragEvent): void {
           : activeSession.type === "link"
             ? ICONS.linkForeground
             : ICONS.searchForeground
-      updateIndicator(
-        event.clientX,
-        event.clientY,
-        label,
-        icon,
-        "sky"
-      )
+      updateIndicator(event.clientX, event.clientY, label, icon, "sky")
     } else {
       // DRAG RIGHT / UP: Open in Background Tab
       const label =
@@ -324,13 +327,7 @@ function onDragOver(event: DragEvent): void {
           : activeSession.type === "link"
             ? ICONS.linkBackground
             : ICONS.searchBackground
-      updateIndicator(
-        event.clientX,
-        event.clientY,
-        label,
-        icon,
-        "indigo"
-      )
+      updateIndicator(event.clientX, event.clientY, label, icon, "indigo")
     }
   } else {
     hideIndicator(true)
@@ -356,7 +353,10 @@ async function onDragEnd(event: DragEvent): Promise<void> {
       // DRAG DOWN: Copy to Clipboard
       if (activeSession.type === "text") {
         await copyToClipboard(activeSession.payload)
-      } else if (activeSession.type === "link" || activeSession.type === "image") {
+      } else if (
+        activeSession.type === "link" ||
+        activeSession.type === "image"
+      ) {
         const cleaned = cleanUrl(activeSession.payload)
         await copyToClipboard(cleaned)
       }
@@ -366,7 +366,7 @@ async function onDragEnd(event: DragEvent): Promise<void> {
       const openInBackground = direction === "left" ? false : true
 
       if (activeSession.type === "text" && currentConfig.searchSelectedText) {
-        sendToBackground("SUPER_DRAG_SEARCH", {
+        sendToBackground(MESSAGE_TYPES.SUPER_DRAG_SEARCH, {
           text: activeSession.payload,
           openInBackground
         }).catch(() => {})
@@ -374,7 +374,7 @@ async function onDragEnd(event: DragEvent): Promise<void> {
         (activeSession.type === "link" && currentConfig.openHyperlinks) ||
         (activeSession.type === "image" && currentConfig.openImages)
       ) {
-        sendToBackground("SUPER_DRAG_OPEN_LINK", {
+        sendToBackground(MESSAGE_TYPES.SUPER_DRAG_OPEN_LINK, {
           url: activeSession.payload,
           openInBackground
         }).catch(() => {})

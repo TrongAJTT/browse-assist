@@ -3,7 +3,7 @@
  * Handles tab creation and search queries initiated by drag operations.
  */
 
-import { cleanUrl } from "~features/context-menu-actions/cleanUrl"
+import { MESSAGE_TYPES } from "~core/messaging"
 import { extensionStorage } from "~core/storage"
 import {
   DEFAULT_SETTINGS,
@@ -11,9 +11,11 @@ import {
   type FeatureSettings,
   type SuperDragConfig
 } from "~core/types"
+import { cleanUrl } from "~features/context-menu-actions/cleanUrl"
 
 export interface SuperDragMessage {
-  action: "SUPER_DRAG_SEARCH" | "SUPER_DRAG_OPEN_LINK"
+  action?: string
+  type?: string
   text?: string
   url?: string
   openInBackground?: boolean
@@ -92,9 +94,11 @@ function onMessageListener(
   sender: chrome.runtime.MessageSender,
   sendResponse: (response?: unknown) => void
 ): boolean | void {
+  const msgType = message?.type || message?.action
+
   if (
-    message?.action !== "SUPER_DRAG_SEARCH" &&
-    message?.action !== "SUPER_DRAG_OPEN_LINK"
+    msgType !== MESSAGE_TYPES.SUPER_DRAG_SEARCH &&
+    msgType !== MESSAGE_TYPES.SUPER_DRAG_OPEN_LINK
   ) {
     return
   }
@@ -102,14 +106,13 @@ function onMessageListener(
   extensionStorage
     .get<FeatureSettings>(STORAGE_KEYS.SETTINGS)
     .then((settings) => {
-      const isMasterEnabled =
-        settings?.superDrag ?? DEFAULT_SETTINGS.superDrag
+      const isMasterEnabled = settings?.superDrag ?? DEFAULT_SETTINGS.superDrag
       if (!isMasterEnabled) return
 
       const config: SuperDragConfig =
         settings?.superDragConfig ?? DEFAULT_SETTINGS.superDragConfig
 
-      if (message.action === "SUPER_DRAG_SEARCH" && message.text) {
+      if (msgType === MESSAGE_TYPES.SUPER_DRAG_SEARCH && message.text) {
         if (config.searchSelectedText) {
           handleSearch(
             message.text,
@@ -118,7 +121,10 @@ function onMessageListener(
             message.openInBackground
           )
         }
-      } else if (message.action === "SUPER_DRAG_OPEN_LINK" && message.url) {
+      } else if (
+        msgType === MESSAGE_TYPES.SUPER_DRAG_OPEN_LINK &&
+        message.url
+      ) {
         if (config.openHyperlinks) {
           handleOpenLink(
             message.url,
