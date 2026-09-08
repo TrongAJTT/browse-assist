@@ -4,6 +4,8 @@
  * to deliver fluid, natural scrolling across web pages.
  */
 
+import { SMOOTH_SCROLL_PRESETS, type SmoothScrollConfig } from "~core/types"
+
 let isActive = false
 
 // Animation & state tracking
@@ -12,10 +14,21 @@ let currentTargetElement: Element | Window = window
 let targetScrollY = 0
 let currentScrollY = 0
 
-// Physics tuning constants
-const EASING_FACTOR = 0.18 // Interpolation speed factor (0 < factor <= 1)
-const SCROLL_STEP = 1.0 // Multiplier for wheel delta
+// Dynamic physics parameters
+let activeConfig: SmoothScrollConfig = { ...SMOOTH_SCROLL_PRESETS.balanced }
 const EPSILON = 0.5 // Threshold to stop animation loop
+
+/**
+ * Updates physics tuning on the fly.
+ */
+export function updateSmoothScrollConfig(config?: Partial<SmoothScrollConfig>): void {
+  if (config) {
+    activeConfig = {
+      ...activeConfig,
+      ...config
+    }
+  }
+}
 
 /**
  * Finds the nearest scrollable element under the cursor or defaults to window.
@@ -87,7 +100,7 @@ function updateScroll(): void {
   const diff = targetScrollY - currentScrollY
 
   if (Math.abs(diff) > EPSILON) {
-    currentScrollY += diff * EASING_FACTOR
+    currentScrollY += diff * activeConfig.smoothness
     setScrollPosition(currentTargetElement, currentScrollY)
     animationFrameId = window.requestAnimationFrame(updateScroll)
   } else {
@@ -121,7 +134,7 @@ function onWheel(event: WheelEvent): void {
     return
   }
 
-  const delta = event.deltaY * SCROLL_STEP
+  const delta = event.deltaY * activeConfig.stepSize
 
   // If user scrolls up at top boundary or down at bottom boundary, don't hijack
   if ((currentPos <= 0 && delta < 0) || (currentPos >= maxPos && delta > 0)) {
@@ -156,9 +169,13 @@ function cancelAnimation(): void {
 }
 
 /**
- * Activates the Smooth Scroll feature.
+ * Activates the Smooth Scroll feature with optional initial config.
  */
-export function activate(): void {
+export function activate(config?: SmoothScrollConfig): void {
+  if (config) {
+    updateSmoothScrollConfig(config)
+  }
+
   if (isActive || typeof window === "undefined") return
   isActive = true
 

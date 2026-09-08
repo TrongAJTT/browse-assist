@@ -46,7 +46,7 @@ function applySettings(nextSettings: FeatureSettings): void {
 
   // Smooth Scroll
   if (nextSettings.smoothScroll) {
-    activateSmoothScroll()
+    activateSmoothScroll(nextSettings.smoothScrollConfig)
   } else {
     deactivateSmoothScroll()
   }

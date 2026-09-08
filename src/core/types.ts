@@ -8,13 +8,43 @@ export type FeatureKey =
   | "mouseZoom"
 
 /**
- * Settings map tracking the enabled state of each feature.
+ * Smooth Scrolling preset options.
+ */
+export type SmoothScrollPreset = "balanced" | "ultra" | "snappy"
+
+export interface SmoothScrollConfig {
+  preset: SmoothScrollPreset
+  stepSize: number // Wheel multiplier (e.g. 1.0)
+  smoothness: number // Easing factor (e.g. 0.18)
+}
+
+export const SMOOTH_SCROLL_PRESETS: Record<SmoothScrollPreset, SmoothScrollConfig> = {
+  balanced: {
+    preset: "balanced",
+    stepSize: 1.0,
+    smoothness: 0.18
+  },
+  ultra: {
+    preset: "ultra",
+    stepSize: 1.2,
+    smoothness: 0.1
+  },
+  snappy: {
+    preset: "snappy",
+    stepSize: 0.9,
+    smoothness: 0.3
+  }
+}
+
+/**
+ * Settings map tracking the enabled state of each feature and sub-configurations.
  */
 export interface FeatureSettings {
   allowRightClick: boolean
   copyLinkText: boolean
   smoothScroll: boolean
   mouseZoom: boolean
+  smoothScrollConfig: SmoothScrollConfig
 }
 
 /**
@@ -25,7 +55,8 @@ export const DEFAULT_SETTINGS: FeatureSettings = {
   allowRightClick: true,
   copyLinkText: true,
   smoothScroll: true,
-  mouseZoom: true
+  mouseZoom: true,
+  smoothScrollConfig: SMOOTH_SCROLL_PRESETS.balanced
 }
 
 /**
@@ -43,6 +74,7 @@ export interface FeatureMeta {
   title: string
   description: string
   icon: string
+  hasSettings?: boolean
 }
 
 /**
@@ -65,7 +97,8 @@ export const FEATURES_LIST: FeatureMeta[] = [
     key: "smoothScroll",
     title: "Smooth Scrolling",
     description: "Enhanced, fluid page scrolling with interpolated physics.",
-    icon: "📜"
+    icon: "📜",
+    hasSettings: true
   },
   {
     key: "mouseZoom",

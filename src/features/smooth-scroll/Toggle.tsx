@@ -11,10 +11,16 @@ import {
 
 const meta = FEATURES_LIST.find((f) => f.key === "smoothScroll")!
 
+interface SmoothScrollToggleProps {
+  onConfigure?: () => void
+}
+
 /**
  * Smooth Scroll toggle row component for Popup UI.
  */
-export const SmoothScrollToggle: React.FC = () => {
+export const SmoothScrollToggle: React.FC<SmoothScrollToggleProps> = ({
+  onConfigure
+}) => {
   const [settings, setSettings] = useStorage<FeatureSettings>(
     STORAGE_KEYS.SETTINGS,
     DEFAULT_SETTINGS
@@ -36,6 +42,7 @@ export const SmoothScrollToggle: React.FC = () => {
       description={meta.description}
       enabled={isEnabled}
       onChange={handleChange}
+      onConfigure={onConfigure}
     />
   )
 }
