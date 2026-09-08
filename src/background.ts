@@ -4,6 +4,7 @@
  */
 
 import { initContextMenuActionsBackground } from "~features/context-menu-actions/background"
+import { initPictureInPictureBackground } from "~features/picture-in-picture/background"
 import { initSuperDragBackground } from "~features/super-drag/background"
 
 // Initialize background handlers
@@ -13,6 +14,10 @@ initContextMenuActionsBackground().catch((err) => {
 
 initSuperDragBackground().catch((err) => {
   console.error("Failed to initialize super-drag background service:", err)
+})
+
+initPictureInPictureBackground().catch((err) => {
+  console.error("Failed to initialize picture-in-picture background service:", err)
 })
 
 

@@ -7,6 +7,7 @@ export type FeatureKey =
   | "superDrag"
   | "smoothScroll"
   | "mouseZoom"
+  | "pictureInPicture"
 
 export type ContextMenuActionId =
   | "copyLinkText"
@@ -102,6 +103,19 @@ export const DEFAULT_MOUSE_ZOOM_CONFIG: MouseZoomConfig = {
 }
 
 /**
+ * Universal Picture-in-Picture configuration.
+ */
+export interface PictureInPictureConfig {
+  showBadge: boolean // Show "PiP" badge on extension icon when video is in PiP
+  showToast: boolean // Show floating feedback notification on toggle
+}
+
+export const DEFAULT_PICTURE_IN_PICTURE_CONFIG: PictureInPictureConfig = {
+  showBadge: true,
+  showToast: true
+}
+
+/**
  * Settings map tracking the enabled state of each feature and sub-configurations.
  */
 export interface FeatureSettings {
@@ -110,10 +124,12 @@ export interface FeatureSettings {
   superDrag: boolean
   smoothScroll: boolean
   mouseZoom: boolean
+  pictureInPicture: boolean
   contextMenuActionsConfig: ContextMenuActionsConfig
   superDragConfig: SuperDragConfig
   smoothScrollConfig: SmoothScrollConfig
   mouseZoomConfig: MouseZoomConfig
+  pictureInPictureConfig: PictureInPictureConfig
 }
 
 /**
@@ -126,13 +142,15 @@ export const DEFAULT_SETTINGS: FeatureSettings = {
   superDrag: true,
   smoothScroll: true,
   mouseZoom: true,
+  pictureInPicture: true,
   contextMenuActionsConfig: DEFAULT_CONTEXT_MENU_ACTIONS_CONFIG,
   superDragConfig: DEFAULT_SUPER_DRAG_CONFIG,
   smoothScrollConfig: {
     ...SMOOTH_SCROLL_PRESETS.balanced,
     interceptionMode: "smart"
   },
-  mouseZoomConfig: DEFAULT_MOUSE_ZOOM_CONFIG
+  mouseZoomConfig: DEFAULT_MOUSE_ZOOM_CONFIG,
+  pictureInPictureConfig: DEFAULT_PICTURE_IN_PICTURE_CONFIG
 }
 
 /**
@@ -193,6 +211,14 @@ export const FEATURES_LIST: FeatureMeta[] = [
     description:
       "Hold modifier key and scroll mouse wheel to zoom into cursor position.",
     icon: "🔍",
+    hasSettings: true
+  },
+  {
+    key: "pictureInPicture",
+    title: "Universal Picture-in-Picture",
+    description:
+      "Toggle floating video window using customizable hotkey (default Alt+P).",
+    icon: "📺",
     hasSettings: true
   }
 ]

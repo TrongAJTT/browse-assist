@@ -21,6 +21,10 @@ import {
   deactivate as deactivateMouseZoom
 } from "~features/mouse-zoom/logic"
 import {
+  activate as activatePiP,
+  deactivate as deactivatePiP
+} from "~features/picture-in-picture/logic"
+import {
   activate as activateSmoothScroll,
   deactivate as deactivateSmoothScroll
 } from "~features/smooth-scroll/logic"
@@ -63,6 +67,13 @@ function applySettings(nextSettings: FeatureSettings): void {
     activateMouseZoom(nextSettings.mouseZoomConfig)
   } else {
     deactivateMouseZoom()
+  }
+
+  // Universal Picture-in-Picture
+  if (nextSettings.pictureInPicture) {
+    activatePiP(nextSettings.pictureInPictureConfig)
+  } else {
+    deactivatePiP()
   }
 }
 

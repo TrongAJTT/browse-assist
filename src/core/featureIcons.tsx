@@ -2,6 +2,7 @@ import {
   Link2,
   MousePointer2,
   MousePointerClick,
+  PictureInPicture2,
   Scroll,
   ZoomIn
 } from "lucide-react"
@@ -45,5 +46,10 @@ export const FEATURE_ICONS: Record<
     icon: ZoomIn,
     colorClass: "text-violet-400",
     bgClass: "bg-violet-500/10 border-violet-500/30"
+  },
+  pictureInPicture: {
+    icon: PictureInPicture2,
+    colorClass: "text-indigo-400",
+    bgClass: "bg-indigo-500/10 border-indigo-500/30"
   }
 }

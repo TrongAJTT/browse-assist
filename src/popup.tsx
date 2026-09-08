@@ -3,7 +3,9 @@ import {
   ExternalLink,
   GitBranch,
   Heart,
-  HelpCircle
+  HelpCircle,
+  PictureInPicture2,
+  X
 } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 
@@ -22,6 +24,8 @@ import { ContextMenuActionsSettingsView } from "~features/context-menu-actions/S
 import { ContextMenuActionsToggle } from "~features/context-menu-actions/Toggle"
 import { MouseZoomSettingsView } from "~features/mouse-zoom/SettingsView"
 import { MouseZoomToggle } from "~features/mouse-zoom/Toggle"
+import { PictureInPictureSettingsView } from "~features/picture-in-picture/SettingsView"
+import { PictureInPictureToggle } from "~features/picture-in-picture/Toggle"
 import { SmoothScrollSettingsView } from "~features/smooth-scroll/SettingsView"
 import { SmoothScrollToggle } from "~features/smooth-scroll/Toggle"
 import { SuperDragSettingsView } from "~features/super-drag/SettingsView"
@@ -35,6 +39,7 @@ type ActiveView =
   | "super-drag-settings"
   | "smooth-scroll-settings"
   | "mouse-zoom-settings"
+  | "picture-in-picture-settings"
   | "about"
 
 function IndexPopup() {
@@ -47,6 +52,30 @@ function IndexPopup() {
     STORAGE_KEYS.SETTINGS,
     DEFAULT_SETTINGS
   )
+
+  const [activePiP, setActivePiP] = useState<{ tabId: number; title: string } | null>(null)
+
+  // Query background for active PiP session
+  useEffect(() => {
+    chrome.runtime.sendMessage({ action: "GET_ACTIVE_PIP_SESSION" }, (response) => {
+      if (response?.session) {
+        setActivePiP(response.session)
+      }
+    })
+  }, [])
+
+  const handleFocusPiPTab = () => {
+    chrome.runtime.sendMessage({ action: "FOCUS_PIP_TAB" }, () => {
+      window.close()
+    })
+  }
+
+  const handleClosePiP = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    chrome.runtime.sendMessage({ action: "CLOSE_PIP" }, () => {
+      setActivePiP(null)
+    })
+  }
 
   // Ready when both storage settings and active tab state are hydrated
   const isHydrated = isTabReady && settings !== undefined
@@ -153,8 +182,42 @@ function IndexPopup() {
         </div>
       </header>
 
-      {/* Body Area - Swappable between Main List, Smooth Scroll Settings and About View */}
+      {/* Body Area - Swappable between Main List, Feature Settings and About View */}
       <div className="px-4 py-2.5 pb-3.5 flex-1 overflow-y-auto">
+        {/* Universal PiP Active Banner */}
+        {activePiP && currentView === "main" && (
+          <div
+            onClick={handleFocusPiPTab}
+            className="mb-3 p-2.5 rounded-xl bg-indigo-950/60 border border-indigo-500/30 hover:border-indigo-500/60 transition-all cursor-pointer group flex items-center justify-between gap-2.5 shadow-lg shadow-indigo-950/20">
+            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+              <div className="p-1.5 rounded-lg bg-indigo-500/20 text-indigo-400 group-hover:scale-105 transition-transform shrink-0">
+                <PictureInPicture2 className="w-4 h-4 animate-pulse" />
+              </div>
+              <div className="flex flex-col min-w-0">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 leading-none">
+                  Video in PiP Mode
+                </span>
+                <span className="text-xs font-semibold text-slate-200 truncate mt-0.5 group-hover:text-indigo-200 transition-colors">
+                  {activePiP.title}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1.5 shrink-0">
+              <span className="text-[10.5px] font-medium text-indigo-300 bg-indigo-900/60 px-2 py-0.5 rounded-md border border-indigo-700/50 group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                Focus Tab
+              </span>
+              <button
+                type="button"
+                onClick={handleClosePiP}
+                title="Exit Picture-in-Picture"
+                className="p-1 rounded-md text-slate-400 hover:text-rose-400 hover:bg-slate-800/80 transition-colors">
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        )}
+
         {currentView === "main" ? (
           <div>
             {/* PowerToys-style Utilities List with Dividers */}
@@ -167,6 +230,11 @@ function IndexPopup() {
               />
               <SuperDragToggle
                 onConfigure={() => setCurrentView("super-drag-settings")}
+              />
+              <PictureInPictureToggle
+                onOpenSettings={() =>
+                  setCurrentView("picture-in-picture-settings")
+                }
               />
               <SmoothScrollToggle
                 onConfigure={() => setCurrentView("smooth-scroll-settings")}
@@ -182,6 +250,8 @@ function IndexPopup() {
           />
         ) : currentView === "super-drag-settings" ? (
           <SuperDragSettingsView onBack={() => setCurrentView("main")} />
+        ) : currentView === "picture-in-picture-settings" ? (
+          <PictureInPictureSettingsView onBack={() => setCurrentView("main")} />
         ) : currentView === "smooth-scroll-settings" ? (
           <SmoothScrollSettingsView onBack={() => setCurrentView("main")} />
         ) : currentView === "mouse-zoom-settings" ? (

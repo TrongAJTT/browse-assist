@@ -49,6 +49,15 @@
     "host_permissions": [
       "https://*/*",
       "http://*/*"
-    ]
+    ],
+    "commands": {
+      "toggle_picture_in_picture": {
+        "suggested_key": {
+          "default": "Alt+P",
+          "mac": "Alt+P"
+        },
+        "description": "Toggle Picture-in-Picture for current playing video"
+      }
+    }
   }
 }
