@@ -1,13 +1,11 @@
 import { useState } from "react"
+import "~style.css"
 
 function IndexPopup() {
   const [data, setData] = useState("")
 
   return (
-    <div
-      style={{
-        padding: 16
-      }}>
+    <div className="p-4 bg-slate-900 text-white min-w-[280px]">
       <h2>
         Welcome to your{" "}
         <a href="https://www.plasmo.com" target="_blank">
