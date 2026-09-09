@@ -45,6 +45,8 @@ import { MouseZoomSettingsView } from "~features/mouse-zoom/SettingsView"
 import { MouseZoomToggle } from "~features/mouse-zoom/Toggle"
 import { PictureInPictureSettingsView } from "~features/picture-in-picture/SettingsView"
 import { PictureInPictureToggle } from "~features/picture-in-picture/Toggle"
+import { VideoWheelControlSettingsView } from "~features/video-wheel-control/SettingsView"
+import { VideoWheelControlToggle } from "~features/video-wheel-control/Toggle"
 import { QuickScrollSettingsView } from "~features/quick-scroll/SettingsView"
 import { QuickScrollToggle } from "~features/quick-scroll/Toggle"
 import { SmoothScrollSettingsView } from "~features/smooth-scroll/SettingsView"
@@ -60,6 +62,7 @@ type ActiveView =
   | "super-drag-settings"
   | "quick-scroll-settings"
   | "picture-in-picture-settings"
+  | "video-wheel-control-settings"
   | "smooth-scroll-settings"
   | "mouse-zoom-settings"
   | "color-picker-settings"
@@ -200,6 +203,11 @@ function IndexPopup() {
     pictureInPicture: (
       <PictureInPictureToggle
         onOpenSettings={() => setCurrentView("picture-in-picture-settings")}
+      />
+    ),
+    videoWheelControl: (
+      <VideoWheelControlToggle
+        onOpenSettings={() => setCurrentView("video-wheel-control-settings")}
       />
     ),
     smoothScroll: (
@@ -633,6 +641,8 @@ function IndexPopup() {
           <QuickScrollSettingsView onBack={() => setCurrentView("main")} />
         ) : currentView === "picture-in-picture-settings" ? (
           <PictureInPictureSettingsView onBack={() => setCurrentView("main")} />
+        ) : currentView === "video-wheel-control-settings" ? (
+          <VideoWheelControlSettingsView onBack={() => setCurrentView("main")} />
         ) : currentView === "smooth-scroll-settings" ? (
           <SmoothScrollSettingsView onBack={() => setCurrentView("main")} />
         ) : currentView === "mouse-zoom-settings" ? (

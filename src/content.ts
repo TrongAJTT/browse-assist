@@ -27,6 +27,10 @@ import {
   deactivate as deactivatePiP
 } from "~features/picture-in-picture/logic"
 import {
+  activate as activateVideoWheelControl,
+  deactivate as deactivateVideoWheelControl
+} from "~features/video-wheel-control/logic"
+import {
   activate as activateQuickScroll,
   deactivate as deactivateQuickScroll
 } from "~features/quick-scroll/logic"
@@ -99,6 +103,13 @@ function applySettings(nextSettings: FeatureSettings): void {
     activatePiP(nextSettings.pictureInPictureConfig)
   } else {
     deactivatePiP()
+  }
+
+  // Video Wheel Control
+  if (nextSettings.videoWheelControl) {
+    activateVideoWheelControl(nextSettings.videoWheelControlConfig)
+  } else {
+    deactivateVideoWheelControl()
   }
 
   // ColorPick Eyedropper

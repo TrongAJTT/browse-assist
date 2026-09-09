@@ -35,37 +35,53 @@ export const DONATE_OPTIONS: DonateOption[] = [
 export const APP_INFO = {
   name: packageJson.displayName || "Browse Assist",
   version: packageJson.version,
-  slogan: (packageJson as { slogan?: string }).slogan || "PowerToys for Web Browsing",
+  slogan:
+    (packageJson as { slogan?: string }).slogan || "PowerToys for Web Browsing",
   description: packageJson.description,
   author: packageJson.author?.split("<")[0]?.trim() || "TrongAJTT",
   authorUrl: "https://github.com/TrongAJTT",
-  homePageUrl: packageJson.homepage || "https://github.com/TrongAJTT/browse-assist",
-  termsUrl: (packageJson as { termsUrl?: string }).termsUrl || "https://github.com/TrongAJTT/browse-assist/blob/main/TERMS.md",
-  privacyPolicyUrl: (packageJson as { privacyPolicyUrl?: string }).privacyPolicyUrl || "https://github.com/TrongAJTT/browse-assist/blob/main/PRIVACY.md",
+  homePageUrl:
+    packageJson.homepage || "https://github.com/TrongAJTT/browse-assist",
+  termsUrl:
+    (packageJson as { termsUrl?: string }).termsUrl ||
+    "https://github.com/TrongAJTT/browse-assist/blob/main/TERMS.md",
+  privacyPolicyUrl:
+    (packageJson as { privacyPolicyUrl?: string }).privacyPolicyUrl ||
+    "https://github.com/TrongAJTT/browse-assist/blob/main/PRIVACY.md",
   libraries: [
     {
       name: "Plasmo Framework",
-      version: packageJson.dependencies?.plasmo?.replace(/[\^~]/g, "") || "0.90.5",
+      version:
+        packageJson.dependencies?.plasmo?.replace(/[\^~]/g, "") || "0.90.5",
       url: "https://docs.plasmo.com/"
     },
     {
       name: "React",
-      version: packageJson.dependencies?.react?.replace(/[\^~]/g, "") || "18.2.0",
+      version:
+        packageJson.dependencies?.react?.replace(/[\^~]/g, "") || "18.2.0",
       url: "https://react.dev/"
     },
     {
       name: "Tailwind CSS",
-      version: packageJson.devDependencies?.tailwindcss?.replace(/[\^~]/g, "") || "3.4.19",
+      version:
+        packageJson.devDependencies?.tailwindcss?.replace(/[\^~]/g, "") ||
+        "3.4.19",
       url: "https://tailwindcss.com/"
     },
     {
       name: "Lucide React",
-      version: packageJson.dependencies?.["lucide-react"]?.replace(/[\^~]/g, "") || "1.41.0",
+      version:
+        packageJson.dependencies?.["lucide-react"]?.replace(/[\^~]/g, "") ||
+        "1.41.0",
       url: "https://lucide.dev/"
     },
     {
       name: "@plasmohq/storage",
-      version: packageJson.dependencies?.["@plasmohq/storage"]?.replace(/[\^~]/g, "") || "1.15.0",
+      version:
+        packageJson.dependencies?.["@plasmohq/storage"]?.replace(
+          /[\^~]/g,
+          ""
+        ) || "1.15.0",
       url: "https://github.com/PlasmoHQ/storage"
     }
   ],
@@ -88,7 +104,8 @@ export const APP_INFO = {
     {
       key: "search",
       name: "Search",
-      description: "Search selected text with default search engine on Super Drag."
+      description:
+        "Search selected text with default search engine on Super Drag."
     }
   ]
 }
@@ -146,3 +163,20 @@ export type SupportedBrowser =
   | "opera"
   | "firefox"
   | "unknown"
+
+/**
+ * Constants for Video Wheel Control feature.
+ */
+export const VIDEO_WHEEL_CONSTANTS = {
+  MIN_VOLUME: 0,
+  MAX_VOLUME: 1,
+  DEFAULT_VOLUME_STEP: 0.05, // 5%
+  MIN_VOLUME_STEP: 0.01,
+  MAX_VOLUME_STEP: 0.2,
+  MIN_SPEED: 0.25,
+  MAX_SPEED: 4.0,
+  DEFAULT_SPEED_STEP: 0.25,
+  MIN_SPEED_STEP: 0.05,
+  MAX_SPEED_STEP: 0.5,
+  OSD_FADE_DURATION_MS: 900
+} as const

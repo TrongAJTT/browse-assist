@@ -8,6 +8,7 @@ export type FeatureKey =
   | "smoothScroll"
   | "mouseZoom"
   | "pictureInPicture"
+  | "videoWheelControl"
   | "quickScroll"
   | "colorPicker"
   | "elementZapper"
@@ -162,6 +163,36 @@ export const DEFAULT_PICTURE_IN_PICTURE_CONFIG: PictureInPictureConfig = {
 }
 
 /**
+ * Modifier keys for Video Wheel Control.
+ */
+export type VideoWheelModifier = "none" | "alt" | "ctrl" | "shift"
+
+/**
+ * Video Wheel Control configuration.
+ */
+export interface VideoWheelControlConfig {
+  volumeModifier: VideoWheelModifier // Key to hold while adjusting volume (default: "shift")
+  speedModifier: VideoWheelModifier // Key to hold while adjusting playback speed (default: "alt")
+  volumeStep: number // Volume delta per wheel step (e.g. 0.05 for 5%)
+  speedStep: number // Playback speed delta per wheel step (e.g. 0.25)
+  middleClickToMute: boolean // Middle-click on video toggles mute
+  showOsd: boolean // Display on-screen volume / speed indicator HUD
+  invertVolumeScroll: boolean // Invert volume scroll direction
+  invertSpeedScroll: boolean // Invert speed scroll direction
+}
+
+export const DEFAULT_VIDEO_WHEEL_CONTROL_CONFIG: VideoWheelControlConfig = {
+  volumeModifier: "shift",
+  speedModifier: "alt",
+  volumeStep: 0.05,
+  speedStep: 0.25,
+  middleClickToMute: true,
+  showOsd: true,
+  invertVolumeScroll: false,
+  invertSpeedScroll: false
+}
+
+/**
  * Quick Scroll Buttons sub-configuration.
  */
 export type QuickScrollPosition =
@@ -264,6 +295,7 @@ export interface FeatureSettings {
   smoothScroll: boolean
   mouseZoom: boolean
   pictureInPicture: boolean
+  videoWheelControl: boolean
   quickScroll: boolean
   colorPicker: boolean
   elementZapper: boolean
@@ -274,6 +306,7 @@ export interface FeatureSettings {
   smoothScrollConfig: SmoothScrollConfig
   mouseZoomConfig: MouseZoomConfig
   pictureInPictureConfig: PictureInPictureConfig
+  videoWheelControlConfig: VideoWheelControlConfig
   quickScrollConfig: QuickScrollConfig
   colorPickerConfig: ColorPickerConfig
   elementZapperConfig: ElementZapperConfig
@@ -295,6 +328,7 @@ export const DEFAULT_FEATURE_LAYOUT_CONFIG: FeatureLayoutConfig = {
     "quickScroll",
     "smoothScroll",
     "pictureInPicture",
+    "videoWheelControl",
     "mouseZoom",
     "colorPicker",
     "elementZapper"
@@ -327,6 +361,7 @@ export const DEFAULT_SETTINGS: FeatureSettings = {
   smoothScroll: true,
   mouseZoom: true,
   pictureInPicture: true,
+  videoWheelControl: true,
   quickScroll: true,
   colorPicker: true,
   elementZapper: true,
@@ -340,6 +375,7 @@ export const DEFAULT_SETTINGS: FeatureSettings = {
   },
   mouseZoomConfig: DEFAULT_MOUSE_ZOOM_CONFIG,
   pictureInPictureConfig: DEFAULT_PICTURE_IN_PICTURE_CONFIG,
+  videoWheelControlConfig: DEFAULT_VIDEO_WHEEL_CONTROL_CONFIG,
   quickScrollConfig: DEFAULT_QUICK_SCROLL_CONFIG,
   colorPickerConfig: DEFAULT_COLOR_PICKER_CONFIG,
   elementZapperConfig: DEFAULT_ELEMENT_ZAPPER_CONFIG
@@ -405,6 +441,14 @@ export const FEATURES_LIST: FeatureMeta[] = [
     title: "Universal Picture-in-Picture",
     description: "Toggle floating video window using customizable shortcut.",
     icon: "📺",
+    hasSettings: true
+  },
+  {
+    key: "videoWheelControl",
+    title: "Video Wheel Control",
+    description:
+      "Adjust video volume and playback speed smoothly using the mouse wheel.",
+    icon: "🔊",
     hasSettings: true
   },
   {

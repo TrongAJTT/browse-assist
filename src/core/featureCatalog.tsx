@@ -6,6 +6,7 @@ import {
   PictureInPicture2,
   Pipette,
   Scroll,
+  Volume2,
   Zap,
   ZoomIn
 } from "lucide-react"
@@ -99,6 +100,16 @@ export const FEATURE_CATALOG: Record<FeatureKey, FeatureCatalogItem> = {
     icon: PictureInPicture2,
     colorClass: "text-indigo-400",
     bgClass: "bg-indigo-500/10 border-indigo-500/30",
+    hasSettings: true
+  },
+  videoWheelControl: {
+    key: "videoWheelControl",
+    title: "Video Wheel Control",
+    description:
+      "Adjust video volume and playback speed smoothly using the mouse wheel.",
+    icon: Volume2,
+    colorClass: "text-violet-400",
+    bgClass: "bg-violet-500/10 border-violet-500/30",
     hasSettings: true
   },
   colorPicker: {

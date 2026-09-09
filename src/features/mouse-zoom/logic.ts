@@ -1,8 +1,9 @@
-import {
-  DEFAULT_MOUSE_ZOOM_CONFIG,
-  type MouseZoomConfig
-} from "~core/types"
 import { removeContentToast, showContentToast } from "~core/toast"
+import { DEFAULT_MOUSE_ZOOM_CONFIG, type MouseZoomConfig } from "~core/types"
+import {
+  registerWheelSubscriber,
+  unregisterWheelSubscriber
+} from "~core/wheelDispatcher"
 
 let isActive = false
 let currentConfig: MouseZoomConfig = { ...DEFAULT_MOUSE_ZOOM_CONFIG }
@@ -60,7 +61,10 @@ function showZoomToast(zoomLevel: number): void {
  * Applies the calculated zoom to the document body.
  */
 function applyZoom(newZoom: number): void {
-  currentZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, Number(newZoom.toFixed(2))))
+  currentZoom = Math.max(
+    MIN_ZOOM,
+    Math.min(MAX_ZOOM, Number(newZoom.toFixed(2)))
+  )
 
   if (document.body) {
     if (currentConfig.smooth) {
@@ -72,7 +76,8 @@ function applyZoom(newZoom: number): void {
     if (currentZoom === 1.0) {
       document.body.style.removeProperty("zoom")
     } else {
-      ;(document.body.style as unknown as { zoom: string }).zoom = currentZoom.toString()
+      ;(document.body.style as unknown as { zoom: string }).zoom =
+        currentZoom.toString()
     }
   }
 
@@ -130,15 +135,12 @@ function onContextMenu(event: MouseEvent): void {
 
 /**
  * Wheel event handler for Modifier + Wheel zoom.
+ * Returns true if the wheel event was consumed (modifier pressed), false otherwise.
  */
-function onWheel(event: WheelEvent): void {
+function onWheelDecision(event: WheelEvent): boolean {
   if (!isModifierPressed(event)) {
-    return
+    return false
   }
-
-  // Prevent default scroll behavior and text selection during zoom
-  event.preventDefault()
-  event.stopPropagation()
 
   if (currentConfig.modifier === "right-click") {
     didZoomWhileRightDown = true
@@ -152,6 +154,7 @@ function onWheel(event: WheelEvent): void {
 
   const nextZoom = currentZoom + direction * currentConfig.stepSize
   applyZoom(nextZoom)
+  return true
 }
 
 /**
@@ -173,7 +176,11 @@ export function activate(config?: MouseZoomConfig): void {
   if (isActive || typeof window === "undefined") return
   isActive = true
 
-  window.addEventListener("wheel", onWheel, { passive: false, capture: true })
+  registerWheelSubscriber({
+    id: "mouse-zoom",
+    priority: 50,
+    handler: onWheelDecision
+  })
   window.addEventListener("mousedown", onMouseDown, { capture: true })
   window.addEventListener("mouseup", onMouseUp, { capture: true })
   window.addEventListener("contextmenu", onContextMenu, { capture: true })
@@ -186,7 +193,7 @@ export function deactivate(): void {
   if (!isActive || typeof window === "undefined") return
   isActive = false
 
-  window.removeEventListener("wheel", onWheel, true)
+  unregisterWheelSubscriber("mouse-zoom")
   window.removeEventListener("mousedown", onMouseDown, true)
   window.removeEventListener("mouseup", onMouseUp, true)
   window.removeEventListener("contextmenu", onContextMenu, true)
@@ -205,4 +212,3 @@ export function deactivate(): void {
 
   removeContentToast()
 }
-
