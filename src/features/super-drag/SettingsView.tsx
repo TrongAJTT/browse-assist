@@ -13,6 +13,7 @@ import React, { useEffect, useState } from "react"
 import { useStorage } from "@plasmohq/storage/hook"
 
 import { GridPicker, type GridPickerItem } from "~components/GridPicker"
+import { SegmentedTabs, type SegmentedTabItem } from "~components/SegmentedTabs"
 import { SettingToggleRow } from "~components/SettingToggleRow"
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
 import {
@@ -49,6 +50,8 @@ const INDICATOR_ITEMS: GridPickerItem<DragIndicatorStyle>[] = [
   }
 ]
 
+type TargetTab = "text" | "link" | "image"
+
 /**
  * Sub-settings view for Super Drag.
  * Configures drag targets with intuitive nested directional gesture D-pads,
@@ -62,6 +65,7 @@ export const SuperDragSettingsView: React.FC<SuperDragSettingsViewProps> = ({
     DEFAULT_SETTINGS
   )
 
+  const [activeTab, setActiveTab] = useState<TargetTab>("text")
   const [isIncognitoAllowed, setIsIncognitoAllowed] = useState(false)
 
   // Check if extension is allowed in Incognito mode
@@ -76,6 +80,27 @@ export const SuperDragSettingsView: React.FC<SuperDragSettingsViewProps> = ({
   const isMasterEnabled = settings?.superDrag ?? DEFAULT_SETTINGS.superDrag
   const currentConfig: SuperDragConfig =
     settings?.superDragConfig ?? DEFAULT_SETTINGS.superDragConfig
+
+  const targetTabs: SegmentedTabItem<TargetTab>[] = [
+    {
+      id: "text",
+      label: "Text",
+      icon: <Type className="w-3.5 h-3.5" />,
+      showOffDot: !currentConfig.searchSelectedText
+    },
+    {
+      id: "link",
+      label: "Links",
+      icon: <Link2 className="w-3.5 h-3.5" />,
+      showOffDot: !currentConfig.openHyperlinks
+    },
+    {
+      id: "image",
+      label: "Images",
+      icon: <ImageIcon className="w-3.5 h-3.5" />,
+      showOffDot: !currentConfig.openImages
+    }
+  ]
 
   const handleToggleMaster = (enabled: boolean) => {
     setSettings((prev) => ({
@@ -150,94 +175,117 @@ export const SuperDragSettingsView: React.FC<SuperDragSettingsViewProps> = ({
       onToggle={handleToggleMaster}
       onBack={onBack}>
       <div className="space-y-4">
-        {/* Section 1: Drag Targets & Directional Config */}
-        <div className="space-y-2">
+        {/* Section 1: Drag Targets (Segmented Tabs with Off Indicator) */}
+        <div className="space-y-2.5">
           <span className="section-header">Drag Targets</span>
 
-          <div className="divide-y divide-border-divider">
-            {/* 1. Search Highlighted Text */}
-            <div className="py-2 first:pt-0">
-              <SettingToggleRow
-                icon={<Search className="w-5 h-5 text-amber-400" />}
-                title="Search Highlighted Text"
-                description="Drag selected text in 4 directions to search, open windows, or copy."
-                enabled={currentConfig.searchSelectedText}
-                onToggle={() => handleToggleOption("searchSelectedText")}
-              />
-              {currentConfig.searchSelectedText && (
-                <div className="mt-2.5 pt-2 pb-1.5 pl-3 border-l-2 border-border-subtle ml-2">
-                  <DirectionalDPadPicker
-                    actions={
-                      currentConfig.textActions ?? DEFAULT_DIRECTIONAL_ACTIONS
-                    }
-                    onChangeAction={(dir, act) =>
-                      handleChangeDirectionAction("textActions", dir, act)
-                    }
-                    onReset={() => handleResetTargetActions("textActions")}
-                    isIncognitoAllowed={isIncognitoAllowed}
-                    centerIcon={
-                      <Type className="w-4 h-4 text-content-muted/40" />
-                    }
-                  />
-                </div>
-              )}
-            </div>
+          {/* Segmented Tab Bar for Targets */}
+          <SegmentedTabs<TargetTab>
+            items={targetTabs}
+            value={activeTab}
+            onChange={setActiveTab}
+          />
 
-            {/* 2. Open Hyperlinks */}
-            <div className="py-2">
-              <SettingToggleRow
-                icon={<ExternalLink className="w-5 h-5 text-emerald-400" />}
-                title="Open Hyperlinks"
-                description="Drag hyperlinks to open in tabs, split screen, or copy destination URL."
-                enabled={currentConfig.openHyperlinks}
-                onToggle={() => handleToggleOption("openHyperlinks")}
-              />
-              {currentConfig.openHyperlinks && (
-                <div className="mt-2.5 pt-2 pb-1.5 pl-3 border-l-2 border-border-subtle ml-2">
-                  <DirectionalDPadPicker
-                    actions={
-                      currentConfig.linkActions ?? DEFAULT_DIRECTIONAL_ACTIONS
-                    }
-                    onChangeAction={(dir, act) =>
-                      handleChangeDirectionAction("linkActions", dir, act)
-                    }
-                    onReset={() => handleResetTargetActions("linkActions")}
-                    isIncognitoAllowed={isIncognitoAllowed}
-                    centerIcon={
-                      <Link2 className="w-4 h-4 text-content-muted/40" />
-                    }
-                  />
-                </div>
-              )}
-            </div>
+          {/* Active Target Content */}
+          <div className="pt-1">
+            {activeTab === "text" && (
+              <div className="space-y-2">
+                <SettingToggleRow
+                  icon={<Search className="w-5 h-5 text-amber-400" />}
+                  title="Search Highlighted Text"
+                  description="Drag selected text in 4 directions to search, open windows, or copy."
+                  enabled={currentConfig.searchSelectedText}
+                  onToggle={() => handleToggleOption("searchSelectedText")}
+                />
+                {currentConfig.searchSelectedText ? (
+                  <div className="mt-2 pt-2 pb-1 pl-3 border-l-2 border-border-subtle ml-2">
+                    <DirectionalDPadPicker
+                      actions={
+                        currentConfig.textActions ?? DEFAULT_DIRECTIONAL_ACTIONS
+                      }
+                      onChangeAction={(dir, act) =>
+                        handleChangeDirectionAction("textActions", dir, act)
+                      }
+                      onReset={() => handleResetTargetActions("textActions")}
+                      isIncognitoAllowed={isIncognitoAllowed}
+                      centerIcon={
+                        <Type className="w-4 h-4 text-content-muted/40" />
+                      }
+                    />
+                  </div>
+                ) : (
+                  <p className="text-xs text-content-muted py-2 text-center">
+                    Highlighted text dragging is currently disabled.
+                  </p>
+                )}
+              </div>
+            )}
 
-            {/* 3. Drag Images */}
-            <div className="py-2">
-              <SettingToggleRow
-                icon={<ImageIcon className="w-5 h-5 text-amber-400" />}
-                title="Drag Images"
-                description="Drag images to view in tabs, split screen, or copy direct image URLs."
-                enabled={currentConfig.openImages}
-                onToggle={() => handleToggleOption("openImages")}
-              />
-              {currentConfig.openImages && (
-                <div className="mt-2.5 pt-2 pb-1.5 pl-3 border-l-2 border-border-subtle ml-2">
-                  <DirectionalDPadPicker
-                    actions={
-                      currentConfig.imageActions ?? DEFAULT_DIRECTIONAL_ACTIONS
-                    }
-                    onChangeAction={(dir, act) =>
-                      handleChangeDirectionAction("imageActions", dir, act)
-                    }
-                    onReset={() => handleResetTargetActions("imageActions")}
-                    isIncognitoAllowed={isIncognitoAllowed}
-                    centerIcon={
-                      <ImageIcon className="w-4 h-4 text-content-muted/40" />
-                    }
-                  />
-                </div>
-              )}
-            </div>
+            {activeTab === "link" && (
+              <div className="space-y-2">
+                <SettingToggleRow
+                  icon={<ExternalLink className="w-5 h-5 text-emerald-400" />}
+                  title="Open Hyperlinks"
+                  description="Drag hyperlinks to open in tabs, split screen, or copy destination URL."
+                  enabled={currentConfig.openHyperlinks}
+                  onToggle={() => handleToggleOption("openHyperlinks")}
+                />
+                {currentConfig.openHyperlinks ? (
+                  <div className="mt-2 pt-2 pb-1 pl-3 border-l-2 border-border-subtle ml-2">
+                    <DirectionalDPadPicker
+                      actions={
+                        currentConfig.linkActions ?? DEFAULT_DIRECTIONAL_ACTIONS
+                      }
+                      onChangeAction={(dir, act) =>
+                        handleChangeDirectionAction("linkActions", dir, act)
+                      }
+                      onReset={() => handleResetTargetActions("linkActions")}
+                      isIncognitoAllowed={isIncognitoAllowed}
+                      centerIcon={
+                        <Link2 className="w-4 h-4 text-content-muted/40" />
+                      }
+                    />
+                  </div>
+                ) : (
+                  <p className="text-xs text-content-muted py-2 text-center">
+                    Hyperlink dragging is currently disabled.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {activeTab === "image" && (
+              <div className="space-y-2">
+                <SettingToggleRow
+                  icon={<ImageIcon className="w-5 h-5 text-amber-400" />}
+                  title="Drag Images"
+                  description="Drag images to view in tabs, split screen, or copy direct image URLs."
+                  enabled={currentConfig.openImages}
+                  onToggle={() => handleToggleOption("openImages")}
+                />
+                {currentConfig.openImages ? (
+                  <div className="mt-2 pt-2 pb-1 pl-3 border-l-2 border-border-subtle ml-2">
+                    <DirectionalDPadPicker
+                      actions={
+                        currentConfig.imageActions ?? DEFAULT_DIRECTIONAL_ACTIONS
+                      }
+                      onChangeAction={(dir, act) =>
+                        handleChangeDirectionAction("imageActions", dir, act)
+                      }
+                      onReset={() => handleResetTargetActions("imageActions")}
+                      isIncognitoAllowed={isIncognitoAllowed}
+                      centerIcon={
+                        <ImageIcon className="w-4 h-4 text-content-muted/40" />
+                      }
+                    />
+                  </div>
+                ) : (
+                  <p className="text-xs text-content-muted py-2 text-center">
+                    Image dragging is currently disabled.
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
