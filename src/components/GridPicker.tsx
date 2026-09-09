@@ -51,7 +51,7 @@ export function GridPicker<T extends string = string>({
             }`}>
             {item.icon && (
               <span
-                className={isSelected ? "text-accent" : "text-content-muted"}>
+                className={isSelected ? "text-white" : "text-content-muted"}>
                 {item.icon}
               </span>
             )}

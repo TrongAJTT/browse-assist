@@ -39,7 +39,6 @@ let detectedTheme: "dark" | "light" = "dark"
 
 const MIN_PAGE_RATIO = 1.6 // Minimum document height / viewport height
 const SCROLL_THRESHOLD = 300 // px threshold to show top or bottom button
-const EDGE_SAFE_THRESHOLD = 320 // px exclusion distance from top and bottom edges
 
 // SVG Icons
 const UP_ARROW_SVG = `
@@ -465,21 +464,28 @@ function updateButtonsVisibility(): void {
   }
 
   const distanceToBottom = totalHeight - (scrollY + viewportHeight)
-  const inTopEdgeZone = scrollY <= EDGE_SAFE_THRESHOLD
-  const inBottomEdgeZone = distanceToBottom <= EDGE_SAFE_THRESHOLD
 
-  // Safe Edge Zones: if enabled, hide entire container when near very top or bottom,
-  // unless currently displaying an active return memory button!
-  if (currentConfig.safeEdgeZones && (inTopEdgeZone || inBottomEdgeZone) && !returnMemory) {
+  // Top button visibility: only show if scrolled down or holding return memory
+  const hasActiveTopReturn = returnMemory?.target === "top"
+  const canScrollUp = scrollY > SCROLL_THRESHOLD || hasActiveTopReturn
+
+  // Bottom button visibility: only show when scrolling through content (not at top, not at bottom)
+  // or holding return memory. Never show a standalone bottom button at the very top of the page!
+  const hasActiveBottomReturn = returnMemory?.target === "bottom"
+  const canScrollDown =
+    (currentConfig.buttonsMode === "both" &&
+      scrollY > SCROLL_THRESHOLD &&
+      distanceToBottom > SCROLL_THRESHOLD) ||
+    hasActiveBottomReturn
+
+  // If neither button should show (e.g. at top without return memory), hide the container entirely
+  if (!canScrollUp && !canScrollDown) {
     containerElement.classList.add("qs-hidden")
     return
   }
 
   containerElement.classList.remove("qs-hidden")
 
-  // Top button visibility
-  const hasActiveTopReturn = returnMemory?.target === "top"
-  const canScrollUp = scrollY > SCROLL_THRESHOLD || hasActiveTopReturn
   if (canScrollUp) {
     btnTop.classList.remove("qs-hidden")
   } else {
@@ -488,12 +494,6 @@ function updateButtonsVisibility(): void {
       resetReturnMemory()
     }
   }
-
-  // Bottom button visibility
-  const hasActiveBottomReturn = returnMemory?.target === "bottom"
-  const canScrollDown =
-    (currentConfig.buttonsMode === "both" && distanceToBottom > SCROLL_THRESHOLD) ||
-    hasActiveBottomReturn
 
   if (canScrollDown) {
     btnBottom.classList.remove("qs-hidden")

@@ -1,10 +1,14 @@
 import {
+  ArrowDownLeft,
+  ArrowDownRight,
+  ArrowLeft,
+  ArrowRight,
+  ArrowUpLeft,
+  ArrowUpRight,
   ArrowUpToLine,
   Compass,
   Eye,
-  History,
-  LayoutTemplate,
-  Shield
+  History
 } from "lucide-react"
 import type React from "react"
 
@@ -31,32 +35,32 @@ const POSITION_ITEMS: GridPickerItem<QuickScrollPosition>[] = [
   {
     id: "top-left",
     label: "Top Left",
-    icon: <LayoutTemplate className="w-3.5 h-3.5" />
+    icon: <ArrowUpLeft className="w-3.5 h-3.5" />
   },
   {
     id: "center-left",
     label: "Center Left",
-    icon: <LayoutTemplate className="w-3.5 h-3.5" />
+    icon: <ArrowLeft className="w-3.5 h-3.5" />
   },
   {
     id: "bottom-left",
     label: "Bottom Left",
-    icon: <LayoutTemplate className="w-3.5 h-3.5" />
+    icon: <ArrowDownLeft className="w-3.5 h-3.5" />
   },
   {
     id: "top-right",
     label: "Top Right",
-    icon: <LayoutTemplate className="w-3.5 h-3.5" />
+    icon: <ArrowUpRight className="w-3.5 h-3.5" />
   },
   {
     id: "center-right",
     label: "Center Right",
-    icon: <LayoutTemplate className="w-3.5 h-3.5" />
+    icon: <ArrowRight className="w-3.5 h-3.5" />
   },
   {
     id: "bottom-right",
     label: "Bottom Right",
-    icon: <LayoutTemplate className="w-3.5 h-3.5" />
+    icon: <ArrowDownRight className="w-3.5 h-3.5" />
   }
 ]
 
@@ -117,7 +121,7 @@ export const QuickScrollSettingsView: React.FC<
   }
 
   const handleToggleOption = (
-    key: keyof Pick<QuickScrollConfig, "autoHide" | "enableReturnMemory" | "safeEdgeZones">
+    key: keyof Pick<QuickScrollConfig, "autoHide" | "enableReturnMemory">
   ) => {
     setSettings((prev) => ({
       ...(prev ?? DEFAULT_SETTINGS),
@@ -179,15 +183,6 @@ export const QuickScrollSettingsView: React.FC<
           <span className="section-header">Behavior & Intelligence</span>
 
           <div className="divide-y divide-border-divider">
-            {/* Safe Edge Zones */}
-            <SettingToggleRow
-              icon={<Shield className="w-5 h-5 text-emerald-400" />}
-              title="Safe Edge Zones"
-              description="Hide buttons entirely near the very top or bottom of the page. Buttons only reveal when scrolling through the middle."
-              enabled={currentConfig.safeEdgeZones}
-              onToggle={() => handleToggleOption("safeEdgeZones")}
-            />
-
             {/* Auto-Dim on Idle */}
             <SettingToggleRow
               icon={<Eye className="w-5 h-5 text-cyan-400" />}
