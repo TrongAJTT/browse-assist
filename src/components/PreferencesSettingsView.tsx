@@ -305,11 +305,11 @@ export const PreferencesSettingsView: React.FC<
         </div>
 
         {/* Navigation & Popup Memory Section */}
-        <div className="space-y-3 pt-3 border-t border-border-divider">
+        <div className="space-y-2.5 pt-3 border-t border-border-divider">
           <span className="section-header">Navigation</span>
 
-          <div className="space-y-3">
-            <div className="flex items-center justify-between gap-3">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between gap-3 py-1">
               <div className="flex items-start gap-2.5 flex-1 min-w-0">
                 <History className="w-4 h-4 text-accent shrink-0 mt-0.5" />
                 <div className="flex flex-col min-w-0">
@@ -330,21 +330,23 @@ export const PreferencesSettingsView: React.FC<
             </div>
 
             {currentNav.rememberLastView && (
-              <div className="pl-6 pt-1">
-                <Slider
-                  label="Session Timeout"
-                  value={currentNav.sessionTimeoutMinutes}
-                  valueDisplay={`${currentNav.sessionTimeoutMinutes} min`}
-                  min={1}
-                  max={60}
-                  step={1}
-                  onChange={handleUpdateTimeout}
-                  ticks={[
-                    { label: "1 min" },
-                    { label: "10 min (Default)" },
-                    { label: "60 min" }
-                  ]}
-                />
+              <div className="pt-1 pb-1 pl-6">
+                <div className="pl-3 border-l-2 border-border-subtle">
+                  <Slider
+                    label="Session Timeout"
+                    value={currentNav.sessionTimeoutMinutes}
+                    valueDisplay={`${currentNav.sessionTimeoutMinutes} min`}
+                    min={1}
+                    max={60}
+                    step={1}
+                    onChange={handleUpdateTimeout}
+                    ticks={[
+                      { label: "1 min" },
+                      { label: "10 min (Default)" },
+                      { label: "60 min" }
+                    ]}
+                  />
+                </div>
               </div>
             )}
           </div>

@@ -108,7 +108,7 @@ export const Slider: React.FC<SliderProps> = ({
         onPointerUp={handlePointerUp}
         onTouchEnd={handlePointerUp}
         onKeyUp={handleKeyUp}
-        className={`w-full h-1.5 bg-app-card rounded-lg appearance-none cursor-pointer accent-accent hover:accent-accent-hover focus:outline-none transition-colors ${
+        className={`w-full h-1 bg-border-subtle rounded-lg appearance-none cursor-pointer accent-accent hover:accent-accent-hover focus:outline-none transition-colors ${
           disabled ? "opacity-40 cursor-not-allowed" : ""
         }`}
       />
