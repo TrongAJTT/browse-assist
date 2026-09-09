@@ -113,9 +113,9 @@ export const FEATURE_CATALOG: Record<FeatureKey, FeatureCatalogItem> = {
   },
   elementZapper: {
     key: "elementZapper",
-    title: "Element Zapper",
+    title: "Element Toys",
     description:
-      "Target and eliminate distracting overlays, banners, and sticky elements on any page.",
+      "Inspect, zap, edit text, or reposition elements on any web page.",
     icon: Zap,
     colorClass: "text-amber-400",
     bgClass: "bg-amber-500/10 border-amber-500/30",

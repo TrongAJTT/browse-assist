@@ -212,16 +212,38 @@ export const DEFAULT_COLOR_PICKER_CONFIG: ColorPickerConfig = {
 }
 
 /**
- * Element Zapper configuration.
+ * Interactive action modes for Element Toys.
+ */
+export type ZapperMode = "zap" | "edit" | "move" | "hide"
+
+/**
+ * Move behavior mode:
+ * - "relative": In-layout DOM flow reorder, respecting layout and pushing other components
+ * - "absolute": Freeform transform translate3d without altering layout flow
+ */
+export type ElementMoveType = "relative" | "absolute"
+
+/**
+ * Element Toys configuration.
  */
 export interface ElementZapperConfig {
   autoUnfreezeScroll: boolean // Automatically remove overflow:hidden on body/html when an overlay is zapped
-  showToast: boolean // Show feedback toast when an element is zapped or mode cancelled
+  showToast: boolean // Show feedback toast when an action is executed or mode cancelled
+  continuousMode: boolean // Stay in Element Toys mode until Esc or Exit button
+  showDimensions: boolean // Display width × height in the hover badge
+  showTagDescriptor: boolean // Display HTML tag & class/id in badge
+  defaultMode: ZapperMode // Initial tool mode when activated
+  moveType: ElementMoveType // "relative" (layout flow / push components) or "absolute" (freeform)
 }
 
 export const DEFAULT_ELEMENT_ZAPPER_CONFIG: ElementZapperConfig = {
   autoUnfreezeScroll: true,
-  showToast: true
+  showToast: true,
+  continuousMode: true,
+  showDimensions: true,
+  showTagDescriptor: true,
+  defaultMode: "zap",
+  moveType: "relative"
 }
 
 /**
@@ -408,9 +430,9 @@ export const FEATURES_LIST: FeatureMeta[] = [
   },
   {
     key: "elementZapper",
-    title: "Element Zapper",
+    title: "Element Toys",
     description:
-      "Target and eliminate distracting overlays, banners, and sticky elements on any page.",
+      "Inspect, zap, edit text, or reposition elements on any web page.",
     icon: "⚡",
     hasSettings: true
   }

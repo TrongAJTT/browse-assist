@@ -92,6 +92,12 @@ export interface MessageRegistry {
   [MESSAGE_TYPES.TRIGGER_ELEMENT_ZAPPER]: {
     request: undefined
     response: { success: boolean }
+  },
+
+  // Navigation & Settings
+  [MESSAGE_TYPES.OPEN_POPUP]: {
+    request: { view?: string }
+    response: { ok: boolean }
   }
 }
 
@@ -166,8 +172,14 @@ export async function getActiveTab(): Promise<chrome.tabs.Tab | null> {
   }
 
   return new Promise((resolve) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      resolve(tabs[0] || null)
+    chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
+      if (tabs && tabs[0]) {
+        resolve(tabs[0])
+      } else {
+        chrome.tabs.query({ active: true, currentWindow: true }, (fallbackTabs) => {
+          resolve(fallbackTabs?.[0] || null)
+        })
+      }
     })
   })
 }

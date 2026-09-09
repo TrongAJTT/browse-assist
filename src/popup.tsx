@@ -70,7 +70,16 @@ type ActiveView =
 const sessionStorage = new Storage({ area: "local" })
 
 function IndexPopup() {
-  const [currentView, setCurrentView] = useState<ActiveView>("main")
+  const urlParams =
+    typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search)
+      : null
+  const initialViewFromUrl =
+    (urlParams?.get("view") as ActiveView | null) || null
+
+  const [currentView, setCurrentView] = useState<ActiveView>(
+    initialViewFromUrl || "main"
+  )
   const [isTabReady, setIsTabReady] = useState(false)
   const [isDonateOpen, setIsDonateOpen] = useState(false)
   const donateMenuRef = useRef<HTMLDivElement>(null)
@@ -89,6 +98,11 @@ function IndexPopup() {
 
   // Restore last view on mount if enabled and within session timeout
   useEffect(() => {
+    if (initialViewFromUrl) {
+      isInitialMount.current = false
+      return
+    }
+
     async function restoreView() {
       try {
         const stored = await sessionStorage.get<{
@@ -117,7 +131,7 @@ function IndexPopup() {
       }
     }
     restoreView()
-  }, []) // run once on mount
+  }, [initialViewFromUrl])
 
   // Persist current view when it changes
   useEffect(() => {

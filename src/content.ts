@@ -53,7 +53,10 @@ export const config: PlasmoCSConfig = {
   all_frames: false
 }
 
+let isElementToysEnabled = true
+
 function applySettings(nextSettings: FeatureSettings): void {
+  isElementToysEnabled = Boolean(nextSettings?.elementZapper)
   // Allow Right Click is managed per-tab on-demand, not auto-activated globally.
 
   // Context Menu Actions
@@ -166,6 +169,26 @@ async function init(): Promise<void> {
         return true
       }
     })
+
+    // In-page keyboard shortcut capture for Element Toys (Alt+Shift+Z)
+    // Intercepts and stops event before browser/page can hijack it
+    window.addEventListener(
+      "keydown",
+      (e) => {
+        if (
+          isElementToysEnabled &&
+          e.altKey &&
+          e.shiftKey &&
+          (e.key?.toLowerCase() === "z" || e.code === "KeyZ")
+        ) {
+          e.preventDefault()
+          e.stopPropagation()
+          e.stopImmediatePropagation()
+          startElementZapping()
+        }
+      },
+      { capture: true }
+    )
   } catch (error) {
     console.error("Browse Assist: Failed to initialize content features", error)
   }

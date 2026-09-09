@@ -93,8 +93,11 @@ export const MESSAGE_TYPES = {
   // ColorPick Eyedropper
   TRIGGER_COLOR_PICKER: "TRIGGER_COLOR_PICKER",
 
-  // Element Zapper
-  TRIGGER_ELEMENT_ZAPPER: "TRIGGER_ELEMENT_ZAPPER"
+  // Element Zapper / Toys
+  TRIGGER_ELEMENT_ZAPPER: "TRIGGER_ELEMENT_ZAPPER",
+
+  // Navigation & Settings
+  OPEN_POPUP: "OPEN_POPUP"
 } as const
 
 export type MessageType = (typeof MESSAGE_TYPES)[keyof typeof MESSAGE_TYPES]

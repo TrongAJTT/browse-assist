@@ -1,10 +1,23 @@
-import { HelpCircle, Sparkles, Zap } from "lucide-react"
+import {
+  Bell,
+  EyeOff,
+  HelpCircle,
+  Move,
+  Repeat,
+  Ruler,
+  Sparkles,
+  Tag,
+  Trash2,
+  Type,
+  Zap
+} from "lucide-react"
 import type React from "react"
 import { useEffect, useState } from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
 import { FeatureShortcutRow } from "~components/FeatureShortcutRow"
+import { SegmentedTabs, type SegmentedTabItem } from "~components/SegmentedTabs"
 import { SettingToggleRow } from "~components/SettingToggleRow"
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
 import { MESSAGE_TYPES, sendToActiveTab } from "~core/messaging"
@@ -14,12 +27,20 @@ import {
   DEFAULT_SETTINGS,
   STORAGE_KEYS,
   type ElementZapperConfig,
-  type FeatureSettings
+  type FeatureSettings,
+  type ZapperMode
 } from "~core/types"
 
 interface ElementZapperSettingsViewProps {
   onBack: () => void
 }
+
+const DEFAULT_MODE_TABS: SegmentedTabItem<ZapperMode>[] = [
+  { id: "zap", label: "Zap", icon: <Trash2 className="w-3.5 h-3.5 text-red-400" /> },
+  { id: "edit", label: "Edit", icon: <Type className="w-3.5 h-3.5 text-sky-400" /> },
+  { id: "move", label: "Move", icon: <Move className="w-3.5 h-3.5 text-emerald-400" /> },
+  { id: "hide", label: "Hide", icon: <EyeOff className="w-3.5 h-3.5 text-amber-400" /> }
+]
 
 export const ElementZapperSettingsView: React.FC<
   ElementZapperSettingsViewProps
@@ -65,7 +86,17 @@ export const ElementZapperSettingsView: React.FC<
     }))
   }
 
-  const handleZapNow = async () => {
+  const handleSetDefaultMode = (mode: ZapperMode) => {
+    setSettings((prev) => ({
+      ...(prev ?? DEFAULT_SETTINGS),
+      elementZapperConfig: {
+        ...(prev?.elementZapperConfig ?? DEFAULT_ELEMENT_ZAPPER_CONFIG),
+        defaultMode: mode
+      }
+    }))
+  }
+
+  const handleLaunchNow = async () => {
     try {
       await sendToActiveTab(MESSAGE_TYPES.TRIGGER_ELEMENT_ZAPPER)
     } finally {
@@ -75,26 +106,26 @@ export const ElementZapperSettingsView: React.FC<
 
   return (
     <SubSettingsLayout
-      title="Element Zapper"
+      title="Element Toys"
       enabled={isMasterEnabled}
       onToggle={handleToggleMaster}
       onBack={onBack}
       rightActions={
         <button
           type="button"
-          onClick={handleZapNow}
+          onClick={handleLaunchNow}
           disabled={!isMasterEnabled}
-          title="Zap Element from Page"
+          title="Launch Element Toys on Page"
           className="px-2.5 py-1 rounded-lg bg-accent hover:bg-accent-hover text-white font-semibold text-xs shadow-sm shadow-accent-glow active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none flex items-center gap-1.5">
           <Zap className="w-3.5 h-3.5 fill-current" />
-          <span>Zap</span>
+          <span>Launch</span>
         </button>
       }>
       <div className="space-y-4">
         {/* Keyboard Shortcut Row */}
         <FeatureShortcutRow
-          title="Zapper Shortcut"
-          description="Activate crosshair cursor on page"
+          title="Activation Shortcut"
+          description="Open floating Element Toys toolbar on active page"
           shortcut={shortcut}
           iconColorClass="text-amber-400"
           onConfigureShortcuts={() => {
@@ -102,25 +133,76 @@ export const ElementZapperSettingsView: React.FC<
           }}
         />
 
-        {/* Behavior Options */}
+        {/* Element Inspector Badge Options */}
         <div className="space-y-1 pt-2 border-t border-border-divider">
-          <span className="section-header">Zapper Behavior</span>
+          <span className="section-header">Element Inspector Badge</span>
 
           <div className="divide-y divide-border-divider">
+            {/* Show Dimensions Switch */}
+            <SettingToggleRow
+              icon={<Ruler className="w-5 h-5 text-sky-400" />}
+              title="Show Element Dimensions"
+              description="Measure and display width × height (px) on hover badge"
+              enabled={currentConfig.showDimensions}
+              onToggle={() => handleToggleConfig("showDimensions")}
+            />
+
+            {/* Show Tag & Class Names Switch */}
+            <SettingToggleRow
+              icon={<Tag className="w-5 h-5 text-amber-400" />}
+              title="Show Tag & Class Names"
+              description="Display HTML tag name and CSS class selectors (e.g. div.banner#hero)"
+              enabled={currentConfig.showTagDescriptor}
+              onToggle={() => handleToggleConfig("showTagDescriptor")}
+            />
+          </div>
+        </div>
+
+        {/* Behavior & Default Mode */}
+        <div className="space-y-1 pt-2 border-t border-border-divider">
+          <span className="section-header">Element Toys Behavior</span>
+
+          {/* Default Starting Mode */}
+          <div className="py-2.5 space-y-2">
+            <div className="flex flex-col gap-0.5">
+              <span className="text-xs font-semibold text-content-primary">
+                Default Tool on Launch
+              </span>
+              <span className="text-[11px] text-content-muted leading-tight">
+                Tool selected by default when activating Element Toys
+              </span>
+            </div>
+            <SegmentedTabs
+              items={DEFAULT_MODE_TABS}
+              value={currentConfig.defaultMode ?? "zap"}
+              onChange={handleSetDefaultMode}
+            />
+          </div>
+
+          <div className="divide-y divide-border-divider">
+            {/* Continuous Mode Switch */}
+            <SettingToggleRow
+              icon={<Repeat className="w-5 h-5 text-indigo-400" />}
+              title="Continuous Session"
+              description="Keep tools active after each action until pressing Esc or Exit"
+              enabled={currentConfig.continuousMode}
+              onToggle={() => handleToggleConfig("continuousMode")}
+            />
+
             {/* Auto Unfreeze Scroll Switch */}
             <SettingToggleRow
               icon={<Sparkles className="w-5 h-5 text-emerald-400" />}
               title="Auto Unfreeze Page Scroll"
-              description="Restore scrollability (overflow: auto) if zapped element was a locking modal overlay"
+              description="Restore scrollability (overflow: auto) if target was a locking modal overlay"
               enabled={currentConfig.autoUnfreezeScroll}
               onToggle={() => handleToggleConfig("autoUnfreezeScroll")}
             />
 
             {/* Show Toast Notifications Switch */}
             <SettingToggleRow
-              icon={<Zap className="w-5 h-5 text-indigo-400" />}
+              icon={<Bell className="w-5 h-5 text-rose-400" />}
               title="Show Floating Toast"
-              description="Display confirmation banner on page when an element is zapped"
+              description="Display confirmation banner on page when actions are executed"
               enabled={currentConfig.showToast}
               onToggle={() => handleToggleConfig("showToast")}
             />
@@ -131,7 +213,7 @@ export const ElementZapperSettingsView: React.FC<
         <div className="p-3 rounded-xl bg-surface-subtle/40 border border-border-subtle space-y-2">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-content-primary">
             <HelpCircle className="w-3.5 h-3.5 text-amber-400" />
-            <span>How to Use Element Zapper</span>
+            <span>How to Use Element Toys</span>
           </div>
           <ul className="text-[11px] text-content-muted space-y-1.5 list-disc list-inside">
             <li>
@@ -139,22 +221,26 @@ export const ElementZapperSettingsView: React.FC<
               <span className="font-mono text-content-primary font-semibold">
                 {shortcut || "Alt + Shift + Z"}
               </span>{" "}
-              or click the button above.
+              to open the in-page floating HUD toolbar.
             </li>
             <li>
-              Move your mouse over the banner, modal, or sticky header you want
-              to remove.
+              <span className="text-red-400 font-semibold">Zap</span>: Click any banner, overlay, or widget to remove it from the DOM.
             </li>
             <li>
-              <span className="text-content-primary font-medium">Click</span>{" "}
-              once to permanently eliminate it from the page DOM.
+              <span className="text-sky-400 font-semibold">Edit</span>: Click any text to edit inline in real-time (keystrokes are completely isolated from the page).
+            </li>
+            <li>
+              <span className="text-emerald-400 font-semibold">Move</span>: Drag to reposition elements across page layouts. Toggle Flow & Free mode directly on the toolbar, and press + / - to expand or shrink element scope.
+            </li>
+            <li>
+              <span className="text-amber-400 font-semibold">Hide</span>: Click to make elements invisible without breaking page flow.
             </li>
             <li>
               Press{" "}
               <span className="font-mono text-content-primary font-semibold">
-                Escape
+                Ctrl + Z
               </span>{" "}
-              or right-click anytime to cancel.
+              to undo any action, or click the <span className="font-semibold text-content-primary">Settings</span> button on the toolbar to configure options.
             </li>
           </ul>
         </div>
