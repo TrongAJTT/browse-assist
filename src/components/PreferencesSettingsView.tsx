@@ -1,4 +1,6 @@
 import {
+  ChevronDown,
+  Compass,
   Eye,
   EyeOff,
   History,
@@ -7,9 +9,11 @@ import {
   Move,
   Palette,
   RotateCcw,
-  Sun
+  Sparkles,
+  Sun,
+  Zap
 } from "lucide-react"
-import React, { useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
@@ -63,6 +67,23 @@ export const PreferencesSettingsView: React.FC<
 
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
+  const [isPresetMenuOpen, setIsPresetMenuOpen] = useState(false)
+  const presetMenuRef = useRef<HTMLDivElement | null>(null)
+
+  // Close preset menu on click outside
+  useEffect(() => {
+    if (!isPresetMenuOpen) return
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        presetMenuRef.current &&
+        !presetMenuRef.current.contains(e.target as Node)
+      ) {
+        setIsPresetMenuOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [isPresetMenuOpen])
 
   const currentTheme = settings?.theme ?? DEFAULT_SETTINGS.theme
   const currentLayout =
@@ -109,9 +130,75 @@ export const PreferencesSettingsView: React.FC<
   }
 
   const handleResetLayout = () => {
+    setIsPresetMenuOpen(false)
     setSettings((prev) => ({
       ...(prev ?? DEFAULT_SETTINGS),
       featureLayout: DEFAULT_FEATURE_LAYOUT_CONFIG
+    }))
+  }
+
+  const handleApplyPreset = (preset: "reading" | "designer" | "essential") => {
+    setIsPresetMenuOpen(false)
+
+    let newOrder: FeatureKey[] = [...DEFAULT_FEATURE_LAYOUT_CONFIG.order]
+    let newHidden: FeatureKey[] = []
+
+    if (preset === "reading") {
+      // Prioritize navigation, reading, uncluttering
+      newOrder = [
+        "allowRightClick",
+        "quickScroll",
+        "smoothScroll",
+        "superDrag",
+        "contextMenuActions",
+        "pictureInPicture",
+        "mouseZoom",
+        "elementZapper",
+        "colorPicker"
+      ]
+      // Show reading & navigation tools, hide heavy inspection tools
+      newHidden = ["colorPicker", "elementZapper"]
+    } else if (preset === "designer") {
+      // Prioritize design, inspect, layout tinkering
+      newOrder = [
+        "allowRightClick",
+        "colorPicker",
+        "elementZapper",
+        "contextMenuActions",
+        "mouseZoom",
+        "superDrag",
+        "quickScroll",
+        "smoothScroll",
+        "pictureInPicture"
+      ]
+      newHidden = []
+    } else if (preset === "essential") {
+      // Minimalist: only core essential utilities
+      newOrder = [
+        "allowRightClick",
+        "superDrag",
+        "contextMenuActions",
+        "quickScroll",
+        "pictureInPicture",
+        "smoothScroll",
+        "mouseZoom",
+        "colorPicker",
+        "elementZapper"
+      ]
+      newHidden = [
+        "mouseZoom",
+        "colorPicker",
+        "elementZapper",
+        "smoothScroll"
+      ]
+    }
+
+    setSettings((prev) => ({
+      ...(prev ?? DEFAULT_SETTINGS),
+      featureLayout: {
+        order: newOrder,
+        hidden: newHidden
+      }
     }))
   }
 
@@ -213,13 +300,65 @@ export const PreferencesSettingsView: React.FC<
         <div className="space-y-2.5 pt-3 border-t border-border-divider">
           <div className="flex items-center justify-between">
             <span className="section-header">Customize Menu</span>
-            <button
-              type="button"
-              onClick={handleResetLayout}
-              className="flex items-center gap-1 text-[11px] font-medium text-accent hover:text-accent-hover transition-colors">
-              <RotateCcw className="w-3 h-3" />
-              <span>Reset order</span>
-            </button>
+            <div className="flex items-center gap-3">
+              {/* Quick Presets Dropdown */}
+              <div className="relative" ref={presetMenuRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsPresetMenuOpen((prev) => !prev)}
+                  className="flex items-center gap-1 text-[11px] font-medium text-accent hover:text-accent-hover transition-colors">
+                  <Sparkles className="w-3 h-3" />
+                  <span>Presets</span>
+                  <ChevronDown className={`w-3 h-3 transition-transform duration-150 ${isPresetMenuOpen ? "rotate-180" : ""}`} />
+                </button>
+
+                {isPresetMenuOpen && (
+                  <div className="absolute right-0 top-full mt-1.5 w-44 p-1 rounded-xl bg-app-surface border border-border-subtle shadow-xl shadow-black/40 backdrop-blur-md z-30 flex flex-col gap-0.5 animate-in fade-in zoom-in-95 duration-100 select-none">
+                    <button
+                      type="button"
+                      onClick={() => handleApplyPreset("reading")}
+                      className="flex items-center gap-2 px-2 py-1.5 text-left rounded-lg hover:bg-app-surface-hover text-content-primary transition-colors group">
+                      <Compass className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-xs font-medium">Reading & Navigation</span>
+                        <span className="text-[10px] text-content-muted">Scroll, drag & read</span>
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleApplyPreset("designer")}
+                      className="flex items-center gap-2 px-2 py-1.5 text-left rounded-lg hover:bg-app-surface-hover text-content-primary transition-colors group">
+                      <Palette className="w-3.5 h-3.5 text-pink-400 shrink-0" />
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-xs font-medium">Designer & Dev</span>
+                        <span className="text-[10px] text-content-muted">Color, inspect & zapper</span>
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleApplyPreset("essential")}
+                      className="flex items-center gap-2 px-2 py-1.5 text-left rounded-lg hover:bg-app-surface-hover text-content-primary transition-colors group">
+                      <Zap className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-xs font-medium">Essentials Only</span>
+                        <span className="text-[10px] text-content-muted">Minimal & focused</span>
+                      </div>
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Reset Order Button */}
+              <button
+                type="button"
+                onClick={handleResetLayout}
+                className="flex items-center gap-1 text-[11px] font-medium text-accent hover:text-accent-hover transition-colors">
+                <RotateCcw className="w-3 h-3" />
+                <span>Reset order</span>
+              </button>
+            </div>
           </div>
 
           <p className="text-xs text-content-muted">

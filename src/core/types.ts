@@ -288,11 +288,11 @@ export interface FeatureLayoutConfig {
 export const DEFAULT_FEATURE_LAYOUT_CONFIG: FeatureLayoutConfig = {
   order: [
     "allowRightClick",
-    "contextMenuActions",
     "superDrag",
+    "contextMenuActions",
     "quickScroll",
-    "pictureInPicture",
     "smoothScroll",
+    "pictureInPicture",
     "mouseZoom",
     "colorPicker",
     "elementZapper"
