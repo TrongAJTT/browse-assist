@@ -339,6 +339,7 @@ function createShadowDOM(): void {
 function handleScrollTopClick(e: MouseEvent): void {
   e.stopPropagation()
   e.preventDefault()
+  window.dispatchEvent(new CustomEvent("browse-assist:cancel-scroll"))
 
   if (returnMemory?.target === "top" && returnMemory.scrollY > 0) {
     // Return back to saved reading position
@@ -382,6 +383,7 @@ function handleScrollTopClick(e: MouseEvent): void {
 function handleScrollBottomClick(e: MouseEvent): void {
   e.stopPropagation()
   e.preventDefault()
+  window.dispatchEvent(new CustomEvent("browse-assist:cancel-scroll"))
 
   if (returnMemory?.target === "bottom" && returnMemory.scrollY >= 0) {
     // Return back to saved reading position

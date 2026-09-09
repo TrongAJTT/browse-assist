@@ -296,6 +296,7 @@ export function activate(config?: SmoothScrollConfig): void {
   window.addEventListener("mousedown", cancelAnimation, { passive: true })
   window.addEventListener("keydown", cancelAnimation, { passive: true })
   window.addEventListener("touchstart", cancelAnimation, { passive: true })
+  window.addEventListener("browse-assist:cancel-scroll", cancelAnimation)
 }
 
 /**
@@ -310,4 +311,5 @@ export function deactivate(): void {
   window.removeEventListener("mousedown", cancelAnimation)
   window.removeEventListener("keydown", cancelAnimation)
   window.removeEventListener("touchstart", cancelAnimation)
+  window.removeEventListener("browse-assist:cancel-scroll", cancelAnimation)
 }
