@@ -1,8 +1,10 @@
 import {
+  Compass,
   ExternalLink,
-  Eye,
+  EyeOff,
   ImageIcon,
   Link2,
+  PieChart,
   Search,
   Type
 } from "lucide-react"
@@ -10,12 +12,14 @@ import React, { useEffect, useState } from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
+import { GridPicker, type GridPickerItem } from "~components/GridPicker"
 import { SettingToggleRow } from "~components/SettingToggleRow"
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
 import {
   DEFAULT_DIRECTIONAL_ACTIONS,
   DEFAULT_SETTINGS,
   STORAGE_KEYS,
+  type DragIndicatorStyle,
   type FeatureSettings,
   type SuperDragAction,
   type SuperDragConfig
@@ -26,6 +30,24 @@ import type { DragDirection } from "~features/super-drag/logic"
 interface SuperDragSettingsViewProps {
   onBack: () => void
 }
+
+const INDICATOR_ITEMS: GridPickerItem<DragIndicatorStyle>[] = [
+  {
+    id: "none",
+    label: "Disabled",
+    icon: <EyeOff className="w-4 h-4" />
+  },
+  {
+    id: "badge",
+    label: "Floating Badge",
+    icon: <Compass className="w-4 h-4" />
+  },
+  {
+    id: "radial",
+    label: "Circular Segments",
+    icon: <PieChart className="w-4 h-4" />
+  }
+]
 
 /**
  * Sub-settings view for Super Drag.
@@ -63,13 +85,24 @@ export const SuperDragSettingsView: React.FC<SuperDragSettingsViewProps> = ({
   }
 
   const handleToggleOption = (
-    key: "searchSelectedText" | "openHyperlinks" | "openImages" | "showIndicator"
+    key: "searchSelectedText" | "openHyperlinks" | "openImages"
   ) => {
     setSettings((prev) => ({
       ...(prev ?? DEFAULT_SETTINGS),
       superDragConfig: {
         ...(prev?.superDragConfig ?? DEFAULT_SETTINGS.superDragConfig),
         [key]: !currentConfig[key]
+      }
+    }))
+  }
+
+  const handleChangeIndicatorStyle = (style: DragIndicatorStyle) => {
+    setSettings((prev) => ({
+      ...(prev ?? DEFAULT_SETTINGS),
+      superDragConfig: {
+        ...(prev?.superDragConfig ?? DEFAULT_SETTINGS.superDragConfig),
+        indicatorStyle: style,
+        showIndicator: style !== "none"
       }
     }))
   }
@@ -105,6 +138,10 @@ export const SuperDragSettingsView: React.FC<SuperDragSettingsViewProps> = ({
       }
     }))
   }
+
+  const currentIndicatorStyle =
+    currentConfig.indicatorStyle ??
+    (currentConfig.showIndicator ? "radial" : "none")
 
   return (
     <SubSettingsLayout
@@ -204,17 +241,25 @@ export const SuperDragSettingsView: React.FC<SuperDragSettingsViewProps> = ({
           </div>
         </div>
 
-        {/* Section 2: Visual Feedback / Indicator */}
+        {/* Section 2: Visual Feedback / Indicator (GridPicker) */}
         <div className="space-y-2 pt-2 border-t border-border-divider">
           <span className="section-header">Display & Feedback</span>
 
-          <div className="divide-y divide-border-divider">
-            <SettingToggleRow
-              icon={<Eye className="w-5 h-5 text-violet-400" />}
-              title="Show Drag Indicator"
-              description="Display floating badge previewing the directional action during drag."
-              enabled={currentConfig.showIndicator}
-              onToggle={() => handleToggleOption("showIndicator")}
+          <div className="space-y-2 pt-1">
+            <div className="flex flex-col gap-0.5">
+              <span className="text-xs font-semibold text-content-primary">
+                Drag Visual Indicator
+              </span>
+              <p className="text-[11px] text-content-muted leading-snug">
+                Choose the visual feedback style displayed while dragging elements.
+              </p>
+            </div>
+
+            <GridPicker<DragIndicatorStyle>
+              items={INDICATOR_ITEMS}
+              value={currentIndicatorStyle}
+              onChange={handleChangeIndicatorStyle}
+              columns={3}
             />
           </div>
         </div>

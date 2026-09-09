@@ -19,23 +19,7 @@ export interface DirectionalDPadPickerProps {
   centerIcon?: React.ReactNode
 }
 
-interface ActionOption {
-  id: SuperDragAction
-  label: string
-  requiresIncognito?: boolean
-}
-
-export const SUPER_DRAG_ACTION_OPTIONS: ActionOption[] = [
-  { id: "open_bg_tab", label: "Background Tab" },
-  { id: "open_active_tab", label: "Active Tab" },
-  { id: "open_split_view", label: "Split View" },
-  { id: "open_window_active", label: "New Window (Focus)" },
-  { id: "open_window_bg", label: "New Window (Bg)" },
-  { id: "open_incognito_active", label: "Incognito Window", requiresIncognito: true },
-  { id: "open_incognito_bg", label: "Incognito (Bg)", requiresIncognito: true },
-  { id: "copy_to_clipboard", label: "Copy to Clipboard" },
-  { id: "none", label: "None (Do Nothing)" }
-]
+import { SUPER_DRAG_ACTION_OPTIONS } from "./constants"
 
 interface DirectionMeta {
   key: DragDirection

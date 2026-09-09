@@ -11,14 +11,37 @@ import {
   type SuperDragConfig
 } from "~core/types"
 import { cleanUrl } from "~features/context-menu-actions/cleanUrl"
+import {
+  MAX_DRAG_DISTANCE,
+  MIN_DRAG_DISTANCE,
+  RADIAL_BG_ACTIVE,
+  RADIAL_BG_IDLE,
+  RADIAL_CENTER,
+  RADIAL_CENTER_BG,
+  RADIAL_CENTER_STROKE,
+  RADIAL_DEADZONE_BG,
+  RADIAL_DEADZONE_STROKE,
+  RADIAL_GAP_DEGREES,
+  RADIAL_GLOW_ACTIVE,
+  RADIAL_INNER_RADIUS,
+  RADIAL_OUTER_RADIUS,
+  RADIAL_STROKE_ACTIVE,
+  RADIAL_STROKE_IDLE,
+  RADIAL_STROKE_WIDTH_ACTIVE,
+  RADIAL_STROKE_WIDTH_IDLE
+} from "./constants"
+
+export {
+  MIN_DRAG_DISTANCE,
+  MAX_DRAG_DISTANCE,
+  RADIAL_INNER_RADIUS,
+  RADIAL_OUTER_RADIUS,
+  RADIAL_OPACITY_IDLE,
+  RADIAL_OPACITY_ACTIVE
+} from "./constants"
 
 let isActive = false
 let currentConfig: SuperDragConfig = { ...DEFAULT_SUPER_DRAG_CONFIG }
-
-// Minimum distance threshold in pixels to distinguish deliberate drag from text selection
-const MIN_DRAG_DISTANCE = 50
-// Maximum distance threshold in pixels to prevent stray cross-screen drags from executing
-const MAX_DRAG_DISTANCE = 220
 
 export type DragDirection = "up" | "down" | "left" | "right"
 
@@ -32,6 +55,80 @@ interface DragSession {
 let activeSession: DragSession | null = null
 let indicatorElement: HTMLDivElement | null = null
 let indicatorTimeoutId: number | null = null
+
+let radialElement: HTMLDivElement | null = null
+let radialTimeoutId: number | null = null
+let currentRadialDirection: DragDirection | null = null
+
+/**
+ * Creates SVG path for an annular sector (pie slice/donut wedge).
+ */
+function createAnnularSectorPath(
+  cx: number,
+  cy: number,
+  r: number,
+  R: number,
+  startDeg: number,
+  endDeg: number,
+  gapDeg = RADIAL_GAP_DEGREES
+): string {
+  const toRad = Math.PI / 180
+  const a1 = (startDeg + gapDeg) * toRad
+  const a2 = (endDeg - gapDeg) * toRad
+
+  const p1x = cx + r * Math.cos(a1)
+  const p1y = cy + r * Math.sin(a1)
+
+  const p2x = cx + R * Math.cos(a1)
+  const p2y = cy + R * Math.sin(a1)
+
+  const p3x = cx + R * Math.cos(a2)
+  const p3y = cy + R * Math.sin(a2)
+
+  const p4x = cx + r * Math.cos(a2)
+  const p4y = cy + r * Math.sin(a2)
+
+  return `M ${p1x.toFixed(2)} ${p1y.toFixed(2)} L ${p2x.toFixed(2)} ${p2y.toFixed(2)} A ${R} ${R} 0 0 1 ${p3x.toFixed(2)} ${p3y.toFixed(2)} L ${p4x.toFixed(2)} ${p4y.toFixed(2)} A ${r} ${r} 0 0 0 ${p1x.toFixed(2)} ${p1y.toFixed(2)} Z`
+}
+
+const RADIAL_PATHS: Record<DragDirection, string> = {
+  up: createAnnularSectorPath(
+    RADIAL_CENTER,
+    RADIAL_CENTER,
+    RADIAL_INNER_RADIUS,
+    RADIAL_OUTER_RADIUS,
+    -135,
+    -45,
+    RADIAL_GAP_DEGREES
+  ),
+  right: createAnnularSectorPath(
+    RADIAL_CENTER,
+    RADIAL_CENTER,
+    RADIAL_INNER_RADIUS,
+    RADIAL_OUTER_RADIUS,
+    -45,
+    45,
+    RADIAL_GAP_DEGREES
+  ),
+  down: createAnnularSectorPath(
+    RADIAL_CENTER,
+    RADIAL_CENTER,
+    RADIAL_INNER_RADIUS,
+    RADIAL_OUTER_RADIUS,
+    45,
+    135,
+    RADIAL_GAP_DEGREES
+  ),
+  left: createAnnularSectorPath(
+    RADIAL_CENTER,
+    RADIAL_CENTER,
+    RADIAL_INNER_RADIUS,
+    RADIAL_OUTER_RADIUS,
+    135,
+    225,
+    RADIAL_GAP_DEGREES
+  )
+}
 
 /**
  * Gets or lazily creates the floating indicator badge element.
@@ -70,6 +167,30 @@ function getOrCreateIndicator(): HTMLDivElement {
     document.documentElement.appendChild(indicatorElement)
   }
   return indicatorElement
+}
+
+/**
+ * Gets or lazily creates the Circular Segment Selection (Radial Pie) indicator element.
+ */
+function getOrCreateRadialIndicator(): HTMLDivElement {
+  if (!radialElement || !document.documentElement.contains(radialElement)) {
+    radialElement = document.createElement("div")
+    radialElement.id = "browse-assist-radial-indicator"
+    radialElement.style.cssText = `
+      position: fixed;
+      z-index: 2147483647;
+      width: 220px;
+      height: 220px;
+      pointer-events: none;
+      user-select: none;
+      opacity: 0;
+      transform: translate3d(-50%, -50%, 0) scale(0.9);
+      transition: opacity 0.16s ease-out, transform 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    `
+    document.documentElement.appendChild(radialElement)
+  }
+  return radialElement
 }
 
 /**
@@ -165,17 +286,15 @@ function getActionDisplay(
 }
 
 /**
- * Updates or shows the live floating drag indicator at the cursor.
+ * Updates or shows the live floating drag badge at the cursor.
  */
-function updateIndicator(
+function updateBadgeIndicator(
   clientX: number,
   clientY: number,
   text: string,
   iconSvg: string,
   badgeTheme: "indigo" | "emerald" | "amber" | "sky" | "violet" = "indigo"
 ): void {
-  if (!currentConfig.showIndicator || typeof document === "undefined") return
-
   const el = getOrCreateIndicator()
   if (indicatorTimeoutId !== null) {
     window.clearTimeout(indicatorTimeoutId)
@@ -208,29 +327,163 @@ function updateIndicator(
 }
 
 /**
- * Hides the floating drag indicator.
+ * Updates or shows the Circular Segment Selection (Radial Pie Menu).
+ * Inner circle radius is locked to MIN_DRAG_DISTANCE (deadzone).
+ * Only activates when distance is between MIN_DRAG_DISTANCE and MAX_DRAG_DISTANCE.
+ */
+function updateRadialIndicator(
+  startX: number,
+  startY: number,
+  activeDirection: DragDirection | null,
+  targetType: "text" | "link" | "image",
+  isExceeded = false
+): void {
+  const el = getOrCreateRadialIndicator()
+  if (radialTimeoutId !== null) {
+    window.clearTimeout(radialTimeoutId)
+    radialTimeoutId = null
+  }
+
+  // Constrain position within viewport to avoid clipping (radial width is 220px)
+  const safeX = Math.max(115, Math.min(window.innerWidth - 115, startX))
+  const safeY = Math.max(115, Math.min(window.innerHeight - 115, startY))
+
+  currentRadialDirection = activeDirection
+
+  const isDeadzone = activeDirection === null && !isExceeded
+  const activeAction = activeDirection ? getTargetAction(targetType, activeDirection) : "none"
+  const activeDisplay = activeDirection ? getActionDisplay(activeAction, targetType) : null
+
+  // Target icon for center hub (centered at 110, 110)
+  const centerTargetIcon =
+    targetType === "text"
+      ? `<text x="110" y="117" text-anchor="middle" font-size="20" font-weight="700" fill="#94a3b8">T</text>`
+      : targetType === "link"
+        ? `<path d="M101 110 a4 4 0 0 1 4 -4 h6 a4 4 0 0 1 4 4 M119 110 a4 4 0 0 1 -4 4 h-6 a4 4 0 0 1 -4 -4" stroke="#94a3b8" stroke-width="2.2" fill="none"/>`
+        : `<rect x="99" y="101" width="22" height="18" rx="3" stroke="#94a3b8" stroke-width="2" fill="none"/>`
+
+  const renderSector = (dir: DragDirection) => {
+    const isHovered = activeDirection === dir
+    const fill = isHovered ? RADIAL_BG_ACTIVE : RADIAL_BG_IDLE
+    const stroke = isHovered ? RADIAL_STROKE_ACTIVE : RADIAL_STROKE_IDLE
+    const strokeWidth = isHovered ? RADIAL_STROKE_WIDTH_ACTIVE : RADIAL_STROKE_WIDTH_IDLE
+    const filter = isHovered ? `filter="${RADIAL_GLOW_ACTIVE}"` : ""
+
+    return `<path d="${RADIAL_PATHS[dir]}" fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}" ${filter} style="transition: fill 0.12s ease, stroke 0.12s ease; cursor: pointer;"/>`
+  }
+
+  // Directional arrows
+  const arrowColor = (dir: DragDirection) =>
+    activeDirection === dir ? "#ffffff" : "rgba(203, 213, 225, 0.7)"
+  const arrowStroke = (dir: DragDirection) =>
+    activeDirection === dir ? "2.6" : "2"
+
+  el.innerHTML = `
+    <svg width="220" height="220" viewBox="0 0 220 220" style="overflow:visible; filter: drop-shadow(0 12px 24px rgba(0,0,0,0.45));">
+      <!-- 4 Annular Wedges -->
+      ${renderSector("up")}
+      ${renderSector("right")}
+      ${renderSector("down")}
+      ${renderSector("left")}
+
+      <!-- Arrow Glyph: Up (centered at 110, 36) -->
+      <path d="M103 42 L110 34 L117 42 M110 34 L110 47" stroke="${arrowColor("up")}" stroke-width="${arrowStroke("up")}" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <!-- Arrow Glyph: Right (centered at 184, 110) -->
+      <path d="M178 103 L186 110 L178 117 M186 110 L173 110" stroke="${arrowColor("right")}" stroke-width="${arrowStroke("right")}" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <!-- Arrow Glyph: Down (centered at 110, 184) -->
+      <path d="M103 178 L110 186 L117 178 M110 186 L110 173" stroke="${arrowColor("down")}" stroke-width="${arrowStroke("down")}" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <!-- Arrow Glyph: Left (centered at 36, 110) -->
+      <path d="M42 103 L34 110 L42 117 M34 110 L47 110" stroke="${arrowColor("left")}" stroke-width="${arrowStroke("left")}" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+      <!-- Center Hole (Deadzone / Cancel Hub - Radius equals MIN_DRAG_DISTANCE) -->
+      <circle cx="${RADIAL_CENTER}" cy="${RADIAL_CENTER}" r="${RADIAL_INNER_RADIUS}"
+        fill="${isDeadzone || isExceeded ? RADIAL_DEADZONE_BG : RADIAL_CENTER_BG}"
+        stroke="${isDeadzone || isExceeded ? RADIAL_DEADZONE_STROKE : RADIAL_CENTER_STROKE}"
+        stroke-width="${isDeadzone || isExceeded ? "1.5" : "1.2"}"
+        stroke-dasharray="${isDeadzone || isExceeded ? "3 3" : "none"}"
+        style="transition: all 0.15s ease;"
+      />
+      ${
+        isDeadzone || isExceeded
+          ? `<path d="M102 102 L118 118 M118 102 L102 118" stroke="rgba(248, 113, 113, 0.85)" stroke-width="2.5" stroke-linecap="round"/>`
+          : centerTargetIcon
+      }
+    </svg>
+
+    <!-- Floating Action Pill Tooltip -->
+    <div style="
+      position: absolute;
+      bottom: -32px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 5px 12px;
+      border-radius: 9999px;
+      background: rgba(15, 23, 42, 0.96);
+      color: #f8fafc;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+      border: 1px solid ${isDeadzone || isExceeded ? "rgba(239, 68, 68, 0.4)" : "rgba(56, 189, 248, 0.4)"};
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(8px);
+      transition: all 0.15s ease;
+    ">
+      ${
+        isExceeded
+          ? `<span style="color:#fca5a5;">Exceeded max distance (Release to cancel)</span>`
+          : isDeadzone
+            ? `<span style="color:#fca5a5;">Release to cancel</span>`
+            : `<span style="color:#38bdf8; margin-right:4px;">${activeDirection === "up" ? "↑ Top:" : activeDirection === "right" ? "→ Right:" : activeDirection === "down" ? "↓ Bottom:" : "← Left:"}</span><span>${activeDisplay?.label.replace("Drop to Open ", "").replace("Drop to ", "")}</span>`
+      }
+    </div>
+  `
+
+  el.style.left = `${safeX}px`
+  el.style.top = `${safeY}px`
+  el.style.opacity = "1"
+  el.style.transform = "translate3d(-50%, -50%, 0) scale(1)"
+}
+
+/**
+ * Hides all active drag indicators (badge and radial).
  */
 function hideIndicator(immediately = false): void {
-  if (!indicatorElement) return
-
-  if (immediately) {
-    indicatorElement.style.opacity = "0"
-    indicatorElement.style.transform = "translate3d(-50%, -100%, 0) scale(0.92)"
-    return
-  }
-
-  if (indicatorTimeoutId !== null) {
-    window.clearTimeout(indicatorTimeoutId)
-  }
-
-  indicatorTimeoutId = window.setTimeout(() => {
-    if (indicatorElement) {
+  // 1. Hide badge indicator
+  if (indicatorElement) {
+    if (immediately) {
       indicatorElement.style.opacity = "0"
-      indicatorElement.style.transform =
-        "translate3d(-50%, -100%, 0) scale(0.92)"
+      indicatorElement.style.transform = "translate3d(-50%, -100%, 0) scale(0.92)"
+    } else {
+      if (indicatorTimeoutId !== null) window.clearTimeout(indicatorTimeoutId)
+      indicatorTimeoutId = window.setTimeout(() => {
+        if (indicatorElement) {
+          indicatorElement.style.opacity = "0"
+          indicatorElement.style.transform =
+            "translate3d(-50%, -100%, 0) scale(0.92)"
+        }
+        indicatorTimeoutId = null
+      }, 180)
     }
-    indicatorTimeoutId = null
-  }, 180)
+  }
+
+  // 2. Hide radial indicator
+  if (radialElement) {
+    currentRadialDirection = null
+    if (immediately) {
+      radialElement.style.opacity = "0"
+      radialElement.style.transform = "translate3d(-50%, -50%, 0) scale(0.88)"
+    } else {
+      if (radialTimeoutId !== null) window.clearTimeout(radialTimeoutId)
+      radialTimeoutId = window.setTimeout(() => {
+        if (radialElement) {
+          radialElement.style.opacity = "0"
+          radialElement.style.transform =
+            "translate3d(-50%, -50%, 0) scale(0.88)"
+        }
+        radialTimeoutId = null
+      }, 180)
+    }
+  }
 }
 
 /**
@@ -374,22 +627,57 @@ function onDragOver(event: DragEvent): void {
     event.dataTransfer.dropEffect = "copy"
   }
 
+  const indicatorStyle =
+    currentConfig.indicatorStyle ??
+    (currentConfig.showIndicator ? "radial" : "none")
+
   const deltaX = event.clientX - activeSession.startX
   const deltaY = event.clientY - activeSession.startY
   const distance = Math.hypot(deltaX, deltaY)
 
-  if (distance >= MIN_DRAG_DISTANCE && distance <= MAX_DRAG_DISTANCE) {
-    const direction = getDragDirection(deltaX, deltaY)
-    const action = getTargetAction(activeSession.type, direction)
+  if (indicatorStyle === "radial") {
+    let activeDirection: DragDirection | null = null
+    let isExceeded = false
 
-    if (action === "none") {
-      hideIndicator(true)
-      return
+    if (distance > MAX_DRAG_DISTANCE) {
+      isExceeded = true
+    } else if (distance >= MIN_DRAG_DISTANCE) {
+      const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI)
+      if (angle >= -135 && angle < -45) {
+        activeDirection = "up"
+      } else if (angle >= -45 && angle < 45) {
+        activeDirection = "right"
+      } else if (angle >= 45 && angle < 135) {
+        activeDirection = "down"
+      } else {
+        activeDirection = "left"
+      }
     }
 
-    const { label, icon, theme } = getActionDisplay(action, activeSession.type)
-    updateIndicator(event.clientX, event.clientY, label, icon, theme)
+    updateRadialIndicator(
+      activeSession.startX,
+      activeSession.startY,
+      activeDirection,
+      activeSession.type,
+      isExceeded
+    )
+  } else if (indicatorStyle === "badge") {
+    if (distance >= MIN_DRAG_DISTANCE && distance <= MAX_DRAG_DISTANCE) {
+      const direction = getDragDirection(deltaX, deltaY)
+      const action = getTargetAction(activeSession.type, direction)
+
+      if (action === "none") {
+        hideIndicator(true)
+        return
+      }
+
+      const { label, icon, theme } = getActionDisplay(action, activeSession.type)
+      updateBadgeIndicator(event.clientX, event.clientY, label, icon, theme)
+    } else {
+      hideIndicator(true)
+    }
   } else {
+    // "none" indicator style: suppress visuals completely
     hideIndicator(true)
   }
 }
@@ -398,6 +686,7 @@ function onDragOver(event: DragEvent): void {
  * Calculates vector distance, determines direction, and dispatches configured action.
  */
 async function onDragEnd(event: DragEvent): Promise<void> {
+  const chosenRadialDirection = currentRadialDirection
   hideIndicator(true)
   if (!isActive || !activeSession) return
 
@@ -405,9 +694,39 @@ async function onDragEnd(event: DragEvent): Promise<void> {
   const deltaY = event.clientY - activeSession.startY
   const distance = Math.hypot(deltaX, deltaY)
 
-  if (distance >= MIN_DRAG_DISTANCE && distance <= MAX_DRAG_DISTANCE) {
-    const direction = getDragDirection(deltaX, deltaY)
-    const action = getTargetAction(activeSession.type, direction)
+  const indicatorStyle =
+    currentConfig.indicatorStyle ??
+    (currentConfig.showIndicator ? "radial" : "none")
+
+  let directionToExecute: DragDirection | null = null
+
+  if (indicatorStyle === "radial") {
+    if (distance >= MIN_DRAG_DISTANCE && distance <= MAX_DRAG_DISTANCE) {
+      if (chosenRadialDirection !== null) {
+        directionToExecute = chosenRadialDirection
+      } else {
+        const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI)
+        if (angle >= -135 && angle < -45) {
+          directionToExecute = "up"
+        } else if (angle >= -45 && angle < 45) {
+          directionToExecute = "right"
+        } else if (angle >= 45 && angle < 135) {
+          directionToExecute = "down"
+        } else {
+          directionToExecute = "left"
+        }
+      }
+    } else {
+      directionToExecute = null
+    }
+  } else {
+    if (distance >= MIN_DRAG_DISTANCE && distance <= MAX_DRAG_DISTANCE) {
+      directionToExecute = getDragDirection(deltaX, deltaY)
+    }
+  }
+
+  if (directionToExecute) {
+    const action = getTargetAction(activeSession.type, directionToExecute)
 
     if (action === "copy_to_clipboard") {
       const payload =
@@ -471,5 +790,15 @@ export function deactivate(): void {
     indicatorTimeoutId = null
   }
 
+  if (radialElement && radialElement.parentNode) {
+    radialElement.parentNode.removeChild(radialElement)
+    radialElement = null
+  }
+  if (radialTimeoutId !== null) {
+    window.clearTimeout(radialTimeoutId)
+    radialTimeoutId = null
+  }
+
+  currentRadialDirection = null
   activeSession = null
 }

@@ -63,13 +63,19 @@ export const DEFAULT_DIRECTIONAL_ACTIONS: DirectionalActions = {
 }
 
 /**
+ * Visual Drag Indicator presentation styles.
+ */
+export type DragIndicatorStyle = "none" | "badge" | "radial"
+
+/**
  * Super Drag sub-configuration.
  */
 export interface SuperDragConfig {
   searchSelectedText: boolean // Dragging highlighted text executes search
   openHyperlinks: boolean // Dragging a link opens URL
   openImages: boolean // Dragging an image opens URL or copies image link
-  showIndicator: boolean // Display live floating indicator badge during drag
+  showIndicator: boolean // Display live floating indicator during drag
+  indicatorStyle: DragIndicatorStyle // Indicator style: "none", "badge", or "radial"
   textActions: DirectionalActions
   linkActions: DirectionalActions
   imageActions: DirectionalActions
@@ -80,6 +86,7 @@ export const DEFAULT_SUPER_DRAG_CONFIG: SuperDragConfig = {
   openHyperlinks: true,
   openImages: false,
   showIndicator: true,
+  indicatorStyle: "radial",
   textActions: { ...DEFAULT_DIRECTIONAL_ACTIONS },
   linkActions: { ...DEFAULT_DIRECTIONAL_ACTIONS },
   imageActions: { ...DEFAULT_DIRECTIONAL_ACTIONS }
