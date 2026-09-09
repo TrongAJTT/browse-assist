@@ -1,4 +1,9 @@
-import { Eye, PictureInPicture2, ShieldAlert } from "lucide-react"
+import {
+  Eye,
+  MousePointerClick,
+  PictureInPicture2,
+  ShieldAlert
+} from "lucide-react"
 import type React from "react"
 import { useEffect, useState } from "react"
 
@@ -162,6 +167,21 @@ export const PictureInPictureSettingsView: React.FC<
               description="Display brief confirmation toast when entering or exiting PiP."
               enabled={currentConfig.showToast}
               onToggle={() => handleToggleOption("showToast")}
+            />
+
+            {/* Hover PiP Button */}
+            <SettingToggleRow
+              icon={<MousePointerClick className="w-5 h-5 text-indigo-400" />}
+              title="Hover Video PiP Button"
+              badge={{
+                text: "Unstable",
+                bgClass: "bg-amber-500/10",
+                colorClass: "text-amber-400",
+                borderClass: "border-amber-500/25"
+              }}
+              description="Show a floating PiP trigger above playing videos. May be unstable or blocked on some custom web video players."
+              enabled={currentConfig.hoverButton}
+              onToggle={() => handleToggleOption("hoverButton")}
             />
           </div>
         </div>

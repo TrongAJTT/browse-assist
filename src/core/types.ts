@@ -152,11 +152,13 @@ export const DEFAULT_MOUSE_ZOOM_CONFIG: MouseZoomConfig = {
 export interface PictureInPictureConfig {
   showBadge: boolean // Show "PiP" badge on extension icon when video is in PiP
   showToast: boolean // Show floating feedback notification on toggle
+  hoverButton: boolean // Show a sleek floating PiP button when hovering over playing videos
 }
 
 export const DEFAULT_PICTURE_IN_PICTURE_CONFIG: PictureInPictureConfig = {
   showBadge: true,
-  showToast: true
+  showToast: true,
+  hoverButton: true
 }
 
 /**
