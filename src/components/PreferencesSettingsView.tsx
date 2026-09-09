@@ -14,6 +14,7 @@ import React, { useState } from "react"
 import { useStorage } from "@plasmohq/storage/hook"
 
 import { GridPicker, type GridPickerItem } from "~components/GridPicker"
+import { Slider } from "~components/Slider"
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
 import { Switch } from "~components/Switch"
 import {
@@ -337,31 +338,21 @@ export const PreferencesSettingsView: React.FC<
             </div>
 
             {currentNav.rememberLastView && (
-              <div className="space-y-1.5 pl-6 pt-1">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-content-secondary font-medium">
-                    Session Timeout
-                  </span>
-                  <span className="font-mono text-accent font-semibold">
-                    {currentNav.sessionTimeoutMinutes} min
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min="1"
-                  max="60"
-                  step="1"
+              <div className="pl-6 pt-1">
+                <Slider
+                  label="Session Timeout"
                   value={currentNav.sessionTimeoutMinutes}
-                  onChange={(e) =>
-                    handleUpdateTimeout(parseInt(e.target.value, 10))
-                  }
-                  className="w-full h-1.5 bg-app-card rounded-lg appearance-none cursor-pointer accent-accent hover:accent-accent-hover"
+                  valueDisplay={`${currentNav.sessionTimeoutMinutes} min`}
+                  min={1}
+                  max={60}
+                  step={1}
+                  onChange={handleUpdateTimeout}
+                  ticks={[
+                    { label: "1 min" },
+                    { label: "10 min (Default)" },
+                    { label: "60 min" }
+                  ]}
                 />
-                <div className="flex justify-between text-[10px] text-content-muted">
-                  <span>1 min</span>
-                  <span>10 min (Default)</span>
-                  <span>60 min</span>
-                </div>
               </div>
             )}
           </div>

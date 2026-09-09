@@ -13,6 +13,7 @@ import { useStorage } from "@plasmohq/storage/hook"
 
 import { GridPicker, type GridPickerItem } from "~components/GridPicker"
 import { SettingToggleRow } from "~components/SettingToggleRow"
+import { Slider } from "~components/Slider"
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
 import { MESSAGE_TYPES, sendToActiveTab } from "~core/messaging"
 import {
@@ -147,30 +148,20 @@ export const MouseZoomSettingsView: React.FC<MouseZoomSettingsViewProps> = ({
       <div className="space-y-4 pt-3 border-t border-border-divider">
         <span className="section-header">Zoom Sensitivity</span>
 
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-content-secondary font-medium">
-              Step Increment
-            </span>
-            <span className="font-mono text-accent font-semibold">
-              {Math.round(currentConfig.stepSize * 100)}%
-            </span>
-          </div>
-          <input
-            type="range"
-            min="0.04"
-            max="0.25"
-            step="0.01"
-            value={currentConfig.stepSize}
-            onChange={(e) => handleUpdateStepSize(parseFloat(e.target.value))}
-            className="w-full h-1.5 bg-app-card rounded-lg appearance-none cursor-pointer accent-accent hover:accent-accent-hover"
-          />
-          <div className="flex justify-between text-[10px] text-content-muted">
-            <span>4% (Fine)</span>
-            <span>10% (Default)</span>
-            <span>25% (Fast)</span>
-          </div>
-        </div>
+        <Slider
+          label="Step Increment"
+          value={currentConfig.stepSize}
+          valueDisplay={`${Math.round(currentConfig.stepSize * 100)}%`}
+          min={0.04}
+          max={0.25}
+          step={0.01}
+          onChange={handleUpdateStepSize}
+          ticks={[
+            { label: "4% (Fine)" },
+            { label: "10% (Default)" },
+            { label: "25% (Fast)" }
+          ]}
+        />
       </div>
 
       {/* Behavior Toggles */}

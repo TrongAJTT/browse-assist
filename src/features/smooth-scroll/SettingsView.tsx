@@ -5,6 +5,7 @@ import { useStorage } from "@plasmohq/storage/hook"
 
 import { GridPicker } from "~components/GridPicker"
 import { SettingToggleRow } from "~components/SettingToggleRow"
+import { Slider } from "~components/Slider"
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
 import {
   DEFAULT_SETTINGS,
@@ -154,46 +155,26 @@ export const SmoothScrollSettingsView: React.FC<
         </span>
 
         {/* Step Size Slider */}
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-content-secondary font-medium">Scroll Distance</span>
-            <span className="font-mono text-accent font-semibold">
-              {currentConfig.stepSize.toFixed(1)}x
-            </span>
-          </div>
-          <input
-            type="range"
-            min="0.5"
-            max="2.0"
-            step="0.1"
-            value={currentConfig.stepSize}
-            onChange={(e) =>
-              handleUpdateParam("stepSize", parseFloat(e.target.value))
-            }
-            className="w-full h-1.5 bg-app-card rounded-lg appearance-none cursor-pointer accent-accent focus:outline-none"
-          />
-        </div>
+        <Slider
+          label="Scroll Distance"
+          value={currentConfig.stepSize}
+          valueDisplay={`${currentConfig.stepSize.toFixed(1)}x`}
+          min={0.5}
+          max={2.0}
+          step={0.1}
+          onChange={(val) => handleUpdateParam("stepSize", val)}
+        />
 
         {/* Smoothness Slider */}
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-content-secondary font-medium">Gliding Duration</span>
-            <span className="font-mono text-accent font-semibold">
-              {Math.round((1 - currentConfig.smoothness) * 100)}%
-            </span>
-          </div>
-          <input
-            type="range"
-            min="0.05"
-            max="0.4"
-            step="0.01"
-            value={currentConfig.smoothness}
-            onChange={(e) =>
-              handleUpdateParam("smoothness", parseFloat(e.target.value))
-            }
-            className="w-full h-1.5 bg-app-card rounded-lg appearance-none cursor-pointer accent-accent focus:outline-none"
-          />
-        </div>
+        <Slider
+          label="Gliding Duration"
+          value={currentConfig.smoothness}
+          valueDisplay={`${Math.round((1 - currentConfig.smoothness) * 100)}%`}
+          min={0.05}
+          max={0.4}
+          step={0.01}
+          onChange={(val) => handleUpdateParam("smoothness", val)}
+        />
       </div>
 
       {/* Advanced Compatibility Mode */}
