@@ -202,6 +202,8 @@ export interface FeatureSettings {
   quickScroll: boolean
   colorPicker: boolean
   elementZapper: boolean
+  featureLayout: FeatureLayoutConfig
+  popupNavigation: PopupNavigationConfig
   contextMenuActionsConfig: ContextMenuActionsConfig
   superDragConfig: SuperDragConfig
   smoothScrollConfig: SmoothScrollConfig
@@ -210,6 +212,42 @@ export interface FeatureSettings {
   quickScrollConfig: QuickScrollConfig
   colorPickerConfig: ColorPickerConfig
   elementZapperConfig: ElementZapperConfig
+}
+
+/**
+ * Feature layout configuration for popup menu customization.
+ */
+export interface FeatureLayoutConfig {
+  order: FeatureKey[]
+  hidden: FeatureKey[]
+}
+
+export const DEFAULT_FEATURE_LAYOUT_CONFIG: FeatureLayoutConfig = {
+  order: [
+    "allowRightClick",
+    "contextMenuActions",
+    "superDrag",
+    "quickScroll",
+    "pictureInPicture",
+    "smoothScroll",
+    "mouseZoom",
+    "colorPicker",
+    "elementZapper"
+  ],
+  hidden: []
+}
+
+/**
+ * Navigation preferences for popup memory.
+ */
+export interface PopupNavigationConfig {
+  rememberLastView: boolean
+  sessionTimeoutMinutes: number
+}
+
+export const DEFAULT_POPUP_NAVIGATION_CONFIG: PopupNavigationConfig = {
+  rememberLastView: true,
+  sessionTimeoutMinutes: 10
 }
 
 /**
@@ -227,6 +265,8 @@ export const DEFAULT_SETTINGS: FeatureSettings = {
   quickScroll: true,
   colorPicker: true,
   elementZapper: true,
+  featureLayout: DEFAULT_FEATURE_LAYOUT_CONFIG,
+  popupNavigation: DEFAULT_POPUP_NAVIGATION_CONFIG,
   contextMenuActionsConfig: DEFAULT_CONTEXT_MENU_ACTIONS_CONFIG,
   superDragConfig: DEFAULT_SUPER_DRAG_CONFIG,
   smoothScrollConfig: {
@@ -245,7 +285,8 @@ export const DEFAULT_SETTINGS: FeatureSettings = {
  */
 export const STORAGE_KEYS = {
   SETTINGS: "browse_assist_settings",
-  COLOR_HISTORY: "browse_assist_color_history"
+  COLOR_HISTORY: "browse_assist_color_history",
+  LAST_VIEW: "browse_assist_last_view"
 } as const
 
 /**
@@ -319,7 +360,8 @@ export const FEATURES_LIST: FeatureMeta[] = [
   {
     key: "colorPicker",
     title: "Color Picker",
-    description: "Pick any pixel color from the screen with instant multi-format copy.",
+    description:
+      "Pick any pixel color from the screen with instant multi-format copy.",
     icon: "🎨",
     hasSettings: true
   },

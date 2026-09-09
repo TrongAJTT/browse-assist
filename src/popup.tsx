@@ -11,8 +11,9 @@ import {
   X,
   Zap
 } from "lucide-react"
-import { useEffect, useRef, useState } from "react"
+import { Fragment, useEffect, useMemo, useRef, useState } from "react"
 
+import { Storage } from "@plasmohq/storage"
 import { useStorage } from "@plasmohq/storage/hook"
 
 import { AboutView } from "~components/AboutView"
@@ -26,8 +27,11 @@ import {
   sendToBackground
 } from "~core/messaging"
 import {
+  DEFAULT_FEATURE_LAYOUT_CONFIG,
+  DEFAULT_POPUP_NAVIGATION_CONFIG,
   DEFAULT_SETTINGS,
   STORAGE_KEYS,
+  type FeatureKey,
   type FeatureSettings
 } from "~core/types"
 import { AllowRightClickToggle } from "~features/allow-right-click/Toggle"
@@ -63,6 +67,8 @@ type ActiveView =
   | "preferences"
   | "about"
 
+const sessionStorage = new Storage({ area: "local" })
+
 function IndexPopup() {
   const [currentView, setCurrentView] = useState<ActiveView>("main")
   const [isTabReady, setIsTabReady] = useState(false)
@@ -70,11 +76,71 @@ function IndexPopup() {
   const donateMenuRef = useRef<HTMLDivElement>(null)
   const [isQuickToolsOpen, setIsQuickToolsOpen] = useState(false)
   const quickToolsMenuRef = useRef<HTMLDivElement>(null)
+  const isInitialMount = useRef(true)
 
   const [settings] = useStorage<FeatureSettings>(
     STORAGE_KEYS.SETTINGS,
     DEFAULT_SETTINGS
   )
+
+  const popupNav = settings?.popupNavigation ?? DEFAULT_POPUP_NAVIGATION_CONFIG
+  const navRef = useRef(popupNav)
+  navRef.current = popupNav
+
+  // Restore last view on mount if enabled and within session timeout
+  useEffect(() => {
+    async function restoreView() {
+      try {
+        const stored = await sessionStorage.get<{
+          view: ActiveView
+          timestamp: number
+        }>(STORAGE_KEYS.LAST_VIEW)
+
+        if (!stored?.view || stored.view === "main") {
+          isInitialMount.current = false
+          return
+        }
+
+        const nav = navRef.current
+        const timeout = nav?.sessionTimeoutMinutes ?? 10
+
+        const elapsed = (Date.now() - stored.timestamp) / 1000 / 60
+        if (elapsed <= timeout) {
+          setCurrentView(stored.view)
+        } else {
+          await sessionStorage.remove(STORAGE_KEYS.LAST_VIEW).catch(() => {})
+        }
+      } catch (err) {
+        console.error("Failed to restore last view:", err)
+      } finally {
+        isInitialMount.current = false
+      }
+    }
+    restoreView()
+  }, []) // run once on mount
+
+  // Persist current view when it changes
+  useEffect(() => {
+    // Skip writing on initial mount before restoration has run
+    if (isInitialMount.current) return
+
+    const nav = navRef.current
+    if (!nav.rememberLastView) {
+      sessionStorage.remove(STORAGE_KEYS.LAST_VIEW).catch(() => {})
+      return
+    }
+
+    if (currentView === "main") {
+      sessionStorage.remove(STORAGE_KEYS.LAST_VIEW).catch(() => {})
+    } else {
+      sessionStorage
+        .set(STORAGE_KEYS.LAST_VIEW, {
+          view: currentView,
+          timestamp: Date.now()
+        })
+        .catch(() => {})
+    }
+  }, [currentView, popupNav.rememberLastView])
 
   const [activePiP, setActivePiP] = useState<{
     tabId: number
@@ -85,6 +151,64 @@ function IndexPopup() {
     useState<string>("Alt + Shift + C")
   const [elementZapperShortcut, setElementZapperShortcut] =
     useState<string>("Alt + Shift + Z")
+
+  // Dynamic feature order & visibility
+  const orderedFeatures = useMemo(() => {
+    const layout = settings?.featureLayout ?? DEFAULT_FEATURE_LAYOUT_CONFIG
+    const savedOrder = layout.order ?? DEFAULT_FEATURE_LAYOUT_CONFIG.order
+    const missing = DEFAULT_FEATURE_LAYOUT_CONFIG.order.filter(
+      (k) => !savedOrder.includes(k)
+    )
+    const fullOrder = [...savedOrder, ...missing]
+    const hiddenSet = new Set(layout.hidden ?? [])
+    return fullOrder.filter((k) => !hiddenSet.has(k))
+  }, [settings?.featureLayout])
+
+  const featureToggleMap: Record<FeatureKey, React.ReactNode> = {
+    allowRightClick: (
+      <AllowRightClickToggle onReady={() => setIsTabReady(true)} />
+    ),
+    contextMenuActions: (
+      <ContextMenuActionsToggle
+        onConfigure={() => setCurrentView("context-menu-actions-settings")}
+      />
+    ),
+    superDrag: (
+      <SuperDragToggle
+        onConfigure={() => setCurrentView("super-drag-settings")}
+      />
+    ),
+    quickScroll: (
+      <QuickScrollToggle
+        onConfigure={() => setCurrentView("quick-scroll-settings")}
+      />
+    ),
+    pictureInPicture: (
+      <PictureInPictureToggle
+        onOpenSettings={() => setCurrentView("picture-in-picture-settings")}
+      />
+    ),
+    smoothScroll: (
+      <SmoothScrollToggle
+        onConfigure={() => setCurrentView("smooth-scroll-settings")}
+      />
+    ),
+    mouseZoom: (
+      <MouseZoomToggle
+        onConfigure={() => setCurrentView("mouse-zoom-settings")}
+      />
+    ),
+    colorPicker: (
+      <ColorPickerToggle
+        onConfigure={() => setCurrentView("color-picker-settings")}
+      />
+    ),
+    elementZapper: (
+      <ElementZapperToggle
+        onConfigure={() => setCurrentView("element-zapper-settings")}
+      />
+    )
+  }
 
   // Query background for active PiP session and command shortcuts
   useEffect(() => {
@@ -480,35 +604,9 @@ function IndexPopup() {
           <div>
             {/* PowerToys-style Utilities List with Dividers */}
             <main className="divide-y divide-border-divider">
-              <AllowRightClickToggle onReady={() => setIsTabReady(true)} />
-              <ContextMenuActionsToggle
-                onConfigure={() =>
-                  setCurrentView("context-menu-actions-settings")
-                }
-              />
-              <SuperDragToggle
-                onConfigure={() => setCurrentView("super-drag-settings")}
-              />
-              <QuickScrollToggle
-                onConfigure={() => setCurrentView("quick-scroll-settings")}
-              />
-              <PictureInPictureToggle
-                onOpenSettings={() =>
-                  setCurrentView("picture-in-picture-settings")
-                }
-              />
-              <SmoothScrollToggle
-                onConfigure={() => setCurrentView("smooth-scroll-settings")}
-              />
-              <MouseZoomToggle
-                onConfigure={() => setCurrentView("mouse-zoom-settings")}
-              />
-              <ColorPickerToggle
-                onConfigure={() => setCurrentView("color-picker-settings")}
-              />
-              <ElementZapperToggle
-                onConfigure={() => setCurrentView("element-zapper-settings")}
-              />
+              {orderedFeatures.map((key) => (
+                <Fragment key={key}>{featureToggleMap[key]}</Fragment>
+              ))}
             </main>
           </div>
         ) : currentView === "context-menu-actions-settings" ? (
