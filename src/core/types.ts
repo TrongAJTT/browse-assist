@@ -165,7 +165,13 @@ export const DEFAULT_PICTURE_IN_PICTURE_CONFIG: PictureInPictureConfig = {
 /**
  * Modifier keys for Video Wheel Control.
  */
-export type VideoWheelModifier = "shift" | "alt" | "ctrl" | "ctrl+shift" | "ctrl+alt"
+export type VideoWheelModifier =
+  | "shift"
+  | "alt"
+  | "ctrl"
+  | "ctrl+shift"
+  | "ctrl+alt"
+  | "alt+shift"
 
 /**
  * Video Wheel Control configuration.

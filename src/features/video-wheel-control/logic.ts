@@ -32,6 +32,8 @@ function isModifierActive(
       return event.ctrlKey && event.shiftKey
     case "ctrl+alt":
       return event.ctrlKey && event.altKey
+    case "alt+shift":
+      return event.altKey && event.shiftKey && !event.ctrlKey
     case "alt":
       return event.altKey && !event.ctrlKey && !event.shiftKey
     case "ctrl":
@@ -188,7 +190,15 @@ function ensureOsdElement(): HTMLElement {
  */
 function showOsd(
   video: HTMLVideoElement,
-  type: "volume" | "speed" | "mute" | "fullscreen" | "seek" | "frame" | "boost" | "screenshot",
+  type:
+    | "volume"
+    | "speed"
+    | "mute"
+    | "fullscreen"
+    | "seek"
+    | "frame"
+    | "boost"
+    | "screenshot",
   valueText: string,
   percent = 1
 ): void {
@@ -207,10 +217,7 @@ function showOsd(
     )
   )
   // Position 20px below video's top edge (or clamp within viewport)
-  const targetY = Math.max(
-    16,
-    Math.min(window.innerHeight - 60, rect.top + 24)
-  )
+  const targetY = Math.max(16, Math.min(window.innerHeight - 60, rect.top + 24))
 
   osd.style.left = `${targetX}px`
   osd.style.top = `${targetY}px`
@@ -457,8 +464,7 @@ function handleLeftClick(event: MouseEvent): void {
     currentConfig.enableScreenshot && event.shiftKey && event.altKey
 
   const wantsMute = currentConfig.clickToMute && isVolumeModifier
-  const wantsFullscreen =
-    currentConfig.clickToFullscreen && isSpeedModifier
+  const wantsFullscreen = currentConfig.clickToFullscreen && isSpeedModifier
 
   if (!wantsMute && !wantsFullscreen && !wantsScreenshot) {
     return
@@ -649,8 +655,7 @@ function onKeyDown(event: KeyboardEvent): void {
     return
   }
 
-  const video =
-    lastKnownHoveredVideo || document.querySelector("video")
+  const video = lastKnownHoveredVideo || document.querySelector("video")
   if (!video || !document.contains(video)) return
 
   isBoostKeyDown = true

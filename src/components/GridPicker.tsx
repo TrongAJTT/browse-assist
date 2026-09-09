@@ -11,6 +11,8 @@ interface GridPickerProps<T extends string = string> {
   value: T
   onChange: (value: T) => void
   columns?: 2 | 3 | 4
+  disabled?: boolean
+  className?: string
 }
 
 /**
@@ -20,7 +22,9 @@ export function GridPicker<T extends string = string>({
   items,
   value,
   onChange,
-  columns = 4
+  columns = 4,
+  disabled = false,
+  className = ""
 }: GridPickerProps<T>): React.ReactElement {
   const colClass =
     columns === 2
@@ -30,17 +34,19 @@ export function GridPicker<T extends string = string>({
         : "grid-cols-4"
 
   return (
-    <div className={`grid ${colClass} gap-1.5`}>
+    <div
+      className={`grid ${colClass} gap-1.5 ${disabled ? "opacity-35 pointer-events-none" : ""} ${className}`}>
       {items.map((item) => {
         const isSelected = value === item.id
         return (
           <button
             key={item.id}
             type="button"
+            disabled={disabled}
             onClick={() => onChange(item.id)}
-            className={`flex flex-col items-center justify-center gap-1.5 py-2 px-1 rounded-md border transition-all ${
+            className={`flex flex-col items-center justify-center gap-1 py-1.5 px-2 rounded-md border transition-all ${
               isSelected
-                ? "bg-accent-subtle border-accent text-accent-hover shadow-sm"
+                ? "bg-accent border-accent text-white shadow-sm font-semibold"
                 : "bg-app-surface hover:bg-app-card border-border-subtle text-content-muted hover:text-content-primary"
             }`}>
             {item.icon && (
