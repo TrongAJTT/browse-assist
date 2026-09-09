@@ -1,6 +1,4 @@
-/**
- * External links and donation constant configuration for Browse Assist.
- */
+import packageJson from "../../package.json"
 
 export interface DonateOption {
   id: string
@@ -35,31 +33,62 @@ export const DONATE_OPTIONS: DonateOption[] = [
 ]
 
 export const APP_INFO = {
-  name: "Browse Assist",
-  version: "0.0.1",
-  author: "TrongAJTT",
+  name: packageJson.displayName || "Browse Assist",
+  version: packageJson.version,
+  slogan: (packageJson as { slogan?: string }).slogan || "PowerToys for Web Browsing",
+  description: packageJson.description,
+  author: packageJson.author?.split("<")[0]?.trim() || "TrongAJTT",
   authorUrl: "https://github.com/TrongAJTT",
-  repoUrl: "https://github.com/TrongAJTT/browse-assist",
-  license: "MIT",
-  description:
-    "PowerToys for Web Browsing. Lightweight, modular, and privacy-first browser enhancements.",
+  homePageUrl: packageJson.homepage || "https://github.com/TrongAJTT/browse-assist",
+  termsUrl: (packageJson as { termsUrl?: string }).termsUrl || "https://github.com/TrongAJTT/browse-assist/blob/main/TERMS.md",
+  privacyPolicyUrl: (packageJson as { privacyPolicyUrl?: string }).privacyPolicyUrl || "https://github.com/TrongAJTT/browse-assist/blob/main/PRIVACY.md",
   libraries: [
     {
       name: "Plasmo Framework",
-      version: "0.90.5",
+      version: packageJson.dependencies?.plasmo?.replace(/[\^~]/g, "") || "0.90.5",
       url: "https://docs.plasmo.com/"
     },
-    { name: "React", version: "18.2.0", url: "https://react.dev/" },
+    {
+      name: "React",
+      version: packageJson.dependencies?.react?.replace(/[\^~]/g, "") || "18.2.0",
+      url: "https://react.dev/"
+    },
     {
       name: "Tailwind CSS",
-      version: "3.4.19",
+      version: packageJson.devDependencies?.tailwindcss?.replace(/[\^~]/g, "") || "3.4.19",
       url: "https://tailwindcss.com/"
     },
-    { name: "Lucide React", version: "1.41.0", url: "https://lucide.dev/" },
+    {
+      name: "Lucide React",
+      version: packageJson.dependencies?.["lucide-react"]?.replace(/[\^~]/g, "") || "1.41.0",
+      url: "https://lucide.dev/"
+    },
     {
       name: "@plasmohq/storage",
-      version: "1.15.0",
+      version: packageJson.dependencies?.["@plasmohq/storage"]?.replace(/[\^~]/g, "") || "1.15.0",
       url: "https://github.com/PlasmoHQ/storage"
+    }
+  ],
+  permissions: [
+    {
+      key: "storage",
+      name: "Storage",
+      description: "Persist custom settings and features preferences locally."
+    },
+    {
+      key: "contextMenus",
+      name: "Context Menus",
+      description: "Provide quick actions on right-click like clean link copy."
+    },
+    {
+      key: "clipboardWrite",
+      name: "Clipboard",
+      description: "Copy picked color codes and markdown formatted links."
+    },
+    {
+      key: "search",
+      name: "Search",
+      description: "Search selected text with default search engine on Super Drag."
     }
   ]
 }

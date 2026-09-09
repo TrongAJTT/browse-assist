@@ -20,7 +20,7 @@ import { AboutView } from "~components/AboutView"
 import { GlobalDialogHost } from "~components/GlobalDialogHost"
 import { PreferencesSettingsView } from "~components/PreferencesSettingsView"
 import { AppIcon } from "~core/assets"
-import { DONATE_OPTIONS } from "~core/constants"
+import { APP_INFO, DONATE_OPTIONS } from "~core/constants"
 import {
   MESSAGE_TYPES,
   sendToActiveTab,
@@ -351,13 +351,13 @@ function IndexPopup() {
       {/* Header - Crisp and cleanly separated from content */}
       <header className="px-4 py-3 bg-app-header border-b border-border-divider flex items-center justify-between sticky top-0 z-20 backdrop-blur-md">
         <div className="flex items-center gap-2.5">
-          <AppIcon className="w-8 h-8 rounded-xl object-contain shadow-md shadow-accent-glow ring-1 ring-white/10" />
+          <AppIcon className="w-8 h-8 rounded-md shadow-md shadow-accent-glow" />
           <div>
             <h1 className="text-sm font-bold tracking-tight text-content-primary leading-none">
-              Browse Assist
+              {APP_INFO.name}
             </h1>
             <p className="text-[11px] text-content-muted font-normal mt-1">
-              PowerToys for Web Browsing
+              {APP_INFO.slogan}
             </p>
           </div>
         </div>

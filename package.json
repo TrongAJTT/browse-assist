@@ -1,8 +1,12 @@
 {
   "name": "browse-assist",
   "displayName": "Browse Assist",
-  "version": "0.0.1",
-  "description": "An enhanced browsing exprience",
+  "version": "1.0.0",
+  "description": "A lightweight, modular collection of quality-of-life tools designed to boost productivity and elevate your browsing flow.",
+  "slogan": "Supercharge Your Web Browsing",
+  "homepage": "https://www.trongajtt.com/apps/browse-assist",
+  "termsUrl": "https://www.trongajtt.com/apps/browse-assist/terms",
+  "privacyPolicyUrl": "https://www.trongajtt.com/apps/browse-assist/policy",
   "author": "TrongAJTT. <trong.ajtt.dev@gmail.com>",
   "scripts": {
     "dev": "plasmo dev",
