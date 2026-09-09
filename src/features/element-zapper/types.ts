@@ -1,7 +1,16 @@
 import type { ElementMoveType, ZapperMode } from "~core/types"
 
+export type ResizeHandle = "n" | "s" | "e" | "w" | "ne" | "nw" | "se" | "sw"
+
+export interface FlowDropTarget {
+  container: HTMLElement
+  referenceNode: Node | null
+  placement: "before" | "after"
+  dividerRect: { top: number; left: number; width: number; height: number; isVertical: boolean }
+}
+
 export interface UndoAction {
-  type: ZapperMode
+  type: ZapperMode | "resize"
   element: HTMLElement
   parent?: HTMLElement | null
   nextSibling?: Node | null
@@ -16,4 +25,9 @@ export interface UndoAction {
   newNextSibling?: Node | null
   oldVisibility?: string
   oldDisplay?: string
+  // Resize undo
+  oldWidth?: string
+  oldHeight?: string
+  newWidth?: string
+  newHeight?: string
 }

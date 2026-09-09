@@ -3,18 +3,14 @@
  * Adheres to SOLID, KISS, and DRY:
  * - Single Responsibility: Coordinates lifecycle, DOM events, and delegates
  *   specific tasks to dedicated action handlers, views, and managers.
- * - Modular design:
- *   - constants.ts: SVG icons, styles, themes
- *   - domUtils.ts: Element descriptors, internal target filters
- *   - undoManager.ts: Undo history stack and rollbacks
- *   - scopeManager.ts: Parent/child scope level navigation
- *   - overlay.ts: Highlighting and container rendering
- *   - toolbar.ts: Floating HUD toolbar presentation
- *   - actions/: zap, hide, edit, move implementations
+ * - Features:
+ *   - Move Flow: Debounced divider preview (horizontal / vertical), commits on mouseup.
+ *   - Move Resize: Interactive corner handles allowing direct element resizing with undo.
  */
 
 import { executeHide } from "./actions/hide"
 import { MoveController } from "./actions/move"
+import { ResizeController } from "./actions/resize"
 import { TextEditor } from "./actions/edit"
 import { executeZap } from "./actions/zap"
 import { SVG_ICONS } from "./constants"
@@ -22,6 +18,7 @@ import { getElementDescriptor, isInternalElement } from "./domUtils"
 import { OverlayView } from "./overlay"
 import { ScopeManager } from "./scopeManager"
 import { ToolbarView } from "./toolbar"
+import type { ResizeHandle } from "./types"
 import { UndoManager } from "./undoManager"
 import { MESSAGE_TYPES, sendToBackground } from "~core/messaging"
 import { extensionStorage } from "~core/storage"
@@ -47,6 +44,7 @@ const undoManager = new UndoManager()
 const scopeManager = new ScopeManager()
 const textEditor = new TextEditor()
 const moveController = new MoveController()
+const resizeController = new ResizeController()
 const overlayView = new OverlayView()
 const toolbarView = new ToolbarView()
 
@@ -72,6 +70,7 @@ function updateHighlight(target: HTMLElement | null): void {
     currentConfig,
     scopeManager.depth,
     moveController.isDragging,
+    resizeController.isResizing,
     textEditor.element
   )
 }
@@ -148,6 +147,16 @@ async function openSettingsView(): Promise<void> {
 function onPointerMove(e: PointerEvent): void {
   if (!isSessionActive) return
 
+  // 1. Resizing in progress
+  if (resizeController.isResizing) {
+    const rect = resizeController.onResize(e.clientX, e.clientY)
+    if (rect) {
+      overlayView.updateRect(rect)
+    }
+    return
+  }
+
+  // 2. Dragging in progress
   if (moveController.isDragging && moveController.target) {
     const rect = moveController.onMove(
       e.clientX,
@@ -156,13 +165,23 @@ function onPointerMove(e: PointerEvent): void {
       () => overlayView.hideHighlight(),
       () => overlayView.showHighlight()
     )
+
+    if (currentConfig.moveType === "relative") {
+      overlayView.showFlowDivider(moveController.dropTarget)
+    }
+
     if (rect) {
       overlayView.updateRect(rect)
     }
     return
   }
 
-  // Normal hover inspect
+  // 3. Normal hover inspect
+  // In Move mode, if cursor is near a corner resize handle, lock currentHoveredElement so it won't switch to parent/outside
+  if (currentMode === "move" && currentHoveredElement && overlayView.isNearHandle(e.clientX, e.clientY)) {
+    return
+  }
+
   const target = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null
   if (target) {
     if (
@@ -185,7 +204,8 @@ function onPointerDownCapture(e: PointerEvent): void {
   const target = e.target as HTMLElement | null
   if (isInternalElement(target)) return
 
-  if (currentMode === "move" && currentHoveredElement) {
+  // Start dragging move target
+  if (currentMode === "move" && currentHoveredElement && !resizeController.isResizing) {
     e.preventDefault()
     e.stopPropagation()
 
@@ -194,18 +214,35 @@ function onPointerDownCapture(e: PointerEvent): void {
 }
 
 function onPointerUpCapture(e: PointerEvent): void {
-  if (!isSessionActive || !moveController.isDragging || !moveController.target) return
+  if (!isSessionActive) return
 
-  e.preventDefault()
-  e.stopPropagation()
+  // End resize
+  if (resizeController.isResizing) {
+    e.preventDefault()
+    e.stopPropagation()
 
-  moveController.endDrag(currentConfig.moveType, undoManager)
-  renderToolbar()
+    resizeController.endResize(undoManager, currentConfig.showToast)
+    renderToolbar()
+    document.documentElement.style.cursor = getCursorForMode(currentMode)
+    updateHighlight(currentHoveredElement)
+    return
+  }
 
-  document.documentElement.style.cursor = getCursorForMode(currentMode)
+  // End drag move
+  if (moveController.isDragging && moveController.target) {
+    e.preventDefault()
+    e.stopPropagation()
 
-  if (!currentConfig.continuousMode) {
-    stopZapping(true)
+    overlayView.showFlowDivider(null)
+    moveController.endDrag(currentConfig.moveType, undoManager)
+    renderToolbar()
+
+    document.documentElement.style.cursor = getCursorForMode(currentMode)
+    updateHighlight(currentHoveredElement)
+
+    if (!currentConfig.continuousMode) {
+      stopZapping(true)
+    }
   }
 }
 
@@ -214,6 +251,14 @@ function onClickCapture(e: MouseEvent): void {
 
   const rawTarget = e.target as HTMLElement | null
   if (isInternalElement(rawTarget)) return
+
+  // Do not execute action clicks if we just finished resizing or dragging
+  if (resizeController.isResizing || moveController.isDragging) return
+
+  if (currentMode === "move") {
+    // In move mode, clicking is reserved for drag & resize
+    return
+  }
 
   e.preventDefault()
   e.stopPropagation()
@@ -340,13 +385,18 @@ function onContextMenu(e: MouseEvent): void {
   }
 }
 
+function handleResizeStart(handle: ResizeHandle, e: PointerEvent): void {
+  if (!currentHoveredElement) return
+  resizeController.startResize(currentHoveredElement, handle, e.clientX, e.clientY)
+}
+
 export function startZapping(): void {
   if (!isActive || isSessionActive) return
   isSessionActive = true
   currentMode = currentConfig.defaultMode || "zap"
   scopeManager.reset()
 
-  overlayView.mount(toolbarView.domElement)
+  overlayView.mount(toolbarView.domElement, handleResizeStart)
   overlayView.setVisible(true)
   renderToolbar()
 
@@ -379,6 +429,8 @@ export function stopZapping(_zapped = false): void {
   }
 
   moveController.endDrag(currentConfig.moveType, undoManager)
+  resizeController.endResize(undoManager, false)
+  overlayView.showFlowDivider(null)
   scopeManager.reset()
 
   window.removeEventListener("pointermove", onPointerMove, { capture: true })

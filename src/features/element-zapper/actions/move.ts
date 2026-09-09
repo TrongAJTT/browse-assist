@@ -1,4 +1,5 @@
 import { isInternalElement } from "../domUtils"
+import type { FlowDropTarget } from "../types"
 import type { UndoManager } from "../undoManager"
 import type { ElementMoveType } from "~core/types"
 
@@ -36,6 +37,11 @@ export class MoveController {
   private initialParent: HTMLElement | null = null
   private initialNextSibling: Node | null = null
 
+  // Flow preview drop target (calculated with debounce/throttle during drag)
+  private pendingDropTarget: FlowDropTarget | null = null
+  private lastComputeTime = 0
+  private readonly THROTTLE_MS = 25
+
   public get isDragging(): boolean {
     return this._isDragging
   }
@@ -44,11 +50,17 @@ export class MoveController {
     return this.dragTarget
   }
 
+  public get dropTarget(): FlowDropTarget | null {
+    return this.pendingDropTarget
+  }
+
   public startDrag(target: HTMLElement, clientX: number, clientY: number): void {
     this._isDragging = true
     this.dragTarget = target
     this.startX = clientX
     this.startY = clientY
+    this.pendingDropTarget = null
+    this.lastComputeTime = 0
 
     this.initialParent = target.parentElement
     this.initialNextSibling = target.nextSibling
@@ -63,7 +75,9 @@ export class MoveController {
   }
 
   /**
-   * Performs drag move operation. Returns the updated BoundingClientRect of the target.
+   * Performs drag move operation.
+   * In Flow mode: Does NOT mutate DOM during drag! Instead calculates pendingDropTarget and divider preview.
+   * In Free mode: Updates translate3d in real-time.
    */
   public onMove(
     clientX: number,
@@ -75,30 +89,83 @@ export class MoveController {
     if (!this._isDragging || !this.dragTarget) return null
 
     if (moveType === "relative") {
-      // Cross-container relative layout flow reordering:
-      hideHighlightBox()
-      const hovered = document.elementFromPoint(clientX, clientY) as HTMLElement | null
-      showHighlightBox()
+      const now = performance.now()
+      if (now - this.lastComputeTime >= this.THROTTLE_MS) {
+        this.lastComputeTime = now
 
-      if (
-        hovered &&
-        hovered !== this.dragTarget &&
-        !this.dragTarget.contains(hovered) &&
-        !isInternalElement(hovered) &&
-        hovered !== document.body &&
-        hovered !== document.documentElement
-      ) {
-        const rect = hovered.getBoundingClientRect()
-        const isAfter =
-          clientY > rect.top + rect.height / 2 || clientX > rect.left + rect.width / 2
+        hideHighlightBox()
+        const hovered = document.elementFromPoint(clientX, clientY) as HTMLElement | null
+        showHighlightBox()
 
-        if (isAfter) {
-          if (hovered.nextSibling !== this.dragTarget) {
-            hovered.after(this.dragTarget)
+        if (
+          hovered &&
+          hovered !== this.dragTarget &&
+          !this.dragTarget.contains(hovered) &&
+          !isInternalElement(hovered) &&
+          hovered !== document.body &&
+          hovered !== document.documentElement
+        ) {
+          const rect = hovered.getBoundingClientRect()
+          const isWider = rect.width > rect.height * 1.5
+          const isTaller = rect.height > rect.width * 1.5
+
+          let isVertical = false
+          let isAfter = false
+
+          if (isWider) {
+            // Predominantly horizontal block -> split horizontally (top vs bottom)
+            isVertical = false
+            isAfter = clientY > rect.top + rect.height / 2
+          } else if (isTaller) {
+            // Predominantly vertical block -> split vertically (left vs right)
+            isVertical = true
+            isAfter = clientX > rect.left + rect.width / 2
+          } else {
+            // Check nearest edge
+            const distTop = Math.abs(clientY - rect.top)
+            const distBottom = Math.abs(clientY - rect.bottom)
+            const distLeft = Math.abs(clientX - rect.left)
+            const distRight = Math.abs(clientX - rect.right)
+            const minDist = Math.min(distTop, distBottom, distLeft, distRight)
+
+            if (minDist === distLeft || minDist === distRight) {
+              isVertical = true
+              isAfter = minDist === distRight
+            } else {
+              isVertical = false
+              isAfter = minDist === distBottom
+            }
           }
-        } else {
-          if (hovered.previousSibling !== this.dragTarget) {
-            hovered.before(this.dragTarget)
+
+          let dividerTop = 0
+          let dividerLeft = 0
+          let dividerWidth = 0
+          let dividerHeight = 0
+
+          if (isVertical) {
+            dividerTop = rect.top
+            dividerHeight = rect.height
+            dividerWidth = 4
+            dividerLeft = isAfter ? rect.right - 2 : rect.left - 2
+          } else {
+            dividerLeft = rect.left
+            dividerWidth = rect.width
+            dividerHeight = 4
+            dividerTop = isAfter ? rect.bottom - 2 : rect.top - 2
+          }
+
+          const container = hovered.parentElement || document.body
+          this.pendingDropTarget = {
+            container,
+            referenceNode: hovered,
+            placement: isAfter ? "after" : "before",
+            dividerRect: {
+              top: dividerTop,
+              left: dividerLeft,
+              width: dividerWidth,
+              height: dividerHeight,
+              isVertical
+            }
           }
         }
       }
@@ -117,7 +184,8 @@ export class MoveController {
   }
 
   /**
-   * Concludes drag operation and records action into undoManager if modified.
+   * Concludes drag operation.
+   * If in Flow mode: Commits the pending drop placement into DOM only on mouse release!
    */
   public endDrag(moveType: ElementMoveType, undoManager: UndoManager): void {
     if (!this._isDragging || !this.dragTarget) return
@@ -126,23 +194,40 @@ export class MoveController {
     const target = this.dragTarget
 
     if (moveType === "relative") {
-      const currentParent = target.parentElement
-      const currentNextSibling = target.nextSibling
+      if (this.pendingDropTarget && this.pendingDropTarget.referenceNode) {
+        const ref = this.pendingDropTarget.referenceNode as HTMLElement
 
-      if (
-        currentParent !== this.initialParent ||
-        currentNextSibling !== this.initialNextSibling
-      ) {
-        undoManager.push({
-          type: "move",
-          element: target,
-          moveType: "relative",
-          oldParent: this.initialParent,
-          oldNextSibling: this.initialNextSibling,
-          newParent: currentParent,
-          newNextSibling: currentNextSibling
-        })
+        // Apply DOM mutation on drop
+        if (this.pendingDropTarget.placement === "after") {
+          if (ref.nextSibling !== target) {
+            ref.after(target)
+          }
+        } else {
+          if (ref.previousSibling !== target) {
+            ref.before(target)
+          }
+        }
+
+        const currentParent = target.parentElement
+        const currentNextSibling = target.nextSibling
+
+        if (
+          currentParent !== this.initialParent ||
+          currentNextSibling !== this.initialNextSibling
+        ) {
+          undoManager.push({
+            type: "move",
+            element: target,
+            moveType: "relative",
+            oldParent: this.initialParent,
+            oldNextSibling: this.initialNextSibling,
+            newParent: currentParent,
+            newNextSibling: currentNextSibling
+          })
+        }
       }
+
+      this.pendingDropTarget = null
     } else {
       const newTransform = target.style.transform || ""
       if (newTransform !== this.initialTransform) {

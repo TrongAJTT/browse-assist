@@ -54,6 +54,15 @@ export class UndoManager {
           }
           break
         }
+        case "resize": {
+          if (action.oldWidth !== undefined) {
+            action.element.style.width = action.oldWidth
+          }
+          if (action.oldHeight !== undefined) {
+            action.element.style.height = action.oldHeight
+          }
+          break
+        }
       }
     } catch {
       // Ignore revert DOM exceptions
