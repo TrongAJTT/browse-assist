@@ -5,7 +5,7 @@ import { useEffect, useState } from "react"
 import { useStorage } from "@plasmohq/storage/hook"
 
 import { FeatureShortcutRow } from "~components/FeatureShortcutRow"
-import { GridPicker, type GridPickerItem } from "~components/GridPicker"
+import { SegmentedTabs, type SegmentedTabItem } from "~components/SegmentedTabs"
 import { SettingToggleRow } from "~components/SettingToggleRow"
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
 import { MESSAGE_TYPES, sendToActiveTab } from "~core/messaging"
@@ -26,21 +26,19 @@ interface ColorPickerSettingsViewProps {
   onBack: () => void
 }
 
-const FORMAT_ITEMS: GridPickerItem<ColorFormat>[] = [
+const FORMAT_ITEMS: SegmentedTabItem<ColorFormat>[] = [
   {
     id: "hex",
     label: "HEX",
-    icon: <span className="font-mono text-xs font-bold text-accent">#</span>
+    icon: <span className="font-mono text-xs font-bold opacity-75">#</span>
   },
   {
     id: "rgb",
-    label: "RGB",
-    icon: <span className="font-mono text-xs font-bold text-accent">RGB</span>
+    label: "RGB"
   },
   {
     id: "hsl",
-    label: "HSL",
-    icon: <span className="font-mono text-xs font-bold text-accent">HSL</span>
+    label: "HSL"
   }
 ]
 
@@ -266,11 +264,10 @@ export const ColorPickerSettingsView: React.FC<
             </p>
           </div>
 
-          <GridPicker<ColorFormat>
+          <SegmentedTabs<ColorFormat>
             items={FORMAT_ITEMS}
             value={currentConfig.defaultFormat}
             onChange={handleSelectFormat}
-            columns={3}
           />
         </div>
 

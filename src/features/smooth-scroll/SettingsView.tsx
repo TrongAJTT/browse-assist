@@ -3,7 +3,7 @@ import type React from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
-import { GridPicker } from "~components/GridPicker"
+import { SegmentedTabs, type SegmentedTabItem } from "~components/SegmentedTabs"
 import { SettingToggleRow } from "~components/SettingToggleRow"
 import { Slider } from "~components/Slider"
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
@@ -91,11 +91,7 @@ export const SmoothScrollSettingsView: React.FC<
     })
   }
 
-  const profileGridItems: {
-    id: SmoothScrollPreset
-    label: string
-    icon: React.ReactNode
-  }[] = [
+  const profileGridItems: SegmentedTabItem<SmoothScrollPreset>[] = [
     {
       id: "balanced",
       label: "Balanced",
@@ -134,17 +130,16 @@ export const SmoothScrollSettingsView: React.FC<
       enabled={isSmoothScrollEnabled}
       onToggle={handleToggleFeature}
       onBack={onBack}>
-      {/* 4-item Horizontal Grid Picker for Profiles including Custom */}
+      {/* 4-item Horizontal SegmentedTabs for Profiles */}
       <div className="space-y-2">
         <span className="section-header">
           Profiles
         </span>
 
-        <GridPicker
+        <SegmentedTabs<SmoothScrollPreset>
           items={profileGridItems}
           value={currentConfig.preset}
           onChange={handleSelectPreset}
-          columns={4}
         />
       </div>
 

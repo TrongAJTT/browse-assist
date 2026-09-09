@@ -11,6 +11,7 @@ import type React from "react"
 import { useStorage } from "@plasmohq/storage/hook"
 
 import { GridPicker, type GridPickerItem } from "~components/GridPicker"
+import { SegmentedTabs, type SegmentedTabItem } from "~components/SegmentedTabs"
 import { SettingToggleRow } from "~components/SettingToggleRow"
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
 import {
@@ -59,7 +60,7 @@ const POSITION_ITEMS: GridPickerItem<QuickScrollPosition>[] = [
   }
 ]
 
-const BUTTON_ITEMS: GridPickerItem<QuickScrollButtonsMode>[] = [
+const BUTTON_ITEMS: SegmentedTabItem<QuickScrollButtonsMode>[] = [
   {
     id: "both",
     label: "Both (Top & Down)",
@@ -165,11 +166,10 @@ export const QuickScrollSettingsView: React.FC<
               Choose whether to display both top & bottom buttons or only scroll
               to top.
             </p>
-            <GridPicker<QuickScrollButtonsMode>
+            <SegmentedTabs<QuickScrollButtonsMode>
               items={BUTTON_ITEMS}
               value={currentConfig.buttonsMode}
               onChange={handleSelectButtonsMode}
-              columns={2}
             />
           </div>
         </div>

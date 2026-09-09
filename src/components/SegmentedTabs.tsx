@@ -49,7 +49,7 @@ export function SegmentedTabs<T extends string = string>({
                   : "text-content-muted hover:text-content-primary hover:bg-app-surface-hover"
             }`}>
             {tab.icon && (
-              <span className="shrink-0 flex items-center justify-center">
+              <span className={`shrink-0 flex items-center justify-center ${isSelected ? "text-white" : "opacity-80"}`}>
                 {tab.icon}
               </span>
             )}

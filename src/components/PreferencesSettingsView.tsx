@@ -13,7 +13,7 @@ import React, { useState } from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
-import { GridPicker, type GridPickerItem } from "~components/GridPicker"
+import { SegmentedTabs, type SegmentedTabItem } from "~components/SegmentedTabs"
 import { Slider } from "~components/Slider"
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
 import { Switch } from "~components/Switch"
@@ -31,7 +31,7 @@ interface PreferencesSettingsViewProps {
   onBack: () => void
 }
 
-const THEME_OPTIONS: GridPickerItem<ThemeMode>[] = [
+const THEME_OPTIONS: SegmentedTabItem<ThemeMode>[] = [
   {
     id: "dark",
     label: "Dark",
@@ -201,11 +201,10 @@ export const PreferencesSettingsView: React.FC<
               </p>
             </div>
 
-            <GridPicker<ThemeMode>
+            <SegmentedTabs<ThemeMode>
               items={THEME_OPTIONS}
               value={currentTheme}
               onChange={handleSelectTheme}
-              columns={3}
             />
           </div>
         </div>
@@ -330,7 +329,7 @@ export const PreferencesSettingsView: React.FC<
             </div>
 
             {currentNav.rememberLastView && (
-              <div className="pt-1 pb-1 pl-6">
+              <div className="pt-1 pb-1 pl-3">
                 <div className="pl-3 border-l-2 border-border-subtle">
                   <Slider
                     label="Session Timeout"
