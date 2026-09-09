@@ -5,6 +5,11 @@ import {
   type VideoWheelModifier
 } from "~core/types"
 import {
+  clearLastKnownHoveredVideo,
+  findVideoAtCoordinates,
+  getLastKnownHoveredVideo
+} from "~core/videoDetector"
+import {
   registerWheelSubscriber,
   unregisterWheelSubscriber
 } from "~core/wheelDispatcher"
@@ -17,8 +22,6 @@ let currentConfig: VideoWheelControlConfig = {
 const OSD_ELEMENT_ID = "browse-assist-video-wheel-osd"
 let osdElement: HTMLElement | null = null
 let osdHideTimeout: NodeJS.Timeout | null = null
-
-let lastKnownHoveredVideo: HTMLVideoElement | null = null
 
 /**
  * Checks if the configured modifier key is pressed.
@@ -46,85 +49,14 @@ function isModifierActive(
 }
 
 /**
- * Finds the target HTMLVideoElement under the cursor.
- * Handles overlay player divs across YouTube, Facebook, X (Twitter), TikTok, and custom web players.
+ * Finds the target HTMLVideoElement under the cursor via shared multi-layer detector.
  */
-function findVideoUnderCursor(event: WheelEvent): HTMLVideoElement | null {
-  const target = event.target as HTMLElement | null
-
-  // 1. Direct video tag
-  if (target && target.tagName.toLowerCase() === "video") {
-    lastKnownHoveredVideo = target as HTMLVideoElement
-    return target as HTMLVideoElement
-  }
-
-  // 2. Child video inside target
-  if (target) {
-    const directChild = target.querySelector("video")
-    if (directChild) {
-      lastKnownHoveredVideo = directChild as HTMLVideoElement
-      return directChild as HTMLVideoElement
-    }
-
-    // 3. Look up video in common player containers or parent tree
-    const container = target.closest(
-      ".html5-video-player, .video-player, [data-player], .player-container, video-player, [data-testid*='video'], [aria-label*='video'], div[role='region']"
-    )
-    if (container) {
-      const video = container.querySelector("video")
-      if (video) {
-        lastKnownHoveredVideo = video as HTMLVideoElement
-        return video as HTMLVideoElement
-      }
-    }
-  }
-
-  // 4. Multi-layer depth scan via elementsFromPoint
-  // Facebook, X (Twitter), and TikTok place full transparent click-interception layers on top
-  if (typeof document.elementsFromPoint === "function") {
-    const elements = document.elementsFromPoint(event.clientX, event.clientY)
-    for (const el of elements) {
-      if (el.tagName.toLowerCase() === "video") {
-        lastKnownHoveredVideo = el as HTMLVideoElement
-        return el as HTMLVideoElement
-      }
-      const video = el.querySelector("video")
-      if (video) {
-        lastKnownHoveredVideo = video as HTMLVideoElement
-        return video as HTMLVideoElement
-      }
-    }
-  }
-
-  // 5. Fallback: check bounding rect of all active playing/ready videos on the page
-  const allVideos = document.querySelectorAll("video")
-  for (const video of allVideos) {
-    const rect = video.getBoundingClientRect()
-    if (
-      event.clientX >= rect.left &&
-      event.clientX <= rect.right &&
-      event.clientY >= rect.top &&
-      event.clientY <= rect.bottom
-    ) {
-      lastKnownHoveredVideo = video
-      return video
-    }
-  }
-
-  // 6. Last known hovered video if pointer is still within its bounding rect
-  if (lastKnownHoveredVideo && document.contains(lastKnownHoveredVideo)) {
-    const rect = lastKnownHoveredVideo.getBoundingClientRect()
-    if (
-      event.clientX >= rect.left &&
-      event.clientX <= rect.right &&
-      event.clientY >= rect.top &&
-      event.clientY <= rect.bottom
-    ) {
-      return lastKnownHoveredVideo
-    }
-  }
-
-  return null
+function findVideoUnderCursor(event: WheelEvent | MouseEvent): HTMLVideoElement | null {
+  return findVideoAtCoordinates({
+    clientX: event.clientX,
+    clientY: event.clientY,
+    target: event.target
+  })
 }
 
 // State for Hold-to-Boost
@@ -470,74 +402,11 @@ function handleLeftClick(event: MouseEvent): void {
     return
   }
 
-  const target = event.target as HTMLElement | null
-  let video: HTMLVideoElement | null = null
-
-  // 1. Direct or child video
-  if (target) {
-    if (target.tagName.toLowerCase() === "video") {
-      video = target as HTMLVideoElement
-    } else {
-      video =
-        target.querySelector("video") ||
-        target
-          .closest(
-            ".html5-video-player, .video-player, [data-player], .player-container, video-player"
-          )
-          ?.querySelector("video") ||
-        null
-    }
-  }
-
-  // 2. Multi-layer depth scan fallback
-  if (!video && typeof document.elementsFromPoint === "function") {
-    const elements = document.elementsFromPoint(event.clientX, event.clientY)
-    for (const el of elements) {
-      if (el.tagName.toLowerCase() === "video") {
-        video = el as HTMLVideoElement
-        break
-      }
-      const child = el.querySelector("video")
-      if (child) {
-        video = child as HTMLVideoElement
-        break
-      }
-    }
-  }
-
-  // 3. Fallback: check bounding rect of all videos
-  if (!video) {
-    const allVideos = document.querySelectorAll("video")
-    for (const v of allVideos) {
-      const rect = v.getBoundingClientRect()
-      if (
-        event.clientX >= rect.left &&
-        event.clientX <= rect.right &&
-        event.clientY >= rect.top &&
-        event.clientY <= rect.bottom
-      ) {
-        video = v
-        break
-      }
-    }
-  }
-
-  // 4. Fallback to cached video
-  if (
-    !video &&
-    lastKnownHoveredVideo &&
-    document.contains(lastKnownHoveredVideo)
-  ) {
-    const rect = lastKnownHoveredVideo.getBoundingClientRect()
-    if (
-      event.clientX >= rect.left &&
-      event.clientX <= rect.right &&
-      event.clientY >= rect.top &&
-      event.clientY <= rect.bottom
-    ) {
-      video = lastKnownHoveredVideo
-    }
-  }
+  const video = findVideoAtCoordinates({
+    clientX: event.clientX,
+    clientY: event.clientY,
+    target: event.target
+  })
 
   if (!video) return
 
@@ -655,7 +524,7 @@ function onKeyDown(event: KeyboardEvent): void {
     return
   }
 
-  const video = lastKnownHoveredVideo || document.querySelector("video")
+  const video = getLastKnownHoveredVideo() || document.querySelector("video")
   if (!video || !document.contains(video)) return
 
   isBoostKeyDown = true
@@ -748,5 +617,5 @@ export function deactivate(): void {
     osdElement = null
   }
 
-  lastKnownHoveredVideo = null
+  clearLastKnownHoveredVideo()
 }

@@ -10,6 +10,10 @@ import {
   DEFAULT_PICTURE_IN_PICTURE_CONFIG,
   type PictureInPictureConfig
 } from "~core/types"
+import {
+  clearLastKnownHoveredVideo,
+  findVideoAtCoordinates
+} from "~core/videoDetector"
 
 let isActive = false
 let currentConfig: PictureInPictureConfig = {
@@ -67,8 +71,8 @@ function ensureHoverButton(): HTMLButtonElement {
     user-select: none;
     pointer-events: auto;
     opacity: 0;
-    transform: translateY(6px) scale(0.96);
-    transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1), transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), background 0.15s ease, border-color 0.15s ease;
+    transform: translateY(4px) scale(0.96);
+    transition: opacity 0.12s ease-out, transform 0.12s ease-out, background 0.12s ease, border-color 0.12s ease;
   `
 
   btn.innerHTML = `
@@ -94,7 +98,7 @@ function ensureHoverButton(): HTMLButtonElement {
     isPointerOverHoverButton = false
     btn.style.background = "rgba(18, 18, 22, 0.92)"
     btn.style.borderColor = "rgba(255, 255, 255, 0.18)"
-    scheduleHideHoverButton(1000)
+    hideHoverButtonNow()
   })
 
   btn.addEventListener("click", async (e) => {
@@ -138,13 +142,13 @@ function showHoverButtonForVideo(video: HTMLVideoElement): void {
   }
 
   const rect = video.getBoundingClientRect()
-  // Threshold: video must be sufficiently sized and visible on screen
-  if (rect.width < 200 || rect.height < 140) {
+  // Threshold: video must have basic visible dimensions on screen
+  if (rect.width < 120 || rect.height < 80) {
     hideHoverButtonNow()
     return
   }
 
-  if (rect.bottom < 40 || rect.top > window.innerHeight - 40) {
+  if (rect.bottom < 30 || rect.top > window.innerHeight - 30) {
     hideHoverButtonNow()
     return
   }
@@ -163,7 +167,7 @@ function showHoverButtonForVideo(video: HTMLVideoElement): void {
   btn.style.left = `${targetX}px`
   btn.style.display = "flex"
 
-  // Trigger smooth drop-in
+  // Trigger smooth instant reveal
   requestAnimationFrame(() => {
     btn.style.opacity = "1"
     btn.style.transform = "translateY(0) scale(1)"
@@ -179,15 +183,6 @@ function showHoverButtonForVideo(video: HTMLVideoElement): void {
   }, 2500)
 }
 
-function scheduleHideHoverButton(delay = 300): void {
-  if (hoverHideTimeout) clearTimeout(hoverHideTimeout)
-  hoverHideTimeout = setTimeout(() => {
-    if (!isPointerOverHoverButton) {
-      hideHoverButtonNow()
-    }
-  }, delay)
-}
-
 function hideHoverButtonNow(): void {
   if (!hoverButtonElement) return
   hoverButtonElement.style.opacity = "0"
@@ -196,12 +191,13 @@ function hideHoverButtonNow(): void {
     if (hoverButtonElement && hoverButtonElement.style.opacity === "0") {
       hoverButtonElement.style.display = "none"
     }
-  }, 180)
+  }, 120)
   hoveredVideoElement = null
 }
 
 /**
  * Window pointermove listener to detect cursor entering video zones.
+ * Utilizes the shared multi-layer penetration video detector.
  */
 function onWindowPointerMove(e: PointerEvent): void {
   if (!isActive || !currentConfig.hoverButton) return
@@ -209,42 +205,19 @@ function onWindowPointerMove(e: PointerEvent): void {
   // If pointer is directly interacting with our hover button, keep it
   if (isPointerOverHoverButton) return
 
-  // Check element under point
-  const target = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null
-  if (!target) {
-    scheduleHideHoverButton(300)
-    return
-  }
+  // Multi-layer penetration search for video under cursor
+  const video = findVideoAtCoordinates({
+    clientX: e.clientX,
+    clientY: e.clientY,
+    target: e.target,
+    minWidth: 120,
+    minHeight: 80
+  })
 
-  // Check if target is a video or inside a video container
-  let video: HTMLVideoElement | null = null
-  if (target.tagName.toLowerCase() === "video") {
-    video = target as HTMLVideoElement
-  } else {
-    // Many players (e.g. YouTube, Twitter) place an overlay div over the video
-    const candidate = target.querySelector("video") || target.closest(".html5-video-player, .video-player, [data-player]")?.querySelector("video")
-    if (candidate) {
-      video = candidate as HTMLVideoElement
-    } else {
-      // Check if mouse is within bounding rect of hoveredVideoElement
-      if (hoveredVideoElement) {
-        const rect = hoveredVideoElement.getBoundingClientRect()
-        if (
-          e.clientX >= rect.left &&
-          e.clientX <= rect.right &&
-          e.clientY >= rect.top &&
-          e.clientY <= rect.bottom
-        ) {
-          video = hoveredVideoElement
-        }
-      }
-    }
-  }
-
-  if (video && (video.readyState >= 2 || !video.paused)) {
+  if (video) {
     showHoverButtonForVideo(video)
-  } else if (!hoveredVideoElement) {
-    scheduleHideHoverButton(300)
+  } else if (hoverButtonElement && hoverButtonElement.style.display !== "none") {
+    hideHoverButtonNow()
   }
 }
 
@@ -459,5 +432,6 @@ export function deactivate(): void {
     hoverHideTimeout = null
   }
 
+  clearLastKnownHoveredVideo()
   removeContentToast()
 }

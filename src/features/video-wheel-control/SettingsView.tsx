@@ -509,10 +509,9 @@ export const VideoWheelControlSettingsView: React.FC<
             ).
           </p>
           <p className="leading-relaxed text-content-muted">
-            On advanced web platforms (e.g. YouTube, Facebook, Netflix), custom
-            state managers may occasionally reset playback rate or mute status
-            when a video loops, changes stream resolution, or auto-plays the
-            next item.
+            On advanced web platforms, custom state managers may occasionally
+            reset playback rate or mute status when a video loops, changes
+            stream resolution, or auto-plays the next item.
           </p>
         </div>
       </div>
