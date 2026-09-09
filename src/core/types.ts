@@ -171,27 +171,55 @@ export type VideoWheelModifier = "shift" | "alt" | "ctrl" | "ctrl+shift" | "ctrl
  * Video Wheel Control configuration.
  */
 export interface VideoWheelControlConfig {
+  enableVolume: boolean // Enable/disable volume wheel control and click-to-mute
   volumeModifier: VideoWheelModifier // Key to hold while adjusting volume (default: "shift")
-  speedModifier: VideoWheelModifier // Key to hold while adjusting playback speed (default: "alt")
   volumeStep: number // Volume delta per wheel step (e.g. 0.05 for 5%)
-  speedStep: number // Playback speed delta per wheel step (e.g. 0.25)
   clickToMute: boolean // Left click + volume modifier on video toggles mute
-  clickToFullscreen: boolean // Left click + speed modifier on video toggles fullscreen
-  showOsd: boolean // Display on-screen volume / speed indicator HUD
   invertVolumeScroll: boolean // Invert volume scroll direction
+
+  enableSpeed: boolean // Enable/disable playback speed wheel control and fullscreen
+  speedModifier: VideoWheelModifier // Key to hold while adjusting playback speed (default: "alt")
+  speedStep: number // Playback speed delta per wheel step (e.g. 0.25)
+  clickToFullscreen: boolean // Left click + speed modifier on video toggles fullscreen
   invertSpeedScroll: boolean // Invert speed scroll direction
+
+  enableSeek: boolean // Enable/disable wheel seeking & frame-by-frame stepper
+  seekModifier: VideoWheelModifier // Key to hold while seeking (default: "ctrl")
+  seekStep: number // Seek delta in seconds per wheel step (default: 5)
+  enableFrameStep: boolean // Step frame-by-frame (~1/30s) when video is paused
+  invertSeekScroll: boolean // Invert seek scroll direction
+
+  enableHoldToBoost: boolean // Hold 'X' key over video to temporarily boost playback speed
+  boostSpeed: number // Boost playback speed multiplier (default: 2.0x)
+
+  enableScreenshot: boolean // Capture video frame to clipboard via Ctrl+Shift+Click or button
+  showOsd: boolean // Display on-screen volume / speed / seek indicator HUD
 }
 
 export const DEFAULT_VIDEO_WHEEL_CONTROL_CONFIG: VideoWheelControlConfig = {
+  enableVolume: true,
   volumeModifier: "shift",
-  speedModifier: "alt",
   volumeStep: 0.05,
-  speedStep: 0.25,
   clickToMute: true,
-  clickToFullscreen: true,
-  showOsd: true,
   invertVolumeScroll: false,
-  invertSpeedScroll: false
+
+  enableSpeed: true,
+  speedModifier: "alt",
+  speedStep: 0.25,
+  clickToFullscreen: true,
+  invertSpeedScroll: false,
+
+  enableSeek: true,
+  seekModifier: "ctrl",
+  seekStep: 5,
+  enableFrameStep: true,
+  invertSeekScroll: false,
+
+  enableHoldToBoost: true,
+  boostSpeed: 2.0,
+
+  enableScreenshot: true,
+  showOsd: true
 }
 
 /**

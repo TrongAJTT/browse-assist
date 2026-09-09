@@ -125,6 +125,25 @@ function findVideoUnderCursor(event: WheelEvent): HTMLVideoElement | null {
   return null
 }
 
+// State for Hold-to-Boost
+let originalPlaybackRate: number | null = null
+let boostedVideo: HTMLVideoElement | null = null
+let isBoostKeyDown = false
+
+/**
+ * Format seconds to mm:ss or hh:mm:ss
+ */
+function formatTime(seconds: number): string {
+  if (isNaN(seconds) || seconds < 0) return "00:00"
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  const s = Math.floor(seconds % 60)
+  if (h > 0) {
+    return `${h}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`
+  }
+  return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`
+}
+
 /**
  * Ensures the floating glassmorphic OSD badge element is created.
  */
@@ -169,7 +188,7 @@ function ensureOsdElement(): HTMLElement {
  */
 function showOsd(
   video: HTMLVideoElement,
-  type: "volume" | "speed" | "mute" | "fullscreen",
+  type: "volume" | "speed" | "mute" | "fullscreen" | "seek" | "frame" | "boost" | "screenshot",
   valueText: string,
   percent = 1
 ): void {
@@ -179,7 +198,7 @@ function showOsd(
   const rect = video.getBoundingClientRect()
 
   // Center OSD horizontally and position near the top border of the video (approx 20px padding from top)
-  const osdWidth = 130
+  const osdWidth = 140
   const targetX = Math.max(
     16,
     Math.min(
@@ -199,6 +218,7 @@ function showOsd(
   // Icons
   let iconSvg = ""
   let barColor = "#818cf8"
+  let showBar = true
 
   if (type === "mute") {
     iconSvg = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="22" y1="9" x2="16" y2="15"/><line x1="16" y1="9" x2="22" y2="15"/></svg>`
@@ -209,6 +229,19 @@ function showOsd(
   } else if (type === "speed") {
     iconSvg = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`
     barColor = "#a78bfa"
+  } else if (type === "seek") {
+    iconSvg = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 19 22 12 13 5 13 19"/><polygon points="2 19 11 12 2 5 2 19"/></svg>`
+    barColor = "#34d399"
+  } else if (type === "frame") {
+    iconSvg = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/><line x1="17" y1="17" x2="22" y2="17"/></svg>`
+    barColor = "#fbbf24"
+  } else if (type === "boost") {
+    iconSvg = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`
+    barColor = "#f59e0b"
+  } else if (type === "screenshot") {
+    iconSvg = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>`
+    barColor = "#ec4899"
+    showBar = false
   } else {
     // Volume icon
     iconSvg = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>`
@@ -218,10 +251,14 @@ function showOsd(
 
   osd.innerHTML = `
     <span style="display:flex;align-items:center;">${iconSvg}</span>
-    <span style="min-width:44px;letter-spacing:0.01em;">${valueText}</span>
-    <div style="width:40px;height:4px;background:rgba(255,255,255,0.15);border-radius:9999px;overflow:hidden;">
-      <div style="width:${barPercent}%;height:100%;background:${barColor};border-radius:9999px;transition:width 0.08s ease-out;"></div>
-    </div>
+    <span style="min-width:44px;letter-spacing:0.01em;white-space:nowrap;">${valueText}</span>
+    ${
+      showBar
+        ? `<div style="width:40px;height:4px;background:rgba(255,255,255,0.15);border-radius:9999px;overflow:hidden;flex-shrink:0;">
+             <div style="width:${barPercent}%;height:100%;background:${barColor};border-radius:9999px;transition:width 0.08s ease-out;"></div>
+           </div>`
+        : ""
+    }
   `
 
   osd.style.display = "flex"
@@ -243,6 +280,43 @@ function showOsd(
 }
 
 /**
+ * Captures video frame to clipboard as PNG
+ */
+async function captureVideoFrame(video: HTMLVideoElement): Promise<void> {
+  try {
+    const width = video.videoWidth || video.clientWidth
+    const height = video.videoHeight || video.clientHeight
+    if (!width || !height) return
+
+    const canvas = document.createElement("canvas")
+    canvas.width = width
+    canvas.height = height
+    const ctx = canvas.getContext("2d")
+    if (!ctx) return
+
+    ctx.drawImage(video, 0, 0, width, height)
+
+    canvas.toBlob(async (blob) => {
+      if (!blob) {
+        showOsd(video, "screenshot", "Failed to capture", 0)
+        return
+      }
+      try {
+        await navigator.clipboard.write([
+          new ClipboardItem({ "image/png": blob })
+        ])
+        showOsd(video, "screenshot", "Frame Copied!", 1)
+      } catch {
+        showOsd(video, "screenshot", "Clipboard Denied", 0)
+      }
+    }, "image/png")
+  } catch {
+    // Cross-origin tainted canvas
+    showOsd(video, "screenshot", "CORS Protected", 0)
+  }
+}
+
+/**
  * Wheel Decision Handler registered into WheelDispatcher at priority 100.
  */
 function onWheelDecision(event: WheelEvent): boolean {
@@ -252,12 +326,62 @@ function onWheelDecision(event: WheelEvent): boolean {
   const video = findVideoUnderCursor(event)
   if (!video) return false
 
-  // Check Speed modifier first (if distinct)
-  const isSpeedMatch = isModifierActive(currentConfig.speedModifier, event)
-  const isVolumeMatch = isModifierActive(currentConfig.volumeModifier, event)
+  // Check which modifier is pressed
+  const isSeekMatch =
+    currentConfig.enableSeek &&
+    isModifierActive(currentConfig.seekModifier, event)
+  const isSpeedMatch =
+    currentConfig.enableSpeed &&
+    isModifierActive(currentConfig.speedModifier, event)
+  const isVolumeMatch =
+    currentConfig.enableVolume &&
+    isModifierActive(currentConfig.volumeModifier, event)
 
-  // Disambiguate if modifiers collide:
-  // Speed control takes precedence when modifiers collide
+  // 1. Seek / Frame-by-Frame Control
+  if (isSeekMatch) {
+    let delta = event.deltaY < 0 ? 1 : -1
+    if (currentConfig.invertSeekScroll) delta = -delta
+
+    // If paused and frame-stepping is enabled, step by 1 frame (~1/30s)
+    if (video.paused && currentConfig.enableFrameStep) {
+      const frameDelta = delta * VIDEO_WHEEL_CONSTANTS.FRAME_DURATION_APPROX
+      const targetTime = Math.max(
+        0,
+        Math.min(video.duration || 99999, video.currentTime + frameDelta)
+      )
+      video.currentTime = targetTime
+      const sign = delta > 0 ? "+1" : "-1"
+      const progress = video.duration ? targetTime / video.duration : 0
+      showOsd(
+        video,
+        "frame",
+        `Frame ${sign} (${formatTime(targetTime)})`,
+        progress
+      )
+      return true
+    }
+
+    // Normal seeking when playing (or if frame step disabled)
+    const stepSeconds = currentConfig.seekStep || 5
+    const seekDelta = delta * stepSeconds
+    const targetTime = Math.max(
+      0,
+      Math.min(video.duration || 99999, video.currentTime + seekDelta)
+    )
+    video.currentTime = targetTime
+    const progress = video.duration ? targetTime / video.duration : 0
+    const sign = delta > 0 ? `+${stepSeconds}s` : `-${stepSeconds}s`
+    const durationStr = video.duration ? formatTime(video.duration) : "--:--"
+    showOsd(
+      video,
+      "seek",
+      `${sign} (${formatTime(targetTime)} / ${durationStr})`,
+      progress
+    )
+    return true
+  }
+
+  // 2. Playback Speed Control
   if (isSpeedMatch) {
     let delta = event.deltaY < 0 ? 1 : -1
     if (currentConfig.invertSpeedScroll) delta = -delta
@@ -279,6 +403,7 @@ function onWheelDecision(event: WheelEvent): boolean {
     return true
   }
 
+  // 3. Volume Control
   if (isVolumeMatch) {
     let delta = event.deltaY < 0 ? 1 : -1
     if (currentConfig.invertVolumeScroll) delta = -delta
@@ -314,26 +439,28 @@ function onWheelDecision(event: WheelEvent): boolean {
  * Handles left-click (button 0) on videos:
  * - Left Click + Volume Modifier: Toggle mute/unmute
  * - Left Click + Speed Modifier: Toggle fullscreen
+ * - Shift + Alt + Click (or Screenshot shortcut): Capture video frame
  */
 function handleLeftClick(event: MouseEvent): void {
   if (!isActive || event.button !== 0) {
     return
   }
 
-  const isVolumeModifier = isModifierActive(
-    currentConfig.volumeModifier,
-    event
-  )
-  const isSpeedModifier = isModifierActive(
-    currentConfig.speedModifier,
-    event
-  )
+  const isVolumeModifier =
+    currentConfig.enableVolume &&
+    isModifierActive(currentConfig.volumeModifier, event)
+  const isSpeedModifier =
+    currentConfig.enableSpeed &&
+    isModifierActive(currentConfig.speedModifier, event)
+  // Shift + Alt + Click for instant screenshot
+  const wantsScreenshot =
+    currentConfig.enableScreenshot && event.shiftKey && event.altKey
 
   const wantsMute = currentConfig.clickToMute && isVolumeModifier
   const wantsFullscreen =
     currentConfig.clickToFullscreen && isSpeedModifier
 
-  if (!wantsMute && !wantsFullscreen) {
+  if (!wantsMute && !wantsFullscreen && !wantsScreenshot) {
     return
   }
 
@@ -413,10 +540,15 @@ function handleLeftClick(event: MouseEvent): void {
   event.stopPropagation()
   event.stopImmediatePropagation()
 
+  // Screenshot action
+  if (wantsScreenshot) {
+    captureVideoFrame(video)
+    return
+  }
+
   // Fullscreen action takes precedence if requested
   if (wantsFullscreen) {
     if (!document.fullscreenElement) {
-      // Prefer player container for fullscreen if available, otherwise video itself
       const container =
         video.closest(
           ".html5-video-player, .video-player, [data-player], .player-container, video-player"
@@ -454,17 +586,19 @@ function handleLeftClick(event: MouseEvent): void {
  */
 function onMouseDown(event: MouseEvent): void {
   if (event.button === 0) {
-    const isVolumeModifier = isModifierActive(
-      currentConfig.volumeModifier,
-      event
-    )
-    const isSpeedModifier = isModifierActive(
-      currentConfig.speedModifier,
-      event
-    )
+    const isVolumeModifier =
+      currentConfig.enableVolume &&
+      isModifierActive(currentConfig.volumeModifier, event)
+    const isSpeedModifier =
+      currentConfig.enableSpeed &&
+      isModifierActive(currentConfig.speedModifier, event)
+    const isScreenshotModifier =
+      currentConfig.enableScreenshot && event.shiftKey && event.altKey
+
     if (
       (currentConfig.clickToMute && isVolumeModifier) ||
-      (currentConfig.clickToFullscreen && isSpeedModifier)
+      (currentConfig.clickToFullscreen && isSpeedModifier) ||
+      isScreenshotModifier
     ) {
       handleLeftClick(event)
     }
@@ -476,23 +610,73 @@ function onMouseDown(event: MouseEvent): void {
  */
 function onClick(event: MouseEvent): void {
   if (event.button === 0) {
-    const isVolumeModifier = isModifierActive(
-      currentConfig.volumeModifier,
-      event
-    )
-    const isSpeedModifier = isModifierActive(
-      currentConfig.speedModifier,
-      event
-    )
+    const isVolumeModifier =
+      currentConfig.enableVolume &&
+      isModifierActive(currentConfig.volumeModifier, event)
+    const isSpeedModifier =
+      currentConfig.enableSpeed &&
+      isModifierActive(currentConfig.speedModifier, event)
+    const isScreenshotModifier =
+      currentConfig.enableScreenshot && event.shiftKey && event.altKey
+
     if (
       (currentConfig.clickToMute && isVolumeModifier) ||
-      (currentConfig.clickToFullscreen && isSpeedModifier)
+      (currentConfig.clickToFullscreen && isSpeedModifier) ||
+      isScreenshotModifier
     ) {
       event.preventDefault()
       event.stopPropagation()
       event.stopImmediatePropagation()
     }
   }
+}
+
+/**
+ * Handles KeyDown for Hold-to-Boost (Hold 'X' key over video)
+ */
+function onKeyDown(event: KeyboardEvent): void {
+  if (!isActive || !currentConfig.enableHoldToBoost || isBoostKeyDown) return
+  if (event.key.toLowerCase() !== "x") return
+
+  // Don't boost if user is typing in an input / textarea / contenteditable
+  const target = event.target as HTMLElement | null
+  if (
+    target &&
+    (target.tagName === "INPUT" ||
+      target.tagName === "TEXTAREA" ||
+      target.isContentEditable)
+  ) {
+    return
+  }
+
+  const video =
+    lastKnownHoveredVideo || document.querySelector("video")
+  if (!video || !document.contains(video)) return
+
+  isBoostKeyDown = true
+  boostedVideo = video
+  originalPlaybackRate = video.playbackRate || 1.0
+
+  const boostRate = currentConfig.boostSpeed || 2.0
+  video.playbackRate = boostRate
+  showOsd(video, "boost", `⚡ ${boostRate}x Boost`, 1)
+}
+
+/**
+ * Handles KeyUp to restore original playback rate after Hold-to-Boost
+ */
+function onKeyUp(event: KeyboardEvent): void {
+  if (!isActive || !isBoostKeyDown) return
+  if (event.key.toLowerCase() !== "x") return
+
+  isBoostKeyDown = false
+  if (boostedVideo && document.contains(boostedVideo)) {
+    const restoreRate = originalPlaybackRate || 1.0
+    boostedVideo.playbackRate = restoreRate
+    showOsd(boostedVideo, "speed", `${restoreRate}x`, restoreRate / 4.0)
+  }
+  boostedVideo = null
+  originalPlaybackRate = null
 }
 
 /**
@@ -525,6 +709,8 @@ export function activate(config?: VideoWheelControlConfig): void {
 
   window.addEventListener("mousedown", onMouseDown, { capture: true })
   window.addEventListener("click", onClick, { capture: true })
+  window.addEventListener("keydown", onKeyDown)
+  window.addEventListener("keyup", onKeyUp)
 }
 
 /**
@@ -537,6 +723,15 @@ export function deactivate(): void {
   unregisterWheelSubscriber("video-wheel-control")
   window.removeEventListener("mousedown", onMouseDown, { capture: true })
   window.removeEventListener("click", onClick, { capture: true })
+  window.removeEventListener("keydown", onKeyDown)
+  window.removeEventListener("keyup", onKeyUp)
+
+  if (isBoostKeyDown && boostedVideo && originalPlaybackRate !== null) {
+    boostedVideo.playbackRate = originalPlaybackRate
+  }
+  isBoostKeyDown = false
+  boostedVideo = null
+  originalPlaybackRate = null
 
   if (osdHideTimeout) {
     clearTimeout(osdHideTimeout)
