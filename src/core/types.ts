@@ -165,7 +165,7 @@ export const DEFAULT_PICTURE_IN_PICTURE_CONFIG: PictureInPictureConfig = {
 /**
  * Modifier keys for Video Wheel Control.
  */
-export type VideoWheelModifier = "none" | "alt" | "ctrl" | "shift"
+export type VideoWheelModifier = "shift" | "alt" | "ctrl" | "ctrl+shift" | "ctrl+alt"
 
 /**
  * Video Wheel Control configuration.
@@ -175,7 +175,8 @@ export interface VideoWheelControlConfig {
   speedModifier: VideoWheelModifier // Key to hold while adjusting playback speed (default: "alt")
   volumeStep: number // Volume delta per wheel step (e.g. 0.05 for 5%)
   speedStep: number // Playback speed delta per wheel step (e.g. 0.25)
-  middleClickToMute: boolean // Middle-click on video toggles mute
+  clickToMute: boolean // Left click + volume modifier on video toggles mute
+  clickToFullscreen: boolean // Left click + speed modifier on video toggles fullscreen
   showOsd: boolean // Display on-screen volume / speed indicator HUD
   invertVolumeScroll: boolean // Invert volume scroll direction
   invertSpeedScroll: boolean // Invert speed scroll direction
@@ -186,7 +187,8 @@ export const DEFAULT_VIDEO_WHEEL_CONTROL_CONFIG: VideoWheelControlConfig = {
   speedModifier: "alt",
   volumeStep: 0.05,
   speedStep: 0.25,
-  middleClickToMute: true,
+  clickToMute: true,
+  clickToFullscreen: true,
   showOsd: true,
   invertVolumeScroll: false,
   invertSpeedScroll: false

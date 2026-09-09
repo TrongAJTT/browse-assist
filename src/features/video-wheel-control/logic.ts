@@ -18,22 +18,26 @@ const OSD_ELEMENT_ID = "browse-assist-video-wheel-osd"
 let osdElement: HTMLElement | null = null
 let osdHideTimeout: NodeJS.Timeout | null = null
 
+let lastKnownHoveredVideo: HTMLVideoElement | null = null
+
 /**
  * Checks if the configured modifier key is pressed.
  */
 function isModifierActive(
   modifier: VideoWheelModifier,
-  event: WheelEvent
+  event: WheelEvent | MouseEvent
 ): boolean {
   switch (modifier) {
-    case "none":
-      return true
+    case "ctrl+shift":
+      return event.ctrlKey && event.shiftKey
+    case "ctrl+alt":
+      return event.ctrlKey && event.altKey
     case "alt":
-      return event.altKey
+      return event.altKey && !event.ctrlKey && !event.shiftKey
     case "ctrl":
-      return event.ctrlKey
+      return event.ctrlKey && !event.shiftKey && !event.altKey
     case "shift":
-      return event.shiftKey
+      return event.shiftKey && !event.ctrlKey && !event.altKey
     default:
       return false
   }
@@ -41,47 +45,81 @@ function isModifierActive(
 
 /**
  * Finds the target HTMLVideoElement under the cursor.
- * Handles overlay player divs (e.g. YouTube, Twitter, Facebook, TikTok).
+ * Handles overlay player divs across YouTube, Facebook, X (Twitter), TikTok, and custom web players.
  */
 function findVideoUnderCursor(event: WheelEvent): HTMLVideoElement | null {
   const target = event.target as HTMLElement | null
-  if (!target) return null
 
   // 1. Direct video tag
-  if (target.tagName.toLowerCase() === "video") {
+  if (target && target.tagName.toLowerCase() === "video") {
+    lastKnownHoveredVideo = target as HTMLVideoElement
     return target as HTMLVideoElement
   }
 
-  // 2. Child video element
-  const directChild = target.querySelector("video")
-  if (directChild) {
-    return directChild as HTMLVideoElement
-  }
-
-  // 3. Look up video in player container
-  const container = target.closest(
-    ".html5-video-player, .video-player, [data-player], .player-container, video-player"
-  )
-  if (container) {
-    const video = container.querySelector("video")
-    if (video) return video as HTMLVideoElement
-  }
-
-  // 4. Element from point check
-  const elementUnderPoint = document.elementFromPoint(
-    event.clientX,
-    event.clientY
-  )
-  if (elementUnderPoint && elementUnderPoint !== target) {
-    if (elementUnderPoint.tagName.toLowerCase() === "video") {
-      return elementUnderPoint as HTMLVideoElement
+  // 2. Child video inside target
+  if (target) {
+    const directChild = target.querySelector("video")
+    if (directChild) {
+      lastKnownHoveredVideo = directChild as HTMLVideoElement
+      return directChild as HTMLVideoElement
     }
-    const candidate =
-      elementUnderPoint.querySelector("video") ||
-      elementUnderPoint
-        .closest(".html5-video-player, .video-player, [data-player]")
-        ?.querySelector("video")
-    if (candidate) return candidate as HTMLVideoElement
+
+    // 3. Look up video in common player containers or parent tree
+    const container = target.closest(
+      ".html5-video-player, .video-player, [data-player], .player-container, video-player, [data-testid*='video'], [aria-label*='video'], div[role='region']"
+    )
+    if (container) {
+      const video = container.querySelector("video")
+      if (video) {
+        lastKnownHoveredVideo = video as HTMLVideoElement
+        return video as HTMLVideoElement
+      }
+    }
+  }
+
+  // 4. Multi-layer depth scan via elementsFromPoint
+  // Facebook, X (Twitter), and TikTok place full transparent click-interception layers on top
+  if (typeof document.elementsFromPoint === "function") {
+    const elements = document.elementsFromPoint(event.clientX, event.clientY)
+    for (const el of elements) {
+      if (el.tagName.toLowerCase() === "video") {
+        lastKnownHoveredVideo = el as HTMLVideoElement
+        return el as HTMLVideoElement
+      }
+      const video = el.querySelector("video")
+      if (video) {
+        lastKnownHoveredVideo = video as HTMLVideoElement
+        return video as HTMLVideoElement
+      }
+    }
+  }
+
+  // 5. Fallback: check bounding rect of all active playing/ready videos on the page
+  const allVideos = document.querySelectorAll("video")
+  for (const video of allVideos) {
+    const rect = video.getBoundingClientRect()
+    if (
+      event.clientX >= rect.left &&
+      event.clientX <= rect.right &&
+      event.clientY >= rect.top &&
+      event.clientY <= rect.bottom
+    ) {
+      lastKnownHoveredVideo = video
+      return video
+    }
+  }
+
+  // 6. Last known hovered video if pointer is still within its bounding rect
+  if (lastKnownHoveredVideo && document.contains(lastKnownHoveredVideo)) {
+    const rect = lastKnownHoveredVideo.getBoundingClientRect()
+    if (
+      event.clientX >= rect.left &&
+      event.clientX <= rect.right &&
+      event.clientY >= rect.top &&
+      event.clientY <= rect.bottom
+    ) {
+      return lastKnownHoveredVideo
+    }
   }
 
   return null
@@ -127,11 +165,11 @@ function ensureOsdElement(): HTMLElement {
 }
 
 /**
- * Displays an on-screen display (OSD) feedback badge centered over the target video.
+ * Displays an on-screen display (OSD) feedback badge centered near the top edge of the target video.
  */
 function showOsd(
   video: HTMLVideoElement,
-  type: "volume" | "speed" | "mute",
+  type: "volume" | "speed" | "mute" | "fullscreen",
   valueText: string,
   percent = 1
 ): void {
@@ -140,7 +178,7 @@ function showOsd(
   const osd = ensureOsdElement()
   const rect = video.getBoundingClientRect()
 
-  // Center OSD horizontally and place around 35% from top of video
+  // Center OSD horizontally and position near the top border of the video (approx 20px padding from top)
   const osdWidth = 130
   const targetX = Math.max(
     16,
@@ -149,9 +187,10 @@ function showOsd(
       rect.left + rect.width / 2 - osdWidth / 2
     )
   )
+  // Position 20px below video's top edge (or clamp within viewport)
   const targetY = Math.max(
     16,
-    Math.min(window.innerHeight - 60, rect.top + rect.height * 0.35)
+    Math.min(window.innerHeight - 60, rect.top + 24)
   )
 
   osd.style.left = `${targetX}px`
@@ -164,6 +203,9 @@ function showOsd(
   if (type === "mute") {
     iconSvg = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="22" y1="9" x2="16" y2="15"/><line x1="16" y1="9" x2="22" y2="15"/></svg>`
     barColor = "#f87171"
+  } else if (type === "fullscreen") {
+    iconSvg = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>`
+    barColor = "#38bdf8"
   } else if (type === "speed") {
     iconSvg = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`
     barColor = "#a78bfa"
@@ -215,8 +257,8 @@ function onWheelDecision(event: WheelEvent): boolean {
   const isVolumeMatch = isModifierActive(currentConfig.volumeModifier, event)
 
   // Disambiguate if modifiers collide:
-  // If user explicitly specified modifiers and both match, prefer Speed if speedModifier is not 'none'
-  if (isSpeedMatch && currentConfig.speedModifier !== "none") {
+  // Speed control takes precedence when modifiers collide
+  if (isSpeedMatch) {
     let delta = event.deltaY < 0 ? 1 : -1
     if (currentConfig.invertSpeedScroll) delta = -delta
 
@@ -269,37 +311,186 @@ function onWheelDecision(event: WheelEvent): boolean {
 }
 
 /**
- * Handles middle-click (auxclick with button 1) on videos to toggle mute.
+ * Handles left-click (button 0) on videos:
+ * - Left Click + Volume Modifier: Toggle mute/unmute
+ * - Left Click + Speed Modifier: Toggle fullscreen
  */
-function onAuxClick(event: MouseEvent): void {
-  if (!isActive || !currentConfig.middleClickToMute || event.button !== 1) {
+function handleLeftClick(event: MouseEvent): void {
+  if (!isActive || event.button !== 0) {
+    return
+  }
+
+  const isVolumeModifier = isModifierActive(
+    currentConfig.volumeModifier,
+    event
+  )
+  const isSpeedModifier = isModifierActive(
+    currentConfig.speedModifier,
+    event
+  )
+
+  const wantsMute = currentConfig.clickToMute && isVolumeModifier
+  const wantsFullscreen =
+    currentConfig.clickToFullscreen && isSpeedModifier
+
+  if (!wantsMute && !wantsFullscreen) {
     return
   }
 
   const target = event.target as HTMLElement | null
-  if (!target) return
-
   let video: HTMLVideoElement | null = null
-  if (target.tagName.toLowerCase() === "video") {
-    video = target as HTMLVideoElement
-  } else {
-    video =
-      target.querySelector("video") ||
-      target
-        .closest(".html5-video-player, .video-player, [data-player]")
-        ?.querySelector("video") ||
-      null
+
+  // 1. Direct or child video
+  if (target) {
+    if (target.tagName.toLowerCase() === "video") {
+      video = target as HTMLVideoElement
+    } else {
+      video =
+        target.querySelector("video") ||
+        target
+          .closest(
+            ".html5-video-player, .video-player, [data-player], .player-container, video-player"
+          )
+          ?.querySelector("video") ||
+        null
+    }
   }
 
-  if (video) {
-    event.preventDefault()
-    event.stopPropagation()
+  // 2. Multi-layer depth scan fallback
+  if (!video && typeof document.elementsFromPoint === "function") {
+    const elements = document.elementsFromPoint(event.clientX, event.clientY)
+    for (const el of elements) {
+      if (el.tagName.toLowerCase() === "video") {
+        video = el as HTMLVideoElement
+        break
+      }
+      const child = el.querySelector("video")
+      if (child) {
+        video = child as HTMLVideoElement
+        break
+      }
+    }
+  }
+
+  // 3. Fallback: check bounding rect of all videos
+  if (!video) {
+    const allVideos = document.querySelectorAll("video")
+    for (const v of allVideos) {
+      const rect = v.getBoundingClientRect()
+      if (
+        event.clientX >= rect.left &&
+        event.clientX <= rect.right &&
+        event.clientY >= rect.top &&
+        event.clientY <= rect.bottom
+      ) {
+        video = v
+        break
+      }
+    }
+  }
+
+  // 4. Fallback to cached video
+  if (
+    !video &&
+    lastKnownHoveredVideo &&
+    document.contains(lastKnownHoveredVideo)
+  ) {
+    const rect = lastKnownHoveredVideo.getBoundingClientRect()
+    if (
+      event.clientX >= rect.left &&
+      event.clientX <= rect.right &&
+      event.clientY >= rect.top &&
+      event.clientY <= rect.bottom
+    ) {
+      video = lastKnownHoveredVideo
+    }
+  }
+
+  if (!video) return
+
+  // Prevent web video player from triggering Play / Pause on click
+  event.preventDefault()
+  event.stopPropagation()
+  event.stopImmediatePropagation()
+
+  // Fullscreen action takes precedence if requested
+  if (wantsFullscreen) {
+    if (!document.fullscreenElement) {
+      // Prefer player container for fullscreen if available, otherwise video itself
+      const container =
+        video.closest(
+          ".html5-video-player, .video-player, [data-player], .player-container, video-player"
+        ) || video
+      if (container.requestFullscreen) {
+        container.requestFullscreen().catch(() => {
+          video?.requestFullscreen().catch(() => {})
+        })
+      } else if (video.requestFullscreen) {
+        video.requestFullscreen().catch(() => {})
+      }
+      showOsd(video, "fullscreen", "Fullscreen", 1)
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {})
+      }
+      showOsd(video, "fullscreen", "Exit Fullscreen", 0)
+    }
+    return
+  }
+
+  if (wantsMute) {
     video.muted = !video.muted
     if (video.muted) {
       showOsd(video, "mute", "Muted", 0)
     } else {
       const percent = Math.round(video.volume * 100)
       showOsd(video, "volume", `${percent}%`, video.volume)
+    }
+  }
+}
+
+/**
+ * Capture phase mousedown to suppress video player play/pause state toggle.
+ */
+function onMouseDown(event: MouseEvent): void {
+  if (event.button === 0) {
+    const isVolumeModifier = isModifierActive(
+      currentConfig.volumeModifier,
+      event
+    )
+    const isSpeedModifier = isModifierActive(
+      currentConfig.speedModifier,
+      event
+    )
+    if (
+      (currentConfig.clickToMute && isVolumeModifier) ||
+      (currentConfig.clickToFullscreen && isSpeedModifier)
+    ) {
+      handleLeftClick(event)
+    }
+  }
+}
+
+/**
+ * Capture phase click to absorb any trailing click events.
+ */
+function onClick(event: MouseEvent): void {
+  if (event.button === 0) {
+    const isVolumeModifier = isModifierActive(
+      currentConfig.volumeModifier,
+      event
+    )
+    const isSpeedModifier = isModifierActive(
+      currentConfig.speedModifier,
+      event
+    )
+    if (
+      (currentConfig.clickToMute && isVolumeModifier) ||
+      (currentConfig.clickToFullscreen && isSpeedModifier)
+    ) {
+      event.preventDefault()
+      event.stopPropagation()
+      event.stopImmediatePropagation()
     }
   }
 }
@@ -332,7 +523,8 @@ export function activate(config?: VideoWheelControlConfig): void {
     handler: onWheelDecision
   })
 
-  window.addEventListener("auxclick", onAuxClick, { capture: true })
+  window.addEventListener("mousedown", onMouseDown, { capture: true })
+  window.addEventListener("click", onClick, { capture: true })
 }
 
 /**
@@ -343,7 +535,8 @@ export function deactivate(): void {
   isActive = false
 
   unregisterWheelSubscriber("video-wheel-control")
-  window.removeEventListener("auxclick", onAuxClick, { capture: true })
+  window.removeEventListener("mousedown", onMouseDown, { capture: true })
+  window.removeEventListener("click", onClick, { capture: true })
 
   if (osdHideTimeout) {
     clearTimeout(osdHideTimeout)
@@ -354,4 +547,6 @@ export function deactivate(): void {
     osdElement.parentNode.removeChild(osdElement)
     osdElement = null
   }
+
+  lastKnownHoveredVideo = null
 }
