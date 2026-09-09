@@ -1,19 +1,19 @@
 ---
 name: plasmo-storage-patterns
 description: >-
-  Mẫu code và quy tắc chuẩn khi sử dụng @plasmohq/storage trong các môi trường khác nhau:
-  React Popup, Content Script và Background Service Worker.
+  Standard code patterns and conventions when working with @plasmohq/storage across environments:
+  React Popup, Content Script, and Background Service Worker.
 ---
 
-# Hướng dẫn Mẫu sử dụng `@plasmohq/storage`
+# Guide & Code Patterns for `@plasmohq/storage`
 
-Thư viện `@plasmohq/storage` cung cấp giải pháp thống nhất để lưu trữ và đồng bộ dữ liệu qua `chrome.storage.sync` hoặc `chrome.storage.local`.
+The `@plasmohq/storage` library provides a unified interface for persisting and synchronizing data via `chrome.storage.sync` or `chrome.storage.local`.
 
 ---
 
-## 1. Trong React UI (`popup.tsx`, `Toggle.tsx`)
+## 1. In React UI (`popup.tsx`, `Toggle.tsx`)
 
-Sử dụng hook `useStorage` từ `@plasmohq/storage/hook`:
+Use the `useStorage` hook from `@plasmohq/storage/hook`:
 
 ```tsx
 import React from "react";
@@ -21,7 +21,7 @@ import { useStorage } from "@plasmohq/storage/hook";
 import { STORAGE_KEYS, DEFAULT_SETTINGS, type FeatureSettings } from "~core/types";
 
 export function SettingComponent() {
-  // Tự động load từ storage, fallback về DEFAULT_SETTINGS và re-render khi storage thay đổi
+  // Automatically loads from storage, falls back to DEFAULT_SETTINGS, and re-renders on change
   const [settings, setSettings] = useStorage<FeatureSettings>(
     STORAGE_KEYS.SETTINGS,
     DEFAULT_SETTINGS
@@ -44,9 +44,9 @@ export function SettingComponent() {
 
 ---
 
-## 2. Trong Content Script (`content.ts`)
+## 2. In Content Scripts (`content.ts`)
 
-Trong Content Script không sử dụng React, ta sử dụng instance `Storage` trực tiếp:
+Content scripts do not run React; use the `Storage` instance directly:
 
 ```ts
 import { Storage } from "@plasmohq/storage";
@@ -54,36 +54,26 @@ import { STORAGE_KEYS, DEFAULT_SETTINGS, type FeatureSettings } from "~core/type
 
 const storage = new Storage();
 
-// 1. Đọc cấu hình khi script khởi động
+// 1. Read configuration during initial injection
 async function init() {
-  const currentSettings = await storage.get<FeatureSettings>(STORAGE_KEYS.SETTINGS) ?? DEFAULT_SETTINGS;
+  const currentSettings = (await storage.get<FeatureSettings>(STORAGE_KEYS.SETTINGS)) ?? DEFAULT_SETTINGS;
   applySettings(currentSettings);
 }
 
-// 2. Theo dõi thay đổi real-time từ Popup
+// 2. Watch for real-time changes
 storage.watch({
   [STORAGE_KEYS.SETTINGS]: (change) => {
     const newSettings = change.newValue as FeatureSettings;
-    applySettings(newSettings ?? DEFAULT_SETTINGS);
+    applySettings(newSettings);
   }
 });
-
-function applySettings(settings: FeatureSettings) {
-  if (settings.allowRightClick) {
-    // activate
-  } else {
-    // deactivate
-  }
-}
-
-init();
 ```
 
 ---
 
-## 3. Trong Background Service Worker (`background.ts`)
+## 3. In Background Service Worker (`background.ts`)
 
-Trong Service Worker, truy cập qua async instance của `Storage`:
+In the Service Worker, storage can be used for persistent state across browser sessions:
 
 ```ts
 import { Storage } from "@plasmohq/storage";
@@ -91,16 +81,21 @@ import { STORAGE_KEYS, DEFAULT_SETTINGS, type FeatureSettings } from "~core/type
 
 const storage = new Storage();
 
-export async function checkFeatureEnabled(feature: keyof FeatureSettings): Promise<boolean> {
-  const settings = await storage.get<FeatureSettings>(STORAGE_KEYS.SETTINGS) ?? DEFAULT_SETTINGS;
-  return !!settings[feature];
+export async function checkFeatureState(key: keyof FeatureSettings): Promise<boolean> {
+  const settings = (await storage.get<FeatureSettings>(STORAGE_KEYS.SETTINGS)) ?? DEFAULT_SETTINGS;
+  return Boolean(settings[key]);
 }
-
-// Lắng nghe thay đổi nếu cần update badge hoặc context menus
-storage.watch({
-  [STORAGE_KEYS.SETTINGS]: (change) => {
-    const newSettings = change.newValue as FeatureSettings;
-    // cập nhật trạng thái context menu nếu cần
-  }
-});
 ```
+
+---
+
+## 4. Best Practices & Rules
+
+1. **Always provide fallback defaults**:
+   Storage reads may return `undefined` on the very first install before initialization. Always fallback using `?? DEFAULT_SETTINGS`.
+
+2. **Unified Storage Key**:
+   Consolidate all general extension configuration within `STORAGE_KEYS.SETTINGS` (`"browse_assist_settings"`) to prevent fragmented keys and ensure atomic updates.
+
+3. **Storage Change Handler Guard**:
+   In `storage.watch`, always check `if (!change.newValue) return;` to avoid handling deletion events unexpectedly.

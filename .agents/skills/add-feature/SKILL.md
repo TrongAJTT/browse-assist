@@ -1,40 +1,39 @@
 ---
 name: add-feature
 description: >-
-  Hướng dẫn quy trình chuẩn khi thêm một tính năng mới vào Browse Assist extension,
-  bao gồm tạo thư mục feature, khai báo type, logic content/background, toggle UI và đăng ký vào orchestrator.
+  Standard workflow for adding a new feature to the Browse Assist extension,
+  including creating feature folders, declaring types, implementing content/background logic, building toggle UI, and registering with orchestrators.
 ---
 
-# Quy trình thêm Feature mới vào Browse Assist
+# Guide to Adding a New Feature
 
-Mỗi tính năng trong Browse Assist được thiết kế theo tư duy **Feature-First**, hoàn toàn độc lập và có thể bật/tắt động trong runtime.
+Every feature in Browse Assist follows a **Feature-First** architecture: completely decoupled, modular, and dynamically toggleable at runtime.
 
-## Các bước thực hiện
+## Workflow Steps
 
-### Bước 1: Khai báo Key và Type
-Mở `src/core/types.ts`:
-1. Thêm key mới vào union `FeatureKey`:
+### Step 1: Declare Key and Types
+Open `src/core/types.ts`:
+1. Add the new feature key to the `FeatureKey` union:
    ```ts
    export type FeatureKey =
      | "allowRightClick"
-     | "copyLinkText"
-     | "smoothScroll"
-     | "mouseZoom"
-     | "yourNewFeature"; // <--- Thêm vào đây
+     | "contextMenuActions"
+     | "superDrag"
+     | "yourNewFeature"; // <--- Add here
    ```
-2. Cập nhật `DEFAULT_SETTINGS` với giá trị mặc định (`true` hoặc `false`).
-3. Khai báo metadata (tên hiển thị, icon, mô tả) trong `FEATURE_METADATA`.
+2. Update `DEFAULT_SETTINGS` with the default state (`true` or `false`) and any sub-configuration interfaces.
+3. Declare metadata (display title, icon, description, category, default hotkey) in `FEATURE_METADATA`.
 
-### Bước 2: Tạo thư mục Feature
-Tạo thư mục `src/features/<tên-feature>/`:
+### Step 2: Create Feature Directory
+Create directory `src/features/<feature-name>/`:
 
-#### Trường hợp A: Can thiệp DOM / Web page (`logic.ts`)
-Tạo file `src/features/<tên-feature>/logic.ts`:
+#### Case A: Web Page / DOM Intervention (`logic.ts`)
+Create `src/features/<feature-name>/logic.ts`:
 ```ts
 let isActive = false;
 
 function handleEvent(e: Event) {
-  // Logic xử lý
+  // Event handling logic
 }
 
 export function activate(): void {
@@ -49,52 +48,41 @@ export function deactivate(): void {
   window.removeEventListener("event", handleEvent, { capture: true });
 }
 ```
-*Lưu ý: Luôn dọn dẹp sạch sẽ event listeners trong hàm `deactivate()`.*
+*Note: Always remove all event listeners and injected elements in `deactivate()`.*
 
-#### Trường hợp B: Chạy trong Service Worker (`background.ts`)
-Tạo file `src/features/<tên-feature>/background.ts`:
+#### Case B: Service Worker Operations (`background.ts`)
+Create `src/features/<feature-name>/background.ts`:
 ```ts
 export function initBackground(): void {
-  // Đăng ký context menu, alarms hoặc listeners service worker
+  // Register context menus, alarms, or chrome.* listeners
 }
 ```
 
-#### Tạo UI Toggle Component (`Toggle.tsx`)
-Tạo file `src/features/<tên-feature>/Toggle.tsx`:
-```tsx
-import React from "react";
-import { useStorage } from "@plasmohq/storage/hook";
-import { STORAGE_KEYS, DEFAULT_SETTINGS, type FeatureSettings } from "~core/types";
+### Step 3: Create Toggle Component for Popup
+Create `src/features/<feature-name>/Toggle.tsx`:
+- Use `useStorage` from `@plasmohq/storage/hook` to bind settings.
+- Utilize shared components from `src/components/` (`Card`, `Switch`, `Slider`, `Kbd`).
 
-export function YourFeatureToggle() {
-  const [settings, setSettings] = useStorage<FeatureSettings>(
-    STORAGE_KEYS.SETTINGS,
-    DEFAULT_SETTINGS
-  );
+### Step 4: Register into Orchestrators
 
-  const isEnabled = settings?.yourNewFeature ?? true;
+1. **Content Script (`src/content.ts`)**:
+   - Import `activate` and `deactivate`.
+   - Register in the feature dispatch table:
+     ```ts
+     const featureHandlers: Record<FeatureKey, { activate: () => void; deactivate: () => void }> = {
+       // ... existing features
+       yourNewFeature: { activate, deactivate }
+     };
+     ```
 
-  const handleToggle = () => {
-    setSettings((prev) => ({
-      ...prev,
-      yourNewFeature: !isEnabled
-    }));
-  };
+2. **Background (`src/background.ts`)** *(if applicable)*:
+   - Import and invoke `initBackground()` during extension initialization.
 
-  return (
-    // Toggle switch UI với Tailwind CSS
-  );
-}
-```
+3. **Popup (`src/popup.tsx`)**:
+   - Render `<YourFeatureToggle />` in the appropriate category panel.
 
-### Bước 3: Đăng ký vào Orchestrator
-1. **Nếu có `logic.ts`**: Import vào `content.ts`, đưa vào handler điều phối `activate()` / `deactivate()` khi storage thay đổi.
-2. **Nếu có `background.ts`**: Import và gọi hàm init trong `background.ts`.
-3. **Thêm UI vào Popup**: Import `Toggle.tsx` và đặt vào danh sách trong `popup.tsx`.
-
-### Bước 4: Kiểm tra và Build
-Chạy:
-```bash
-pnpm dev
-```
-Kiểm tra bật/tắt trên trang web mục tiêu và kiểm tra devtools console không có lỗi rò rỉ bộ nhớ.
+### Step 5: Verification
+Apply verification rules based on change scope (refer to `AGENTS.md`):
+- Small change / UI-only: Proceed directly.
+- Under 1,000 lines: Run `pnpm lint` and `pnpm typecheck`.
+- 1,000+ lines: Run `pnpm lint`, `pnpm typecheck`, and `pnpm build`.
