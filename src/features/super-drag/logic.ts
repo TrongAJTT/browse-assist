@@ -1,13 +1,15 @@
 /**
  * Super Drag - Content Script Logic
  * Intercepts dragstart, dragover, and dragend events to trigger directional actions:
- * - Drag Right / Up: Search or Open Link in background
- * - Drag Left: Search or Open Link in active (foreground) tab
- * - Drag Down: Copy Text or Clean Link to clipboard
+ * Supports 4 directions (up, down, left, right) configurable per target (text, link, image).
  */
 
 import { MESSAGE_TYPES, sendToBackground } from "~core/messaging"
-import { DEFAULT_SUPER_DRAG_CONFIG, type SuperDragConfig } from "~core/types"
+import {
+  DEFAULT_SUPER_DRAG_CONFIG,
+  type SuperDragAction,
+  type SuperDragConfig
+} from "~core/types"
 import { cleanUrl } from "~features/context-menu-actions/cleanUrl"
 
 let isActive = false
@@ -16,7 +18,7 @@ let currentConfig: SuperDragConfig = { ...DEFAULT_SUPER_DRAG_CONFIG }
 // Minimum distance threshold in pixels to distinguish deliberate drag from text selection
 const MIN_DRAG_DISTANCE = 50
 // Maximum distance threshold in pixels to prevent stray cross-screen drags from executing
-const MAX_DRAG_DISTANCE = 200
+const MAX_DRAG_DISTANCE = 220
 
 export type DragDirection = "up" | "down" | "left" | "right"
 
@@ -71,6 +73,98 @@ function getOrCreateIndicator(): HTMLDivElement {
 }
 
 /**
+ * Inline SVGs for indicator icons.
+ */
+const ICONS = {
+  tabBackground: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>`,
+  tabForeground: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>`,
+  splitView: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M12 3v18"/></svg>`,
+  windowActive: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="M10 4v4"/><path d="M2 8h20"/></svg>`,
+  windowBg: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="M2 8h20"/></svg>`,
+  incognito: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12a5 5 0 0 0 5 5 8 8 0 0 1 5 2 8 8 0 0 1 5-2 5 5 0 0 0 5-5"/><path d="M3 7h18"/><circle cx="7" cy="14" r="2"/><circle cx="17" cy="14" r="2"/></svg>`,
+  copy: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`,
+  none: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg>`
+}
+
+/**
+ * Resolves action display config: text label, icon, and border color theme.
+ */
+function getActionDisplay(
+  action: SuperDragAction,
+  targetType: "text" | "link" | "image"
+): { label: string; icon: string; theme: "indigo" | "emerald" | "amber" | "sky" | "violet" } {
+  const typeLabel =
+    targetType === "text"
+      ? "Search"
+      : targetType === "image"
+        ? "Image"
+        : "Link"
+
+  switch (action) {
+    case "open_bg_tab":
+      return {
+        label: `Drop to Open ${typeLabel} (Background)`,
+        icon: ICONS.tabBackground,
+        theme: "indigo"
+      }
+    case "open_active_tab":
+      return {
+        label: `Drop to Open ${typeLabel} (New Tab)`,
+        icon: ICONS.tabForeground,
+        theme: "sky"
+      }
+    case "open_split_view":
+      return {
+        label: `Drop to Open ${typeLabel} (Split View)`,
+        icon: ICONS.splitView,
+        theme: "violet"
+      }
+    case "open_window_active":
+      return {
+        label: `Drop to Open ${typeLabel} (New Window)`,
+        icon: ICONS.windowActive,
+        theme: "sky"
+      }
+    case "open_window_bg":
+      return {
+        label: `Drop to Open ${typeLabel} (Window Background)`,
+        icon: ICONS.windowBg,
+        theme: "indigo"
+      }
+    case "open_incognito_active":
+      return {
+        label: `Drop to Open ${typeLabel} (Incognito)`,
+        icon: ICONS.incognito,
+        theme: "amber"
+      }
+    case "open_incognito_bg":
+      return {
+        label: `Drop to Open ${typeLabel} (Incognito Background)`,
+        icon: ICONS.incognito,
+        theme: "amber"
+      }
+    case "copy_to_clipboard":
+      return {
+        label:
+          targetType === "text"
+            ? "Drop to Copy Text"
+            : targetType === "image"
+              ? "Drop to Copy Image Link"
+              : "Drop to Copy Link",
+        icon: ICONS.copy,
+        theme: "emerald"
+      }
+    case "none":
+    default:
+      return {
+        label: "No action",
+        icon: ICONS.none,
+        theme: "indigo"
+      }
+  }
+}
+
+/**
  * Updates or shows the live floating drag indicator at the cursor.
  */
 function updateIndicator(
@@ -78,7 +172,7 @@ function updateIndicator(
   clientY: number,
   text: string,
   iconSvg: string,
-  badgeTheme: "indigo" | "emerald" | "amber" | "sky" = "indigo"
+  badgeTheme: "indigo" | "emerald" | "amber" | "sky" | "violet" = "indigo"
 ): void {
   if (!currentConfig.showIndicator || typeof document === "undefined") return
 
@@ -95,7 +189,9 @@ function updateIndicator(
         ? "rgba(251, 191, 36, 0.4)"
         : badgeTheme === "sky"
           ? "rgba(56, 189, 248, 0.4)"
-          : "rgba(129, 140, 248, 0.4)"
+          : badgeTheme === "violet"
+            ? "rgba(167, 139, 250, 0.4)"
+            : "rgba(129, 140, 248, 0.4)"
 
   el.style.borderColor = themeBorder
   el.innerHTML = `
@@ -105,7 +201,6 @@ function updateIndicator(
     <span>${text}</span>
   `
 
-  // Position 20px above the cursor
   el.style.left = `${clientX}px`
   el.style.top = `${clientY - 20}px`
   el.style.opacity = "1"
@@ -136,17 +231,6 @@ function hideIndicator(immediately = false): void {
     }
     indicatorTimeoutId = null
   }, 180)
-}
-
-// Inline SVGs for indicator icons
-const ICONS = {
-  searchBackground: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><path d="M11 8v6"/><path d="M8 11h6"/></svg>`,
-  searchForeground: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>`,
-  linkBackground: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>`,
-  linkForeground: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="m10 14 11-11"/></svg>`,
-  imageBackground: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>`,
-  imageForeground: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>`,
-  copy: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`
 }
 
 /**
@@ -185,6 +269,22 @@ function getDragDirection(deltaX: number, deltaY: number): DragDirection {
 }
 
 /**
+ * Retrieves configured action for current target type and direction.
+ */
+function getTargetAction(
+  targetType: "text" | "link" | "image",
+  direction: DragDirection
+): SuperDragAction {
+  if (targetType === "text") {
+    return currentConfig.textActions?.[direction] ?? "open_bg_tab"
+  }
+  if (targetType === "link") {
+    return currentConfig.linkActions?.[direction] ?? "open_bg_tab"
+  }
+  return currentConfig.imageActions?.[direction] ?? "open_bg_tab"
+}
+
+/**
  * Checks if target is an editable form element where native drag must not be hijacked.
  */
 function isEditableElement(target: EventTarget | null): boolean {
@@ -204,7 +304,6 @@ function isEditableElement(target: EventTarget | null): boolean {
 function onDragStart(event: DragEvent): void {
   if (!isActive) return
 
-  // Safeguard: Do not intercept dragging inside form fields or rich text editors
   if (isEditableElement(event.target)) {
     activeSession = null
     return
@@ -266,7 +365,7 @@ function onDragStart(event: DragEvent): void {
 }
 
 /**
- * Updates live indicator on drag and enables dropping anywhere.
+ * Updates live indicator on drag.
  */
 function onDragOver(event: DragEvent): void {
   if (!isActive || !activeSession) return
@@ -279,63 +378,24 @@ function onDragOver(event: DragEvent): void {
   const deltaY = event.clientY - activeSession.startY
   const distance = Math.hypot(deltaX, deltaY)
 
-  // Only show indicator if drag is within valid activation zone [MIN_DRAG_DISTANCE, MAX_DRAG_DISTANCE]
   if (distance >= MIN_DRAG_DISTANCE && distance <= MAX_DRAG_DISTANCE) {
     const direction = getDragDirection(deltaX, deltaY)
+    const action = getTargetAction(activeSession.type, direction)
 
-    if (direction === "down") {
-      // DRAG DOWN: Copy to Clipboard
-      const label =
-        activeSession.type === "text"
-          ? "Drop to Copy Text"
-          : activeSession.type === "image"
-            ? "Drop to Copy Image Link"
-            : "Drop to Copy Link"
-      updateIndicator(
-        event.clientX,
-        event.clientY,
-        label,
-        ICONS.copy,
-        "emerald"
-      )
-    } else if (direction === "left") {
-      // DRAG LEFT: Open in Foreground (Active) Tab
-      const label =
-        activeSession.type === "text"
-          ? "Drop to Search (New Tab)"
-          : activeSession.type === "image"
-            ? "Drop to Open Image (New Tab)"
-            : "Drop to Open (New Tab)"
-      const icon =
-        activeSession.type === "image"
-          ? ICONS.imageForeground
-          : activeSession.type === "link"
-            ? ICONS.linkForeground
-            : ICONS.searchForeground
-      updateIndicator(event.clientX, event.clientY, label, icon, "sky")
-    } else {
-      // DRAG RIGHT / UP: Open in Background Tab
-      const label =
-        activeSession.type === "text"
-          ? "Drop to Search (Background)"
-          : activeSession.type === "image"
-            ? "Drop to Open Image (Background)"
-            : "Drop to Open (Background)"
-      const icon =
-        activeSession.type === "image"
-          ? ICONS.imageBackground
-          : activeSession.type === "link"
-            ? ICONS.linkBackground
-            : ICONS.searchBackground
-      updateIndicator(event.clientX, event.clientY, label, icon, "indigo")
+    if (action === "none") {
+      hideIndicator(true)
+      return
     }
+
+    const { label, icon, theme } = getActionDisplay(action, activeSession.type)
+    updateIndicator(event.clientX, event.clientY, label, icon, theme)
   } else {
     hideIndicator(true)
   }
 }
 
 /**
- * Calculates vector distance, determines direction, and dispatches action.
+ * Calculates vector distance, determines direction, and dispatches configured action.
  */
 async function onDragEnd(event: DragEvent): Promise<void> {
   hideIndicator(true)
@@ -345,40 +405,22 @@ async function onDragEnd(event: DragEvent): Promise<void> {
   const deltaY = event.clientY - activeSession.startY
   const distance = Math.hypot(deltaX, deltaY)
 
-  // Must exceed minimum threshold and not exceed maximum bounding distance
   if (distance >= MIN_DRAG_DISTANCE && distance <= MAX_DRAG_DISTANCE) {
     const direction = getDragDirection(deltaX, deltaY)
+    const action = getTargetAction(activeSession.type, direction)
 
-    if (direction === "down") {
-      // DRAG DOWN: Copy to Clipboard
-      if (activeSession.type === "text") {
-        await copyToClipboard(activeSession.payload)
-      } else if (
-        activeSession.type === "link" ||
-        activeSession.type === "image"
-      ) {
-        const cleaned = cleanUrl(activeSession.payload)
-        await copyToClipboard(cleaned)
-      }
-    } else {
-      // DRAG RIGHT / UP: Open in Background Tab
-      // DRAG LEFT: Open in Active / Foreground Tab
-      const openInBackground = direction === "left" ? false : true
-
-      if (activeSession.type === "text" && currentConfig.searchSelectedText) {
-        sendToBackground(MESSAGE_TYPES.SUPER_DRAG_SEARCH, {
-          text: activeSession.payload,
-          openInBackground
-        }).catch(() => {})
-      } else if (
-        (activeSession.type === "link" && currentConfig.openHyperlinks) ||
-        (activeSession.type === "image" && currentConfig.openImages)
-      ) {
-        sendToBackground(MESSAGE_TYPES.SUPER_DRAG_OPEN_LINK, {
-          url: activeSession.payload,
-          openInBackground
-        }).catch(() => {})
-      }
+    if (action === "copy_to_clipboard") {
+      const payload =
+        activeSession.type === "text"
+          ? activeSession.payload
+          : cleanUrl(activeSession.payload)
+      await copyToClipboard(payload)
+    } else if (action !== "none") {
+      sendToBackground(MESSAGE_TYPES.SUPER_DRAG_EXECUTE_ACTION, {
+        action,
+        targetType: activeSession.type,
+        payload: activeSession.payload
+      }).catch(() => {})
     }
   }
 

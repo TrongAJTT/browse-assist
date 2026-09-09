@@ -35,6 +35,34 @@ export const DEFAULT_CONTEXT_MENU_ACTIONS_CONFIG: ContextMenuActionsConfig = {
 }
 
 /**
+ * Supported Super Drag actions for directional gestures.
+ */
+export type SuperDragAction =
+  | "open_bg_tab"
+  | "open_active_tab"
+  | "open_split_view"
+  | "open_window_active"
+  | "open_window_bg"
+  | "open_incognito_active"
+  | "open_incognito_bg"
+  | "copy_to_clipboard"
+  | "none"
+
+export interface DirectionalActions {
+  up: SuperDragAction
+  down: SuperDragAction
+  left: SuperDragAction
+  right: SuperDragAction
+}
+
+export const DEFAULT_DIRECTIONAL_ACTIONS: DirectionalActions = {
+  up: "open_bg_tab",
+  right: "open_bg_tab",
+  left: "open_active_tab",
+  down: "copy_to_clipboard"
+}
+
+/**
  * Super Drag sub-configuration.
  */
 export interface SuperDragConfig {
@@ -42,13 +70,19 @@ export interface SuperDragConfig {
   openHyperlinks: boolean // Dragging a link opens URL
   openImages: boolean // Dragging an image opens URL or copies image link
   showIndicator: boolean // Display live floating indicator badge during drag
+  textActions: DirectionalActions
+  linkActions: DirectionalActions
+  imageActions: DirectionalActions
 }
 
 export const DEFAULT_SUPER_DRAG_CONFIG: SuperDragConfig = {
   searchSelectedText: true,
   openHyperlinks: true,
   openImages: false,
-  showIndicator: true
+  showIndicator: true,
+  textActions: { ...DEFAULT_DIRECTIONAL_ACTIONS },
+  linkActions: { ...DEFAULT_DIRECTIONAL_ACTIONS },
+  imageActions: { ...DEFAULT_DIRECTIONAL_ACTIONS }
 }
 
 /**

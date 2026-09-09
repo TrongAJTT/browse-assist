@@ -1,6 +1,6 @@
 /**
  * Super Drag - Background Service Worker Logic
- * Handles tab creation and search queries initiated by drag operations.
+ * Handles tab creation, window splitting, new windows, and search queries.
  */
 
 import { MESSAGE_TYPES } from "~core/messaging"
@@ -9,6 +9,7 @@ import {
   DEFAULT_SETTINGS,
   STORAGE_KEYS,
   type FeatureSettings,
+  type SuperDragAction,
   type SuperDragConfig
 } from "~core/types"
 import { cleanUrl } from "~features/context-menu-actions/cleanUrl"
@@ -19,10 +20,155 @@ export interface SuperDragMessage {
   text?: string
   url?: string
   openInBackground?: boolean
+  // Extended directional payload
+  targetType?: "text" | "link" | "image"
+  payload?: string
 }
 
 /**
- * Executes a search query using the browser's default search engine.
+ * Resolves a target URL from payload or search query.
+ */
+function resolveUrl(targetType: "text" | "link" | "image", payload: string): string {
+  if (targetType === "text") {
+    return `https://www.google.com/search?q=${encodeURIComponent(payload)}`
+  }
+  return cleanUrl(payload)
+}
+
+/**
+ * Dual-Window Side-by-Side Split View (Model A).
+ * Resizes current window to 50% left width, opens new window on 50% right width.
+ */
+async function handleSplitView(url: string, senderTab?: chrome.tabs.Tab): Promise<void> {
+  try {
+    const currentWin = senderTab?.windowId
+      ? await chrome.windows.get(senderTab.windowId)
+      : await chrome.windows.getCurrent()
+
+    const screenLeft = currentWin.left ?? 0
+    const screenTop = currentWin.top ?? 0
+    const totalWidth = currentWin.width ?? 1280
+    const totalHeight = currentWin.height ?? 800
+
+    const halfWidth = Math.max(400, Math.floor(totalWidth / 2))
+
+    // 1. Resize current window to left half
+    if (currentWin.id) {
+      await chrome.windows.update(currentWin.id, {
+        left: screenLeft,
+        top: screenTop,
+        width: halfWidth,
+        height: totalHeight,
+        state: "normal"
+      })
+    }
+
+    // 2. Open new window on right half
+    await chrome.windows.create({
+      url,
+      left: screenLeft + halfWidth,
+      top: screenTop,
+      width: halfWidth,
+      height: totalHeight,
+      focused: true
+    })
+  } catch (err) {
+    console.warn("Browse Assist: Failed to execute split view, falling back to new tab", err)
+    chrome.tabs.create({ url, active: true })
+  }
+}
+
+/**
+ * Opens a URL in a new window with optional incognito or background focus.
+ */
+async function handleNewWindow(
+  url: string,
+  options: { incognito?: boolean; focused?: boolean }
+): Promise<void> {
+  const { incognito = false, focused = true } = options
+
+  if (incognito) {
+    const isAllowed = await new Promise<boolean>((resolve) => {
+      if (chrome.extension?.isAllowedIncognitoAccess) {
+        chrome.extension.isAllowedIncognitoAccess(resolve)
+      } else {
+        resolve(false)
+      }
+    })
+
+    if (!isAllowed) {
+      console.warn("Browse Assist: Extension not allowed in incognito mode.")
+      // Fallback to active tab
+      chrome.tabs.create({ url, active: true })
+      return
+    }
+  }
+
+  try {
+    await chrome.windows.create({
+      url,
+      incognito,
+      focused
+    })
+  } catch (err) {
+    console.warn("Browse Assist: Failed to create window, falling back to tab", err)
+    chrome.tabs.create({ url, active: focused })
+  }
+}
+
+/**
+ * Central dispatcher for Super Drag actions.
+ */
+async function executeSuperDragAction(
+  action: SuperDragAction,
+  targetType: "text" | "link" | "image",
+  rawPayload: string,
+  senderTab?: chrome.tabs.Tab
+): Promise<void> {
+  if (action === "none") return
+
+  const url = resolveUrl(targetType, rawPayload)
+
+  switch (action) {
+    case "open_bg_tab": {
+      let targetIndex: number | undefined
+      if (senderTab && typeof senderTab.index === "number") {
+        targetIndex = senderTab.index + 1
+      }
+      chrome.tabs.create({ url, active: false, index: targetIndex })
+      break
+    }
+    case "open_active_tab": {
+      let targetIndex: number | undefined
+      if (senderTab && typeof senderTab.index === "number") {
+        targetIndex = senderTab.index + 1
+      }
+      chrome.tabs.create({ url, active: true, index: targetIndex })
+      break
+    }
+    case "open_split_view":
+      await handleSplitView(url, senderTab)
+      break
+    case "open_window_active":
+      await handleNewWindow(url, { focused: true })
+      break
+    case "open_window_bg":
+      await handleNewWindow(url, { focused: false })
+      break
+    case "open_incognito_active":
+      await handleNewWindow(url, { incognito: true, focused: true })
+      break
+    case "open_incognito_bg":
+      await handleNewWindow(url, { incognito: true, focused: false })
+      break
+    default:
+      chrome.tabs.create({ url, active: false })
+      break
+  }
+}
+
+/**
+ * Executes a search query using the browser's default search engine (legacy).
  */
 async function handleSearch(
   text: string,
@@ -40,7 +186,6 @@ async function handleSearch(
       disposition: "NEW_TAB"
     })
 
-    // If configured to open in background, refocus the sender tab
     if (openInBackground && senderTab?.id) {
       try {
         await chrome.tabs.update(senderTab.id, { active: true })
@@ -49,7 +194,6 @@ async function handleSearch(
       }
     }
   } else {
-    // Fallback if chrome.search is unavailable in specific environment
     const fallbackUrl = `https://www.google.com/search?q=${encodeURIComponent(text)}`
     chrome.tabs.create({
       url: fallbackUrl,
@@ -59,7 +203,7 @@ async function handleSearch(
 }
 
 /**
- * Opens a hyperlink in a new tab (with optional tracking parameter cleaning).
+ * Opens a hyperlink in a new tab (legacy).
  */
 async function handleOpenLink(
   rawUrl: string,
@@ -68,20 +212,16 @@ async function handleOpenLink(
   overrideBackground = true
 ): Promise<void> {
   if (!rawUrl) return
-
   const url = cleanUrl(rawUrl)
   let targetIndex: number | undefined
 
-  // Default natural behavior: open adjacent to current tab if possible
   if (senderTab && typeof senderTab.index === "number") {
     targetIndex = senderTab.index + 1
   }
 
-  const openInBackground = overrideBackground
-
   chrome.tabs.create({
     url,
-    active: !openInBackground,
+    active: !overrideBackground,
     index: targetIndex
   })
 }
@@ -98,43 +238,56 @@ function onMessageListener(
 
   if (
     msgType !== MESSAGE_TYPES.SUPER_DRAG_SEARCH &&
-    msgType !== MESSAGE_TYPES.SUPER_DRAG_OPEN_LINK
+    msgType !== MESSAGE_TYPES.SUPER_DRAG_OPEN_LINK &&
+    msgType !== MESSAGE_TYPES.SUPER_DRAG_EXECUTE_ACTION
   ) {
     return
   }
 
   extensionStorage
     .get<FeatureSettings>(STORAGE_KEYS.SETTINGS)
-    .then((settings) => {
+    .then(async (settings) => {
       const isMasterEnabled = settings?.superDrag ?? DEFAULT_SETTINGS.superDrag
-      if (!isMasterEnabled) return
+      if (!isMasterEnabled) {
+        sendResponse({ success: false, reason: "disabled" })
+        return
+      }
 
       const config: SuperDragConfig =
         settings?.superDragConfig ?? DEFAULT_SETTINGS.superDragConfig
 
-      if (msgType === MESSAGE_TYPES.SUPER_DRAG_SEARCH && message.text) {
+      if (msgType === MESSAGE_TYPES.SUPER_DRAG_EXECUTE_ACTION) {
+        const action = (message as unknown as { action: SuperDragAction }).action
+        const targetType = message.targetType ?? "text"
+        const payload = message.payload ?? ""
+
+        if (action && payload) {
+          await executeSuperDragAction(action, targetType, payload, sender.tab)
+          sendResponse({ success: true })
+        } else {
+          sendResponse({ success: false, error: "Missing action or payload" })
+        }
+      } else if (msgType === MESSAGE_TYPES.SUPER_DRAG_SEARCH && message.text) {
         if (config.searchSelectedText) {
-          handleSearch(
+          await handleSearch(
             message.text,
             config,
             sender.tab,
             message.openInBackground
           )
         }
-      } else if (
-        msgType === MESSAGE_TYPES.SUPER_DRAG_OPEN_LINK &&
-        message.url
-      ) {
+        sendResponse({ success: true })
+      } else if (msgType === MESSAGE_TYPES.SUPER_DRAG_OPEN_LINK && message.url) {
         if (config.openHyperlinks) {
-          handleOpenLink(
+          await handleOpenLink(
             message.url,
             config,
             sender.tab,
             message.openInBackground
           )
         }
+        sendResponse({ success: true })
       }
-      sendResponse({ success: true })
     })
     .catch((err) => {
       console.warn("Browse Assist: Failed to execute Super Drag action", err)

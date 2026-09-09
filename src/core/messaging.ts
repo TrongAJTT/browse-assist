@@ -5,6 +5,7 @@
  */
 
 import { MESSAGE_TYPES, type MessageType } from "~core/constants"
+import type { SuperDragAction } from "~core/types"
 
 export { MESSAGE_TYPES, type MessageType }
 
@@ -71,6 +72,14 @@ export interface MessageRegistry {
   [MESSAGE_TYPES.SUPER_DRAG_OPEN_LINK]: {
     request: { url: string; openInBackground: boolean }
     response: { ok: boolean }
+  }
+  [MESSAGE_TYPES.SUPER_DRAG_EXECUTE_ACTION]: {
+    request: {
+      action: SuperDragAction
+      targetType: "text" | "link" | "image"
+      payload: string
+    }
+    response: { success: boolean; error?: string }
   }
 
   // ColorPick Eyedropper
