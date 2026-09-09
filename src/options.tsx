@@ -2,10 +2,9 @@ import { useStorage } from "@plasmohq/storage/hook"
 
 import { Switch } from "~components/Switch"
 import { AppIcon } from "~core/assets"
-import { FEATURE_ICONS } from "~core/featureIcons"
+import { FEATURE_CATALOG_LIST } from "~core/featureCatalog"
 import {
   DEFAULT_SETTINGS,
-  FEATURES_LIST,
   STORAGE_KEYS,
   type FeatureKey,
   type FeatureSettings
@@ -64,10 +63,10 @@ function OptionsPage() {
           </h2>
 
           <div className="grid gap-3.5">
-            {FEATURES_LIST.map((feature) => {
+            {FEATURE_CATALOG_LIST.map((feature) => {
               const isEnabled = resolved[feature.key]
-              const IconComp = FEATURE_ICONS[feature.key].icon
-              const iconColor = FEATURE_ICONS[feature.key].colorClass
+              const IconComp = feature.icon
+              const iconColor = feature.colorClass
               return (
                 <div
                   key={feature.key}

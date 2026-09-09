@@ -17,13 +17,12 @@ import { GridPicker, type GridPickerItem } from "~components/GridPicker"
 import { Slider } from "~components/Slider"
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
 import { Switch } from "~components/Switch"
+import { FEATURE_CATALOG } from "~core/featureCatalog"
 import {
   DEFAULT_FEATURE_LAYOUT_CONFIG,
   DEFAULT_SETTINGS,
-  FEATURES_LIST,
   STORAGE_KEYS,
   type FeatureKey,
-  type FeatureMeta,
   type FeatureSettings,
   type ThemeMode
 } from "~core/types"
@@ -49,15 +48,6 @@ const THEME_OPTIONS: GridPickerItem<ThemeMode>[] = [
     icon: <Laptop className="w-3.5 h-3.5" />
   }
 ]
-
-// Create a fast lookup map for feature metadata
-const FEATURE_META_MAP: Record<FeatureKey, FeatureMeta> = FEATURES_LIST.reduce(
-  (acc, meta) => {
-    acc[meta.key] = meta
-    return acc
-  },
-  {} as Record<FeatureKey, FeatureMeta>
-)
 
 /**
  * Preferences / General Settings view.
@@ -240,13 +230,15 @@ export const PreferencesSettingsView: React.FC<
 
           <div className="divide-y divide-border-divider">
             {order.map((key, index) => {
-              const item = FEATURE_META_MAP[key]
+              const item = FEATURE_CATALOG[key]
               if (!item) return null
 
               const isHidden = hiddenSet.has(key)
               const isDragging = draggedIndex === index
               const isDragOver =
                 dragOverIndex === index && draggedIndex !== index
+
+              const IconComponent = item.icon
 
               return (
                 <div
@@ -270,9 +262,9 @@ export const PreferencesSettingsView: React.FC<
                       !isHidden ? "feature-row-active" : "feature-row-dimmed"
                     }`}>
                     <Move className="w-3.5 h-3.5 text-content-muted opacity-40 group-hover:opacity-100 shrink-0 transition-opacity" />
-                    <span className="text-base select-none shrink-0">
-                      {item.icon}
-                    </span>
+                    <div className="shrink-0 flex items-center justify-center transition-transform duration-200 ease-out group-hover:scale-110">
+                      <IconComponent className={`w-5 h-5 ${item.colorClass}`} />
+                    </div>
                     <div className="flex flex-col min-w-0 flex-1">
                       <span className="text-xs font-semibold text-content-primary truncate">
                         {item.title}

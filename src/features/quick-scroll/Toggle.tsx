@@ -4,14 +4,14 @@ import type React from "react"
 import { useStorage } from "@plasmohq/storage/hook"
 
 import { ToggleSwitch } from "~components/ToggleSwitch"
+import { FEATURE_CATALOG } from "~core/featureCatalog"
 import {
   DEFAULT_SETTINGS,
-  FEATURES_LIST,
   STORAGE_KEYS,
   type FeatureSettings
 } from "~core/types"
 
-const meta = FEATURES_LIST.find((f) => f.key === "quickScroll")!
+const meta = FEATURE_CATALOG.quickScroll
 
 interface QuickScrollToggleProps {
   onConfigure?: () => void

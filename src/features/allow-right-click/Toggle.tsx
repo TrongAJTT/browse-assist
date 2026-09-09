@@ -3,10 +3,10 @@ import type React from "react"
 import { useEffect, useState } from "react"
 
 import { ToggleSwitch } from "~components/ToggleSwitch"
+import { FEATURE_CATALOG } from "~core/featureCatalog"
 import { MESSAGE_TYPES, sendToActiveTab } from "~core/messaging"
-import { FEATURES_LIST } from "~core/types"
 
-const meta = FEATURES_LIST.find((f) => f.key === "allowRightClick")!
+const meta = FEATURE_CATALOG.allowRightClick
 
 interface AllowRightClickToggleProps {
   onStatusChange?: (active: boolean) => void
