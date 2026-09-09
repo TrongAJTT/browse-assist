@@ -35,6 +35,7 @@ let returnMemory: ReturnMemorySlot | null = null
 let memoryTimer: number | null = null
 let hideTimer: number | null = null
 let isTicking = false
+let isSmoothScrolling = false
 let detectedTheme: "dark" | "light" = "dark"
 
 const MIN_PAGE_RATIO = 1.6 // Minimum document height / viewport height
@@ -520,6 +521,10 @@ function updateButtonsVisibility(): void {
 }
 
 function onScroll(): void {
+  // Suppress intermediate updates while smooth scroll is animating — prevents button
+  // flickering as the scroll position crosses visibility thresholds frame-by-frame.
+  if (isSmoothScrolling) return
+
   if (!isTicking) {
     window.requestAnimationFrame(() => {
       updateButtonsVisibility()
@@ -527,6 +532,17 @@ function onScroll(): void {
     })
     isTicking = true
   }
+}
+
+function onSmoothScrollStart(): void {
+  isSmoothScrolling = true
+}
+
+function onSmoothScrollEnd(): void {
+  isSmoothScrolling = false
+  // Run a single visibility update now that animation has settled
+  isTicking = false
+  onScroll()
 }
 
 export function activate(
@@ -541,6 +557,8 @@ export function activate(
     createShadowDOM()
     window.addEventListener("scroll", onScroll, { passive: true })
     window.addEventListener("resize", onScroll, { passive: true })
+    window.addEventListener("browse-assist:smooth-scroll-start", onSmoothScrollStart)
+    window.addEventListener("browse-assist:smooth-scroll-end", onSmoothScrollEnd)
   } else if (containerElement) {
     containerElement.className = `qs-container qs-pos-${currentConfig.position}`
     updateThemeStyles()
@@ -555,6 +573,8 @@ export function deactivate(): void {
 
   window.removeEventListener("scroll", onScroll)
   window.removeEventListener("resize", onScroll)
+  window.removeEventListener("browse-assist:smooth-scroll-start", onSmoothScrollStart)
+  window.removeEventListener("browse-assist:smooth-scroll-end", onSmoothScrollEnd)
 
   if (themeObserver) {
     themeObserver.disconnect()

@@ -18,18 +18,69 @@ let currentScrollY = 0
 let activeConfig: SmoothScrollConfig = { ...SMOOTH_SCROLL_PRESETS.balanced }
 const EPSILON = 0.5 // Threshold to stop animation loop
 
+// ---------------------------------------------------------------------------
+// Caches — WeakMap keys are GC'd automatically when elements are removed from DOM
+// ---------------------------------------------------------------------------
+
+/**
+ * Cache: element → nearest scrollable ancestor (or window sentinel).
+ * Invalidated when the element is first encountered or re-entered after a container switch.
+ */
+const scrollableContainerCache = new WeakMap<Element, Element | Window>()
+
+/**
+ * Cache: element → whether it is an interactive surface that should be ignored.
+ * Result is stable for any given element subtree so we never need to re-compute.
+ */
+const interactiveSurfaceCache = new WeakMap<Element, boolean>()
+
+// ---------------------------------------------------------------------------
+// Static constants hoisted out of per-event paths
+// ---------------------------------------------------------------------------
+
+const INTERACTIVE_SELECTOR = [
+  "canvas",
+  "[role='application']",
+  ".konvajs-content",
+  ".konvajs-content *",
+  ".monaco-editor",
+  ".CodeMirror",
+  ".leaflet-container",
+  "[data-canvas]",
+  "[data-interactive-scroll]"
+].join(",")
+
+const INTERACTIVE_CURSORS = new Set([
+  "crosshair",
+  "move",
+  "grab",
+  "grabbing",
+  "zoom-in",
+  "zoom-out",
+  "cell",
+  "copy",
+  "none"
+])
+
+// ---------------------------------------------------------------------------
+// Core helpers
+// ---------------------------------------------------------------------------
+
 /**
  * Finds the nearest scrollable element under the cursor or defaults to window.
+ * Result is cached per element to avoid repeated DOM traversal + getComputedStyle.
  */
 function getScrollableContainer(target: EventTarget | null): Element | Window {
   if (!(target instanceof Element)) {
     return window
   }
 
+  const cached = scrollableContainerCache.get(target)
+  if (cached !== undefined) return cached
+
   let node: Element | null = target
   while (node && node !== document.body && node !== document.documentElement) {
-    const style = window.getComputedStyle(node)
-    const overflowY = style.overflowY
+    const overflowY = window.getComputedStyle(node).overflowY
     const canScroll =
       (overflowY === "auto" ||
         overflowY === "scroll" ||
@@ -37,11 +88,13 @@ function getScrollableContainer(target: EventTarget | null): Element | Window {
       node.scrollHeight > node.clientHeight
 
     if (canScroll) {
+      scrollableContainerCache.set(target, node)
       return node
     }
     node = node.parentElement
   }
 
+  scrollableContainerCache.set(target, window)
   return window
 }
 
@@ -103,12 +156,16 @@ function updateScroll(): void {
     currentScrollY = targetScrollY
     setScrollPosition(currentTargetElement, currentScrollY)
     animationFrameId = null
+    window.dispatchEvent(new CustomEvent("browse-assist:smooth-scroll-end"))
   }
 }
 
 /**
  * Checks if the target element or its ancestors are interactive surfaces
  * (e.g. Canvas, Konva, SVG interactive viewports, code editors, maps).
+ *
+ * Result is cached per element — the check is structurally stable for any element
+ * (moving a canvas around the DOM is not a use case we need to handle).
  *
  * Relies on CSS heuristics rather than event.defaultPrevented because React synthetic
  * onWheel does NOT propagate preventDefault() to the underlying native DOM event.
@@ -118,56 +175,40 @@ function isInteractiveSurface(target: EventTarget | null): boolean {
     return false
   }
 
-  // 1. Tag / class name selector check for well-known frameworks
-  const interactiveSelector = [
-    "canvas",
-    "[role='application']",
-    ".konvajs-content",
-    ".konvajs-content *",
-    ".monaco-editor",
-    ".CodeMirror",
-    ".leaflet-container",
-    "[data-canvas]",
-    "[data-interactive-scroll]"
-  ].join(",")
+  const cached = interactiveSurfaceCache.get(target)
+  if (cached !== undefined) return cached
 
-  if (target.closest(interactiveSelector) !== null) {
+  // 1. Tag / class name selector check for well-known frameworks
+  if (target.closest(INTERACTIVE_SELECTOR) !== null) {
+    interactiveSurfaceCache.set(target, true)
     return true
   }
 
-  // 2. CSS cursor heuristic: design tools / canvas apps set cursor to crosshair, grab, zoom, etc.
-  //    Walk up the DOM until we find a meaningful cursor or hit body.
-  const interactiveCursors = new Set([
-    "crosshair",
-    "move",
-    "grab",
-    "grabbing",
-    "zoom-in",
-    "zoom-out",
-    "cell",
-    "copy",
-    "none" // Some canvas apps hide cursor during interaction
-  ])
-
+  // 2. CSS cursor / touch-action heuristic: walk up DOM once per unique element
   let node: Element | null = target
   while (node && node !== document.body && node !== document.documentElement) {
     const style = window.getComputedStyle(node)
 
-    // Cursor style signals interactive drawing/design surface
-    if (interactiveCursors.has(style.cursor)) {
+    if (INTERACTIVE_CURSORS.has(style.cursor)) {
+      interactiveSurfaceCache.set(target, true)
       return true
     }
 
-    // touch-action != 'auto' means the element explicitly manages its own scroll/pan behavior
     if (style.touchAction !== "auto" && style.touchAction !== "manipulation") {
+      interactiveSurfaceCache.set(target, true)
       return true
     }
 
     node = node.parentElement
   }
 
+  interactiveSurfaceCache.set(target, false)
   return false
 }
+
+// ---------------------------------------------------------------------------
+// Wheel event handler
+// ---------------------------------------------------------------------------
 
 /**
  * Wheel event listener.
@@ -186,16 +227,17 @@ function onWheel(event: WheelEvent): void {
     return
   }
 
+  // Only handle pure vertical scrolling
+  if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) {
+    return
+  }
+
   // In smart mode, skip canvases / interactive graphic applications (Konva, Figma, Maps, Code editors)
+  // NOTE: moved after deltaX guard to avoid running expensive DOM check on horizontal scrolls
   if (
     activeConfig.interceptionMode !== "aggressive" &&
     isInteractiveSurface(event.target)
   ) {
-    return
-  }
-
-  // Only handle pure vertical scrolling
-  if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) {
     return
   }
 
@@ -208,7 +250,15 @@ function onWheel(event: WheelEvent): void {
     return
   }
 
-  const delta = event.deltaY * activeConfig.stepSize
+  // Normalize deltaY: LINE mode (deltaMode=1) → multiply by ~20px; PAGE mode (2) → viewport height
+  let rawDelta = event.deltaY
+  if (event.deltaMode === 1) {
+    rawDelta *= 20
+  } else if (event.deltaMode === 2) {
+    rawDelta *= window.innerHeight
+  }
+
+  const delta = rawDelta * activeConfig.stepSize
 
   // If user scrolls up at top boundary or down at bottom boundary, don't hijack
   if ((currentPos <= 0 && delta < 0) || (currentPos >= maxPos && delta > 0)) {
@@ -228,9 +278,14 @@ function onWheel(event: WheelEvent): void {
   targetScrollY = Math.max(0, Math.min(maxPos, targetScrollY + delta))
 
   if (animationFrameId === null) {
+    window.dispatchEvent(new CustomEvent("browse-assist:smooth-scroll-start"))
     animationFrameId = window.requestAnimationFrame(updateScroll)
   }
 }
+
+// ---------------------------------------------------------------------------
+// Animation control
+// ---------------------------------------------------------------------------
 
 /**
  * Cancels ongoing animation when user interacts directly (e.g. mousedown, keydown).
@@ -239,6 +294,7 @@ function cancelAnimation(): void {
   if (animationFrameId !== null) {
     window.cancelAnimationFrame(animationFrameId)
     animationFrameId = null
+    window.dispatchEvent(new CustomEvent("browse-assist:smooth-scroll-end"))
   }
 }
 
@@ -255,6 +311,10 @@ function attachWheelListener(useCapture: boolean): void {
     capture: useCapture
   })
 }
+
+// ---------------------------------------------------------------------------
+// Public API
+// ---------------------------------------------------------------------------
 
 /**
  * Updates physics tuning on the fly.
