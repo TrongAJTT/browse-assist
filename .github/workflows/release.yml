@@ -1,0 +1,91 @@
+name: Release Extension
+
+on:
+  push:
+    tags:
+      - "v[0-9]*.[0-9]*.[0-9]*"
+      - "v*"
+
+jobs:
+  release:
+    name: Build & Publish Release
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      discussions: write
+      id-token: write
+      attestations: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Quality Checks
+        run: |
+          pnpm typecheck
+          pnpm lint
+
+      - name: Build Chrome Extension Package
+        run: pnpm package:chrome
+
+      - name: Build Edge Extension Package
+        run: pnpm package:edge
+
+      - name: Build Firefox Extension Package
+        run: pnpm package:firefox
+
+      - name: Prepare Release Artifacts & Generate SHA-256 Checksums
+        run: |
+          TAG_NAME="${GITHUB_REF_NAME}"
+          echo "Preparing release artifacts for tag: ${TAG_NAME}"
+          cp build/chrome-mv3-prod.zip "browse-assist-${TAG_NAME}-chrome.zip"
+          cp build/edge-mv3-prod.zip "browse-assist-${TAG_NAME}-edge.zip"
+          cp build/firefox-mv3-prod.zip "browse-assist-${TAG_NAME}-firefox.zip"
+          
+          echo "===================================================="
+          echo "  OFFICIAL IMMUTABLE SHA-256 CHECKSUMS (LOG RECORD)"
+          echo "===================================================="
+          sha256sum browse-assist-${TAG_NAME}-*.zip | tee SHA256SUMS.txt
+          echo "===================================================="
+
+      - name: Generate Artifact Attestations (Sigstore Cryptographic Signatures)
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: 'browse-assist-${{ github.ref_name }}-*.zip'
+
+      - name: Upload Build Artifacts (Immutable CI Artifacts)
+        uses: actions/upload-artifact@v4
+        with:
+          name: browse-assist-${{ github.ref_name }}-builds
+          path: |
+            browse-assist-${{ github.ref_name }}-*.zip
+            SHA256SUMS.txt
+
+      - name: Create GitHub Release
+        if: ${{ !contains(github.ref_name, '-hf') }}
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Browse Assist ${{ github.ref_name }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+          files: |
+            browse-assist-${{ github.ref_name }}-chrome.zip
+            browse-assist-${{ github.ref_name }}-edge.zip
+            browse-assist-${{ github.ref_name }}-firefox.zip
+            SHA256SUMS.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

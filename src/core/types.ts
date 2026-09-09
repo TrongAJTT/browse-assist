@@ -87,7 +87,7 @@ export const DEFAULT_SUPER_DRAG_CONFIG: SuperDragConfig = {
   openHyperlinks: true,
   openImages: false,
   showIndicator: true,
-  indicatorStyle: "radial",
+  indicatorStyle: "badge",
   textActions: { ...DEFAULT_DIRECTIONAL_ACTIONS },
   linkActions: { ...DEFAULT_DIRECTIONAL_ACTIONS },
   imageActions: { ...DEFAULT_DIRECTIONAL_ACTIONS }

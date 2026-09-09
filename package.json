@@ -12,6 +12,9 @@
     "dev": "plasmo dev",
     "build": "plasmo build",
     "package": "plasmo package",
+    "package:edge": "plasmo build --target=edge-mv3 && plasmo package --target=edge-mv3",
+    "package:firefox": "plasmo build --target=firefox-mv3 && plasmo package --target=firefox-mv3",
+    "package:chrome": "plasmo build --target=chrome-mv3 && plasmo package --target=chrome-mv3",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
@@ -50,6 +53,17 @@
       "clipboardWrite",
       "search"
     ],
+    "browser_specific_settings": {
+      "gecko": {
+        "id": "browse-assist@trongajtt.com",
+        "strict_min_version": "109.0",
+        "data_collection_permissions": {
+          "required": [
+            "none"
+          ]
+        }
+      }
+    },
     "commands": {
       "toggle_picture_in_picture": {
         "suggested_key": {
