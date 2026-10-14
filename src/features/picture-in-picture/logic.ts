@@ -8,6 +8,7 @@ import { MESSAGE_TYPES, sendToBackground } from "~core/messaging"
 import { removeContentToast, showContentToast } from "~core/toast"
 import {
   DEFAULT_PICTURE_IN_PICTURE_CONFIG,
+  normalizeEdgePlacement,
   type PictureInPictureConfig
 } from "~core/types"
 import {
@@ -161,28 +162,35 @@ function showHoverButtonForVideo(video: HTMLVideoElement): void {
   const marginX = 14
   const marginY = 14
 
-  const position = currentConfig.buttonPosition || "top-right"
+  const placement = normalizeEdgePlacement(
+    currentConfig.placement ?? currentConfig.buttonPosition,
+    DEFAULT_PICTURE_IN_PICTURE_CONFIG.placement
+  )
+  const offset = Math.max(0, Math.min(100, placement.offsetPercent))
 
   let targetX: number
   let targetY: number
 
-  switch (position) {
-    case "top-left":
-      targetX = rect.left + marginX
+  const availableW = Math.max(0, rect.width - buttonWidth - 2 * marginX)
+  const availableH = Math.max(0, rect.height - buttonHeight - 2 * marginY)
+
+  switch (placement.edge) {
+    case "top":
+      targetX = rect.left + marginX + (availableW * offset) / 100
       targetY = rect.top + marginY
       break
-    case "bottom-left":
+    case "bottom":
+      targetX = rect.left + marginX + (availableW * offset) / 100
+      targetY = rect.bottom - buttonHeight - marginY
+      break
+    case "left":
       targetX = rect.left + marginX
-      targetY = rect.bottom - buttonHeight - marginY
+      targetY = rect.top + marginY + (availableH * offset) / 100
       break
-    case "bottom-right":
-      targetX = rect.right - buttonWidth - marginX
-      targetY = rect.bottom - buttonHeight - marginY
-      break
-    case "top-right":
+    case "right":
     default:
       targetX = rect.right - buttonWidth - marginX
-      targetY = rect.top + marginY
+      targetY = rect.top + marginY + (availableH * offset) / 100
       break
   }
 

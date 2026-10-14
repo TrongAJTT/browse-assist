@@ -147,7 +147,66 @@ export const DEFAULT_MOUSE_ZOOM_CONFIG: MouseZoomConfig = {
 }
 
 /**
- * Corner position for the floating Video PiP button.
+ * Screen or container boundary edge identifier.
+ */
+export type ScreenEdge = "left" | "right" | "top" | "bottom"
+
+/**
+ * Universal position along a container's perimeter edge.
+ */
+export interface EdgePlacement {
+  edge: ScreenEdge
+  offsetPercent: number // 0 to 100 percentage along the specified edge
+}
+
+/**
+ * Safely normalizes legacy position string presets or partial EdgePlacement objects.
+ */
+export function normalizeEdgePlacement(
+  raw: unknown,
+  fallback: EdgePlacement
+): EdgePlacement {
+  if (!raw) return fallback
+
+  // Already an EdgePlacement object
+  if (typeof raw === "object" && raw !== null && "edge" in raw) {
+    const p = raw as Partial<EdgePlacement>
+    const validEdges: ScreenEdge[] = ["left", "right", "top", "bottom"]
+    const edge = validEdges.includes(p.edge as ScreenEdge)
+      ? (p.edge as ScreenEdge)
+      : fallback.edge
+    const offset =
+      typeof p.offsetPercent === "number" && !isNaN(p.offsetPercent)
+        ? Math.max(0, Math.min(100, Math.round(p.offsetPercent)))
+        : fallback.offsetPercent
+    return { edge, offsetPercent: offset }
+  }
+
+  // Legacy preset string conversions
+  if (typeof raw === "string") {
+    switch (raw) {
+      case "top-left":
+        return { edge: "left", offsetPercent: 0 }
+      case "center-left":
+        return { edge: "left", offsetPercent: 50 }
+      case "bottom-left":
+        return { edge: "left", offsetPercent: 100 }
+      case "top-right":
+        return { edge: "right", offsetPercent: 0 }
+      case "center-right":
+        return { edge: "right", offsetPercent: 50 }
+      case "bottom-right":
+        return { edge: "right", offsetPercent: 100 }
+      default:
+        return fallback
+    }
+  }
+
+  return fallback
+}
+
+/**
+ * Corner position for the floating Video PiP button (legacy).
  */
 export type PipButtonPosition =
   | "top-left"
@@ -162,13 +221,15 @@ export interface PictureInPictureConfig {
   showBadge: boolean // Show "PiP" badge on extension icon when video is in PiP
   showToast: boolean // Show floating feedback notification on toggle
   hoverButton: boolean // Show a sleek floating PiP button when hovering over playing videos
-  buttonPosition: PipButtonPosition // Corner position inside the video frame
+  placement: EdgePlacement // Edge position inside the video frame
+  buttonPosition?: PipButtonPosition // Legacy fallback
 }
 
 export const DEFAULT_PICTURE_IN_PICTURE_CONFIG: PictureInPictureConfig = {
   showBadge: true,
   showToast: true,
   hoverButton: true,
+  placement: { edge: "right", offsetPercent: 0 },
   buttonPosition: "top-right"
 }
 
@@ -251,17 +312,19 @@ export type QuickScrollPosition =
 export type QuickScrollButtonsMode = "both" | "top-only"
 
 export interface QuickScrollConfig {
-  position: QuickScrollPosition
+  placement: EdgePlacement
   buttonsMode: QuickScrollButtonsMode
   autoHide: boolean // Dim buttons when user stops scrolling
   enableReturnMemory: boolean // Remember previous scroll position and allow return for both top and bottom
+  position?: QuickScrollPosition // Legacy fallback
 }
 
 export const DEFAULT_QUICK_SCROLL_CONFIG: QuickScrollConfig = {
-  position: "bottom-right",
+  placement: { edge: "right", offsetPercent: 100 },
   buttonsMode: "both",
   autoHide: true,
-  enableReturnMemory: false
+  enableReturnMemory: false,
+  position: "bottom-right"
 }
 
 /**
@@ -336,13 +399,15 @@ export type QuickHubCorner =
  * Quick Hub configuration.
  */
 export interface QuickHubConfig {
-  corner: QuickHubCorner
+  placement: EdgePlacement
   hoverToReveal: boolean
+  corner?: QuickHubCorner // Legacy fallback
 }
 
 export const DEFAULT_QUICK_HUB_CONFIG: QuickHubConfig = {
-  corner: "top-right",
-  hoverToReveal: true
+  placement: { edge: "right", offsetPercent: 0 },
+  hoverToReveal: true,
+  corner: "top-right"
 }
 
 /**

@@ -6,6 +6,7 @@
 
 import {
   DEFAULT_QUICK_SCROLL_CONFIG,
+  normalizeEdgePlacement,
   type QuickScrollConfig,
   type ThemeMode
 } from "~core/types"
@@ -285,6 +286,21 @@ function updateThemeStyles(): void {
   }
 }
 
+function applyPlacementStyle(): void {
+  if (!containerElement) return
+  const placement = normalizeEdgePlacement(
+    currentConfig.placement ?? currentConfig.position,
+    DEFAULT_QUICK_SCROLL_CONFIG.placement
+  )
+  const edge = placement.edge === "left" ? "left" : "right"
+  const offset = Math.max(0, Math.min(100, placement.offsetPercent))
+  containerElement.style.left = edge === "left" ? "18px" : "auto"
+  containerElement.style.right = edge === "right" ? "18px" : "auto"
+  containerElement.style.top = `calc(24px + (100vh - 48px) * ${offset} / 100)`
+  containerElement.style.bottom = "auto"
+  containerElement.style.transform = `translateY(-${offset}%)`
+}
+
 function createShadowDOM(): void {
   if (hostElement && document.documentElement.contains(hostElement)) return
 
@@ -299,7 +315,8 @@ function createShadowDOM(): void {
   styleElement.textContent = getStyles(detectedTheme)
 
   containerElement = document.createElement("div")
-  containerElement.className = `qs-container qs-pos-${currentConfig.position}`
+  containerElement.className = "qs-container"
+  applyPlacementStyle()
 
   // Button Scroll to Top
   btnTop = document.createElement("button")
@@ -560,7 +577,7 @@ export function activate(
     window.addEventListener("browse-assist:smooth-scroll-start", onSmoothScrollStart)
     window.addEventListener("browse-assist:smooth-scroll-end", onSmoothScrollEnd)
   } else if (containerElement) {
-    containerElement.className = `qs-container qs-pos-${currentConfig.position}`
+    applyPlacementStyle()
     updateThemeStyles()
   }
 

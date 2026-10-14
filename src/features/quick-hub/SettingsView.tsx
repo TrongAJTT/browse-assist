@@ -1,55 +1,27 @@
-import {
-  ArrowDownLeft,
-  ArrowDownRight,
-  ArrowUpLeft,
-  ArrowUpRight,
-  Eye,
-  Sparkles
-} from "lucide-react"
+import { Eye, Sparkles } from "lucide-react"
 import type React from "react"
 import { useEffect, useState } from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
+import { EdgePositionPicker } from "~components/EdgePositionPicker"
 import { FeatureShortcutRow } from "~components/FeatureShortcutRow"
-import { GridPicker, type GridPickerItem } from "~components/GridPicker"
 import { SettingToggleRow } from "~components/SettingToggleRow"
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
 import { openBrowserShortcutsPage } from "~core/shortcutsHelper"
 import {
+  DEFAULT_QUICK_HUB_CONFIG,
   DEFAULT_SETTINGS,
+  normalizeEdgePlacement,
   STORAGE_KEYS,
+  type EdgePlacement,
   type FeatureSettings,
-  type QuickHubConfig,
-  type QuickHubCorner
+  type QuickHubConfig
 } from "~core/types"
 
 interface QuickHubSettingsViewProps {
   onBack: () => void
 }
-
-const CORNER_ITEMS: GridPickerItem<QuickHubCorner>[] = [
-  {
-    id: "top-right",
-    label: "Top Right",
-    icon: <ArrowUpRight className="w-3.5 h-3.5" />
-  },
-  {
-    id: "top-left",
-    label: "Top Left",
-    icon: <ArrowUpLeft className="w-3.5 h-3.5" />
-  },
-  {
-    id: "bottom-right",
-    label: "Bottom Right",
-    icon: <ArrowDownRight className="w-3.5 h-3.5" />
-  },
-  {
-    id: "bottom-left",
-    label: "Bottom Left",
-    icon: <ArrowDownLeft className="w-3.5 h-3.5" />
-  }
-]
 
 /**
  * Sub-settings view for Quick Hub.
@@ -87,12 +59,17 @@ export const QuickHubSettingsView: React.FC<QuickHubSettingsViewProps> = ({
     }))
   }
 
-  const handleSelectCorner = (corner: QuickHubCorner) => {
+  const currentPlacement = normalizeEdgePlacement(
+    currentConfig.placement ?? currentConfig.corner,
+    DEFAULT_QUICK_HUB_CONFIG.placement
+  )
+
+  const handlePlacementChange = (placement: EdgePlacement) => {
     setSettings((prev) => ({
       ...(prev ?? DEFAULT_SETTINGS),
       quickHubConfig: {
         ...(prev?.quickHubConfig ?? DEFAULT_SETTINGS.quickHubConfig),
-        corner
+        placement
       }
     }))
   }
@@ -118,7 +95,7 @@ export const QuickHubSettingsView: React.FC<QuickHubSettingsViewProps> = ({
       onToggle={handleToggleMaster}
       onBack={onBack}>
       <div className="space-y-4">
-        {/* Section 1: Screen Position Placement */}
+        {/* Section 1: Screen Position Placement (Edge Position Picker with Snapping) */}
         <div className="space-y-2">
           <span className="section-header">Screen Position</span>
           <div className="space-y-1.5">
@@ -126,14 +103,13 @@ export const QuickHubSettingsView: React.FC<QuickHubSettingsViewProps> = ({
               Floating Button Placement
             </span>
             <p className="text-[11px] text-content-muted leading-snug">
-              Choose which corner of the browser viewport to anchor the floating
-              Quick Hub trigger.
+              Drag or click along the perimeter to anchor the Quick Hub trigger
+              anywhere on screen.
             </p>
-            <GridPicker<QuickHubCorner>
-              items={CORNER_ITEMS}
-              value={currentConfig.corner}
-              onChange={handleSelectCorner}
-              columns={4}
+            <EdgePositionPicker
+              allowedEdges={["top", "right", "bottom", "left"]}
+              value={currentPlacement}
+              onChange={handlePlacementChange}
             />
           </div>
         </div>
@@ -162,19 +138,6 @@ export const QuickHubSettingsView: React.FC<QuickHubSettingsViewProps> = ({
             iconColorClass="text-amber-400"
             onConfigureShortcuts={handleOpenShortcutsPage}
           />
-        </div>
-
-        {/* Info card */}
-        <div className="card-subtle p-3 text-[11px] text-content-muted space-y-1">
-          <div className="flex items-center gap-1.5 font-semibold text-content-secondary">
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span>Direct In-Page Execution</span>
-          </div>
-          <p className="leading-relaxed">
-            Quick Hub activates directly within the webpage DOM, ensuring 100%
-            reliable Picture-in-Picture and Color Picker activation without
-            losing browser user gesture tokens.
-          </p>
         </div>
       </div>
     </SubSettingsLayout>

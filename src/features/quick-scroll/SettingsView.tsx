@@ -1,73 +1,31 @@
-import {
-  ArrowDownLeft,
-  ArrowDownRight,
-  ArrowLeft,
-  ArrowRight,
-  ArrowUpLeft,
-  ArrowUpRight,
-  ArrowUpToLine,
-  Compass,
-  Eye,
-  History
-} from "lucide-react"
+import { ArrowUpToLine, Compass, Eye, History } from "lucide-react"
 import type React from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
-import { GridPicker, type GridPickerItem } from "~components/GridPicker"
+import { EdgePositionPicker } from "~components/EdgePositionPicker"
 import { SegmentedTabs, type SegmentedTabItem } from "~components/SegmentedTabs"
 import { SettingToggleRow } from "~components/SettingToggleRow"
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
 import {
+  DEFAULT_QUICK_SCROLL_CONFIG,
   DEFAULT_SETTINGS,
+  normalizeEdgePlacement,
   STORAGE_KEYS,
+  type EdgePlacement,
   type FeatureSettings,
   type QuickScrollButtonsMode,
-  type QuickScrollConfig,
-  type QuickScrollPosition
+  type QuickScrollConfig
 } from "~core/types"
 
 interface QuickScrollSettingsViewProps {
   onBack: () => void
 }
 
-const POSITION_ITEMS: GridPickerItem<QuickScrollPosition>[] = [
-  {
-    id: "top-left",
-    label: "Top Left",
-    icon: <ArrowUpLeft className="w-3.5 h-3.5" />
-  },
-  {
-    id: "center-left",
-    label: "Center Left",
-    icon: <ArrowLeft className="w-3.5 h-3.5" />
-  },
-  {
-    id: "bottom-left",
-    label: "Bottom Left",
-    icon: <ArrowDownLeft className="w-3.5 h-3.5" />
-  },
-  {
-    id: "top-right",
-    label: "Top Right",
-    icon: <ArrowUpRight className="w-3.5 h-3.5" />
-  },
-  {
-    id: "center-right",
-    label: "Center Right",
-    icon: <ArrowRight className="w-3.5 h-3.5" />
-  },
-  {
-    id: "bottom-right",
-    label: "Bottom Right",
-    icon: <ArrowDownRight className="w-3.5 h-3.5" />
-  }
-]
-
 const BUTTON_ITEMS: SegmentedTabItem<QuickScrollButtonsMode>[] = [
   {
     id: "both",
-    label: "Both (Top & Down)",
+    label: "Top & Bottom",
     icon: <Compass className="w-3.5 h-3.5" />
   },
   {
@@ -100,12 +58,17 @@ export const QuickScrollSettingsView: React.FC<
     }))
   }
 
-  const handleSelectPosition = (position: QuickScrollPosition) => {
+  const currentPlacement = normalizeEdgePlacement(
+    currentConfig.placement ?? currentConfig.position,
+    DEFAULT_QUICK_SCROLL_CONFIG.placement
+  )
+
+  const handleSelectPlacement = (placement: EdgePlacement) => {
     setSettings((prev) => ({
       ...(prev ?? DEFAULT_SETTINGS),
       quickScrollConfig: {
         ...(prev?.quickScrollConfig ?? DEFAULT_SETTINGS.quickScrollConfig),
-        position
+        placement
       }
     }))
   }
@@ -139,7 +102,7 @@ export const QuickScrollSettingsView: React.FC<
       onToggle={handleToggleMaster}
       onBack={onBack}>
       <div className="space-y-4">
-        {/* Section 1: Screen Position (Flat Layout, No Card Wrapper) */}
+        {/* Section 1: Screen Position (Edge Position Picker with Snapping) */}
         <div className="space-y-2">
           <span className="section-header">Screen Position</span>
           <div className="space-y-1.5">
@@ -147,14 +110,13 @@ export const QuickScrollSettingsView: React.FC<
               Button Placement
             </span>
             <p className="text-[11px] text-content-muted leading-snug">
-              Choose where floating scroll buttons anchor on your browser
-              screen.
+              Drag or click along the left or right perimeter to anchor the
+              floating scroll buttons.
             </p>
-            <GridPicker<QuickScrollPosition>
-              items={POSITION_ITEMS}
-              value={currentConfig.position}
-              onChange={handleSelectPosition}
-              columns={3}
+            <EdgePositionPicker
+              allowedEdges={["left", "right"]}
+              value={currentPlacement}
+              onChange={handleSelectPlacement}
             />
           </div>
         </div>

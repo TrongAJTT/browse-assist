@@ -10,9 +10,10 @@ import { cleanUrl, copyToClipboard, showCopiedFeedback } from "~core/linkUtils"
 import { getStoredSettings, subscribeToSettings } from "~core/storage"
 import {
   DEFAULT_QUICK_HUB_CONFIG,
+  normalizeEdgePlacement,
+  type EdgePlacement,
   type FeatureSettings,
-  type QuickHubConfig,
-  type QuickHubCorner
+  type QuickHubConfig
 } from "~core/types"
 import { pickColor } from "~features/color-picker/logic"
 import { startZapping as startElementZapping } from "~features/element-zapper/logic"
@@ -46,37 +47,84 @@ const ARROW_DOWN_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="no
 const ZOOM_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>`
 const LINK_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`
 
-function getCornerPositionCss(corner: QuickHubCorner): {
+function getPlacementCss(placement: EdgePlacement): {
   btnCss: string
   menuCss: string
 } {
-  switch (corner) {
-    case "top-left":
+  const edge = placement.edge
+  const offset = Math.max(0, Math.min(100, placement.offsetPercent))
+
+  switch (edge) {
+    case "top": {
+      const isNearLeft = offset < 35
+      const isNearRight = offset > 65
+      const origin = isNearLeft ? "top left" : isNearRight ? "top right" : "top center"
+      const menuLeftCss = isNearLeft
+        ? `left: clamp(16px, ${offset}vw - 18px, calc(100vw - 266px));`
+        : isNearRight
+          ? `left: clamp(16px, calc(${offset}vw - 232px), calc(100vw - 266px));`
+          : `left: clamp(16px, calc(${offset}vw - 125px), calc(100vw - 266px));`
+
       return {
-        btnCss: "top: 16px; left: 16px;",
-        menuCss: "top: 56px; left: 16px; transform-origin: top left;"
+        btnCss: `top: 16px; left: calc(16px + (100vw - 32px) * ${offset} / 100); transform: translateX(-${offset}%);`,
+        menuCss: `top: 56px; ${menuLeftCss} transform-origin: ${origin};`
       }
-    case "bottom-left":
+    }
+    case "bottom": {
+      const isNearLeft = offset < 35
+      const isNearRight = offset > 65
+      const origin = isNearLeft ? "bottom left" : isNearRight ? "bottom right" : "bottom center"
+      const menuLeftCss = isNearLeft
+        ? `left: clamp(16px, ${offset}vw - 18px, calc(100vw - 266px));`
+        : isNearRight
+          ? `left: clamp(16px, calc(${offset}vw - 232px), calc(100vw - 266px));`
+          : `left: clamp(16px, calc(${offset}vw - 125px), calc(100vw - 266px));`
+
       return {
-        btnCss: "bottom: 16px; left: 16px;",
-        menuCss: "bottom: 56px; left: 16px; transform-origin: bottom left;"
+        btnCss: `bottom: 16px; left: calc(16px + (100vw - 32px) * ${offset} / 100); transform: translateX(-${offset}%);`,
+        menuCss: `bottom: 56px; ${menuLeftCss} transform-origin: ${origin};`
       }
-    case "bottom-right":
+    }
+    case "left": {
+      const isNearTop = offset < 35
+      const isNearBottom = offset > 65
+      const origin = isNearTop ? "top left" : isNearBottom ? "bottom left" : "center left"
+      const menuTopCss = isNearTop
+        ? `top: clamp(16px, ${offset}vh - 18px, calc(100vh - 320px));`
+        : isNearBottom
+          ? `bottom: clamp(16px, calc(100vh - ${offset}vh - 18px), calc(100vh - 320px));`
+          : `top: clamp(16px, calc(${offset}vh - 150px), calc(100vh - 320px));`
+
       return {
-        btnCss: "bottom: 16px; right: 16px;",
-        menuCss: "bottom: 56px; right: 16px; transform-origin: bottom right;"
+        btnCss: `left: 16px; top: calc(16px + (100vh - 32px) * ${offset} / 100); transform: translateY(-${offset}%);`,
+        menuCss: `left: 56px; ${menuTopCss} transform-origin: ${origin};`
       }
-    case "top-right":
-    default:
+    }
+    case "right":
+    default: {
+      const isNearTop = offset < 35
+      const isNearBottom = offset > 65
+      const origin = isNearTop ? "top right" : isNearBottom ? "bottom right" : "center right"
+      const menuTopCss = isNearTop
+        ? `top: clamp(16px, ${offset}vh - 18px, calc(100vh - 320px));`
+        : isNearBottom
+          ? `bottom: clamp(16px, calc(100vh - ${offset}vh - 18px), calc(100vh - 320px));`
+          : `top: clamp(16px, calc(${offset}vh - 150px), calc(100vh - 320px));`
+
       return {
-        btnCss: "top: 16px; right: 16px;",
-        menuCss: "top: 56px; right: 16px; transform-origin: top right;"
+        btnCss: `right: 16px; top: calc(16px + (100vh - 32px) * ${offset} / 100); transform: translateY(-${offset}%);`,
+        menuCss: `right: 56px; ${menuTopCss} transform-origin: ${origin};`
       }
+    }
   }
 }
 
 function getShadowStyles(config: QuickHubConfig): string {
-  const { btnCss, menuCss } = getCornerPositionCss(config.corner)
+  const placement = normalizeEdgePlacement(
+    config.placement ?? config.corner,
+    DEFAULT_QUICK_HUB_CONFIG.placement
+  )
+  const { btnCss, menuCss } = getPlacementCss(placement)
 
   return `
     :host {
@@ -477,31 +525,16 @@ export function toggleQuickHubMenu(): void {
 }
 
 /**
- * Checks proximity between mouse coordinate and configured corner.
+ * Checks proximity between mouse coordinate and floating trigger button.
  */
 function handleMouseMove(e: MouseEvent): void {
   if (!currentConfig.hoverToReveal || isMenuOpen || !triggerBtn) return
 
-  const corner = currentConfig.corner
-  let dist = 999999
+  const rect = triggerBtn.getBoundingClientRect()
+  const btnCenterX = rect.left + rect.width / 2
+  const btnCenterY = rect.top + rect.height / 2
 
-  const vw = window.innerWidth
-  const vh = window.innerHeight
-
-  switch (corner) {
-    case "top-right":
-      dist = Math.hypot(vw - e.clientX, e.clientY)
-      break
-    case "top-left":
-      dist = Math.hypot(e.clientX, e.clientY)
-      break
-    case "bottom-right":
-      dist = Math.hypot(vw - e.clientX, vh - e.clientY)
-      break
-    case "bottom-left":
-      dist = Math.hypot(e.clientX, vh - e.clientY)
-      break
-  }
+  const dist = Math.hypot(btnCenterX - e.clientX, btnCenterY - e.clientY)
 
   if (dist <= PROXIMITY_RADIUS) {
     if (hideTimeout) {

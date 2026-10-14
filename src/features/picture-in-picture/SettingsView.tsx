@@ -1,56 +1,28 @@
-import {
-  ArrowDownLeft,
-  ArrowDownRight,
-  ArrowUpLeft,
-  ArrowUpRight,
-  Eye,
-  MousePointerClick,
-  ShieldAlert
-} from "lucide-react"
+import { Eye, MousePointerClick, ShieldAlert } from "lucide-react"
 import type React from "react"
 import { useEffect, useState } from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
+import { EdgePositionPicker } from "~components/EdgePositionPicker"
 import { FeatureShortcutRow } from "~components/FeatureShortcutRow"
-import { GridPicker, type GridPickerItem } from "~components/GridPicker"
 import { SettingToggleRow } from "~components/SettingToggleRow"
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
 import { openBrowserShortcutsPage } from "~core/shortcutsHelper"
 import {
+  DEFAULT_PICTURE_IN_PICTURE_CONFIG,
   DEFAULT_SETTINGS,
   STORAGE_KEYS,
+  type EdgePlacement,
   type FeatureSettings,
   type PictureInPictureConfig,
-  type PipButtonPosition
+  normalizeEdgePlacement
 } from "~core/types"
 
 interface PictureInPictureSettingsViewProps {
   onBack: () => void
 }
 
-const PIP_POSITION_ITEMS: GridPickerItem<PipButtonPosition>[] = [
-  {
-    id: "top-left",
-    label: "Top Left",
-    icon: <ArrowUpLeft className="w-3.5 h-3.5" />
-  },
-  {
-    id: "top-right",
-    label: "Top Right",
-    icon: <ArrowUpRight className="w-3.5 h-3.5" />
-  },
-  {
-    id: "bottom-left",
-    label: "Bottom Left",
-    icon: <ArrowDownLeft className="w-3.5 h-3.5" />
-  },
-  {
-    id: "bottom-right",
-    label: "Bottom Right",
-    icon: <ArrowDownRight className="w-3.5 h-3.5" />
-  }
-]
 
 /**
  * Sub-settings view for Universal Picture-in-Picture.
@@ -100,13 +72,34 @@ export const PictureInPictureSettingsView: React.FC<
     }))
   }
 
-  const handleSelectPosition = (position: PipButtonPosition) => {
+  const currentPlacement = normalizeEdgePlacement(
+    currentConfig.placement ?? currentConfig.buttonPosition,
+    DEFAULT_PICTURE_IN_PICTURE_CONFIG.placement
+  )
+
+  const handleSelectPlacement = (placement: EdgePlacement) => {
     setSettings((prev) => ({
       ...(prev ?? DEFAULT_SETTINGS),
       pictureInPictureConfig: {
         ...(prev?.pictureInPictureConfig ??
           DEFAULT_SETTINGS.pictureInPictureConfig),
-        buttonPosition: position
+        placement,
+        buttonPosition:
+          placement.edge === "top"
+            ? placement.offsetPercent < 50
+              ? "top-left"
+              : "top-right"
+            : placement.edge === "bottom"
+              ? placement.offsetPercent < 50
+                ? "bottom-left"
+                : "bottom-right"
+              : placement.edge === "left"
+                ? placement.offsetPercent < 50
+                  ? "top-left"
+                  : "bottom-left"
+                : placement.offsetPercent < 50
+                  ? "top-right"
+                  : "bottom-right"
       }
     }))
   }
@@ -177,33 +170,19 @@ export const PictureInPictureSettingsView: React.FC<
             <span className="section-header">Button Position</span>
             <div className="space-y-1.5">
               <span className="text-xs font-semibold text-content-primary">
-                Corner Placement
+                Edge & Alignment
               </span>
               <p className="text-[11px] text-content-muted leading-snug">
-                Choose which corner inside the video frame to anchor the floating PiP button.
+                Drag or click along the edges to anchor the floating PiP button inside the video frame.
               </p>
-              <GridPicker<PipButtonPosition>
-                items={PIP_POSITION_ITEMS}
-                value={currentConfig.buttonPosition ?? "top-right"}
-                onChange={handleSelectPosition}
-                columns={4}
+              <EdgePositionPicker
+                value={currentPlacement}
+                onChange={handleSelectPlacement}
+                allowedEdges={["top", "right", "bottom", "left"]}
               />
             </div>
           </div>
         )}
-
-        {/* Feature Highlights Note */}
-        <div className="card-subtle p-3 text-[11px] text-content-muted space-y-1">
-          <div className="flex items-center gap-1.5 font-semibold text-content-secondary">
-            <ShieldAlert className="w-3.5 h-3.5 text-accent" />
-            <span>Universal Compatibility</span>
-          </div>
-          <p className="leading-relaxed">
-            Automatically finds currently active playing videos, unlocks
-            restricted players, and allows single-click tab refocusing right
-            from the extension popup.
-          </p>
-        </div>
       </div>
     </SubSettingsLayout>
   )
