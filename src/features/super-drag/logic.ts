@@ -10,7 +10,12 @@ import {
   type SuperDragAction,
   type SuperDragConfig
 } from "~core/types"
-import { cleanUrl } from "~features/context-menu-actions/cleanUrl"
+import {
+  cleanUrl,
+  copyToClipboard,
+  extractAnchorText,
+  showCopiedFeedback
+} from "~core/linkUtils"
 import {
   MAX_DRAG_DISTANCE,
   MIN_DRAG_DISTANCE,
@@ -50,6 +55,7 @@ interface DragSession {
   startY: number
   type: "text" | "link" | "image"
   payload: string
+  extraText?: string
 }
 
 let activeSession: DragSession | null = null
@@ -203,6 +209,7 @@ const ICONS = {
   windowBg: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="M2 8h20"/></svg>`,
   incognito: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12a5 5 0 0 0 5 5 8 8 0 0 1 5 2 8 8 0 0 1 5-2 5 5 0 0 0 5-5"/><path d="M3 7h18"/><circle cx="7" cy="14" r="2"/><circle cx="17" cy="14" r="2"/></svg>`,
   copy: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`,
+  copyText: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>`,
   none: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg>`
 }
 
@@ -245,6 +252,12 @@ function getActionDisplay(
         icon: ICONS.incognito,
         theme: "amber"
       }
+    case "copy_link_text":
+      return {
+        label: "Drop to Copy Link Text",
+        icon: ICONS.copyText,
+        theme: "sky"
+      }
     case "copy_to_clipboard":
       return {
         label:
@@ -252,7 +265,7 @@ function getActionDisplay(
             ? "Drop to Copy Text"
             : targetType === "image"
               ? "Drop to Copy Image Link"
-              : "Drop to Copy Link",
+              : "Drop to Copy Link URL",
         icon: ICONS.copy,
         theme: "emerald"
       }
@@ -384,11 +397,10 @@ function updateRadialIndicator(
         stroke-dasharray="${isDeadzone || isExceeded ? "3 3" : "none"}"
         style="transition: all 0.15s ease;"
       />
-      ${
-        isDeadzone || isExceeded
-          ? `<path d="M102 102 L118 118 M118 102 L102 118" stroke="rgba(248, 113, 113, 0.85)" stroke-width="2.5" stroke-linecap="round"/>`
-          : centerTargetIcon
-      }
+      ${isDeadzone || isExceeded
+      ? `<path d="M102 102 L118 118 M118 102 L102 118" stroke="rgba(248, 113, 113, 0.85)" stroke-width="2.5" stroke-linecap="round"/>`
+      : centerTargetIcon
+    }
     </svg>
 
     <!-- Floating Action Pill Tooltip -->
@@ -409,13 +421,12 @@ function updateRadialIndicator(
       backdrop-filter: blur(8px);
       transition: all 0.15s ease;
     ">
-      ${
-        isExceeded
-          ? `<span style="color:#fca5a5;">Exceeded max distance (Release to cancel)</span>`
-          : isDeadzone
-            ? `<span style="color:#fca5a5;">Release to cancel</span>`
-            : `<span style="color:#38bdf8; margin-right:4px;">${activeDirection === "up" ? "↑ Top:" : activeDirection === "right" ? "→ Right:" : activeDirection === "down" ? "↓ Bottom:" : "← Left:"}</span><span>${activeDisplay?.label.replace("Drop to Open ", "").replace("Drop to ", "")}</span>`
-      }
+      ${isExceeded
+      ? `<span style="color:#fca5a5;">Exceeded max distance (Release to cancel)</span>`
+      : isDeadzone
+        ? `<span style="color:#fca5a5;">Release to cancel</span>`
+        : `<span>${activeDisplay?.label.replace("Drop to Open ", "").replace("Drop to ", "")}</span>`
+    }
     </div>
   `
 
@@ -467,29 +478,6 @@ function hideIndicator(immediately = false): void {
   }
 }
 
-/**
- * Copies text to clipboard with fallback.
- */
-async function copyToClipboard(text: string): Promise<boolean> {
-  try {
-    await navigator.clipboard.writeText(text)
-    return true
-  } catch {
-    try {
-      const textarea = document.createElement("textarea")
-      textarea.value = text
-      textarea.style.position = "fixed"
-      textarea.style.opacity = "0"
-      document.body.appendChild(textarea)
-      textarea.select()
-      const successful = document.execCommand("copy")
-      document.body.removeChild(textarea)
-      return successful
-    } catch {
-      return false
-    }
-  }
-}
 
 /**
  * Determines primary drag direction based on displacement angles.
@@ -576,7 +564,8 @@ function onDragStart(event: DragEvent): void {
       startX: event.clientX,
       startY: event.clientY,
       type: "link",
-      payload: anchor.href
+      payload: anchor.href,
+      extraText: extractAnchorText(anchor, anchor.href)
     }
     return
   }
@@ -709,18 +698,33 @@ async function onDragEnd(event: DragEvent): Promise<void> {
   if (directionToExecute) {
     const action = getTargetAction(activeSession.type, directionToExecute)
 
-    if (action === "copy_to_clipboard") {
+    if (action === "copy_link_text") {
+      const textToCopy = activeSession.extraText || activeSession.payload
+      const success = await copyToClipboard(textToCopy)
+      if (success) {
+        showCopiedFeedback("Copied Link Text", textToCopy)
+      }
+    } else if (action === "copy_to_clipboard") {
       const payload =
         activeSession.type === "text"
           ? activeSession.payload
           : cleanUrl(activeSession.payload)
-      await copyToClipboard(payload)
+      const success = await copyToClipboard(payload)
+      if (success) {
+        const label =
+          activeSession.type === "text"
+            ? "Copied Text"
+            : activeSession.type === "image"
+              ? "Copied Image Link"
+              : "Copied Link URL"
+        showCopiedFeedback(label, payload)
+      }
     } else if (action !== "none") {
       sendToBackground(MESSAGE_TYPES.SUPER_DRAG_EXECUTE_ACTION, {
         action,
         targetType: activeSession.type,
         payload: activeSession.payload
-      }).catch(() => {})
+      }).catch(() => { })
     }
   }
 

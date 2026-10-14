@@ -59,5 +59,45 @@ export const SUPER_DRAG_ACTION_OPTIONS: SuperDragActionOption[] = [
   { id: "open_window_active", label: "New Window" },
   { id: "open_incognito_active", label: "Incognito Window", requiresIncognito: true },
   { id: "copy_to_clipboard", label: "Copy to Clipboard" },
+  { id: "copy_link_text", label: "Copy Link Text" },
   { id: "none", label: "None (Do Nothing)" }
 ]
+
+/**
+ * Resolves context-aware action options tailored to the specific drag target type.
+ */
+export function getSuperDragActionOptions(
+  targetType: "text" | "link" | "image" = "text"
+): SuperDragActionOption[] {
+  if (targetType === "link") {
+    return [
+      { id: "open_bg_tab", label: "Background Tab" },
+      { id: "open_active_tab", label: "Active Tab" },
+      { id: "open_window_active", label: "New Window" },
+      { id: "open_incognito_active", label: "Incognito Window", requiresIncognito: true },
+      { id: "copy_to_clipboard", label: "Copy Link URL" },
+      { id: "copy_link_text", label: "Copy Link Text" },
+      { id: "none", label: "None (Do Nothing)" }
+    ]
+  }
+
+  if (targetType === "image") {
+    return [
+      { id: "open_bg_tab", label: "Background Tab" },
+      { id: "open_active_tab", label: "Active Tab" },
+      { id: "open_window_active", label: "New Window" },
+      { id: "open_incognito_active", label: "Incognito Window", requiresIncognito: true },
+      { id: "copy_to_clipboard", label: "Copy Image Link" },
+      { id: "none", label: "None (Do Nothing)" }
+    ]
+  }
+
+  return [
+    { id: "open_bg_tab", label: "Background Tab" },
+    { id: "open_active_tab", label: "Active Tab" },
+    { id: "open_window_active", label: "New Window" },
+    { id: "open_incognito_active", label: "Incognito Window", requiresIncognito: true },
+    { id: "copy_to_clipboard", label: "Copy to Clipboard" },
+    { id: "none", label: "None (Do Nothing)" }
+  ]
+}

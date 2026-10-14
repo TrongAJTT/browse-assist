@@ -44,6 +44,7 @@ export type SuperDragAction =
   | "open_window_active"
   | "open_incognito_active"
   | "copy_to_clipboard"
+  | "copy_link_text"
   | "none"
 
 export interface DirectionalActions {

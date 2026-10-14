@@ -12,7 +12,7 @@ import {
   type SuperDragAction,
   type SuperDragConfig
 } from "~core/types"
-import { cleanUrl } from "~features/context-menu-actions/cleanUrl"
+import { cleanUrl } from "~core/linkUtils"
 
 export interface SuperDragMessage {
   action?: string

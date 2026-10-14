@@ -200,6 +200,7 @@ export const SuperDragSettingsView: React.FC<SuperDragSettingsViewProps> = ({
                 {currentConfig.searchSelectedText ? (
                   <div className="mt-2 pt-2 pb-1 pl-3 border-l-2 border-border-subtle ml-2">
                     <DirectionalDPadPicker
+                      targetType="text"
                       actions={
                         currentConfig.textActions ?? DEFAULT_DIRECTIONAL_ACTIONS
                       }
@@ -226,13 +227,14 @@ export const SuperDragSettingsView: React.FC<SuperDragSettingsViewProps> = ({
                 <SettingToggleRow
                   icon={<ExternalLink className="w-5 h-5 text-emerald-400" />}
                   title="Open Hyperlinks"
-                  description="Drag hyperlinks to open in tabs, new windows, or copy destination URL."
+                  description="Drag hyperlinks to open in tabs, new windows, or copy link URL or text."
                   enabled={currentConfig.openHyperlinks}
                   onToggle={() => handleToggleOption("openHyperlinks")}
                 />
                 {currentConfig.openHyperlinks ? (
                   <div className="mt-2 pt-2 pb-1 pl-3 border-l-2 border-border-subtle ml-2">
                     <DirectionalDPadPicker
+                      targetType="link"
                       actions={
                         currentConfig.linkActions ?? DEFAULT_DIRECTIONAL_ACTIONS
                       }
@@ -266,6 +268,7 @@ export const SuperDragSettingsView: React.FC<SuperDragSettingsViewProps> = ({
                 {currentConfig.openImages ? (
                   <div className="mt-2 pt-2 pb-1 pl-3 border-l-2 border-border-subtle ml-2">
                     <DirectionalDPadPicker
+                      targetType="image"
                       actions={
                         currentConfig.imageActions ?? DEFAULT_DIRECTIONAL_ACTIONS
                       }

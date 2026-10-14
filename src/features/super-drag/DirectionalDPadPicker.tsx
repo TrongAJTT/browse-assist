@@ -17,9 +17,10 @@ export interface DirectionalDPadPickerProps {
   onReset?: () => void
   isIncognitoAllowed: boolean
   centerIcon?: React.ReactNode
+  targetType?: "text" | "link" | "image"
 }
 
-import { SUPER_DRAG_ACTION_OPTIONS } from "./constants"
+import { getSuperDragActionOptions } from "./constants"
 
 interface DirectionMeta {
   key: DragDirection
@@ -45,12 +46,15 @@ export const DirectionalDPadPicker: React.FC<DirectionalDPadPickerProps> = ({
   onChangeAction,
   onReset,
   isIncognitoAllowed,
-  centerIcon
+  centerIcon,
+  targetType = "text"
 }) => {
+  const actionOptions = getSuperDragActionOptions(targetType)
+
   const renderDirectionNode = (direction: DragDirection, widthClass = "w-[126px]") => {
     const { key, label, Icon } = DIRECTIONS[direction]
     const rawAction = actions[key]
-    const isValid = SUPER_DRAG_ACTION_OPTIONS.some((opt) => opt.id === rawAction)
+    const isValid = actionOptions.some((opt) => opt.id === rawAction)
     const currentAction = isValid ? rawAction : "open_bg_tab"
 
     return (
@@ -69,7 +73,7 @@ export const DirectionalDPadPicker: React.FC<DirectionalDPadPickerProps> = ({
             onChangeAction(key, e.target.value as SuperDragAction)
           }
           className="w-full text-[11px] font-medium bg-app-elevated text-content-primary border border-border-subtle/80 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-accent cursor-pointer truncate text-left">
-          {SUPER_DRAG_ACTION_OPTIONS.map((opt) => {
+          {actionOptions.map((opt) => {
             const isDisabled = opt.requiresIncognito && !isIncognitoAllowed
 
             return (
@@ -78,7 +82,7 @@ export const DirectionalDPadPicker: React.FC<DirectionalDPadPickerProps> = ({
                 value={opt.id}
                 disabled={isDisabled}
                 className={isDisabled ? "text-content-muted/50" : ""}>
-                {opt.label} {isDisabled ? "(No Incognito)" : ""}
+                {opt.label} {isDisabled ? "(N/A)" : ""}
               </option>
             )
           })}
