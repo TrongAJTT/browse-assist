@@ -6,6 +6,7 @@ import {
   PictureInPicture2,
   Pipette,
   Scroll,
+  Sparkles,
   Volume2,
   Zap,
   ZoomIn
@@ -129,6 +130,16 @@ export const FEATURE_CATALOG: Record<FeatureKey, FeatureCatalogItem> = {
     description:
       "Inspect, zap, edit text, or reposition elements on any web page.",
     icon: Zap,
+    colorClass: "text-amber-400",
+    bgClass: "bg-amber-500/10 border-amber-500/30",
+    hasSettings: true
+  },
+  quickHub: {
+    key: "quickHub",
+    title: "Quick Hub",
+    description:
+      "On-screen quick utility hub with smart corner hover activation.",
+    icon: Sparkles,
     colorClass: "text-amber-400",
     bgClass: "bg-amber-500/10 border-amber-500/30",
     hasSettings: true

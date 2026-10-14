@@ -53,6 +53,11 @@ import {
   deactivate as deactivateElementZapper,
   startZapping as startElementZapping
 } from "~features/element-zapper/logic"
+import {
+  activate as activateQuickHub,
+  deactivate as deactivateQuickHub,
+  toggleQuickHubMenu
+} from "~features/quick-hub/logic"
 
 export const config: PlasmoCSConfig = {
   matches: ["http://*/*", "https://*/*"],
@@ -127,6 +132,13 @@ function applySettings(nextSettings: FeatureSettings): void {
   } else {
     deactivateElementZapper()
   }
+
+  // Quick Hub
+  if (nextSettings.quickHub) {
+    activateQuickHub(nextSettings.quickHubConfig)
+  } else {
+    deactivateQuickHub()
+  }
 }
 
 /**
@@ -171,6 +183,11 @@ async function init(): Promise<void> {
       }
       if (msgType === MESSAGE_TYPES.TRIGGER_ELEMENT_ZAPPER) {
         startElementZapping()
+        sendResponse({ success: true })
+        return true
+      }
+      if (msgType === MESSAGE_TYPES.TOGGLE_QUICK_HUB) {
+        toggleQuickHubMenu()
         sendResponse({ success: true })
         return true
       }

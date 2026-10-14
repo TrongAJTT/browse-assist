@@ -95,6 +95,9 @@
           "mac": "Alt+Shift+Z"
         },
         "description": "Activate Element Zapper to remove page clutter"
+      },
+      "toggle_quick_hub": {
+        "description": "Toggle Quick Hub on-screen menu"
       }
     },
     "overrides": {
@@ -127,6 +130,9 @@
               "mac": "Alt+Shift+Z"
             },
             "description": "Activate Element Zapper to remove page clutter"
+          },
+          "toggle_quick_hub": {
+            "description": "Toggle Quick Hub on-screen menu"
           }
         }
       }

@@ -39,4 +39,10 @@ initElementZapperBackground().catch((err) => {
   console.error("Failed to initialize element-zapper background service:", err)
 })
 
+import { initQuickHubBackground } from "~features/quick-hub/background"
+
+initQuickHubBackground().catch((err) => {
+  console.error("Failed to initialize quick-hub background service:", err)
+})
+
 

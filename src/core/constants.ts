@@ -142,6 +142,9 @@ export const MESSAGE_TYPES = {
   // Element Zapper / Toys
   TRIGGER_ELEMENT_ZAPPER: "TRIGGER_ELEMENT_ZAPPER",
 
+  // Quick Hub
+  TOGGLE_QUICK_HUB: "TOGGLE_QUICK_HUB",
+
   // Navigation & Settings
   OPEN_POPUP: "OPEN_POPUP"
 } as const

@@ -12,6 +12,7 @@ export type FeatureKey =
   | "quickScroll"
   | "colorPicker"
   | "elementZapper"
+  | "quickHub"
 
 export type ContextMenuActionId =
   | "copyLinkText"
@@ -323,6 +324,28 @@ export const DEFAULT_ELEMENT_ZAPPER_CONFIG: ElementZapperConfig = {
 }
 
 /**
+ * Screen corner position for Quick Hub trigger.
+ */
+export type QuickHubCorner =
+  | "top-right"
+  | "top-left"
+  | "bottom-right"
+  | "bottom-left"
+
+/**
+ * Quick Hub configuration.
+ */
+export interface QuickHubConfig {
+  corner: QuickHubCorner
+  hoverToReveal: boolean
+}
+
+export const DEFAULT_QUICK_HUB_CONFIG: QuickHubConfig = {
+  corner: "top-right",
+  hoverToReveal: true
+}
+
+/**
  * Appearance theme options: "dark" | "light" | "system".
  */
 export type ThemeMode = "dark" | "light" | "system"
@@ -342,6 +365,7 @@ export interface FeatureSettings {
   quickScroll: boolean
   colorPicker: boolean
   elementZapper: boolean
+  quickHub: boolean
   featureLayout: FeatureLayoutConfig
   popupNavigation: PopupNavigationConfig
   contextMenuActionsConfig: ContextMenuActionsConfig
@@ -353,6 +377,7 @@ export interface FeatureSettings {
   quickScrollConfig: QuickScrollConfig
   colorPickerConfig: ColorPickerConfig
   elementZapperConfig: ElementZapperConfig
+  quickHubConfig: QuickHubConfig
 }
 
 /**
@@ -374,7 +399,8 @@ export const DEFAULT_FEATURE_LAYOUT_CONFIG: FeatureLayoutConfig = {
     "videoWheelControl",
     "mouseZoom",
     "colorPicker",
-    "elementZapper"
+    "elementZapper",
+    "quickHub"
   ],
   hidden: []
 }
@@ -408,6 +434,7 @@ export const DEFAULT_SETTINGS: FeatureSettings = {
   quickScroll: true,
   colorPicker: true,
   elementZapper: true,
+  quickHub: true,
   featureLayout: DEFAULT_FEATURE_LAYOUT_CONFIG,
   popupNavigation: DEFAULT_POPUP_NAVIGATION_CONFIG,
   contextMenuActionsConfig: DEFAULT_CONTEXT_MENU_ACTIONS_CONFIG,
@@ -421,7 +448,8 @@ export const DEFAULT_SETTINGS: FeatureSettings = {
   videoWheelControlConfig: DEFAULT_VIDEO_WHEEL_CONTROL_CONFIG,
   quickScrollConfig: DEFAULT_QUICK_SCROLL_CONFIG,
   colorPickerConfig: DEFAULT_COLOR_PICKER_CONFIG,
-  elementZapperConfig: DEFAULT_ELEMENT_ZAPPER_CONFIG
+  elementZapperConfig: DEFAULT_ELEMENT_ZAPPER_CONFIG,
+  quickHubConfig: DEFAULT_QUICK_HUB_CONFIG
 }
 
 /**
@@ -523,6 +551,14 @@ export const FEATURES_LIST: FeatureMeta[] = [
     description:
       "Inspect, zap, edit text, or reposition elements on any web page.",
     icon: "⚡",
+    hasSettings: true
+  },
+  {
+    key: "quickHub",
+    title: "Quick Hub",
+    description:
+      "On-screen quick utility hub with smart corner hover activation.",
+    icon: "✨",
     hasSettings: true
   }
 ]

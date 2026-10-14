@@ -94,6 +94,12 @@ export interface MessageRegistry {
     response: { success: boolean }
   },
 
+  // Quick Hub
+  [MESSAGE_TYPES.TOGGLE_QUICK_HUB]: {
+    request: undefined
+    response: { success: boolean }
+  },
+
   // Navigation & Settings
   [MESSAGE_TYPES.OPEN_POPUP]: {
     request: { view?: string }

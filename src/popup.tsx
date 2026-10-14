@@ -5,11 +5,8 @@ import {
   Heart,
   HelpCircle,
   PictureInPicture2,
-  Pipette,
   Settings as SettingsIcon,
-  Sparkles,
-  X,
-  Zap
+  X
 } from "lucide-react"
 import { Fragment, useEffect, useMemo, useRef, useState } from "react"
 
@@ -24,7 +21,6 @@ import { isColorPickerSupported } from "~core/browserDetect"
 import { APP_INFO, DONATE_OPTIONS } from "~core/constants"
 import {
   MESSAGE_TYPES,
-  sendToActiveTab,
   sendToBackground
 } from "~core/messaging"
 import {
@@ -48,6 +44,8 @@ import { PictureInPictureSettingsView } from "~features/picture-in-picture/Setti
 import { PictureInPictureToggle } from "~features/picture-in-picture/Toggle"
 import { VideoWheelControlSettingsView } from "~features/video-wheel-control/SettingsView"
 import { VideoWheelControlToggle } from "~features/video-wheel-control/Toggle"
+import { QuickHubSettingsView } from "~features/quick-hub/SettingsView"
+import { QuickHubToggle } from "~features/quick-hub/Toggle"
 import { QuickScrollSettingsView } from "~features/quick-scroll/SettingsView"
 import { QuickScrollToggle } from "~features/quick-scroll/Toggle"
 import { SmoothScrollSettingsView } from "~features/smooth-scroll/SettingsView"
@@ -68,6 +66,7 @@ type ActiveView =
   | "mouse-zoom-settings"
   | "color-picker-settings"
   | "element-zapper-settings"
+  | "quick-hub-settings"
   | "preferences"
   | "about"
 
@@ -87,8 +86,6 @@ function IndexPopup() {
   const [isTabReady, setIsTabReady] = useState(false)
   const [isDonateOpen, setIsDonateOpen] = useState(false)
   const donateMenuRef = useRef<HTMLDivElement>(null)
-  const [isQuickToolsOpen, setIsQuickToolsOpen] = useState(false)
-  const quickToolsMenuRef = useRef<HTMLDivElement>(null)
   const isInitialMount = useRef(true)
 
   const [settings] = useStorage<FeatureSettings>(
@@ -164,10 +161,6 @@ function IndexPopup() {
     tabId: number
     title: string
   } | null>(null)
-  const [colorPickerShortcut, setColorPickerShortcut] =
-    useState<string>("Alt + Shift + C")
-  const [elementZapperShortcut, setElementZapperShortcut] =
-    useState<string>("Alt + Shift + Z")
 
   // Dynamic feature order & visibility
   const orderedFeatures = useMemo(() => {
@@ -231,34 +224,21 @@ function IndexPopup() {
       <ElementZapperToggle
         onConfigure={() => setCurrentView("element-zapper-settings")}
       />
+    ),
+    quickHub: (
+      <QuickHubToggle
+        onConfigure={() => setCurrentView("quick-hub-settings")}
+      />
     )
   }
 
-  // Query background for active PiP session and command shortcuts
+  // Query background for active PiP session
   useEffect(() => {
     sendToBackground(MESSAGE_TYPES.GET_ACTIVE_PIP_SESSION).then((response) => {
       if (response?.session) {
         setActivePiP(response.session)
       }
     })
-
-    if (chrome.commands?.getAll) {
-      chrome.commands.getAll((commands) => {
-        const cpCmd = commands.find((c) => c.name === "toggle_color_picker")
-        if (cpCmd?.shortcut) {
-          setColorPickerShortcut(cpCmd.shortcut)
-        } else {
-          setColorPickerShortcut("")
-        }
-
-        const ezCmd = commands.find((c) => c.name === "toggle_element_zapper")
-        if (ezCmd?.shortcut) {
-          setElementZapperShortcut(ezCmd.shortcut)
-        } else {
-          setElementZapperShortcut("")
-        }
-      })
-    }
   }, [])
 
   const handleFocusPiPTab = async () => {
@@ -282,18 +262,12 @@ function IndexPopup() {
       if (donateMenuRef.current && !donateMenuRef.current.contains(target)) {
         setIsDonateOpen(false)
       }
-      if (
-        quickToolsMenuRef.current &&
-        !quickToolsMenuRef.current.contains(target)
-      ) {
-        setIsQuickToolsOpen(false)
-      }
     }
-    if (isDonateOpen || isQuickToolsOpen) {
+    if (isDonateOpen) {
       document.addEventListener("mousedown", handleClickOutside)
     }
     return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [isDonateOpen, isQuickToolsOpen])
+  }, [isDonateOpen])
 
   const getDonateIcon = (iconName: string) => {
     switch (iconName) {
@@ -344,122 +318,8 @@ function IndexPopup() {
           </div>
         </div>
 
-        {/* Action icons: Quick Tools, Preferences, About & Donate */}
+        {/* Action icons: Preferences, About & Donate */}
         <div className="flex items-center gap-1">
-          {/* Quick Tools Dropdown */}
-          <div className="relative" ref={quickToolsMenuRef}>
-            <button
-              type="button"
-              title="Quick Tools (Instant Actions)"
-              onClick={() => setIsQuickToolsOpen((prev) => !prev)}
-              className={`p-1.5 rounded-lg transition-all focus:outline-none ${
-                isQuickToolsOpen
-                  ? "bg-accent-subtle text-accent ring-1 ring-accent-glow"
-                  : activePiP
-                    ? "bg-indigo-500/20 text-indigo-400 ring-1 ring-indigo-500/30 animate-pulse"
-                    : "text-content-muted hover:text-accent hover:bg-app-surface active:scale-95"
-              }`}>
-              <Sparkles className="w-4 h-4 fill-current/20" />
-            </button>
-
-            {/* Quick Tools Dropdown Menu */}
-            {isQuickToolsOpen && (
-              <div className="absolute right-0 mt-2 w-64 rounded-xl bg-app-elevated border border-border-subtle shadow-2xl shadow-black/50 py-1.5 z-30 animate-in fade-in zoom-in-95 duration-100">
-                <div className="px-3 py-1.5 border-b border-border-divider/50 mb-1 flex items-center justify-between">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-content-muted">
-                    Quick Tools
-                  </span>
-                  <span className="text-[10px] text-content-muted">
-                    Click to launch on page
-                  </span>
-                </div>
-
-                <div className="space-y-0.5 px-1">
-                  {/* Pick Color from Screen */}
-                  {isColorPickerSupported && settings?.colorPicker && (
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        setIsQuickToolsOpen(false)
-                        if (
-                          typeof window !== "undefined" &&
-                          "EyeDropper" in window
-                        ) {
-                          try {
-                            const EyeDropperClass = (
-                              window as unknown as {
-                                EyeDropper: new () => {
-                                  open: () => Promise<{ sRGBHex: string }>
-                                }
-                              }
-                            ).EyeDropper
-                            const eyeDropper = new EyeDropperClass()
-                            const result = await eyeDropper.open()
-                            if (result?.sRGBHex) {
-                              const hex = result.sRGBHex.toUpperCase()
-                              await navigator.clipboard
-                                .writeText(hex)
-                                .catch(() => {})
-                            }
-                          } catch {
-                            // User cancelled
-                          }
-                          return
-                        }
-                        await sendToActiveTab(
-                          MESSAGE_TYPES.TRIGGER_COLOR_PICKER
-                        )
-                        window.close()
-                      }}
-                      className="w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs hover:bg-app-surface text-content-primary transition-colors group text-left">
-                      <div className="flex items-center gap-2.5">
-                        <div className="p-1 rounded-md bg-pink-500/10 text-pink-400 group-hover:scale-105 transition-transform">
-                          <Pipette className="w-3.5 h-3.5" />
-                        </div>
-                        <span className="font-medium text-[11px]">
-                          Pick Color
-                        </span>
-                      </div>
-                      {colorPickerShortcut && (
-                        <kbd className="px-1.5 py-0.5 bg-surface-elevated text-content-muted rounded text-[10px] font-mono border border-border-subtle">
-                          {colorPickerShortcut}
-                        </kbd>
-                      )}
-                    </button>
-                  )}
-
-                  {/* Zap Element from Page */}
-                  {settings?.elementZapper && (
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        setIsQuickToolsOpen(false)
-                        await sendToActiveTab(
-                          MESSAGE_TYPES.TRIGGER_ELEMENT_ZAPPER
-                        )
-                        window.close()
-                      }}
-                      className="w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs hover:bg-app-surface text-content-primary transition-colors group text-left">
-                      <div className="flex items-center gap-2.5">
-                        <div className="p-1 rounded-md bg-amber-500/10 text-amber-400 group-hover:scale-105 transition-transform">
-                          <Zap className="w-3.5 h-3.5" />
-                        </div>
-                        <span className="font-medium text-[11px]">
-                          Element Zapper
-                        </span>
-                      </div>
-                      {elementZapperShortcut && (
-                        <kbd className="px-1.5 py-0.5 bg-surface-elevated text-content-muted rounded text-[10px] font-mono border border-border-subtle">
-                          {elementZapperShortcut}
-                        </kbd>
-                      )}
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-
           {/* Preferences / Settings Button */}
           <button
             type="button"
@@ -591,6 +451,8 @@ function IndexPopup() {
           <ColorPickerSettingsView onBack={() => setCurrentView("main")} />
         ) : currentView === "element-zapper-settings" ? (
           <ElementZapperSettingsView onBack={() => setCurrentView("main")} />
+        ) : currentView === "quick-hub-settings" ? (
+          <QuickHubSettingsView onBack={() => setCurrentView("main")} />
         ) : currentView === "preferences" ? (
           <PreferencesSettingsView onBack={() => setCurrentView("main")} />
         ) : (
