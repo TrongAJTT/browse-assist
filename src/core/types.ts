@@ -41,11 +41,8 @@ export const DEFAULT_CONTEXT_MENU_ACTIONS_CONFIG: ContextMenuActionsConfig = {
 export type SuperDragAction =
   | "open_bg_tab"
   | "open_active_tab"
-  | "open_split_view"
   | "open_window_active"
-  | "open_window_bg"
   | "open_incognito_active"
-  | "open_incognito_bg"
   | "copy_to_clipboard"
   | "none"
 

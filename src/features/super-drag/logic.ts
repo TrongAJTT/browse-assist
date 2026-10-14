@@ -199,7 +199,6 @@ function getOrCreateRadialIndicator(): HTMLDivElement {
 const ICONS = {
   tabBackground: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>`,
   tabForeground: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>`,
-  splitView: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M12 3v18"/></svg>`,
   windowActive: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="M10 4v4"/><path d="M2 8h20"/></svg>`,
   windowBg: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="M2 8h20"/></svg>`,
   incognito: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12a5 5 0 0 0 5 5 8 8 0 0 1 5 2 8 8 0 0 1 5-2 5 5 0 0 0 5-5"/><path d="M3 7h18"/><circle cx="7" cy="14" r="2"/><circle cx="17" cy="14" r="2"/></svg>`,
@@ -234,33 +233,15 @@ function getActionDisplay(
         icon: ICONS.tabForeground,
         theme: "sky"
       }
-    case "open_split_view":
-      return {
-        label: `Drop to Open ${typeLabel} (Split View)`,
-        icon: ICONS.splitView,
-        theme: "violet"
-      }
     case "open_window_active":
       return {
         label: `Drop to Open ${typeLabel} (New Window)`,
         icon: ICONS.windowActive,
         theme: "sky"
       }
-    case "open_window_bg":
-      return {
-        label: `Drop to Open ${typeLabel} (Window Background)`,
-        icon: ICONS.windowBg,
-        theme: "indigo"
-      }
     case "open_incognito_active":
       return {
         label: `Drop to Open ${typeLabel} (Incognito)`,
-        icon: ICONS.incognito,
-        theme: "amber"
-      }
-    case "open_incognito_bg":
-      return {
-        label: `Drop to Open ${typeLabel} (Incognito Background)`,
         icon: ICONS.incognito,
         theme: "amber"
       }

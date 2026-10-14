@@ -36,49 +36,6 @@ function resolveUrl(targetType: "text" | "link" | "image", payload: string): str
 }
 
 /**
- * Dual-Window Side-by-Side Split View (Model A).
- * Resizes current window to 50% left width, opens new window on 50% right width.
- */
-async function handleSplitView(url: string, senderTab?: chrome.tabs.Tab): Promise<void> {
-  try {
-    const currentWin = senderTab?.windowId
-      ? await chrome.windows.get(senderTab.windowId)
-      : await chrome.windows.getCurrent()
-
-    const screenLeft = currentWin.left ?? 0
-    const screenTop = currentWin.top ?? 0
-    const totalWidth = currentWin.width ?? 1280
-    const totalHeight = currentWin.height ?? 800
-
-    const halfWidth = Math.max(400, Math.floor(totalWidth / 2))
-
-    // 1. Resize current window to left half
-    if (currentWin.id) {
-      await chrome.windows.update(currentWin.id, {
-        left: screenLeft,
-        top: screenTop,
-        width: halfWidth,
-        height: totalHeight,
-        state: "normal"
-      })
-    }
-
-    // 2. Open new window on right half
-    await chrome.windows.create({
-      url,
-      left: screenLeft + halfWidth,
-      top: screenTop,
-      width: halfWidth,
-      height: totalHeight,
-      focused: true
-    })
-  } catch (err) {
-    console.warn("Browse Assist: Failed to execute split view, falling back to new tab", err)
-    chrome.tabs.create({ url, active: true })
-  }
-}
-
-/**
  * Opens a URL in a new window with optional incognito or background focus.
  */
 async function handleNewWindow(
@@ -146,20 +103,11 @@ async function executeSuperDragAction(
       chrome.tabs.create({ url, active: true, index: targetIndex })
       break
     }
-    case "open_split_view":
-      await handleSplitView(url, senderTab)
-      break
     case "open_window_active":
       await handleNewWindow(url, { focused: true })
       break
-    case "open_window_bg":
-      await handleNewWindow(url, { focused: false })
-      break
     case "open_incognito_active":
       await handleNewWindow(url, { incognito: true, focused: true })
-      break
-    case "open_incognito_bg":
-      await handleNewWindow(url, { incognito: true, focused: false })
       break
     default:
       chrome.tabs.create({ url, active: false })

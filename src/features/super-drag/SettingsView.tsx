@@ -226,7 +226,7 @@ export const SuperDragSettingsView: React.FC<SuperDragSettingsViewProps> = ({
                 <SettingToggleRow
                   icon={<ExternalLink className="w-5 h-5 text-emerald-400" />}
                   title="Open Hyperlinks"
-                  description="Drag hyperlinks to open in tabs, split screen, or copy destination URL."
+                  description="Drag hyperlinks to open in tabs, new windows, or copy destination URL."
                   enabled={currentConfig.openHyperlinks}
                   onToggle={() => handleToggleOption("openHyperlinks")}
                 />
@@ -259,7 +259,7 @@ export const SuperDragSettingsView: React.FC<SuperDragSettingsViewProps> = ({
                 <SettingToggleRow
                   icon={<ImageIcon className="w-5 h-5 text-amber-400" />}
                   title="Drag Images"
-                  description="Drag images to view in tabs, split screen, or copy direct image URLs."
+                  description="Drag images to view in tabs, new windows, or copy direct image URLs."
                   enabled={currentConfig.openImages}
                   onToggle={() => handleToggleOption("openImages")}
                 />

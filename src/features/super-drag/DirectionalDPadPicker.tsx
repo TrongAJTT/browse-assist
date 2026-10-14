@@ -49,7 +49,9 @@ export const DirectionalDPadPicker: React.FC<DirectionalDPadPickerProps> = ({
 }) => {
   const renderDirectionNode = (direction: DragDirection, widthClass = "w-[126px]") => {
     const { key, label, Icon } = DIRECTIONS[direction]
-    const currentAction = actions[key] ?? "open_bg_tab"
+    const rawAction = actions[key]
+    const isValid = SUPER_DRAG_ACTION_OPTIONS.some((opt) => opt.id === rawAction)
+    const currentAction = isValid ? rawAction : "open_bg_tab"
 
     return (
       <div

@@ -56,11 +56,8 @@ export interface SuperDragActionOption {
 export const SUPER_DRAG_ACTION_OPTIONS: SuperDragActionOption[] = [
   { id: "open_bg_tab", label: "Background Tab" },
   { id: "open_active_tab", label: "Active Tab" },
-  { id: "open_split_view", label: "Split View" },
-  { id: "open_window_active", label: "New Window (Focus)" },
-  { id: "open_window_bg", label: "New Window (Bg)" },
+  { id: "open_window_active", label: "New Window" },
   { id: "open_incognito_active", label: "Incognito Window", requiresIncognito: true },
-  { id: "open_incognito_bg", label: "Incognito (Bg)", requiresIncognito: true },
   { id: "copy_to_clipboard", label: "Copy to Clipboard" },
   { id: "none", label: "None (Do Nothing)" }
 ]
