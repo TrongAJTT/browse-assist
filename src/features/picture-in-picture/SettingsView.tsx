@@ -1,7 +1,10 @@
 import {
+  ArrowDownLeft,
+  ArrowDownRight,
+  ArrowUpLeft,
+  ArrowUpRight,
   Eye,
   MousePointerClick,
-  PictureInPicture2,
   ShieldAlert
 } from "lucide-react"
 import type React from "react"
@@ -10,24 +13,44 @@ import { useEffect, useState } from "react"
 import { useStorage } from "@plasmohq/storage/hook"
 
 import { FeatureShortcutRow } from "~components/FeatureShortcutRow"
+import { GridPicker, type GridPickerItem } from "~components/GridPicker"
 import { SettingToggleRow } from "~components/SettingToggleRow"
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
-import {
-  MESSAGE_TYPES,
-  sendToActiveTab,
-  sendToBackground
-} from "~core/messaging"
 import { openBrowserShortcutsPage } from "~core/shortcutsHelper"
 import {
   DEFAULT_SETTINGS,
   STORAGE_KEYS,
   type FeatureSettings,
-  type PictureInPictureConfig
+  type PictureInPictureConfig,
+  type PipButtonPosition
 } from "~core/types"
 
 interface PictureInPictureSettingsViewProps {
   onBack: () => void
 }
+
+const PIP_POSITION_ITEMS: GridPickerItem<PipButtonPosition>[] = [
+  {
+    id: "top-left",
+    label: "Top Left",
+    icon: <ArrowUpLeft className="w-3.5 h-3.5" />
+  },
+  {
+    id: "top-right",
+    label: "Top Right",
+    icon: <ArrowUpRight className="w-3.5 h-3.5" />
+  },
+  {
+    id: "bottom-left",
+    label: "Bottom Left",
+    icon: <ArrowDownLeft className="w-3.5 h-3.5" />
+  },
+  {
+    id: "bottom-right",
+    label: "Bottom Right",
+    icon: <ArrowDownRight className="w-3.5 h-3.5" />
+  }
+]
 
 /**
  * Sub-settings view for Universal Picture-in-Picture.
@@ -77,36 +100,15 @@ export const PictureInPictureSettingsView: React.FC<
     }))
   }
 
-  const [activePiP, setActivePiP] = useState<{
-    tabId: number
-    title: string
-  } | null>(null)
-
-  useEffect(() => {
-    sendToBackground(MESSAGE_TYPES.GET_ACTIVE_PIP_SESSION).then((response) => {
-      if (response?.session) {
-        setActivePiP(response.session)
+  const handleSelectPosition = (position: PipButtonPosition) => {
+    setSettings((prev) => ({
+      ...(prev ?? DEFAULT_SETTINGS),
+      pictureInPictureConfig: {
+        ...(prev?.pictureInPictureConfig ??
+          DEFAULT_SETTINGS.pictureInPictureConfig),
+        buttonPosition: position
       }
-    })
-  }, [])
-
-  const handleTogglePiP = async () => {
-    if (activePiP) {
-      await sendToBackground(MESSAGE_TYPES.CLOSE_PIP)
-      setActivePiP(null)
-      return
-    }
-
-    await sendToActiveTab(MESSAGE_TYPES.TOGGLE_PICTURE_IN_PICTURE)
-    setTimeout(async () => {
-      const response = await sendToBackground(
-        MESSAGE_TYPES.GET_ACTIVE_PIP_SESSION
-      )
-      if (response?.session) {
-        setActivePiP(response.session)
-      }
-    }, 300)
-    window.close()
+    }))
   }
 
   const handleOpenShortcutsPage = () => {
@@ -118,24 +120,7 @@ export const PictureInPictureSettingsView: React.FC<
       title="Picture-in-Picture"
       enabled={isMasterEnabled}
       onToggle={handleToggleMaster}
-      onBack={onBack}
-      rightActions={
-        <button
-          type="button"
-          onClick={handleTogglePiP}
-          disabled={!isMasterEnabled}
-          title={
-            activePiP ? "Exit Picture-in-Picture" : "Toggle Picture-in-Picture"
-          }
-          className={`px-2.5 py-1 rounded-lg font-semibold text-xs transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none flex items-center gap-1.5 shadow-sm ${
-            activePiP
-              ? "bg-rose-500 hover:bg-rose-600 text-white shadow-rose-500/25"
-              : "bg-accent hover:bg-accent-hover text-white shadow-accent-glow"
-          }`}>
-          <PictureInPicture2 className="w-3.5 h-3.5" />
-          <span>{activePiP ? "Exit PiP" : "Launch"}</span>
-        </button>
-      }>
+      onBack={onBack}>
       <div className="space-y-4">
         {/* Shortcut Section */}
         <FeatureShortcutRow
@@ -179,12 +164,33 @@ export const PictureInPictureSettingsView: React.FC<
                 colorClass: "text-amber-400",
                 borderClass: "border-amber-500/25"
               }}
-              description="Show a floating PiP trigger above playing videos. May be unstable or blocked on some custom web video players."
+              description="Show a floating PiP trigger inside playing videos. May be unstable or blocked on some custom web video players."
               enabled={currentConfig.hoverButton}
               onToggle={() => handleToggleOption("hoverButton")}
             />
           </div>
         </div>
+
+        {/* Hover Button Corner Position (when enabled) */}
+        {currentConfig.hoverButton && (
+          <div className="space-y-2 pt-2 border-t border-border-divider">
+            <span className="section-header">Button Position</span>
+            <div className="space-y-1.5">
+              <span className="text-xs font-semibold text-content-primary">
+                Corner Placement
+              </span>
+              <p className="text-[11px] text-content-muted leading-snug">
+                Choose which corner inside the video frame to anchor the floating PiP button.
+              </p>
+              <GridPicker<PipButtonPosition>
+                items={PIP_POSITION_ITEMS}
+                value={currentConfig.buttonPosition ?? "top-right"}
+                onChange={handleSelectPosition}
+                columns={4}
+              />
+            </div>
+          </div>
+        )}
 
         {/* Feature Highlights Note */}
         <div className="card-subtle p-3 text-[11px] text-content-muted space-y-1">

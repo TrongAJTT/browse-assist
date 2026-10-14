@@ -163,7 +163,6 @@ function IndexPopup() {
     tabId: number
     title: string
   } | null>(null)
-  const [pipShortcut, setPipShortcut] = useState<string>("Alt + P")
   const [colorPickerShortcut, setColorPickerShortcut] =
     useState<string>("Alt + Shift + C")
   const [elementZapperShortcut, setElementZapperShortcut] =
@@ -242,15 +241,6 @@ function IndexPopup() {
 
     if (chrome.commands?.getAll) {
       chrome.commands.getAll((commands) => {
-        const pipCmd = commands.find(
-          (c) => c.name === "toggle_picture_in_picture"
-        )
-        if (pipCmd?.shortcut) {
-          setPipShortcut(pipCmd.shortcut)
-        } else {
-          setPipShortcut("")
-        }
-
         const cpCmd = commands.find((c) => c.name === "toggle_color_picker")
         if (cpCmd?.shortcut) {
           setColorPickerShortcut(cpCmd.shortcut)
@@ -277,25 +267,6 @@ function IndexPopup() {
     e.stopPropagation()
     await sendToBackground(MESSAGE_TYPES.CLOSE_PIP)
     setActivePiP(null)
-  }
-
-  const handleTogglePiPOnCurrentTab = async () => {
-    if (activePiP) {
-      await sendToBackground(MESSAGE_TYPES.CLOSE_PIP)
-      setActivePiP(null)
-      return
-    }
-
-    await sendToActiveTab(MESSAGE_TYPES.TOGGLE_PICTURE_IN_PICTURE)
-    // Re-check PiP state after small delay
-    setTimeout(async () => {
-      const response = await sendToBackground(
-        MESSAGE_TYPES.GET_ACTIVE_PIP_SESSION
-      )
-      if (response?.session) {
-        setActivePiP(response.session)
-      }
-    }, 300)
   }
 
   // Ready when both storage settings and active tab state are hydrated
@@ -477,40 +448,6 @@ function IndexPopup() {
                       {elementZapperShortcut && (
                         <kbd className="px-1.5 py-0.5 bg-surface-elevated text-content-muted rounded text-[10px] font-mono border border-border-subtle">
                           {elementZapperShortcut}
-                        </kbd>
-                      )}
-                    </button>
-                  )}
-
-                  {/* Toggle Picture-in-Picture */}
-                  {settings?.pictureInPicture && (
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        setIsQuickToolsOpen(false)
-                        await handleTogglePiPOnCurrentTab()
-                      }}
-                      className="w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs hover:bg-app-surface text-content-primary transition-colors group text-left">
-                      <div className="flex items-center gap-2.5">
-                        <div
-                          className={`p-1 rounded-md transition-transform group-hover:scale-105 ${
-                            activePiP
-                              ? "bg-indigo-500/20 text-indigo-400 animate-pulse"
-                              : "bg-indigo-500/10 text-indigo-400"
-                          }`}>
-                          <PictureInPicture2 className="w-3.5 h-3.5" />
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="font-medium text-[11px]">
-                            {activePiP
-                              ? "Exit PiP Video"
-                              : "Picture-in-Picture"}
-                          </span>
-                        </div>
-                      </div>
-                      {pipShortcut && (
-                        <kbd className="px-1.5 py-0.5 bg-surface-elevated text-content-muted rounded text-[10px] font-mono border border-border-subtle">
-                          {pipShortcut}
                         </kbd>
                       )}
                     </button>

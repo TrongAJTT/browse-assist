@@ -145,18 +145,29 @@ export const DEFAULT_MOUSE_ZOOM_CONFIG: MouseZoomConfig = {
 }
 
 /**
+ * Corner position for the floating Video PiP button.
+ */
+export type PipButtonPosition =
+  | "top-left"
+  | "top-right"
+  | "bottom-left"
+  | "bottom-right"
+
+/**
  * Universal Picture-in-Picture configuration.
  */
 export interface PictureInPictureConfig {
   showBadge: boolean // Show "PiP" badge on extension icon when video is in PiP
   showToast: boolean // Show floating feedback notification on toggle
   hoverButton: boolean // Show a sleek floating PiP button when hovering over playing videos
+  buttonPosition: PipButtonPosition // Corner position inside the video frame
 }
 
 export const DEFAULT_PICTURE_IN_PICTURE_CONFIG: PictureInPictureConfig = {
   showBadge: true,
   showToast: true,
-  hoverButton: true
+  hoverButton: true,
+  buttonPosition: "top-right"
 }
 
 /**

@@ -55,14 +55,13 @@ function ensureHoverButton(): HTMLButtonElement {
     align-items: center;
     justify-content: center;
     gap: 5px;
-    padding: 3px 12px 4px 12px;
-    border-radius: 8px 8px 0 0;
-    background: rgba(18, 18, 22, 0.92);
+    padding: 4px 10px;
+    border-radius: 9999px;
+    background: rgba(18, 18, 22, 0.85);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    border-bottom: none;
-    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(0, 0, 0, 0.25);
     color: #ffffff;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     font-size: 11px;
@@ -71,23 +70,21 @@ function ensureHoverButton(): HTMLButtonElement {
     user-select: none;
     pointer-events: auto;
     opacity: 0;
-    transform: translateY(4px) scale(0.96);
-    transition: opacity 0.12s ease-out, transform 0.12s ease-out, background 0.12s ease, border-color 0.12s ease;
+    transform: scale(0.92);
+    transition: opacity 0.15s ease-out, transform 0.15s ease-out, background 0.12s ease, border-color 0.12s ease;
   `
 
   btn.innerHTML = `
-    <!-- Left inverted corner curve wing (flares out at bottom onto video border) -->
-    <span style="position:absolute;bottom:0;left:-8px;width:8px;height:8px;pointer-events:none;background:radial-gradient(circle at 0 0, transparent 8px, rgba(18, 18, 22, 0.92) 8.5px);"></span>
     <span style="display:flex;align-items:center;color:#818cf8;">${PIP_ICON_SVG}</span>
     <span style="letter-spacing:0.02em;">PiP</span>
-    <!-- Right inverted corner curve wing (flares out at bottom onto video border) -->
-    <span style="position:absolute;bottom:0;right:-8px;width:8px;height:8px;pointer-events:none;background:radial-gradient(circle at 100% 0, transparent 8px, rgba(18, 18, 22, 0.92) 8.5px);"></span>
   `
 
   btn.addEventListener("mouseenter", () => {
     isPointerOverHoverButton = true
-    btn.style.background = "rgba(30, 27, 75, 0.96)"
-    btn.style.borderColor = "rgba(129, 140, 248, 0.5)"
+    btn.style.opacity = "1"
+    btn.style.background = "rgba(30, 27, 75, 0.95)"
+    btn.style.borderColor = "rgba(129, 140, 248, 0.6)"
+    btn.style.transform = "scale(1.05)"
     if (hoverHideTimeout) {
       clearTimeout(hoverHideTimeout)
       hoverHideTimeout = null
@@ -96,8 +93,10 @@ function ensureHoverButton(): HTMLButtonElement {
 
   btn.addEventListener("mouseleave", () => {
     isPointerOverHoverButton = false
-    btn.style.background = "rgba(18, 18, 22, 0.92)"
-    btn.style.borderColor = "rgba(255, 255, 255, 0.18)"
+    btn.style.opacity = "0.65"
+    btn.style.background = "rgba(18, 18, 22, 0.85)"
+    btn.style.borderColor = "rgba(255, 255, 255, 0.2)"
+    btn.style.transform = "scale(1)"
     hideHoverButtonNow()
   })
 
@@ -130,7 +129,7 @@ function ensureHoverButton(): HTMLButtonElement {
 }
 
 /**
- * Positions and shows the floating PiP hover button protruding outward above the top edge of the video.
+ * Positions and shows the floating PiP hover button inside the video corner.
  */
 function showHoverButtonForVideo(video: HTMLVideoElement): void {
   if (!currentConfig.hoverButton || !isActive) return
@@ -156,21 +155,54 @@ function showHoverButtonForVideo(video: HTMLVideoElement): void {
   const btn = ensureHoverButton()
   hoveredVideoElement = video
 
-  // Position docked directly on the top border of video bounding rect, protruding outward above it
+  // Position inside the video bounding rect
   const buttonWidth = 62
-  const buttonHeight = 24
-  const targetX = Math.max(16, Math.min(window.innerWidth - buttonWidth - 16, rect.left + rect.width / 2 - buttonWidth / 2))
-  // Protrude upward outside the video; if video is right at top edge of viewport, clamp to 0
-  const targetY = rect.top >= buttonHeight ? rect.top - buttonHeight : Math.max(0, rect.top)
+  const buttonHeight = 26
+  const marginX = 14
+  const marginY = 14
+
+  const position = currentConfig.buttonPosition || "top-right"
+
+  let targetX: number
+  let targetY: number
+
+  switch (position) {
+    case "top-left":
+      targetX = rect.left + marginX
+      targetY = rect.top + marginY
+      break
+    case "bottom-left":
+      targetX = rect.left + marginX
+      targetY = rect.bottom - buttonHeight - marginY
+      break
+    case "bottom-right":
+      targetX = rect.right - buttonWidth - marginX
+      targetY = rect.bottom - buttonHeight - marginY
+      break
+    case "top-right":
+    default:
+      targetX = rect.right - buttonWidth - marginX
+      targetY = rect.top + marginY
+      break
+  }
+
+  // Ensure button remains safely clamped within visible video bounds and viewport
+  const minX = Math.max(8, rect.left + 4)
+  const maxX = Math.min(window.innerWidth - buttonWidth - 8, rect.right - buttonWidth - 4)
+  const minY = Math.max(8, rect.top + 4)
+  const maxY = Math.min(window.innerHeight - buttonHeight - 8, rect.bottom - buttonHeight - 4)
+
+  targetX = Math.max(minX, Math.min(maxX, targetX))
+  targetY = Math.max(minY, Math.min(maxY, targetY))
 
   btn.style.top = `${targetY}px`
   btn.style.left = `${targetX}px`
   btn.style.display = "flex"
 
-  // Trigger smooth instant reveal
+  // Trigger smooth instant reveal (dimmed by 35% to 0.65 by default, 1.0 on hover)
   requestAnimationFrame(() => {
-    btn.style.opacity = "1"
-    btn.style.transform = "translateY(0) scale(1)"
+    btn.style.opacity = isPointerOverHoverButton ? "1" : "0.65"
+    btn.style.transform = "scale(1)"
   })
 
   // Auto-hide after 2.5s of no pointer motion
@@ -178,7 +210,7 @@ function showHoverButtonForVideo(video: HTMLVideoElement): void {
   hoverHideTimeout = setTimeout(() => {
     if (!isPointerOverHoverButton) {
       btn.style.opacity = "0"
-      btn.style.transform = "translateY(-4px) scale(0.96)"
+      btn.style.transform = "scale(0.92)"
     }
   }, 2500)
 }
@@ -186,7 +218,7 @@ function showHoverButtonForVideo(video: HTMLVideoElement): void {
 function hideHoverButtonNow(): void {
   if (!hoverButtonElement) return
   hoverButtonElement.style.opacity = "0"
-  hoverButtonElement.style.transform = "translateY(-4px) scale(0.96)"
+  hoverButtonElement.style.transform = "scale(0.92)"
   setTimeout(() => {
     if (hoverButtonElement && hoverButtonElement.style.opacity === "0") {
       hoverButtonElement.style.display = "none"
@@ -384,6 +416,8 @@ export function updatePictureInPictureConfig(
 
   if (!currentConfig.hoverButton) {
     hideHoverButtonNow()
+  } else if (hoveredVideoElement) {
+    showHoverButtonForVideo(hoveredVideoElement)
   }
 }
 
