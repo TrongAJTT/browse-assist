@@ -23,26 +23,71 @@ export const MENU_ITEMS = {
 type MenuItemId = (typeof MENU_ITEMS)[keyof typeof MENU_ITEMS]
 
 const registeredMenuIds = new Set<string>()
+let isUpdating = false
+let pendingUpdate: { masterEnabled: boolean; config: ContextMenuActionsConfig } | null = null
+
+/**
+ * Resolves the active contextMenus / menus API across Chromium and Gecko (Firefox).
+ */
+function getMenusApi(): typeof chrome.contextMenus | null {
+  const globalObj = globalThis as unknown as {
+    browser?: {
+      contextMenus?: typeof chrome.contextMenus
+      menus?: typeof chrome.contextMenus
+    }
+    chrome?: { contextMenus?: typeof chrome.contextMenus }
+  }
+
+  return (
+    globalObj.browser?.contextMenus ||
+    globalObj.browser?.menus ||
+    globalObj.chrome?.contextMenus ||
+    null
+  )
+}
 
 /**
  * Synchronizes context menus with active configuration.
+ * Uses mutex locking and promise resolution to avoid race conditions in Firefox MV3 event pages.
  */
-export function updateContextMenus(
+export async function updateContextMenus(
   masterEnabled: boolean,
   config: ContextMenuActionsConfig
-): void {
-  if (typeof chrome === "undefined" || !chrome.contextMenus) return
+): Promise<void> {
+  const menusApi = getMenusApi()
+  if (!menusApi) return
 
-  // Remove all our registered menus first to avoid conflicts
-  chrome.contextMenus.removeAll(() => {
-    if (chrome.runtime.lastError) {
-      // Suppress removal errors
-    }
+  if (isUpdating) {
+    pendingUpdate = { masterEnabled, config }
+    return
+  }
+
+  isUpdating = true
+
+  try {
+    // Safely remove all our registered menus first
+    await new Promise<void>((resolve) => {
+      try {
+        const res = (menusApi.removeAll as (cb?: () => void) => unknown)(() => {
+          resolve()
+        })
+        if (res && typeof (res as Promise<void>).then === "function") {
+          ;(res as Promise<void>).then(() => resolve()).catch(() => resolve())
+        }
+      } catch {
+        resolve()
+      }
+    })
+
     registeredMenuIds.clear()
 
     if (!masterEnabled) return
 
-    const order = config.order || ["copyLinkText", "cleanLinkCopy", "markdownLinkCopy"]
+    const order = config.order || [
+      "copyLinkText",
+      "cleanLinkCopy",
+      "markdownLinkCopy"
+    ]
 
     const actionDefinitions = {
       copyLinkText: {
@@ -63,24 +108,38 @@ export function updateContextMenus(
     }
 
     // Register items in the exact sequence specified by order
-    order.forEach((actionId) => {
+    for (const actionId of order) {
       const def = actionDefinitions[actionId]
       if (def && def.enabled) {
-        chrome.contextMenus.create(
-          {
-            id: def.id,
-            title: def.title,
-            contexts: ["link"]
-          },
-          () => {
-            if (!chrome.runtime.lastError) {
-              registeredMenuIds.add(def.id)
+        try {
+          menusApi.create(
+            {
+              id: def.id,
+              title: def.title,
+              contexts: ["link"]
+            },
+            () => {
+              const err = chrome.runtime?.lastError
+              if (err) {
+                console.warn("[Browse Assist] Context menu error:", err.message)
+              } else {
+                registeredMenuIds.add(def.id)
+              }
             }
-          }
-        )
+          )
+        } catch (err) {
+          console.warn("[Browse Assist] Context menu create error:", err)
+        }
       }
-    })
-  })
+    }
+  } finally {
+    isUpdating = false
+    if (pendingUpdate) {
+      const next = pendingUpdate
+      pendingUpdate = null
+      await updateContextMenus(next.masterEnabled, next.config)
+    }
+  }
 }
 
 /**
@@ -112,19 +171,44 @@ export function handleContextMenuClick(
 }
 
 /**
- * Initializes the background handlers and synchronizes with storage settings.
+ * Synchronizes context menus from storage.
  */
-export async function initContextMenuActionsBackground(): Promise<void> {
-  if (typeof chrome === "undefined") return
-
-  // Read current settings
-  const settings = await extensionStorage.get<FeatureSettings>(STORAGE_KEYS.SETTINGS)
+async function syncMenusFromStorage(): Promise<void> {
+  const settings = await extensionStorage.get<FeatureSettings>(
+    STORAGE_KEYS.SETTINGS
+  )
   const isMasterEnabled =
     settings?.contextMenuActions ?? DEFAULT_SETTINGS.contextMenuActions
   const config =
-    settings?.contextMenuActionsConfig ?? DEFAULT_SETTINGS.contextMenuActionsConfig
+    settings?.contextMenuActionsConfig ??
+    DEFAULT_SETTINGS.contextMenuActionsConfig
 
-  updateContextMenus(isMasterEnabled, config)
+  await updateContextMenus(isMasterEnabled, config)
+}
+
+/**
+ * Initializes the background handlers and synchronizes with storage settings.
+ */
+export async function initContextMenuActionsBackground(): Promise<void> {
+  const menusApi = getMenusApi()
+  if (!menusApi) return
+
+  // Initial sync
+  await syncMenusFromStorage()
+
+  // Register in runtime lifecycle hooks for Firefox & Chrome MV3 persistence
+  if (
+    chrome.runtime?.onInstalled &&
+    !chrome.runtime.onInstalled.hasListener(syncMenusFromStorage)
+  ) {
+    chrome.runtime.onInstalled.addListener(syncMenusFromStorage)
+  }
+  if (
+    chrome.runtime?.onStartup &&
+    !chrome.runtime.onStartup.hasListener(syncMenusFromStorage)
+  ) {
+    chrome.runtime.onStartup.addListener(syncMenusFromStorage)
+  }
 
   // Watch for toggle & config updates from popup
   extensionStorage.watch({
@@ -136,15 +220,15 @@ export async function initContextMenuActionsBackground(): Promise<void> {
         nextSettings?.contextMenuActionsConfig ??
         DEFAULT_SETTINGS.contextMenuActionsConfig
 
-      updateContextMenus(nextMaster, nextConfig)
+      updateContextMenus(nextMaster, nextConfig).catch(() => {})
     }
   })
 
   // Listen for context menu click events
   if (
-    chrome.contextMenus?.onClicked &&
-    !chrome.contextMenus.onClicked.hasListener(handleContextMenuClick)
+    menusApi.onClicked &&
+    !menusApi.onClicked.hasListener(handleContextMenuClick)
   ) {
-    chrome.contextMenus.onClicked.addListener(handleContextMenuClick)
+    menusApi.onClicked.addListener(handleContextMenuClick)
   }
 }

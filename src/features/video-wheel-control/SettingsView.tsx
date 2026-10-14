@@ -496,9 +496,6 @@ export const VideoWheelControlSettingsView: React.FC<
           <div className="flex items-center gap-1.5 font-semibold text-content-secondary">
             <Info className="w-3.5 h-3.5 text-violet-400 shrink-0" />
             <span>Compatibility & State Notice</span>
-            <span className="text-[10px] font-semibold px-1.5 py-0.2 rounded border bg-amber-500/10 text-amber-400 border-amber-500/25 ml-auto">
-              HTML5 Direct
-            </span>
           </div>
           <p className="leading-relaxed">
             This feature interacts directly with the underlying HTML5 media

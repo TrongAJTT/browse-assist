@@ -99,6 +99,13 @@
     },
     "overrides": {
       "firefox": {
+        "permissions": [
+          "storage",
+          "contextMenus",
+          "menus",
+          "clipboardWrite",
+          "search"
+        ],
         "commands": {
           "toggle_picture_in_picture": {
             "suggested_key": {
