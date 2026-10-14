@@ -11,8 +11,19 @@ let currentConfig: MouseZoomConfig = { ...DEFAULT_MOUSE_ZOOM_CONFIG }
 // Zoom parameters limits
 const MIN_ZOOM = 0.5 // 50%
 const MAX_ZOOM = 3.0 // 300%
+const ANIMATION_DURATION = 140 // ms for smooth fluid transitions
 
 let currentZoom = 1.0
+let targetZoom = 1.0
+
+// Interpolation / RAF state
+let animFrameId: number | null = null
+let animStartTime = 0
+let animStartZoom = 1.0
+let anchorContentX = 0
+let anchorContentY = 0
+let anchorMouseX = 0
+let anchorMouseY = 0
 
 let isLeftMouseDown = false
 let isRightMouseDown = false
@@ -58,21 +69,52 @@ function showZoomToast(zoomLevel: number): void {
 }
 
 /**
- * Applies the calculated zoom to the document body.
+ * Safely scrolls window to target coordinates without triggering unwanted smooth scroll interference.
  */
-function applyZoom(newZoom: number): void {
-  currentZoom = Math.max(
+function safeScrollTo(x: number, y: number): void {
+  try {
+    window.scrollTo({
+      left: x,
+      top: y,
+      behavior: "instant"
+    })
+  } catch {
+    window.scrollTo(x, y)
+  }
+}
+
+/**
+ * Applies immediate zoom and scroll compensation pinned to (mouseX, mouseY).
+ */
+function applyZoomInstant(
+  newZoom: number,
+  mouseX: number,
+  mouseY: number
+): void {
+  if (animFrameId !== null) {
+    cancelAnimationFrame(animFrameId)
+    animFrameId = null
+  }
+
+  const oldZoom = currentZoom
+  const clampedZoom = Math.max(
     MIN_ZOOM,
     Math.min(MAX_ZOOM, Number(newZoom.toFixed(2)))
   )
+  if (Math.abs(clampedZoom - oldZoom) < 0.001) return
+
+  const scrollX = window.scrollX ?? window.pageXOffset ?? 0
+  const scrollY = window.scrollY ?? window.pageYOffset ?? 0
+
+  // The content coordinate located under the mouse pointer
+  const contentX = (scrollX + mouseX) / oldZoom
+  const contentY = (scrollY + mouseY) / oldZoom
+
+  currentZoom = clampedZoom
+  targetZoom = clampedZoom
 
   if (document.body) {
-    if (currentConfig.smooth) {
-      document.body.style.transition = "zoom 0.1s ease-out"
-    } else {
-      document.body.style.transition = "none"
-    }
-
+    document.body.style.transition = "none"
     if (currentZoom === 1.0) {
       document.body.style.removeProperty("zoom")
     } else {
@@ -81,14 +123,100 @@ function applyZoom(newZoom: number): void {
     }
   }
 
+  // Pin point under mouse by compensating scroll offset
+  const targetScrollX = Math.max(0, Math.round(contentX * currentZoom - mouseX))
+  const targetScrollY = Math.max(0, Math.round(contentY * currentZoom - mouseY))
+  safeScrollTo(targetScrollX, targetScrollY)
+
   showZoomToast(currentZoom)
+}
+
+/**
+ * RAF step handler for smooth zoom & scroll interpolation.
+ */
+function stepSmoothAnim(now: number): void {
+  const elapsed = now - animStartTime
+  const progress = Math.min(1, elapsed / ANIMATION_DURATION)
+  // Cubic ease-out for snappy, responsive feel
+  const ease = 1 - Math.pow(1 - progress, 3)
+
+  const nextZoom = animStartZoom + (targetZoom - animStartZoom) * ease
+  currentZoom = Number(nextZoom.toFixed(3))
+
+  if (document.body) {
+    document.body.style.transition = "none"
+    if (Math.abs(currentZoom - 1.0) < 0.005 && progress >= 1) {
+      document.body.style.removeProperty("zoom")
+      currentZoom = 1.0
+    } else {
+      ;(document.body.style as unknown as { zoom: string }).zoom =
+        currentZoom.toString()
+    }
+  }
+
+  // Scroll compensation in exact sync with current interpolated zoom
+  const targetScrollX = Math.max(
+    0,
+    Math.round(anchorContentX * currentZoom - anchorMouseX)
+  )
+  const targetScrollY = Math.max(
+    0,
+    Math.round(anchorContentY * currentZoom - anchorMouseY)
+  )
+  safeScrollTo(targetScrollX, targetScrollY)
+
+  if (progress < 1) {
+    animFrameId = requestAnimationFrame(stepSmoothAnim)
+  } else {
+    animFrameId = null
+    currentZoom = targetZoom
+    if (currentZoom === 1.0 && document.body) {
+      document.body.style.removeProperty("zoom")
+    }
+  }
+}
+
+/**
+ * Initiates or chains smooth zoom interpolation pinned to (mouseX, mouseY).
+ */
+function applyZoomSmooth(
+  nextTargetZoom: number,
+  mouseX: number,
+  mouseY: number
+): void {
+  const scrollX = window.scrollX ?? window.pageXOffset ?? 0
+  const scrollY = window.scrollY ?? window.pageYOffset ?? 0
+
+  // Anchor content coordinate under mouse cursor at current rendered zoom
+  anchorContentX = (scrollX + mouseX) / currentZoom
+  anchorContentY = (scrollY + mouseY) / currentZoom
+  anchorMouseX = mouseX
+  anchorMouseY = mouseY
+
+  animStartZoom = currentZoom
+  animStartTime = performance.now()
+  targetZoom = Math.max(
+    MIN_ZOOM,
+    Math.min(MAX_ZOOM, Number(nextTargetZoom.toFixed(2)))
+  )
+
+  showZoomToast(targetZoom)
+
+  if (animFrameId === null) {
+    animFrameId = requestAnimationFrame(stepSmoothAnim)
+  }
 }
 
 /**
  * Resets the zoom back to 100%.
  */
 export function resetZoom(): void {
+  if (animFrameId !== null) {
+    cancelAnimationFrame(animFrameId)
+    animFrameId = null
+  }
   currentZoom = 1.0
+  targetZoom = 1.0
   if (document.body) {
     document.body.style.removeProperty("zoom")
     document.body.style.removeProperty("transition")
@@ -133,6 +261,11 @@ function onContextMenu(event: MouseEvent): void {
   }
 }
 
+function onBlur(): void {
+  isLeftMouseDown = false
+  isRightMouseDown = false
+}
+
 /**
  * Wheel event handler for Modifier + Wheel zoom.
  * Returns true if the wheel event was consumed (modifier pressed), false otherwise.
@@ -152,8 +285,14 @@ function onWheelDecision(event: WheelEvent): boolean {
     direction = -direction
   }
 
-  const nextZoom = currentZoom + direction * currentConfig.stepSize
-  applyZoom(nextZoom)
+  const nextTarget = targetZoom + direction * currentConfig.stepSize
+
+  if (currentConfig.smooth) {
+    applyZoomSmooth(nextTarget, event.clientX, event.clientY)
+  } else {
+    applyZoomInstant(nextTarget, event.clientX, event.clientY)
+  }
+
   return true
 }
 
@@ -184,6 +323,7 @@ export function activate(config?: MouseZoomConfig): void {
   window.addEventListener("mousedown", onMouseDown, { capture: true })
   window.addEventListener("mouseup", onMouseUp, { capture: true })
   window.addEventListener("contextmenu", onContextMenu, { capture: true })
+  window.addEventListener("blur", onBlur)
 }
 
 /**
@@ -193,10 +333,16 @@ export function deactivate(): void {
   if (!isActive || typeof window === "undefined") return
   isActive = false
 
+  if (animFrameId !== null) {
+    cancelAnimationFrame(animFrameId)
+    animFrameId = null
+  }
+
   unregisterWheelSubscriber("mouse-zoom")
   window.removeEventListener("mousedown", onMouseDown, true)
   window.removeEventListener("mouseup", onMouseUp, true)
   window.removeEventListener("contextmenu", onContextMenu, true)
+  window.removeEventListener("blur", onBlur)
 
   isLeftMouseDown = false
   isRightMouseDown = false
@@ -209,6 +355,7 @@ export function deactivate(): void {
     document.body.style.removeProperty("transition")
   }
   currentZoom = 1.0
+  targetZoom = 1.0
 
   removeContentToast()
 }

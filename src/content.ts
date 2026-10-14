@@ -21,7 +21,8 @@ import {
 } from "~features/context-menu-actions/logic"
 import {
   activate as activateMouseZoom,
-  deactivate as deactivateMouseZoom
+  deactivate as deactivateMouseZoom,
+  resetZoom as resetMouseZoom
 } from "~features/mouse-zoom/logic"
 import {
   activate as activatePiP,
@@ -164,14 +165,7 @@ async function init(): Promise<void> {
         return true
       }
       if (msgType === MESSAGE_TYPES.RESET_MOUSE_ZOOM) {
-        if (typeof window !== "undefined" && document.body) {
-          document.body.style.removeProperty("zoom")
-          document.body.style.removeProperty("transition")
-          const toast = document.getElementById("browse-assist-zoom-toast")
-          if (toast && toast.parentNode) {
-            toast.parentNode.removeChild(toast)
-          }
-        }
+        resetMouseZoom()
         sendResponse({ success: true })
         return true
       }
