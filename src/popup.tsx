@@ -20,6 +20,7 @@ import { AboutView } from "~components/AboutView"
 import { GlobalDialogHost } from "~components/GlobalDialogHost"
 import { PreferencesSettingsView } from "~components/PreferencesSettingsView"
 import { AppIcon } from "~core/assets"
+import { isColorPickerSupported } from "~core/browserDetect"
 import { APP_INFO, DONATE_OPTIONS } from "~core/constants"
 import {
   MESSAGE_TYPES,
@@ -177,7 +178,9 @@ function IndexPopup() {
     )
     const fullOrder = [...savedOrder, ...missing]
     const hiddenSet = new Set(layout.hidden ?? [])
-    return fullOrder.filter((k) => !hiddenSet.has(k))
+    return fullOrder.filter(
+      (k) => !hiddenSet.has(k) && (k !== "colorPicker" || isColorPickerSupported)
+    )
   }, [settings?.featureLayout])
 
   const featureToggleMap: Record<FeatureKey, React.ReactNode> = {
@@ -373,7 +376,7 @@ function IndexPopup() {
 
                 <div className="space-y-0.5 px-1">
                   {/* Pick Color from Screen */}
-                  {settings?.colorPicker && (
+                  {isColorPickerSupported && settings?.colorPicker && (
                     <button
                       type="button"
                       onClick={async () => {

@@ -12,6 +12,7 @@ import {
 } from "lucide-react"
 import type React from "react"
 
+import { isColorPickerSupported } from "./browserDetect"
 import type { FeatureKey } from "./types"
 
 export interface FeatureIconProps {
@@ -138,4 +139,6 @@ export const FEATURE_CATALOG: Record<FeatureKey, FeatureCatalogItem> = {
  * Array view of all features for iteration (e.g. in Options page).
  */
 export const FEATURE_CATALOG_LIST: FeatureCatalogItem[] =
-  Object.values(FEATURE_CATALOG)
+  Object.values(FEATURE_CATALOG).filter(
+    (item) => item.key !== "colorPicker" || isColorPickerSupported
+  )

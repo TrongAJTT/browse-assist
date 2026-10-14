@@ -10,6 +10,9 @@
   "author": "TrongAJTT. <trong.ajtt.dev@gmail.com>",
   "scripts": {
     "dev": "plasmo dev",
+    "dev:firefox": "plasmo dev --target=firefox-mv3",
+    "dev:edge": "plasmo dev --target=edge-mv3",
+    "dev:chrome": "plasmo dev --target=chrome-mv3",
     "build": "plasmo build",
     "package": "plasmo package",
     "package:edge": "plasmo build --target=edge-mv3 && plasmo package --target=edge-mv3",
@@ -92,6 +95,33 @@
           "mac": "Alt+Shift+Z"
         },
         "description": "Activate Element Zapper to remove page clutter"
+      }
+    },
+    "overrides": {
+      "firefox": {
+        "commands": {
+          "toggle_picture_in_picture": {
+            "suggested_key": {
+              "default": "Alt+P",
+              "mac": "Alt+P"
+            },
+            "description": "Toggle Picture-in-Picture for current playing video"
+          },
+          "toggle_allow_right_click": {
+            "suggested_key": {
+              "default": "Alt+R",
+              "mac": "Alt+R"
+            },
+            "description": "Toggle Allow Right Click on current tab"
+          },
+          "toggle_element_zapper": {
+            "suggested_key": {
+              "default": "Alt+Shift+Z",
+              "mac": "Alt+Shift+Z"
+            },
+            "description": "Activate Element Zapper to remove page clutter"
+          }
+        }
       }
     }
   }

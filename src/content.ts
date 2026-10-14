@@ -5,6 +5,7 @@
 
 import type { PlasmoCSConfig } from "plasmo"
 
+import { isColorPickerSupported } from "~core/browserDetect"
 import { MESSAGE_TYPES } from "~core/messaging"
 import { getStoredSettings, subscribeToSettings } from "~core/storage"
 import type { FeatureSettings } from "~core/types"
@@ -112,8 +113,8 @@ function applySettings(nextSettings: FeatureSettings): void {
     deactivateVideoWheelControl()
   }
 
-  // ColorPick Eyedropper
-  if (nextSettings.colorPicker) {
+  // ColorPick Eyedropper (Chromium only)
+  if (isColorPickerSupported && nextSettings.colorPicker) {
     activateColorPicker(nextSettings.colorPickerConfig)
   } else {
     deactivateColorPicker()

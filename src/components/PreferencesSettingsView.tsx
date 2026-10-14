@@ -21,6 +21,7 @@ import { SegmentedTabs, type SegmentedTabItem } from "~components/SegmentedTabs"
 import { Slider } from "~components/Slider"
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
 import { Switch } from "~components/Switch"
+import { isColorPickerSupported } from "~core/browserDetect"
 import { FEATURE_CATALOG } from "~core/featureCatalog"
 import {
   DEFAULT_FEATURE_LAYOUT_CONFIG,
@@ -98,7 +99,9 @@ export const PreferencesSettingsView: React.FC<
     const missing = DEFAULT_FEATURE_LAYOUT_CONFIG.order.filter(
       (k) => !savedOrder.includes(k)
     )
-    return [...savedOrder, ...missing]
+    return [...savedOrder, ...missing].filter(
+      (k) => k !== "colorPicker" || isColorPickerSupported
+    )
   }, [currentLayout?.order])
 
   const hiddenSet = React.useMemo(
