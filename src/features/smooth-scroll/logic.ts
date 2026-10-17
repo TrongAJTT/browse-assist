@@ -206,6 +206,46 @@ function isInteractiveSurface(target: EventTarget | null): boolean {
   return false
 }
 
+/**
+ * Checks if the container or target element is managed by CSS Scroll Snap or a video feed container.
+ * Such containers require native gesture detection and momentum to snap across full-page items.
+ */
+function isScrollSnapContainer(
+  container: Element | Window,
+  target: EventTarget | null
+): boolean {
+  const el =
+    container === window ? document.documentElement : (container as Element)
+
+  if (el) {
+    const style = window.getComputedStyle(el)
+    const snapType = style.scrollSnapType
+    if (snapType && snapType !== "none") {
+      return true
+    }
+  }
+
+  if (container === window && document.body) {
+    const bodyStyle = window.getComputedStyle(document.body)
+    const bodySnap = bodyStyle.scrollSnapType
+    if (bodySnap && bodySnap !== "none") {
+      return true
+    }
+  }
+
+  // Fallback for well-known short-video feeds and snap containers
+  if (
+    target instanceof Element &&
+    target.closest(
+      "ytd-shorts, #shorts-container, [is-shorts], [data-e2e='recommend-list-item-container']"
+    ) !== null
+  ) {
+    return true
+  }
+
+  return false
+}
+
 // ---------------------------------------------------------------------------
 // Wheel event handler
 // ---------------------------------------------------------------------------
@@ -247,6 +287,12 @@ function onWheel(event: WheelEvent): void {
 
   // If container cannot be scrolled, allow default
   if (maxPos <= 0) {
+    return
+  }
+
+  // Bypass containers utilizing CSS Scroll Snap or video feeds (e.g. YouTube Shorts, TikTok, Reels)
+  // Intercepting scroll here breaks native snap gestures and causes snap-back jitter
+  if (isScrollSnapContainer(container, event.target)) {
     return
   }
 
