@@ -96,20 +96,24 @@ const QUICK_HUB_ACTIONS_META: Record<QuickHubActionId, QuickHubActionMeta> = {
       return { isDisabled: false }
     }
   },
-  elementZapper: {
-    id: "elementZapper",
-    title: "Zap Element / Toys",
-    description: "Remove overlays and inspect DOM elements",
+  elementToys: {
+    id: "elementToys",
+    title: "Element Toys",
+    description: "Inspect, zap, edit text, or reposition elements",
     icon: Zap,
     colorClass: "text-amber-400",
     getSourceState: (s) => {
-      if (!s.elementZapper) {
+      const isEnabled = s.elementToys ?? s.elementZapper
+      if (!isEnabled) {
         return {
           isDisabled: true,
           reason: "Element Toys is disabled in extension settings"
         }
       }
-      if (s.featureLayout?.hidden?.includes("elementZapper")) {
+      const isHidden =
+        s.featureLayout?.hidden?.includes("elementToys") ||
+        s.featureLayout?.hidden?.includes("elementZapper")
+      if (isHidden) {
         return {
           isDisabled: true,
           reason: "Element Toys is hidden in popup menu"
@@ -117,6 +121,9 @@ const QUICK_HUB_ACTIONS_META: Record<QuickHubActionId, QuickHubActionMeta> = {
       }
       return { isDisabled: false }
     }
+  },
+  get elementZapper() {
+    return this.elementToys
   },
   scrollTop: {
     id: "scrollTop",

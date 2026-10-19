@@ -124,8 +124,8 @@ export const FEATURE_CATALOG: Record<FeatureKey, FeatureCatalogItem> = {
     bgClass: "bg-pink-500/10 border-pink-500/30",
     hasSettings: true
   },
-  elementZapper: {
-    key: "elementZapper",
+  elementToys: {
+    key: "elementToys",
     title: "Element Toys",
     description:
       "Inspect, zap, edit text, or reposition elements on any web page.",
@@ -133,6 +133,9 @@ export const FEATURE_CATALOG: Record<FeatureKey, FeatureCatalogItem> = {
     colorClass: "text-amber-400",
     bgClass: "bg-amber-500/10 border-amber-500/30",
     hasSettings: true
+  },
+  get elementZapper() {
+    return this.elementToys
   },
   quickHub: {
     key: "quickHub",

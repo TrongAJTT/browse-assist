@@ -9,7 +9,7 @@ Browse Assist is a browser extension (Manifest V3) inspired by the "PowerToys fo
 6. **Universal Picture-in-Picture**: Trigger PiP for currently playing videos via hotkey `Alt+P`.
 7. **Quick Scroll**: Double-click edges or floating buttons to jump swiftly to top or bottom.
 8. **Color Picker**: Eyedropper magnifier zooming into individual pixels to copy HEX/RGB/HSL color codes instantly.
-9. **Element Zapper**: Point-and-click targeting mode to remove annoying overlays/banners from the DOM, with automatic scroll unfreezing.
+9. **Element Toys**: Inspect, zap, edit text, or reposition elements on any web page, with automatic scroll unfreezing.
 
 ---
 

@@ -29,7 +29,7 @@ graph TD
         CS -->|activate / deactivate| F4[Quick Scroll]
         CS -->|activate / deactivate| F5[Super Drag]
         CS -->|activate / deactivate| F6[Color Picker]
-        CS -->|activate / deactivate| F7[Element Zapper]
+        CS -->|activate / deactivate| F7[Element Toys]
     end
 ```
 

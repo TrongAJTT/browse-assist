@@ -88,8 +88,8 @@ export interface MessageRegistry {
     response: { success: boolean }
   }
 
-  // Element Zapper
-  [MESSAGE_TYPES.TRIGGER_ELEMENT_ZAPPER]: {
+  // Element Toys
+  [MESSAGE_TYPES.TRIGGER_ELEMENT_TOYS]: {
     request: undefined
     response: { success: boolean }
   },

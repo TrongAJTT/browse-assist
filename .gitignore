@@ -37,3 +37,4 @@ tsconfig.tsbuildinfo
 SPECIFICATION.md
 assets/icon.svg
 .codegraph/
+docs/internal/

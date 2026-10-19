@@ -1,15 +1,15 @@
 import { SVG_ICONS, MODE_COLORS, TOOLBAR_ID } from "./constants"
-import type { ElementMoveType, ZapperMode } from "~core/types"
+import type { ElementMoveType, ElementToysMode } from "~core/types"
 
 export interface ToolbarHandlers {
-  onModeChange: (mode: ZapperMode) => void
+  onModeChange: (mode: ElementToysMode) => void
   onSubMoveChange: (type: ElementMoveType) => void
   onUndo: () => void
   onSettings: () => void
   onExit: () => void
 }
 
-function getModeButtonStyle(mode: ZapperMode, isSelected: boolean): string {
+function getModeButtonStyle(mode: ElementToysMode, isSelected: boolean): string {
   const color = MODE_COLORS[mode]
   if (isSelected) {
     return `
@@ -140,7 +140,7 @@ export class ToolbarView {
   }
 
   public render(
-    currentMode: ZapperMode,
+    currentMode: ElementToysMode,
     moveType: ElementMoveType,
     undoCount: number,
     handlers: ToolbarHandlers
@@ -216,7 +216,7 @@ export class ToolbarView {
     el.querySelectorAll<HTMLButtonElement>("[data-mode]").forEach((btn) => {
       btn.onclick = (e) => {
         e.stopPropagation()
-        const selected = btn.getAttribute("data-mode") as ZapperMode
+        const selected = btn.getAttribute("data-mode") as ElementToysMode
         if (selected) handlers.onModeChange(selected)
       }
     })

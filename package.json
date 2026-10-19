@@ -89,12 +89,12 @@
         },
         "description": "Pick color from screen"
       },
-      "toggle_element_zapper": {
+      "toggle_element_toys": {
         "suggested_key": {
           "default": "Alt+Shift+Z",
           "mac": "Alt+Shift+Z"
         },
-        "description": "Activate Element Zapper to remove page clutter"
+        "description": "Activate Element Toys to inspect and manipulate page elements"
       },
       "toggle_quick_hub": {
         "description": "Toggle Quick Hub on-screen menu"
@@ -124,12 +124,12 @@
             },
             "description": "Toggle Allow Right Click on current tab"
           },
-          "toggle_element_zapper": {
+          "toggle_element_toys": {
             "suggested_key": {
               "default": "Alt+Shift+Z",
               "mac": "Alt+Shift+Z"
             },
-            "description": "Activate Element Zapper to remove page clutter"
+            "description": "Activate Element Toys to inspect and manipulate page elements"
           },
           "toggle_quick_hub": {
             "description": "Toggle Quick Hub on-screen menu"

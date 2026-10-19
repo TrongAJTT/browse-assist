@@ -179,17 +179,17 @@ export const PreferencesSettingsView: React.FC<
         "contextMenuActions",
         "pictureInPicture",
         "mouseZoom",
-        "elementZapper",
+        "elementToys",
         "colorPicker"
       ]
       // Show reading & navigation tools, hide heavy inspection tools
-      newHidden = ["colorPicker", "elementZapper"]
+      newHidden = ["colorPicker", "elementToys"]
     } else if (preset === "designer") {
       // Prioritize design, inspect, layout tinkering
       newOrder = [
         "allowRightClick",
         "colorPicker",
-        "elementZapper",
+        "elementToys",
         "contextMenuActions",
         "mouseZoom",
         "superDrag",
@@ -209,12 +209,12 @@ export const PreferencesSettingsView: React.FC<
         "smoothScroll",
         "mouseZoom",
         "colorPicker",
-        "elementZapper"
+        "elementToys"
       ]
       newHidden = [
         "mouseZoom",
         "colorPicker",
-        "elementZapper",
+        "elementToys",
         "smoothScroll"
       ]
     }
@@ -373,7 +373,7 @@ export const PreferencesSettingsView: React.FC<
                           Designer & Dev
                         </span>
                         <span className="text-[10px] text-content-muted">
-                          Color, inspect & zapper
+                          Color, inspect & toys
                         </span>
                       </div>
                     </button>

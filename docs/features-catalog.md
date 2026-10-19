@@ -17,7 +17,7 @@ This document outlines the catalog of active features, default keybindings, exec
 | 7   | **Video Wheel Control**  | `videoWheelControl`  | Content Script | `Shift` / `Alt` + Mouse wheel | Smoothly adjusts video volume and playback speed directly on video player hover with OSD HUD and middle-click mute.                                                     |
 | 8   | **Quick Scroll**         | `quickScroll`        | Content Script | Double-click page edge        | Double-click configured browser window margins (or floating buttons) to jump quickly to the top or bottom of the page.                                                  |
 | 9   | **Color Picker**         | `colorPicker`        | Content Script | Popup Action                  | Eyedropper magnifier zooming into individual pixels under the cursor; click to copy HEX, RGB, or HSL codes.                                                             |
-| 10  | **Element Zapper**       | `elementZapper`      | Content Script | Popup Action                  | Point-and-click targeting mode to remove sticky banners, popups, and paywall overlays from the DOM; automatically unfreezes locked body scrolling (`overflow: hidden`). |
+| 10  | **Element Toys**         | `elementToys`        | Content Script | Popup Action                  | Point-and-click targeting mode to inspect, zap, edit text, or reposition elements on any web page; automatically unfreezes locked body scrolling (`overflow: hidden`). |
 
 ---
 

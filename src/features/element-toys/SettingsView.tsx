@@ -23,27 +23,29 @@ import { SubSettingsLayout } from "~components/SubSettingsLayout"
 import { MESSAGE_TYPES, sendToActiveTab } from "~core/messaging"
 import { openBrowserShortcutsPage } from "~core/shortcutsHelper"
 import {
-  DEFAULT_ELEMENT_ZAPPER_CONFIG,
+  DEFAULT_ELEMENT_TOYS_CONFIG,
   DEFAULT_SETTINGS,
   STORAGE_KEYS,
-  type ElementZapperConfig,
+  type ElementToysConfig,
   type FeatureSettings,
-  type ZapperMode
+  type ElementToysMode
 } from "~core/types"
 
-interface ElementZapperSettingsViewProps {
+export interface ElementToysSettingsViewProps {
   onBack: () => void
 }
 
-const DEFAULT_MODE_TABS: SegmentedTabItem<ZapperMode>[] = [
+export type ElementZapperSettingsViewProps = ElementToysSettingsViewProps
+
+const DEFAULT_MODE_TABS: SegmentedTabItem<ElementToysMode>[] = [
   { id: "zap", label: "Zap", icon: <Trash2 className="w-3.5 h-3.5 text-red-400" /> },
   { id: "edit", label: "Edit", icon: <Type className="w-3.5 h-3.5 text-sky-400" /> },
   { id: "move", label: "Move", icon: <Move className="w-3.5 h-3.5 text-emerald-400" /> },
   { id: "hide", label: "Hide", icon: <EyeOff className="w-3.5 h-3.5 text-amber-400" /> }
 ]
 
-export const ElementZapperSettingsView: React.FC<
-  ElementZapperSettingsViewProps
+export const ElementToysSettingsView: React.FC<
+  ElementToysSettingsViewProps
 > = ({ onBack }) => {
   const [settings, setSettings] = useStorage<FeatureSettings>(
     STORAGE_KEYS.SETTINGS,
@@ -54,7 +56,9 @@ export const ElementZapperSettingsView: React.FC<
   useEffect(() => {
     if (chrome.commands?.getAll) {
       chrome.commands.getAll((commands) => {
-        const cmd = commands.find((c) => c.name === "toggle_element_zapper")
+        const cmd = commands.find(
+          (c) => c.name === "toggle_element_toys" || c.name === "toggle_element_zapper"
+        )
         if (cmd?.shortcut) {
           setShortcut(cmd.shortcut)
         } else {
@@ -64,41 +68,46 @@ export const ElementZapperSettingsView: React.FC<
     }
   }, [])
 
-  const currentConfig: ElementZapperConfig =
-    settings?.elementZapperConfig ?? DEFAULT_ELEMENT_ZAPPER_CONFIG
+  const currentConfig: ElementToysConfig =
+    settings?.elementToysConfig ?? settings?.elementZapperConfig ?? DEFAULT_ELEMENT_TOYS_CONFIG
   const isMasterEnabled =
-    settings?.elementZapper ?? DEFAULT_SETTINGS.elementZapper
+    settings?.elementToys ?? settings?.elementZapper ?? DEFAULT_SETTINGS.elementToys
 
   const handleToggleMaster = (enabled: boolean) => {
     setSettings((prev) => ({
       ...(prev ?? DEFAULT_SETTINGS),
+      elementToys: enabled,
       elementZapper: enabled
     }))
   }
 
-  const handleToggleConfig = (key: keyof ElementZapperConfig) => {
+  const handleToggleConfig = (key: keyof ElementToysConfig) => {
+    const updatedConfig = {
+      ...(settings?.elementToysConfig ?? settings?.elementZapperConfig ?? DEFAULT_ELEMENT_TOYS_CONFIG),
+      [key]: !currentConfig[key]
+    }
     setSettings((prev) => ({
       ...(prev ?? DEFAULT_SETTINGS),
-      elementZapperConfig: {
-        ...(prev?.elementZapperConfig ?? DEFAULT_ELEMENT_ZAPPER_CONFIG),
-        [key]: !currentConfig[key]
-      }
+      elementToysConfig: updatedConfig,
+      elementZapperConfig: updatedConfig
     }))
   }
 
-  const handleSetDefaultMode = (mode: ZapperMode) => {
+  const handleSetDefaultMode = (mode: ElementToysMode) => {
+    const updatedConfig = {
+      ...(settings?.elementToysConfig ?? settings?.elementZapperConfig ?? DEFAULT_ELEMENT_TOYS_CONFIG),
+      defaultMode: mode
+    }
     setSettings((prev) => ({
       ...(prev ?? DEFAULT_SETTINGS),
-      elementZapperConfig: {
-        ...(prev?.elementZapperConfig ?? DEFAULT_ELEMENT_ZAPPER_CONFIG),
-        defaultMode: mode
-      }
+      elementToysConfig: updatedConfig,
+      elementZapperConfig: updatedConfig
     }))
   }
 
   const handleLaunchNow = async () => {
     try {
-      await sendToActiveTab(MESSAGE_TYPES.TRIGGER_ELEMENT_ZAPPER)
+      await sendToActiveTab(MESSAGE_TYPES.TRIGGER_ELEMENT_TOYS)
     } finally {
       window.close()
     }
@@ -248,3 +257,6 @@ export const ElementZapperSettingsView: React.FC<
     </SubSettingsLayout>
   )
 }
+
+export const ElementZapperSettingsView = ElementToysSettingsView
+

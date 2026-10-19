@@ -1,7 +1,7 @@
-import { MODE_COLORS, ZAPPER_CONTAINER_ID } from "./constants"
+import { MODE_COLORS, ELEMENT_TOYS_CONTAINER_ID } from "./constants"
 import { getElementDescriptor, isInternalElement } from "./domUtils"
 import type { FlowDropTarget, ResizeHandle } from "./types"
-import type { ElementZapperConfig, ZapperMode } from "~core/types"
+import type { ElementToysConfig, ElementToysMode } from "~core/types"
 
 export class OverlayView {
   private container: HTMLDivElement | null = null
@@ -32,7 +32,7 @@ export class OverlayView {
     }
 
     this.container = document.createElement("div")
-    this.container.id = ZAPPER_CONTAINER_ID
+    this.container.id = ELEMENT_TOYS_CONTAINER_ID
     this.container.setAttribute("data-browse-assist-internal", "true")
     this.container.style.cssText = `
       position: fixed;
@@ -253,8 +253,8 @@ export class OverlayView {
 
   public updateHighlight(
     target: HTMLElement | null,
-    mode: ZapperMode,
-    config: ElementZapperConfig,
+    mode: ElementToysMode,
+    config: ElementToysConfig,
     scopeDepth: number,
     isDragging: boolean,
     isResizing: boolean,

@@ -49,10 +49,10 @@ import {
   deactivate as deactivateColorPicker
 } from "~features/color-picker/logic"
 import {
-  activate as activateElementZapper,
-  deactivate as deactivateElementZapper,
-  startZapping as startElementZapping
-} from "~features/element-zapper/logic"
+  activate as activateElementToys,
+  deactivate as deactivateElementToys,
+  startZapping as startElementToys
+} from "~features/element-toys/logic"
 import {
   activate as activateQuickHub,
   deactivate as deactivateQuickHub,
@@ -67,7 +67,7 @@ export const config: PlasmoCSConfig = {
 let isElementToysEnabled = true
 
 function applySettings(nextSettings: FeatureSettings): void {
-  isElementToysEnabled = Boolean(nextSettings?.elementZapper)
+  isElementToysEnabled = Boolean(nextSettings?.elementToys ?? nextSettings?.elementZapper)
   // Allow Right Click is managed per-tab on-demand, not auto-activated globally.
 
   // Context Menu Actions
@@ -126,11 +126,14 @@ function applySettings(nextSettings: FeatureSettings): void {
     deactivateColorPicker()
   }
 
-  // Element Zapper
-  if (nextSettings.elementZapper) {
-    activateElementZapper(nextSettings.elementZapperConfig)
+  // Element Toys
+  const isToysEnabled = nextSettings.elementToys ?? nextSettings.elementZapper
+  if (isToysEnabled) {
+    activateElementToys(
+      nextSettings.elementToysConfig || nextSettings.elementZapperConfig
+    )
   } else {
-    deactivateElementZapper()
+    deactivateElementToys()
   }
 
   // Quick Hub
@@ -181,8 +184,11 @@ async function init(): Promise<void> {
         sendResponse({ success: true })
         return true
       }
-      if (msgType === MESSAGE_TYPES.TRIGGER_ELEMENT_ZAPPER) {
-        startElementZapping()
+      if (
+        msgType === MESSAGE_TYPES.TRIGGER_ELEMENT_TOYS ||
+        msgType === MESSAGE_TYPES.TRIGGER_ELEMENT_ZAPPER
+      ) {
+        startElementToys()
         sendResponse({ success: true })
         return true
       }
@@ -207,7 +213,7 @@ async function init(): Promise<void> {
           e.preventDefault()
           e.stopPropagation()
           e.stopImmediatePropagation()
-          startElementZapping()
+          startElementToys()
         }
       },
       { capture: true }

@@ -1,4 +1,4 @@
-import { ZAPPER_CONTAINER_ID, TOOLBAR_ID } from "./constants"
+import { ELEMENT_TOYS_CONTAINER_ID, TOOLBAR_ID } from "./constants"
 
 /**
  * Builds readable descriptor for an element (e.g. "div#cookie-banner.modal").
@@ -22,9 +22,9 @@ export function getElementDescriptor(el: HTMLElement): string {
 export function isInternalElement(target: HTMLElement | null): boolean {
   if (!target) return false
   return (
-    target.id === ZAPPER_CONTAINER_ID ||
+    target.id === ELEMENT_TOYS_CONTAINER_ID ||
     target.id === TOOLBAR_ID ||
-    !!target.closest(`#${ZAPPER_CONTAINER_ID}`) ||
+    !!target.closest(`#${ELEMENT_TOYS_CONTAINER_ID}`) ||
     !!target.closest(`[data-browse-assist-internal]`)
   )
 }

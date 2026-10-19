@@ -18,7 +18,7 @@ import {
   type QuickHubConfig
 } from "~core/types"
 import { pickColor } from "~features/color-picker/logic"
-import { startZapping as startElementZapping } from "~features/element-zapper/logic"
+import { startZapping as startElementToys } from "~features/element-toys/logic"
 import { resetZoom as resetMouseZoom } from "~features/mouse-zoom/logic"
 import { togglePictureInPicture } from "~features/picture-in-picture/logic"
 
@@ -381,11 +381,13 @@ const ACTION_RENDERERS: Record<
     list.appendChild(btn)
     return true
   },
-  elementZapper: (list, settings) => {
-    if (
-      !settings.elementZapper ||
+  elementToys: (list, settings) => {
+    const isEnabled = settings.elementToys ?? settings.elementZapper
+    const isHidden =
+      settings.featureLayout?.hidden?.includes("elementToys") ||
       settings.featureLayout?.hidden?.includes("elementZapper")
-    ) {
+
+    if (!isEnabled || isHidden) {
       return false
     }
     const btn = document.createElement("button")
@@ -394,15 +396,18 @@ const ACTION_RENDERERS: Record<
     btn.innerHTML = `
       <div class="qh-item-content">
         <div class="qh-icon-box qh-icon-zap">${ZAP_ICON_SVG}</div>
-        <span class="qh-item-name">Zap Element / Toys</span>
+        <span class="qh-item-name">Element Toys</span>
       </div>
     `
     btn.addEventListener("click", () => {
       closeMenu()
-      startElementZapping()
+      startElementToys()
     })
     list.appendChild(btn)
     return true
+  },
+  get elementZapper() {
+    return this.elementToys
   },
   scrollTop: (list, settings) => {
     if (

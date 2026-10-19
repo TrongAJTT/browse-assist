@@ -1,4 +1,4 @@
-import type { ElementMoveType, ZapperMode } from "~core/types"
+import type { ElementMoveType, ElementToysMode } from "~core/types"
 
 export type ResizeHandle = "n" | "s" | "e" | "w" | "ne" | "nw" | "se" | "sw"
 
@@ -10,7 +10,7 @@ export interface FlowDropTarget {
 }
 
 export interface UndoAction {
-  type: ZapperMode | "resize"
+  type: ElementToysMode | "resize"
   element: HTMLElement
   parent?: HTMLElement | null
   nextSibling?: Node | null

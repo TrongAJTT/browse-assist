@@ -11,7 +11,8 @@ export type FeatureKey =
   | "videoWheelControl"
   | "quickScroll"
   | "colorPicker"
-  | "elementZapper"
+  | "elementToys"
+  | "elementZapper" // deprecated alias
   | "quickHub"
 
 export type ContextMenuActionId =
@@ -354,7 +355,8 @@ export const DEFAULT_COLOR_PICKER_CONFIG: ColorPickerConfig = {
 /**
  * Interactive action modes for Element Toys.
  */
-export type ZapperMode = "zap" | "edit" | "move" | "hide"
+export type ElementToysMode = "zap" | "edit" | "move" | "hide"
+export type ZapperMode = ElementToysMode // Alias for backward compatibility
 
 /**
  * Move behavior mode:
@@ -366,17 +368,19 @@ export type ElementMoveType = "relative" | "absolute"
 /**
  * Element Toys configuration.
  */
-export interface ElementZapperConfig {
+export interface ElementToysConfig {
   autoUnfreezeScroll: boolean // Automatically remove overflow:hidden on body/html when an overlay is zapped
   showToast: boolean // Show feedback toast when an action is executed or mode cancelled
   continuousMode: boolean // Stay in Element Toys mode until Esc or Exit button
   showDimensions: boolean // Display width × height in the hover badge
   showTagDescriptor: boolean // Display HTML tag & class/id in badge
-  defaultMode: ZapperMode // Initial tool mode when activated
+  defaultMode: ElementToysMode // Initial tool mode when activated
   moveType: ElementMoveType // "relative" (layout flow / push components) or "absolute" (freeform)
 }
 
-export const DEFAULT_ELEMENT_ZAPPER_CONFIG: ElementZapperConfig = {
+export type ElementZapperConfig = ElementToysConfig // Alias for backward compatibility
+
+export const DEFAULT_ELEMENT_TOYS_CONFIG: ElementToysConfig = {
   autoUnfreezeScroll: true,
   showToast: true,
   continuousMode: true,
@@ -385,6 +389,8 @@ export const DEFAULT_ELEMENT_ZAPPER_CONFIG: ElementZapperConfig = {
   defaultMode: "zap",
   moveType: "relative"
 }
+
+export const DEFAULT_ELEMENT_ZAPPER_CONFIG = DEFAULT_ELEMENT_TOYS_CONFIG
 
 /**
  * Screen corner position for Quick Hub trigger.
@@ -401,7 +407,8 @@ export type QuickHubCorner =
 export type QuickHubActionId =
   | "pip"
   | "colorPicker"
-  | "elementZapper"
+  | "elementToys"
+  | "elementZapper" // deprecated alias
   | "scrollTop"
   | "scrollBottom"
   | "resetZoom"
@@ -410,7 +417,7 @@ export type QuickHubActionId =
 export const DEFAULT_QUICK_HUB_ACTION_ORDER: QuickHubActionId[] = [
   "pip",
   "colorPicker",
-  "elementZapper",
+  "elementToys",
   "scrollTop",
   "scrollBottom",
   "resetZoom",
@@ -461,7 +468,8 @@ export interface FeatureSettings {
   videoWheelControl: boolean
   quickScroll: boolean
   colorPicker: boolean
-  elementZapper: boolean
+  elementToys: boolean
+  elementZapper?: boolean // Deprecated fallback
   quickHub: boolean
   featureLayout: FeatureLayoutConfig
   popupNavigation: PopupNavigationConfig
@@ -473,7 +481,8 @@ export interface FeatureSettings {
   videoWheelControlConfig: VideoWheelControlConfig
   quickScrollConfig: QuickScrollConfig
   colorPickerConfig: ColorPickerConfig
-  elementZapperConfig: ElementZapperConfig
+  elementToysConfig: ElementToysConfig
+  elementZapperConfig?: ElementToysConfig // Deprecated fallback
   quickHubConfig: QuickHubConfig
 }
 
@@ -496,7 +505,7 @@ export const DEFAULT_FEATURE_LAYOUT_CONFIG: FeatureLayoutConfig = {
     "videoWheelControl",
     "mouseZoom",
     "colorPicker",
-    "elementZapper",
+    "elementToys",
     "quickHub"
   ],
   hidden: []
@@ -531,6 +540,7 @@ export const DEFAULT_SETTINGS: FeatureSettings = {
   videoWheelControl: true,
   quickScroll: true,
   colorPicker: true,
+  elementToys: true,
   elementZapper: true,
   quickHub: true,
   featureLayout: DEFAULT_FEATURE_LAYOUT_CONFIG,
@@ -546,7 +556,8 @@ export const DEFAULT_SETTINGS: FeatureSettings = {
   videoWheelControlConfig: DEFAULT_VIDEO_WHEEL_CONTROL_CONFIG,
   quickScrollConfig: DEFAULT_QUICK_SCROLL_CONFIG,
   colorPickerConfig: DEFAULT_COLOR_PICKER_CONFIG,
-  elementZapperConfig: DEFAULT_ELEMENT_ZAPPER_CONFIG,
+  elementToysConfig: DEFAULT_ELEMENT_TOYS_CONFIG,
+  elementZapperConfig: DEFAULT_ELEMENT_TOYS_CONFIG,
   quickHubConfig: DEFAULT_QUICK_HUB_CONFIG
 }
 
@@ -644,7 +655,7 @@ export const FEATURES_LIST: FeatureMeta[] = [
     hasSettings: true
   },
   {
-    key: "elementZapper",
+    key: "elementToys",
     title: "Element Toys",
     description:
       "Inspect, zap, edit text, or reposition elements on any web page.",

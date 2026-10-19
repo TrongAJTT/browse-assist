@@ -24,19 +24,19 @@ import { MESSAGE_TYPES, sendToBackground } from "~core/messaging"
 import { extensionStorage } from "~core/storage"
 import { showContentToast } from "~core/toast"
 import {
-  DEFAULT_ELEMENT_ZAPPER_CONFIG,
+  DEFAULT_ELEMENT_TOYS_CONFIG,
   STORAGE_KEYS,
   type ElementMoveType,
-  type ElementZapperConfig,
+  type ElementToysConfig,
   type FeatureSettings,
-  type ZapperMode
+  type ElementToysMode
 } from "~core/types"
 
 // Feature state
 let isActive = false
 let isSessionActive = false
-let currentConfig: ElementZapperConfig = DEFAULT_ELEMENT_ZAPPER_CONFIG
-let currentMode: ZapperMode = "zap"
+let currentConfig: ElementToysConfig = DEFAULT_ELEMENT_TOYS_CONFIG
+let currentMode: ElementToysMode = "zap"
 let currentHoveredElement: HTMLElement | null = null
 
 // Subsystem instances
@@ -48,7 +48,7 @@ const resizeController = new ResizeController()
 const overlayView = new OverlayView()
 const toolbarView = new ToolbarView()
 
-function getCursorForMode(mode: ZapperMode): string {
+function getCursorForMode(mode: ElementToysMode): string {
   switch (mode) {
     case "zap":
       return "crosshair"
@@ -90,7 +90,7 @@ function renderToolbar(): void {
   )
 }
 
-function setMode(mode: ZapperMode): void {
+function setMode(mode: ElementToysMode): void {
   if (textEditor.isEditing) {
     textEditor.commit(undoManager, true, currentConfig.showToast)
   }
@@ -109,12 +109,14 @@ async function setMoveType(type: ElementMoveType): Promise<void> {
   try {
     const settings = await extensionStorage.get<FeatureSettings>(STORAGE_KEYS.SETTINGS)
     if (settings) {
+      const nextConfig = {
+        ...(settings.elementToysConfig || settings.elementZapperConfig || currentConfig),
+        moveType: type
+      }
       await extensionStorage.set(STORAGE_KEYS.SETTINGS, {
         ...settings,
-        elementZapperConfig: {
-          ...(settings.elementZapperConfig || currentConfig),
-          moveType: type
-        }
+        elementToysConfig: nextConfig,
+        elementZapperConfig: nextConfig
       })
     }
   } catch {
@@ -141,7 +143,7 @@ function undoLastAction(): void {
 
 async function openSettingsView(): Promise<void> {
   stopZapping(false)
-  await sendToBackground(MESSAGE_TYPES.OPEN_POPUP, { view: "element-zapper-settings" })
+  await sendToBackground(MESSAGE_TYPES.OPEN_POPUP, { view: "element-toys-settings" })
 }
 
 function onPointerMove(e: PointerEvent): void {
@@ -446,9 +448,9 @@ export function stopZapping(_zapped = false): void {
   currentHoveredElement = null
 }
 
-export function activate(config?: ElementZapperConfig): void {
+export function activate(config?: ElementToysConfig): void {
   if (config) {
-    currentConfig = { ...DEFAULT_ELEMENT_ZAPPER_CONFIG, ...config }
+    currentConfig = { ...DEFAULT_ELEMENT_TOYS_CONFIG, ...config }
     if (isSessionActive) {
       renderToolbar()
       updateHighlight(currentHoveredElement)

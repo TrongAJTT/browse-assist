@@ -1,6 +1,7 @@
-import type { ZapperMode } from "~core/types"
+import type { ElementToysMode } from "~core/types"
 
-export const ZAPPER_CONTAINER_ID = "__browse_assist_element_toys_container__"
+export const ELEMENT_TOYS_CONTAINER_ID = "__browse_assist_element_toys_container__"
+export const ZAPPER_CONTAINER_ID = ELEMENT_TOYS_CONTAINER_ID // Legacy alias
 export const TOOLBAR_ID = "__browse_assist_element_toys_toolbar__"
 
 // Crisp inline SVG icons (13x13 or 14x14) matching Lucide design language
@@ -16,7 +17,7 @@ export const SVG_ICONS = {
 } as const
 
 // Mode visual themes
-export const MODE_COLORS: Record<ZapperMode, { primary: string; bg: string; border: string }> = {
+export const MODE_COLORS: Record<ElementToysMode, { primary: string; bg: string; border: string }> = {
   zap: {
     primary: "#ef4444",
     bg: "rgba(239, 68, 68, 0.15)",

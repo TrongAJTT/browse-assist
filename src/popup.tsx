@@ -37,8 +37,8 @@ import { ColorPickerSettingsView } from "~features/color-picker/SettingsView"
 import { ColorPickerToggle } from "~features/color-picker/Toggle"
 import { ContextMenuActionsSettingsView } from "~features/context-menu-actions/SettingsView"
 import { ContextMenuActionsToggle } from "~features/context-menu-actions/Toggle"
-import { ElementZapperSettingsView } from "~features/element-zapper/SettingsView"
-import { ElementZapperToggle } from "~features/element-zapper/Toggle"
+import { ElementToysSettingsView } from "~features/element-toys/SettingsView"
+import { ElementToysToggle } from "~features/element-toys/Toggle"
 import { MouseZoomSettingsView } from "~features/mouse-zoom/SettingsView"
 import { MouseZoomToggle } from "~features/mouse-zoom/Toggle"
 import { PictureInPictureSettingsView } from "~features/picture-in-picture/SettingsView"
@@ -66,6 +66,7 @@ type ActiveView =
   | "smooth-scroll-settings"
   | "mouse-zoom-settings"
   | "color-picker-settings"
+  | "element-toys-settings"
   | "element-zapper-settings"
   | "quick-hub-settings"
   | "preferences"
@@ -221,9 +222,14 @@ function IndexPopup() {
         onConfigure={() => setCurrentView("color-picker-settings")}
       />
     ),
+    elementToys: (
+      <ElementToysToggle
+        onConfigure={() => setCurrentView("element-toys-settings")}
+      />
+    ),
     elementZapper: (
-      <ElementZapperToggle
-        onConfigure={() => setCurrentView("element-zapper-settings")}
+      <ElementToysToggle
+        onConfigure={() => setCurrentView("element-toys-settings")}
       />
     ),
     quickHub: (
@@ -458,8 +464,9 @@ function IndexPopup() {
           <MouseZoomSettingsView onBack={() => setCurrentView("main")} />
         ) : currentView === "color-picker-settings" ? (
           <ColorPickerSettingsView onBack={() => setCurrentView("main")} />
-        ) : currentView === "element-zapper-settings" ? (
-          <ElementZapperSettingsView onBack={() => setCurrentView("main")} />
+        ) : currentView === "element-toys-settings" ||
+          currentView === "element-zapper-settings" ? (
+          <ElementToysSettingsView onBack={() => setCurrentView("main")} />
         ) : currentView === "quick-hub-settings" ? (
           <QuickHubSettingsView onBack={() => setCurrentView("main")} />
         ) : currentView === "preferences" ? (

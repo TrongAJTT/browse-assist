@@ -14,8 +14,8 @@ const localStorage = new Storage({ area: "local" })
  * Listens for commands registered in manifest.
  */
 function onCommandListener(command: string): void {
-  if (command === "toggle_element_zapper") {
-    sendToActiveTab(MESSAGE_TYPES.TRIGGER_ELEMENT_ZAPPER).catch(() => {})
+  if (command === "toggle_element_toys" || command === "toggle_element_zapper") {
+    sendToActiveTab(MESSAGE_TYPES.TRIGGER_ELEMENT_TOYS).catch(() => {})
   }
 }
 
@@ -31,7 +31,7 @@ function onMessageListener(
   if (msgType === MESSAGE_TYPES.OPEN_POPUP) {
     ;(async () => {
       try {
-        const targetView = message?.view || "element-zapper-settings"
+        const targetView = message?.view || "element-toys-settings"
 
         // Store into localStorage area matching popup.tsx LAST_VIEW key
         await localStorage.set(STORAGE_KEYS.LAST_VIEW, {
@@ -82,7 +82,10 @@ function onMessageListener(
 /**
  * Initializes the Element Toys background listeners.
  */
-export async function initElementZapperBackground(): Promise<void> {
+export async function initElementToysBackground(): Promise<void> {
   chrome.commands.onCommand.addListener(onCommandListener)
   chrome.runtime.onMessage.addListener(onMessageListener)
 }
+
+export const initElementZapperBackground = initElementToysBackground
+

@@ -27,7 +27,7 @@ initPictureInPictureBackground().catch((err) => {
 
 import { isColorPickerSupported } from "~core/browserDetect"
 import { initColorPickerBackground } from "~features/color-picker/background"
-import { initElementZapperBackground } from "~features/element-zapper/background"
+import { initElementToysBackground } from "~features/element-toys/background"
 
 if (isColorPickerSupported) {
   initColorPickerBackground().catch((err) => {
@@ -35,8 +35,8 @@ if (isColorPickerSupported) {
   })
 }
 
-initElementZapperBackground().catch((err) => {
-  console.error("Failed to initialize element-zapper background service:", err)
+initElementToysBackground().catch((err) => {
+  console.error("Failed to initialize element-toys background service:", err)
 })
 
 import { initQuickHubBackground } from "~features/quick-hub/background"

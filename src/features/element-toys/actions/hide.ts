@@ -1,34 +1,29 @@
-import { SVG_ICONS } from "../constants"
 import { getElementDescriptor } from "../domUtils"
 import { unfreezeScrollLock } from "../scrollUnlock"
 import type { UndoManager } from "../undoManager"
 import { showContentToast } from "~core/toast"
-import type { ElementZapperConfig } from "~core/types"
+import type { ElementToysConfig } from "~core/types"
 
-export function executeZap(
+export function executeHide(
   target: HTMLElement,
-  config: ElementZapperConfig,
+  config: ElementToysConfig,
   undoManager: UndoManager
 ): void {
-  const parent = target.parentElement
-  const nextSibling = target.nextSibling
+  const oldVisibility = target.style.visibility
+  const oldDisplay = target.style.display
   const desc = getElementDescriptor(target)
   const isPotentialModal =
     window.getComputedStyle(target).position === "fixed" ||
     window.getComputedStyle(target).position === "absolute"
 
   undoManager.push({
-    type: "zap",
+    type: "hide",
     element: target,
-    parent,
-    nextSibling
+    oldVisibility,
+    oldDisplay
   })
 
-  try {
-    target.remove()
-  } catch {
-    target.style.display = "none"
-  }
+  target.style.setProperty("visibility", "hidden", "important")
 
   if (config.autoUnfreezeScroll && isPotentialModal) {
     unfreezeScrollLock(config.showToast)
@@ -36,11 +31,10 @@ export function executeZap(
 
   if (config.showToast) {
     showContentToast({
-      message: "Element Zapped!",
+      message: "Element Hidden",
       detail: `<${desc}>`,
-      type: "success",
-      iconSvg: SVG_ICONS.zap,
-      duration: 2000
+      type: "info",
+      duration: 1800
     })
   }
 }

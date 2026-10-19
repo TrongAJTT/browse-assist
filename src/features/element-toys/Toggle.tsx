@@ -12,16 +12,18 @@ import {
   type FeatureSettings
 } from "~core/types"
 
-const meta = FEATURE_CATALOG.elementZapper
+const meta = FEATURE_CATALOG.elementToys
 
-interface ElementZapperToggleProps {
+export interface ElementToysToggleProps {
   onConfigure?: () => void
 }
 
+export type ElementZapperToggleProps = ElementToysToggleProps
+
 /**
- * Toggle component for Element Zapper on Popup main view.
+ * Toggle component for Element Toys on Popup main view.
  */
-export const ElementZapperToggle: React.FC<ElementZapperToggleProps> = ({
+export const ElementToysToggle: React.FC<ElementToysToggleProps> = ({
   onConfigure
 }) => {
   const [settings, setSettings] = useStorage<FeatureSettings>(
@@ -33,7 +35,9 @@ export const ElementZapperToggle: React.FC<ElementZapperToggleProps> = ({
   useEffect(() => {
     if (chrome.commands?.getAll) {
       chrome.commands.getAll((commands) => {
-        const cmd = commands.find((c) => c.name === "toggle_element_zapper")
+        const cmd = commands.find(
+          (c) => c.name === "toggle_element_toys" || c.name === "toggle_element_zapper"
+        )
         if (cmd?.shortcut) {
           setShortcut(cmd.shortcut)
         } else {
@@ -43,11 +47,13 @@ export const ElementZapperToggle: React.FC<ElementZapperToggleProps> = ({
     }
   }, [])
 
-  const isEnabled = settings?.elementZapper ?? DEFAULT_SETTINGS.elementZapper
+  const isEnabled =
+    settings?.elementToys ?? settings?.elementZapper ?? DEFAULT_SETTINGS.elementToys
 
   const handleToggle = (enabled: boolean) => {
     setSettings((prev) => ({
       ...(prev ?? DEFAULT_SETTINGS),
+      elementToys: enabled,
       elementZapper: enabled
     }))
   }
@@ -64,3 +70,6 @@ export const ElementZapperToggle: React.FC<ElementZapperToggleProps> = ({
     />
   )
 }
+
+export const ElementZapperToggle = ElementToysToggle
+
