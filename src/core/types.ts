@@ -396,18 +396,44 @@ export type QuickHubCorner =
   | "bottom-left"
 
 /**
+ * Action identifiers for Quick Hub in-page tools.
+ */
+export type QuickHubActionId =
+  | "pip"
+  | "colorPicker"
+  | "elementZapper"
+  | "scrollTop"
+  | "scrollBottom"
+  | "resetZoom"
+  | "cleanUrl"
+
+export const DEFAULT_QUICK_HUB_ACTION_ORDER: QuickHubActionId[] = [
+  "pip",
+  "colorPicker",
+  "elementZapper",
+  "scrollTop",
+  "scrollBottom",
+  "resetZoom",
+  "cleanUrl"
+]
+
+/**
  * Quick Hub configuration.
  */
 export interface QuickHubConfig {
   placement: EdgePlacement
   hoverToReveal: boolean
   corner?: QuickHubCorner // Legacy fallback
+  actionOrder?: QuickHubActionId[]
+  hiddenActions?: QuickHubActionId[]
 }
 
 export const DEFAULT_QUICK_HUB_CONFIG: QuickHubConfig = {
   placement: { edge: "right", offsetPercent: 0 },
   hoverToReveal: true,
-  corner: "top-right"
+  corner: "top-right",
+  actionOrder: [...DEFAULT_QUICK_HUB_ACTION_ORDER],
+  hiddenActions: []
 }
 
 /**

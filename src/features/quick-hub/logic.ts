@@ -9,10 +9,12 @@ import { isColorPickerSupported } from "~core/browserDetect"
 import { cleanUrl, copyToClipboard, showCopiedFeedback } from "~core/linkUtils"
 import { getStoredSettings, subscribeToSettings } from "~core/storage"
 import {
+  DEFAULT_QUICK_HUB_ACTION_ORDER,
   DEFAULT_QUICK_HUB_CONFIG,
   normalizeEdgePlacement,
   type EdgePlacement,
   type FeatureSettings,
+  type QuickHubActionId,
   type QuickHubConfig
 } from "~core/types"
 import { pickColor } from "~features/color-picker/logic"
@@ -328,21 +330,17 @@ function getShadowStyles(config: QuickHubConfig): string {
   `
 }
 
-function renderMenuContent(): void {
-  if (!menuCard) return
-
-  menuCard.innerHTML = ""
-
-  // Items List
-  const list = document.createElement("div")
-  list.className = "qh-items-list"
-
-  let renderedCount = 0
-  const settings = cachedSettings
-
-  // 1. Picture-in-Picture
-  if (settings?.pictureInPicture) {
-    renderedCount++
+const ACTION_RENDERERS: Record<
+  QuickHubActionId,
+  (list: HTMLElement, settings: FeatureSettings) => boolean
+> = {
+  pip: (list, settings) => {
+    if (
+      !settings.pictureInPicture ||
+      settings.featureLayout?.hidden?.includes("pictureInPicture")
+    ) {
+      return false
+    }
     const btn = document.createElement("button")
     btn.type = "button"
     btn.className = "qh-item"
@@ -357,11 +355,16 @@ function renderMenuContent(): void {
       togglePictureInPicture().catch(() => {})
     })
     list.appendChild(btn)
-  }
-
-  // 2. Pick Color from Screen (Chromium only)
-  if (isColorPickerSupported && settings?.colorPicker) {
-    renderedCount++
+    return true
+  },
+  colorPicker: (list, settings) => {
+    if (
+      !isColorPickerSupported ||
+      !settings.colorPicker ||
+      settings.featureLayout?.hidden?.includes("colorPicker")
+    ) {
+      return false
+    }
     const btn = document.createElement("button")
     btn.type = "button"
     btn.className = "qh-item"
@@ -376,11 +379,15 @@ function renderMenuContent(): void {
       pickColor().catch(() => {})
     })
     list.appendChild(btn)
-  }
-
-  // 3. Element Toys / Zapper
-  if (settings?.elementZapper) {
-    renderedCount++
+    return true
+  },
+  elementZapper: (list, settings) => {
+    if (
+      !settings.elementZapper ||
+      settings.featureLayout?.hidden?.includes("elementZapper")
+    ) {
+      return false
+    }
     const btn = document.createElement("button")
     btn.type = "button"
     btn.className = "qh-item"
@@ -395,11 +402,15 @@ function renderMenuContent(): void {
       startElementZapping()
     })
     list.appendChild(btn)
-  }
-
-  // 4. Quick Scroll: Scroll to Top
-  if (settings?.quickScroll) {
-    renderedCount++
+    return true
+  },
+  scrollTop: (list, settings) => {
+    if (
+      !settings.quickScroll ||
+      settings.featureLayout?.hidden?.includes("quickScroll")
+    ) {
+      return false
+    }
     const btn = document.createElement("button")
     btn.type = "button"
     btn.className = "qh-item"
@@ -414,11 +425,16 @@ function renderMenuContent(): void {
       window.scrollTo({ top: 0, behavior: "smooth" })
     })
     list.appendChild(btn)
-  }
-
-  // 5. Quick Scroll: Scroll to Bottom
-  if (settings?.quickScroll && settings.quickScrollConfig?.buttonsMode !== "top-only") {
-    renderedCount++
+    return true
+  },
+  scrollBottom: (list, settings) => {
+    if (
+      !settings.quickScroll ||
+      settings.featureLayout?.hidden?.includes("quickScroll") ||
+      settings.quickScrollConfig?.buttonsMode === "top-only"
+    ) {
+      return false
+    }
     const btn = document.createElement("button")
     btn.type = "button"
     btn.className = "qh-item"
@@ -437,11 +453,15 @@ function renderMenuContent(): void {
       window.scrollTo({ top: scrollHeight, behavior: "smooth" })
     })
     list.appendChild(btn)
-  }
-
-  // 6. Reset Mouse Pin-to-Zoom
-  if (settings?.mouseZoom) {
-    renderedCount++
+    return true
+  },
+  resetZoom: (list, settings) => {
+    if (
+      !settings.mouseZoom ||
+      settings.featureLayout?.hidden?.includes("mouseZoom")
+    ) {
+      return false
+    }
     const btn = document.createElement("button")
     btn.type = "button"
     btn.className = "qh-item"
@@ -456,11 +476,15 @@ function renderMenuContent(): void {
       resetMouseZoom()
     })
     list.appendChild(btn)
-  }
-
-  // 7. Context Menu Actions: Clean URL Copy
-  if (settings?.contextMenuActions) {
-    renderedCount++
+    return true
+  },
+  cleanUrl: (list, settings) => {
+    if (
+      !settings.contextMenuActions ||
+      settings.featureLayout?.hidden?.includes("contextMenuActions")
+    ) {
+      return false
+    }
     const btn = document.createElement("button")
     btn.type = "button"
     btn.className = "qh-item"
@@ -480,6 +504,37 @@ function renderMenuContent(): void {
       }
     })
     list.appendChild(btn)
+    return true
+  }
+}
+
+function renderMenuContent(): void {
+  if (!menuCard) return
+
+  menuCard.innerHTML = ""
+
+  // Items List
+  const list = document.createElement("div")
+  list.className = "qh-items-list"
+
+  let renderedCount = 0
+  const settings = cachedSettings
+
+  if (settings) {
+    const rawOrder = currentConfig.actionOrder ?? DEFAULT_QUICK_HUB_ACTION_ORDER
+    const missing = DEFAULT_QUICK_HUB_ACTION_ORDER.filter(
+      (id) => !rawOrder.includes(id)
+    )
+    const fullOrder = [...rawOrder, ...missing]
+    const hiddenSet = new Set(currentConfig.hiddenActions ?? [])
+
+    for (const actionId of fullOrder) {
+      if (hiddenSet.has(actionId)) continue
+      const renderer = ACTION_RENDERERS[actionId]
+      if (renderer && renderer(list, settings)) {
+        renderedCount++
+      }
+    }
   }
 
   if (renderedCount === 0) {

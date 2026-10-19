@@ -1,24 +1,24 @@
 import {
   ChevronDown,
   Compass,
-  Eye,
-  EyeOff,
   History,
   Laptop,
   Moon,
-  Move,
   Palette,
-  RotateCcw,
   Sparkles,
   Sun,
   Zap
 } from "lucide-react"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useMemo, useRef, useState } from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
 import { SegmentedTabs, type SegmentedTabItem } from "~components/SegmentedTabs"
 import { Slider } from "~components/Slider"
+import {
+  SortableVisibilityList,
+  type SortableVisibilityItem
+} from "~components/SortableVisibilityList"
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
 import { Switch } from "~components/Switch"
 import { isColorPickerSupported } from "~core/browserDetect"
@@ -66,8 +66,6 @@ export const PreferencesSettingsView: React.FC<
     DEFAULT_SETTINGS
   )
 
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
-  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
   const [isPresetMenuOpen, setIsPresetMenuOpen] = useState(false)
   const presetMenuRef = useRef<HTMLDivElement | null>(null)
 
@@ -205,50 +203,24 @@ export const PreferencesSettingsView: React.FC<
     }))
   }
 
-  const handleDragStart = (e: React.DragEvent, index: number) => {
-    setDraggedIndex(index)
-    e.dataTransfer.effectAllowed = "move"
-    if (e.dataTransfer.setData) {
-      e.dataTransfer.setData("text/plain", index.toString())
-    }
-  }
-
-  const handleDragOver = (e: React.DragEvent, index: number) => {
-    e.preventDefault()
-    e.dataTransfer.dropEffect = "move"
-    if (dragOverIndex !== index) {
-      setDragOverIndex(index)
-    }
-  }
-
-  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
-    e.preventDefault()
-    if (draggedIndex === null || draggedIndex === dropIndex) {
-      setDraggedIndex(null)
-      setDragOverIndex(null)
-      return
-    }
-
-    const newOrder = [...order]
-    const [movedItem] = newOrder.splice(draggedIndex, 1)
-    newOrder.splice(dropIndex, 0, movedItem)
-
-    setDraggedIndex(null)
-    setDragOverIndex(null)
-
-    setSettings((prev) => ({
-      ...(prev ?? DEFAULT_SETTINGS),
-      featureLayout: {
-        ...(prev?.featureLayout ?? DEFAULT_SETTINGS.featureLayout),
-        order: newOrder
-      }
-    }))
-  }
-
-  const handleDragEnd = () => {
-    setDraggedIndex(null)
-    setDragOverIndex(null)
-  }
+  const listItems: SortableVisibilityItem<FeatureKey>[] = useMemo(() => {
+    return order
+      .map((key): SortableVisibilityItem<FeatureKey> | null => {
+        const item = FEATURE_CATALOG[key]
+        if (!item) return null
+        return {
+          id: key,
+          title: item.title,
+          description: item.description,
+          icon: item.icon,
+          colorClass: item.colorClass,
+          isHidden: hiddenSet.has(key)
+        }
+      })
+      .filter(
+        (item): item is SortableVisibilityItem<FeatureKey> => item !== null
+      )
+  }, [order, hiddenSet])
 
   const handleToggleRememberLastView = (enabled: boolean) => {
     setSettings((prev) => ({
@@ -300,11 +272,23 @@ export const PreferencesSettingsView: React.FC<
         </div>
 
         {/* Customize Menu Section */}
-        <div className="space-y-2.5 pt-3 border-t border-border-divider">
-          <div className="flex items-center justify-between">
-            <span className="section-header">Customize Menu</span>
-            <div className="flex items-center gap-3">
-              {/* Quick Presets Dropdown */}
+        <div className="pt-3 border-t border-border-divider">
+          <SortableVisibilityList<FeatureKey>
+            title="Customize Menu"
+            description="Drag items to reorder them in the popup list, or toggle visibility to hide features you don't use."
+            items={listItems}
+            onOrderChange={(newOrder) => {
+              setSettings((prev) => ({
+                ...(prev ?? DEFAULT_SETTINGS),
+                featureLayout: {
+                  ...(prev?.featureLayout ?? DEFAULT_SETTINGS.featureLayout),
+                  order: newOrder
+                }
+              }))
+            }}
+            onToggleVisibility={handleToggleVisibility}
+            onResetOrder={handleResetLayout}
+            headerActions={
               <div className="relative" ref={presetMenuRef}>
                 <button
                   type="button"
@@ -312,7 +296,11 @@ export const PreferencesSettingsView: React.FC<
                   className="flex items-center gap-1 text-[11px] font-medium text-accent hover:text-accent-hover transition-colors">
                   <Sparkles className="w-3 h-3" />
                   <span>Presets</span>
-                  <ChevronDown className={`w-3 h-3 transition-transform duration-150 ${isPresetMenuOpen ? "rotate-180" : ""}`} />
+                  <ChevronDown
+                    className={`w-3 h-3 transition-transform duration-150 ${
+                      isPresetMenuOpen ? "rotate-180" : ""
+                    }`}
+                  />
                 </button>
 
                 {isPresetMenuOpen && (
@@ -323,8 +311,12 @@ export const PreferencesSettingsView: React.FC<
                       className="flex items-center gap-2 px-2 py-1.5 text-left rounded-lg hover:bg-app-surface-hover text-content-primary transition-colors group">
                       <Compass className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
                       <div className="flex flex-col min-w-0">
-                        <span className="text-xs font-medium">Reading & Navigation</span>
-                        <span className="text-[10px] text-content-muted">Scroll, drag & read</span>
+                        <span className="text-xs font-medium">
+                          Reading & Navigation
+                        </span>
+                        <span className="text-[10px] text-content-muted">
+                          Scroll, drag & read
+                        </span>
                       </div>
                     </button>
 
@@ -334,8 +326,12 @@ export const PreferencesSettingsView: React.FC<
                       className="flex items-center gap-2 px-2 py-1.5 text-left rounded-lg hover:bg-app-surface-hover text-content-primary transition-colors group">
                       <Palette className="w-3.5 h-3.5 text-pink-400 shrink-0" />
                       <div className="flex flex-col min-w-0">
-                        <span className="text-xs font-medium">Designer & Dev</span>
-                        <span className="text-[10px] text-content-muted">Color, inspect & zapper</span>
+                        <span className="text-xs font-medium">
+                          Designer & Dev
+                        </span>
+                        <span className="text-[10px] text-content-muted">
+                          Color, inspect & zapper
+                        </span>
                       </div>
                     </button>
 
@@ -345,104 +341,19 @@ export const PreferencesSettingsView: React.FC<
                       className="flex items-center gap-2 px-2 py-1.5 text-left rounded-lg hover:bg-app-surface-hover text-content-primary transition-colors group">
                       <Zap className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                       <div className="flex flex-col min-w-0">
-                        <span className="text-xs font-medium">Essentials Only</span>
-                        <span className="text-[10px] text-content-muted">Minimal & focused</span>
+                        <span className="text-xs font-medium">
+                          Essentials Only
+                        </span>
+                        <span className="text-[10px] text-content-muted">
+                          Minimal & focused
+                        </span>
                       </div>
                     </button>
                   </div>
                 )}
               </div>
-
-              {/* Reset Order Button */}
-              <button
-                type="button"
-                onClick={handleResetLayout}
-                className="flex items-center gap-1 text-[11px] font-medium text-accent hover:text-accent-hover transition-colors">
-                <RotateCcw className="w-3 h-3" />
-                <span>Reset order</span>
-              </button>
-            </div>
-          </div>
-
-          <p className="text-xs text-content-muted">
-            Drag items to reorder them in the popup list, or toggle visibility
-            to hide features you don&apos;t use.
-          </p>
-
-          <div className="divide-y divide-border-divider">
-            {order.map((key, index) => {
-              const item = FEATURE_CATALOG[key]
-              if (!item) return null
-
-              const isHidden = hiddenSet.has(key)
-              const isDragging = draggedIndex === index
-              const isDragOver =
-                dragOverIndex === index && draggedIndex !== index
-
-              const IconComponent = item.icon
-
-              return (
-                <div
-                  key={key}
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, index)}
-                  onDragOver={(e) => handleDragOver(e, index)}
-                  onDrop={(e) => handleDrop(e, index)}
-                  onDragEnd={handleDragEnd}
-                  className={`flex items-center justify-between gap-3 py-2.5 group cursor-grab active:cursor-grabbing transition-all duration-150 ${
-                    isDragging ? "opacity-30 scale-[0.98]" : "opacity-100"
-                  } ${
-                    isDragOver
-                      ? "border-t-2 border-t-accent bg-accent-subtle"
-                      : ""
-                  }`}>
-                  {/* Left: Drag Handle Indicator + Icon + Title */}
-                  <div
-                    onClick={() => handleToggleVisibility(key)}
-                    className={`flex items-center gap-2.5 flex-1 min-w-0 cursor-pointer ${
-                      !isHidden ? "feature-row-active" : "feature-row-dimmed"
-                    }`}>
-                    <Move className="w-3.5 h-3.5 text-content-muted opacity-40 group-hover:opacity-100 shrink-0 transition-opacity" />
-                    <div className="shrink-0 flex items-center justify-center transition-transform duration-200 ease-out group-hover:scale-110">
-                      <IconComponent className={`w-5 h-5 ${item.colorClass}`} />
-                    </div>
-                    <div className="flex flex-col min-w-0 flex-1">
-                      <span className="text-xs font-semibold text-content-primary truncate">
-                        {item.title}
-                      </span>
-                      <span className="text-[10px] text-content-muted truncate">
-                        {item.description}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Right: Visibility Eye button */}
-                  <div className="flex items-center shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => handleToggleVisibility(key)}
-                      title={
-                        isHidden
-                          ? "Show feature in menu"
-                          : "Hide feature from menu"
-                      }
-                      aria-label={`${isHidden ? "Show" : "Hide"} ${item.title}`}
-                      className={`p-1.5 rounded-lg border transition-all duration-150 ${
-                        isHidden
-                          ? "bg-app-card text-content-muted border-border-subtle hover:text-content-primary hover:border-accent"
-                          : "bg-accent-subtle text-accent border-accent/20 hover:bg-accent/20"
-                      }`}>
-                      {isHidden ? (
-                        <EyeOff className="w-3.5 h-3.5" />
-                      ) : (
-                        <Eye className="w-3.5 h-3.5" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
+            }
+          />
         </div>
 
         {/* Navigation & Popup Memory Section */}
