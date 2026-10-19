@@ -23,6 +23,7 @@ import {
   MESSAGE_TYPES,
   sendToBackground
 } from "~core/messaging"
+import { ViewModeContext } from "~core/viewModeContext"
 import {
   DEFAULT_FEATURE_LAYOUT_CONFIG,
   DEFAULT_POPUP_NAVIGATION_CONFIG,
@@ -424,12 +425,20 @@ function IndexPopup() {
 
         {currentView === "main" ? (
           <div>
-            {/* PowerToys-style Utilities List with Dividers */}
-            <main className="divide-y divide-border-divider">
-              {orderedFeatures.map((key) => (
-                <Fragment key={key}>{featureToggleMap[key]}</Fragment>
-              ))}
-            </main>
+            <ViewModeContext.Provider
+              value={settings?.viewMode ?? DEFAULT_SETTINGS.viewMode ?? "list"}>
+              {/* PowerToys-style Utilities List with Dividers or Compact Grid */}
+              <main
+                className={
+                  (settings?.viewMode ?? DEFAULT_SETTINGS.viewMode) === "grid"
+                    ? "grid grid-cols-2 gap-2.5 py-1"
+                    : "divide-y divide-border-divider"
+                }>
+                {orderedFeatures.map((key) => (
+                  <Fragment key={key}>{featureToggleMap[key]}</Fragment>
+                ))}
+              </main>
+            </ViewModeContext.Provider>
           </div>
         ) : currentView === "context-menu-actions-settings" ? (
           <ContextMenuActionsSettingsView

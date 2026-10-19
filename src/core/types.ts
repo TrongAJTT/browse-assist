@@ -442,10 +442,16 @@ export const DEFAULT_QUICK_HUB_CONFIG: QuickHubConfig = {
 export type ThemeMode = "dark" | "light" | "system"
 
 /**
+ * Popup display layout mode: "list" (detailed) or "grid" (compact).
+ */
+export type ViewMode = "list" | "grid"
+
+/**
  * Settings map tracking the enabled state of each feature and sub-configurations.
  */
 export interface FeatureSettings {
   theme: ThemeMode
+  viewMode?: ViewMode
   allowRightClick: boolean
   contextMenuActions: boolean
   superDrag: boolean
@@ -515,6 +521,7 @@ export const DEFAULT_POPUP_NAVIGATION_CONFIG: PopupNavigationConfig = {
  */
 export const DEFAULT_SETTINGS: FeatureSettings = {
   theme: "system",
+  viewMode: "list",
   allowRightClick: true,
   contextMenuActions: true,
   superDrag: true,

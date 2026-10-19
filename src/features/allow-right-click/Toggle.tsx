@@ -59,7 +59,6 @@ export const AllowRightClickToggle: React.FC<AllowRightClickToggleProps> = ({
       enabled={isActiveInTab}
       onChange={handleChange}
       shortcut={shortcut}
-      badge="On-Demand"
     />
   )
 }

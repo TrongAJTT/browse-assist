@@ -187,4 +187,23 @@ body {
   border: 1px solid var(--border-subtle);
 }
 
+/* Badge Marquee Ping-Pong on Card Hover */
+@keyframes badge-marquee-pingpong {
+  0%, 15% {
+    transform: translateX(0);
+  }
+  85%, 100% {
+    transform: translateX(var(--marquee-dist, 0px));
+  }
+}
+
+.group-hover-marquee {
+  will-change: transform;
+}
+
+.group:hover .group-hover-marquee {
+  animation: badge-marquee-pingpong 2.6s ease-in-out infinite alternate;
+}
+
+
 

@@ -3,6 +3,8 @@ import {
   Compass,
   History,
   Laptop,
+  LayoutGrid,
+  List,
   Moon,
   Palette,
   Sparkles,
@@ -29,7 +31,8 @@ import {
   STORAGE_KEYS,
   type FeatureKey,
   type FeatureSettings,
-  type ThemeMode
+  type ThemeMode,
+  type ViewMode
 } from "~core/types"
 
 interface PreferencesSettingsViewProps {
@@ -51,6 +54,19 @@ const THEME_OPTIONS: SegmentedTabItem<ThemeMode>[] = [
     id: "system",
     label: "System",
     icon: <Laptop className="w-3.5 h-3.5" />
+  }
+]
+
+const VIEW_MODE_OPTIONS: SegmentedTabItem<ViewMode>[] = [
+  {
+    id: "list",
+    label: "List",
+    icon: <List className="w-3.5 h-3.5" />
+  },
+  {
+    id: "grid",
+    label: "Grid",
+    icon: <LayoutGrid className="w-3.5 h-3.5" />
   }
 ]
 
@@ -85,6 +101,8 @@ export const PreferencesSettingsView: React.FC<
   }, [isPresetMenuOpen])
 
   const currentTheme = settings?.theme ?? DEFAULT_SETTINGS.theme
+  const currentViewMode: ViewMode =
+    settings?.viewMode ?? DEFAULT_SETTINGS.viewMode ?? "list"
   const currentLayout =
     settings?.featureLayout ?? DEFAULT_SETTINGS.featureLayout
   const currentNav =
@@ -111,6 +129,13 @@ export const PreferencesSettingsView: React.FC<
     setSettings((prev) => ({
       ...(prev ?? DEFAULT_SETTINGS),
       theme
+    }))
+  }
+
+  const handleSelectViewMode = (viewMode: ViewMode) => {
+    setSettings((prev) => ({
+      ...(prev ?? DEFAULT_SETTINGS),
+      viewMode
     }))
   }
 
@@ -267,6 +292,24 @@ export const PreferencesSettingsView: React.FC<
               items={THEME_OPTIONS}
               value={currentTheme}
               onChange={handleSelectTheme}
+            />
+
+            <div className="pt-2">
+              <div className="flex items-center gap-1.5">
+                <LayoutGrid className="w-4 h-4 text-accent" />
+                <span className="text-xs font-semibold text-content-primary">
+                  View Mode
+                </span>
+              </div>
+              <p className="text-[11px] text-content-muted mt-0.5 leading-snug">
+                Choose between detailed list view with descriptions or a compact grid layout.
+              </p>
+            </div>
+
+            <SegmentedTabs<ViewMode>
+              items={VIEW_MODE_OPTIONS}
+              value={currentViewMode}
+              onChange={handleSelectViewMode}
             />
           </div>
         </div>
