@@ -134,9 +134,6 @@ export const FEATURE_CATALOG: Record<FeatureKey, FeatureCatalogItem> = {
     bgClass: "bg-amber-500/10 border-amber-500/30",
     hasSettings: true
   },
-  get elementZapper() {
-    return this.elementToys
-  },
   quickHub: {
     key: "quickHub",
     title: "Quick Hub",
@@ -152,7 +149,6 @@ export const FEATURE_CATALOG: Record<FeatureKey, FeatureCatalogItem> = {
 /**
  * Array view of all features for iteration (e.g. in Options page).
  */
-export const FEATURE_CATALOG_LIST: FeatureCatalogItem[] =
-  Object.values(FEATURE_CATALOG).filter(
-    (item) => item.key !== "colorPicker" || isColorPickerSupported
-  )
+export const FEATURE_CATALOG_LIST: FeatureCatalogItem[] = Object.values(
+  FEATURE_CATALOG
+).filter((item) => item.key !== "colorPicker" || isColorPickerSupported)

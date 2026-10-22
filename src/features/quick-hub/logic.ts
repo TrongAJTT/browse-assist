@@ -9,9 +9,10 @@ import { isColorPickerSupported } from "~core/browserDetect"
 import { cleanUrl, copyToClipboard, showCopiedFeedback } from "~core/linkUtils"
 import { getStoredSettings, subscribeToSettings } from "~core/storage"
 import {
-  DEFAULT_QUICK_HUB_ACTION_ORDER,
   DEFAULT_QUICK_HUB_CONFIG,
   normalizeEdgePlacement,
+  normalizeQuickHubActionOrder,
+  normalizeQuickHubHiddenActions,
   type EdgePlacement,
   type FeatureSettings,
   type QuickHubActionId,
@@ -382,10 +383,8 @@ const ACTION_RENDERERS: Record<
     return true
   },
   elementToys: (list, settings) => {
-    const isEnabled = settings.elementToys ?? settings.elementZapper
-    const isHidden =
-      settings.featureLayout?.hidden?.includes("elementToys") ||
-      settings.featureLayout?.hidden?.includes("elementZapper")
+    const isEnabled = settings.elementToys
+    const isHidden = settings.featureLayout?.hidden?.includes("elementToys")
 
     if (!isEnabled || isHidden) {
       return false
@@ -405,9 +404,6 @@ const ACTION_RENDERERS: Record<
     })
     list.appendChild(btn)
     return true
-  },
-  get elementZapper() {
-    return this.elementToys
   },
   scrollTop: (list, settings) => {
     if (
@@ -526,12 +522,8 @@ function renderMenuContent(): void {
   const settings = cachedSettings
 
   if (settings) {
-    const rawOrder = currentConfig.actionOrder ?? DEFAULT_QUICK_HUB_ACTION_ORDER
-    const missing = DEFAULT_QUICK_HUB_ACTION_ORDER.filter(
-      (id) => !rawOrder.includes(id)
-    )
-    const fullOrder = [...rawOrder, ...missing]
-    const hiddenSet = new Set(currentConfig.hiddenActions ?? [])
+    const fullOrder = normalizeQuickHubActionOrder(currentConfig.actionOrder)
+    const hiddenSet = new Set(normalizeQuickHubHiddenActions(currentConfig.hiddenActions))
 
     for (const actionId of fullOrder) {
       if (hiddenSet.has(actionId)) continue

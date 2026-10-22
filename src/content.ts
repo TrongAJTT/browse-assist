@@ -67,7 +67,7 @@ export const config: PlasmoCSConfig = {
 let isElementToysEnabled = true
 
 function applySettings(nextSettings: FeatureSettings): void {
-  isElementToysEnabled = Boolean(nextSettings?.elementToys ?? nextSettings?.elementZapper)
+  isElementToysEnabled = Boolean(nextSettings?.elementToys)
   // Allow Right Click is managed per-tab on-demand, not auto-activated globally.
 
   // Context Menu Actions
@@ -127,11 +127,8 @@ function applySettings(nextSettings: FeatureSettings): void {
   }
 
   // Element Toys
-  const isToysEnabled = nextSettings.elementToys ?? nextSettings.elementZapper
-  if (isToysEnabled) {
-    activateElementToys(
-      nextSettings.elementToysConfig || nextSettings.elementZapperConfig
-    )
+  if (nextSettings.elementToys) {
+    activateElementToys(nextSettings.elementToysConfig)
   } else {
     deactivateElementToys()
   }
@@ -184,10 +181,7 @@ async function init(): Promise<void> {
         sendResponse({ success: true })
         return true
       }
-      if (
-        msgType === MESSAGE_TYPES.TRIGGER_ELEMENT_TOYS ||
-        msgType === MESSAGE_TYPES.TRIGGER_ELEMENT_ZAPPER
-      ) {
+      if (msgType === MESSAGE_TYPES.TRIGGER_ELEMENT_TOYS) {
         startElementToys()
         sendResponse({ success: true })
         return true

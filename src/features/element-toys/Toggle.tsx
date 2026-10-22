@@ -18,8 +18,6 @@ export interface ElementToysToggleProps {
   onConfigure?: () => void
 }
 
-export type ElementZapperToggleProps = ElementToysToggleProps
-
 /**
  * Toggle component for Element Toys on Popup main view.
  */
@@ -35,9 +33,7 @@ export const ElementToysToggle: React.FC<ElementToysToggleProps> = ({
   useEffect(() => {
     if (chrome.commands?.getAll) {
       chrome.commands.getAll((commands) => {
-        const cmd = commands.find(
-          (c) => c.name === "toggle_element_toys" || c.name === "toggle_element_zapper"
-        )
+        const cmd = commands.find((c) => c.name === "toggle_element_toys")
         if (cmd?.shortcut) {
           setShortcut(cmd.shortcut)
         } else {
@@ -47,14 +43,12 @@ export const ElementToysToggle: React.FC<ElementToysToggleProps> = ({
     }
   }, [])
 
-  const isEnabled =
-    settings?.elementToys ?? settings?.elementZapper ?? DEFAULT_SETTINGS.elementToys
+  const isEnabled = settings?.elementToys ?? DEFAULT_SETTINGS.elementToys
 
   const handleToggle = (enabled: boolean) => {
     setSettings((prev) => ({
       ...(prev ?? DEFAULT_SETTINGS),
-      elementToys: enabled,
-      elementZapper: enabled
+      elementToys: enabled
     }))
   }
 
@@ -70,6 +64,4 @@ export const ElementToysToggle: React.FC<ElementToysToggleProps> = ({
     />
   )
 }
-
-export const ElementZapperToggle = ElementToysToggle
 

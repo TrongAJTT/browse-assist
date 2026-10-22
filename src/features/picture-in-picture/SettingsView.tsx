@@ -1,4 +1,4 @@
-import { Eye, MousePointerClick, ShieldAlert } from "lucide-react"
+import { Eye, MousePointerClick } from "lucide-react"
 import type React from "react"
 import { useEffect, useState } from "react"
 

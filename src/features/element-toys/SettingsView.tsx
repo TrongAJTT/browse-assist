@@ -35,8 +35,6 @@ export interface ElementToysSettingsViewProps {
   onBack: () => void
 }
 
-export type ElementZapperSettingsViewProps = ElementToysSettingsViewProps
-
 const DEFAULT_MODE_TABS: SegmentedTabItem<ElementToysMode>[] = [
   { id: "zap", label: "Zap", icon: <Trash2 className="w-3.5 h-3.5 text-red-400" /> },
   { id: "edit", label: "Edit", icon: <Type className="w-3.5 h-3.5 text-sky-400" /> },
@@ -56,9 +54,7 @@ export const ElementToysSettingsView: React.FC<
   useEffect(() => {
     if (chrome.commands?.getAll) {
       chrome.commands.getAll((commands) => {
-        const cmd = commands.find(
-          (c) => c.name === "toggle_element_toys" || c.name === "toggle_element_zapper"
-        )
+        const cmd = commands.find((c) => c.name === "toggle_element_toys")
         if (cmd?.shortcut) {
           setShortcut(cmd.shortcut)
         } else {
@@ -69,39 +65,36 @@ export const ElementToysSettingsView: React.FC<
   }, [])
 
   const currentConfig: ElementToysConfig =
-    settings?.elementToysConfig ?? settings?.elementZapperConfig ?? DEFAULT_ELEMENT_TOYS_CONFIG
+    settings?.elementToysConfig ?? DEFAULT_ELEMENT_TOYS_CONFIG
   const isMasterEnabled =
-    settings?.elementToys ?? settings?.elementZapper ?? DEFAULT_SETTINGS.elementToys
+    settings?.elementToys ?? DEFAULT_SETTINGS.elementToys
 
   const handleToggleMaster = (enabled: boolean) => {
     setSettings((prev) => ({
       ...(prev ?? DEFAULT_SETTINGS),
-      elementToys: enabled,
-      elementZapper: enabled
+      elementToys: enabled
     }))
   }
 
   const handleToggleConfig = (key: keyof ElementToysConfig) => {
     const updatedConfig = {
-      ...(settings?.elementToysConfig ?? settings?.elementZapperConfig ?? DEFAULT_ELEMENT_TOYS_CONFIG),
+      ...(settings?.elementToysConfig ?? DEFAULT_ELEMENT_TOYS_CONFIG),
       [key]: !currentConfig[key]
     }
     setSettings((prev) => ({
       ...(prev ?? DEFAULT_SETTINGS),
-      elementToysConfig: updatedConfig,
-      elementZapperConfig: updatedConfig
+      elementToysConfig: updatedConfig
     }))
   }
 
   const handleSetDefaultMode = (mode: ElementToysMode) => {
     const updatedConfig = {
-      ...(settings?.elementToysConfig ?? settings?.elementZapperConfig ?? DEFAULT_ELEMENT_TOYS_CONFIG),
+      ...(settings?.elementToysConfig ?? DEFAULT_ELEMENT_TOYS_CONFIG),
       defaultMode: mode
     }
     setSettings((prev) => ({
       ...(prev ?? DEFAULT_SETTINGS),
-      elementToysConfig: updatedConfig,
-      elementZapperConfig: updatedConfig
+      elementToysConfig: updatedConfig
     }))
   }
 
@@ -257,6 +250,4 @@ export const ElementToysSettingsView: React.FC<
     </SubSettingsLayout>
   )
 }
-
-export const ElementZapperSettingsView = ElementToysSettingsView
 

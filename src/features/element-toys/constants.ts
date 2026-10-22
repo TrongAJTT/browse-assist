@@ -1,7 +1,6 @@
 import type { ElementToysMode } from "~core/types"
 
 export const ELEMENT_TOYS_CONTAINER_ID = "__browse_assist_element_toys_container__"
-export const ZAPPER_CONTAINER_ID = ELEMENT_TOYS_CONTAINER_ID // Legacy alias
 export const TOOLBAR_ID = "__browse_assist_element_toys_toolbar__"
 
 // Crisp inline SVG icons (13x13 or 14x14) matching Lucide design language

@@ -28,6 +28,8 @@ import {
   DEFAULT_QUICK_HUB_CONFIG,
   DEFAULT_SETTINGS,
   normalizeEdgePlacement,
+  normalizeQuickHubActionOrder,
+  normalizeQuickHubHiddenActions,
   STORAGE_KEYS,
   type EdgePlacement,
   type FeatureSettings,
@@ -103,16 +105,14 @@ const QUICK_HUB_ACTIONS_META: Record<QuickHubActionId, QuickHubActionMeta> = {
     icon: Zap,
     colorClass: "text-amber-400",
     getSourceState: (s) => {
-      const isEnabled = s.elementToys ?? s.elementZapper
+      const isEnabled = s.elementToys
       if (!isEnabled) {
         return {
           isDisabled: true,
           reason: "Element Toys is disabled in extension settings"
         }
       }
-      const isHidden =
-        s.featureLayout?.hidden?.includes("elementToys") ||
-        s.featureLayout?.hidden?.includes("elementZapper")
+      const isHidden = s.featureLayout?.hidden?.includes("elementToys")
       if (isHidden) {
         return {
           isDisabled: true,
@@ -121,9 +121,6 @@ const QUICK_HUB_ACTIONS_META: Record<QuickHubActionId, QuickHubActionMeta> = {
       }
       return { isDisabled: false }
     }
-  },
-  get elementZapper() {
-    return this.elementToys
   },
   scrollTop: {
     id: "scrollTop",
@@ -289,18 +286,14 @@ export const QuickHubSettingsView: React.FC<QuickHubSettingsViewProps> = ({
   // Action Order & Visibility
   // If Color Picker is not supported in this browser, hide it completely rather than forcing disabled
   const actionOrder: QuickHubActionId[] = useMemo(() => {
-    const savedOrder =
-      currentConfig.actionOrder ?? DEFAULT_QUICK_HUB_ACTION_ORDER
-    const missing = DEFAULT_QUICK_HUB_ACTION_ORDER.filter(
-      (id) => !savedOrder.includes(id)
-    )
-    return [...savedOrder, ...missing].filter(
+    const fullOrder = normalizeQuickHubActionOrder(currentConfig.actionOrder)
+    return fullOrder.filter(
       (id) => id !== "colorPicker" || isColorPickerSupported
     )
   }, [currentConfig.actionOrder])
 
   const hiddenActionsSet = useMemo(
-    () => new Set(currentConfig.hiddenActions ?? []),
+    () => new Set(normalizeQuickHubHiddenActions(currentConfig.hiddenActions)),
     [currentConfig.hiddenActions]
   )
 
@@ -312,9 +305,10 @@ export const QuickHubSettingsView: React.FC<QuickHubSettingsViewProps> = ({
     }
 
     const isCurrentlyHidden = hiddenActionsSet.has(actionId)
+    const currentHiddenList = normalizeQuickHubHiddenActions(currentConfig.hiddenActions)
     const newHidden = isCurrentlyHidden
-      ? (currentConfig.hiddenActions ?? []).filter((id) => id !== actionId)
-      : [...(currentConfig.hiddenActions ?? []), actionId]
+      ? currentHiddenList.filter((id) => id !== actionId)
+      : [...currentHiddenList, actionId]
 
     setSettings((prev) => ({
       ...(prev ?? DEFAULT_SETTINGS),
