@@ -1,12 +1,14 @@
 import {
   ChevronDown,
   Compass,
+  ExternalLink,
   History,
   Laptop,
   LayoutGrid,
   List,
   Moon,
   Palette,
+  Sliders,
   Sparkles,
   Sun,
   Zap
@@ -29,6 +31,8 @@ import {
   DEFAULT_FEATURE_LAYOUT_CONFIG,
   DEFAULT_SETTINGS,
   STORAGE_KEYS,
+  normalizeFeatureHidden,
+  normalizeFeatureOrder,
   type FeatureKey,
   type FeatureSettings,
   type ThemeMode,
@@ -110,18 +114,14 @@ export const PreferencesSettingsView: React.FC<
 
   // Ensure all known features exist in order array (in case new features were added)
   const order: FeatureKey[] = React.useMemo(() => {
-    const savedOrder =
-      currentLayout?.order ?? DEFAULT_FEATURE_LAYOUT_CONFIG.order
-    const missing = DEFAULT_FEATURE_LAYOUT_CONFIG.order.filter(
-      (k) => !savedOrder.includes(k)
-    )
-    return [...savedOrder, ...missing].filter(
+    const fullOrder = normalizeFeatureOrder(currentLayout?.order)
+    return fullOrder.filter(
       (k) => k !== "colorPicker" || isColorPickerSupported
     )
   }, [currentLayout?.order])
 
   const hiddenSet = React.useMemo(
-    () => new Set(currentLayout?.hidden ?? []),
+    () => new Set(normalizeFeatureHidden(currentLayout?.hidden)),
     [currentLayout?.hidden]
   )
 
@@ -141,9 +141,10 @@ export const PreferencesSettingsView: React.FC<
 
   const handleToggleVisibility = (key: FeatureKey) => {
     const isCurrentlyHidden = hiddenSet.has(key)
+    const currentHiddenList = normalizeFeatureHidden(currentLayout?.hidden)
     const newHidden = isCurrentlyHidden
-      ? currentLayout.hidden.filter((k) => k !== key)
-      : [...(currentLayout.hidden ?? []), key]
+      ? currentHiddenList.filter((k) => k !== key)
+      : [...currentHiddenList, key]
 
     setSettings((prev) => ({
       ...(prev ?? DEFAULT_SETTINGS),
@@ -445,6 +446,38 @@ export const PreferencesSettingsView: React.FC<
               </div>
             )}
           </div>
+        </div>
+
+        {/* Other Section */}
+        <div className="space-y-2.5 pt-3 border-t border-border-divider">
+          <span className="section-header">Other</span>
+
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof chrome !== "undefined" && chrome.runtime?.openOptionsPage) {
+                chrome.runtime.openOptionsPage()
+              } else if (typeof chrome !== "undefined" && chrome.runtime?.getURL) {
+                window.open(chrome.runtime.getURL("options.html"), "_blank")
+              }
+            }}
+            className="w-full flex items-center justify-between p-2.5 rounded-xl bg-app-surface hover:bg-app-surface-hover border border-border-subtle hover:border-accent/40 active:scale-[0.99] transition-all text-content-primary group cursor-pointer shadow-sm">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="p-1.5 rounded-lg bg-accent-subtle text-accent shrink-0">
+                <Sliders className="w-4 h-4" />
+              </div>
+              <div className="flex flex-col text-left min-w-0">
+                <span className="text-xs font-semibold text-content-primary">
+                  Extension Options Page
+                </span>
+                <span className="text-[10px] text-content-muted truncate">
+                  Full settings dashboard &amp; shortcut guide
+                </span>
+              </div>
+            </div>
+
+            <ExternalLink className="w-3.5 h-3.5 text-content-muted group-hover:text-accent shrink-0 ml-2 transition-colors" />
+          </button>
         </div>
       </div>
     </SubSettingsLayout>

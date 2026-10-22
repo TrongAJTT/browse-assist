@@ -12,8 +12,55 @@ export type FeatureKey =
   | "quickScroll"
   | "colorPicker"
   | "elementToys"
-  | "elementZapper" // deprecated alias
   | "quickHub"
+
+/**
+ * Views and sub-settings routes supported inside the extension popup.
+ */
+export type ActiveView =
+  | "main"
+  | "context-menu-actions-settings"
+  | "super-drag-settings"
+  | "quick-scroll-settings"
+  | "picture-in-picture-settings"
+  | "video-wheel-control-settings"
+  | "smooth-scroll-settings"
+  | "mouse-zoom-settings"
+  | "color-picker-settings"
+  | "element-toys-settings"
+  | "quick-hub-settings"
+  | "preferences"
+  | "about"
+
+/**
+ * Maps a feature key to its corresponding sub-settings view in the popup.
+ */
+export function getFeatureSettingsView(key: FeatureKey): ActiveView | null {
+  switch (key) {
+    case "contextMenuActions":
+      return "context-menu-actions-settings"
+    case "superDrag":
+      return "super-drag-settings"
+    case "quickScroll":
+      return "quick-scroll-settings"
+    case "smoothScroll":
+      return "smooth-scroll-settings"
+    case "mouseZoom":
+      return "mouse-zoom-settings"
+    case "pictureInPicture":
+      return "picture-in-picture-settings"
+    case "videoWheelControl":
+      return "video-wheel-control-settings"
+    case "colorPicker":
+      return "color-picker-settings"
+    case "elementToys":
+      return "element-toys-settings"
+    case "quickHub":
+      return "quick-hub-settings"
+    default:
+      return null
+  }
+}
 
 export type ContextMenuActionId =
   | "copyLinkText"
@@ -356,7 +403,6 @@ export const DEFAULT_COLOR_PICKER_CONFIG: ColorPickerConfig = {
  * Interactive action modes for Element Toys.
  */
 export type ElementToysMode = "zap" | "edit" | "move" | "hide"
-export type ZapperMode = ElementToysMode // Alias for backward compatibility
 
 /**
  * Move behavior mode:
@@ -378,8 +424,6 @@ export interface ElementToysConfig {
   moveType: ElementMoveType // "relative" (layout flow / push components) or "absolute" (freeform)
 }
 
-export type ElementZapperConfig = ElementToysConfig // Alias for backward compatibility
-
 export const DEFAULT_ELEMENT_TOYS_CONFIG: ElementToysConfig = {
   autoUnfreezeScroll: true,
   showToast: true,
@@ -389,8 +433,6 @@ export const DEFAULT_ELEMENT_TOYS_CONFIG: ElementToysConfig = {
   defaultMode: "zap",
   moveType: "relative"
 }
-
-export const DEFAULT_ELEMENT_ZAPPER_CONFIG = DEFAULT_ELEMENT_TOYS_CONFIG
 
 /**
  * Screen corner position for Quick Hub trigger.
@@ -408,7 +450,6 @@ export type QuickHubActionId =
   | "pip"
   | "colorPicker"
   | "elementToys"
-  | "elementZapper" // deprecated alias
   | "scrollTop"
   | "scrollBottom"
   | "resetZoom"
@@ -469,7 +510,6 @@ export interface FeatureSettings {
   quickScroll: boolean
   colorPicker: boolean
   elementToys: boolean
-  elementZapper?: boolean // Deprecated fallback
   quickHub: boolean
   featureLayout: FeatureLayoutConfig
   popupNavigation: PopupNavigationConfig
@@ -482,7 +522,6 @@ export interface FeatureSettings {
   quickScrollConfig: QuickScrollConfig
   colorPickerConfig: ColorPickerConfig
   elementToysConfig: ElementToysConfig
-  elementZapperConfig?: ElementToysConfig // Deprecated fallback
   quickHubConfig: QuickHubConfig
 }
 
@@ -509,6 +548,54 @@ export const DEFAULT_FEATURE_LAYOUT_CONFIG: FeatureLayoutConfig = {
     "quickHub"
   ],
   hidden: []
+}
+
+/**
+ * Deduplicates and fills in missing features for consistent menu ordering.
+ */
+export function normalizeFeatureOrder(order?: FeatureKey[]): FeatureKey[] {
+  const source = order ?? DEFAULT_FEATURE_LAYOUT_CONFIG.order
+  const deduplicated: FeatureKey[] = []
+  const seen = new Set<FeatureKey>()
+  for (const k of source) {
+    if (!seen.has(k)) {
+      seen.add(k)
+      deduplicated.push(k)
+    }
+  }
+  const missing = DEFAULT_FEATURE_LAYOUT_CONFIG.order.filter(
+    (k) => !seen.has(k)
+  )
+  return [...deduplicated, ...missing]
+}
+
+export function normalizeFeatureHidden(hidden?: FeatureKey[]): FeatureKey[] {
+  if (!hidden) return []
+  return Array.from(new Set(hidden))
+}
+
+/**
+ * Deduplicates and fills in missing Quick Hub actions for consistent in-page menu order.
+ */
+export function normalizeQuickHubActionOrder(order?: QuickHubActionId[]): QuickHubActionId[] {
+  const source = order ?? DEFAULT_QUICK_HUB_ACTION_ORDER
+  const deduplicated: QuickHubActionId[] = []
+  const seen = new Set<QuickHubActionId>()
+  for (const id of source) {
+    if (!seen.has(id)) {
+      seen.add(id)
+      deduplicated.push(id)
+    }
+  }
+  const missing = DEFAULT_QUICK_HUB_ACTION_ORDER.filter(
+    (id) => !seen.has(id)
+  )
+  return [...deduplicated, ...missing]
+}
+
+export function normalizeQuickHubHiddenActions(hidden?: QuickHubActionId[]): QuickHubActionId[] {
+  if (!hidden) return []
+  return Array.from(new Set(hidden))
 }
 
 /**
@@ -541,7 +628,6 @@ export const DEFAULT_SETTINGS: FeatureSettings = {
   quickScroll: true,
   colorPicker: true,
   elementToys: true,
-  elementZapper: true,
   quickHub: true,
   featureLayout: DEFAULT_FEATURE_LAYOUT_CONFIG,
   popupNavigation: DEFAULT_POPUP_NAVIGATION_CONFIG,
@@ -557,7 +643,6 @@ export const DEFAULT_SETTINGS: FeatureSettings = {
   quickScrollConfig: DEFAULT_QUICK_SCROLL_CONFIG,
   colorPickerConfig: DEFAULT_COLOR_PICKER_CONFIG,
   elementToysConfig: DEFAULT_ELEMENT_TOYS_CONFIG,
-  elementZapperConfig: DEFAULT_ELEMENT_TOYS_CONFIG,
   quickHubConfig: DEFAULT_QUICK_HUB_CONFIG
 }
 

@@ -20,7 +20,7 @@ import { ScopeManager } from "./scopeManager"
 import { ToolbarView } from "./toolbar"
 import type { ResizeHandle } from "./types"
 import { UndoManager } from "./undoManager"
-import { MESSAGE_TYPES, sendToBackground } from "~core/messaging"
+import { openExtensionPopup } from "~core/popupHelper"
 import { extensionStorage } from "~core/storage"
 import { showContentToast } from "~core/toast"
 import {
@@ -110,13 +110,12 @@ async function setMoveType(type: ElementMoveType): Promise<void> {
     const settings = await extensionStorage.get<FeatureSettings>(STORAGE_KEYS.SETTINGS)
     if (settings) {
       const nextConfig = {
-        ...(settings.elementToysConfig || settings.elementZapperConfig || currentConfig),
+        ...(settings.elementToysConfig || currentConfig),
         moveType: type
       }
       await extensionStorage.set(STORAGE_KEYS.SETTINGS, {
         ...settings,
-        elementToysConfig: nextConfig,
-        elementZapperConfig: nextConfig
+        elementToysConfig: nextConfig
       })
     }
   } catch {
@@ -143,7 +142,7 @@ function undoLastAction(): void {
 
 async function openSettingsView(): Promise<void> {
   stopZapping(false)
-  await sendToBackground(MESSAGE_TYPES.OPEN_POPUP, { view: "element-toys-settings" })
+  await openExtensionPopup("element-toys-settings")
 }
 
 function onPointerMove(e: PointerEvent): void {

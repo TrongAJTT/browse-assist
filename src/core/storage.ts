@@ -67,3 +67,50 @@ export function subscribeToSettings(
     })
   }
 }
+
+/**
+ * Clears all persistent and local data stored by the extension in the browser,
+ * then restores the default settings schema.
+ */
+export async function clearAllExtensionData(): Promise<void> {
+  const localStorage = new Storage({ area: "local" })
+
+  // 1. Clear Plasmo storage instances
+  await Promise.allSettled([
+    extensionStorage.clear(),
+    localStorage.clear()
+  ])
+
+  // 2. Clear native chrome.storage areas if available
+  if (typeof chrome !== "undefined" && chrome.storage) {
+    const clearArea = (area?: chrome.storage.StorageArea) => {
+      if (!area) return Promise.resolve()
+      return new Promise<void>((resolve) => {
+        try {
+          area.clear(() => resolve())
+        } catch {
+          resolve()
+        }
+      })
+    }
+
+    await Promise.allSettled([
+      clearArea(chrome.storage.sync),
+      clearArea(chrome.storage.local),
+      clearArea(chrome.storage.session)
+    ])
+  }
+
+  // 3. Clear window localStorage / sessionStorage if in browser window context
+  if (typeof window !== "undefined") {
+    try {
+      window.localStorage.clear()
+      window.sessionStorage.clear()
+    } catch {
+      // Ignore origin or security errors
+    }
+  }
+
+  // 4. Seed back factory defaults
+  await extensionStorage.set(STORAGE_KEYS.SETTINGS, DEFAULT_SETTINGS)
+}

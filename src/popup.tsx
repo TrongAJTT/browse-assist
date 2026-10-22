@@ -29,6 +29,9 @@ import {
   DEFAULT_POPUP_NAVIGATION_CONFIG,
   DEFAULT_SETTINGS,
   STORAGE_KEYS,
+  normalizeFeatureHidden,
+  normalizeFeatureOrder,
+  type ActiveView,
   type FeatureKey,
   type FeatureSettings
 } from "~core/types"
@@ -55,22 +58,6 @@ import { SuperDragSettingsView } from "~features/super-drag/SettingsView"
 import { SuperDragToggle } from "~features/super-drag/Toggle"
 
 import "~style.css"
-
-type ActiveView =
-  | "main"
-  | "context-menu-actions-settings"
-  | "super-drag-settings"
-  | "quick-scroll-settings"
-  | "picture-in-picture-settings"
-  | "video-wheel-control-settings"
-  | "smooth-scroll-settings"
-  | "mouse-zoom-settings"
-  | "color-picker-settings"
-  | "element-toys-settings"
-  | "element-zapper-settings"
-  | "quick-hub-settings"
-  | "preferences"
-  | "about"
 
 const sessionStorage = new Storage({ area: "local" })
 
@@ -167,12 +154,8 @@ function IndexPopup() {
   // Dynamic feature order & visibility
   const orderedFeatures = useMemo(() => {
     const layout = settings?.featureLayout ?? DEFAULT_FEATURE_LAYOUT_CONFIG
-    const savedOrder = layout.order ?? DEFAULT_FEATURE_LAYOUT_CONFIG.order
-    const missing = DEFAULT_FEATURE_LAYOUT_CONFIG.order.filter(
-      (k) => !savedOrder.includes(k)
-    )
-    const fullOrder = [...savedOrder, ...missing]
-    const hiddenSet = new Set(layout.hidden ?? [])
+    const fullOrder = normalizeFeatureOrder(layout.order)
+    const hiddenSet = new Set(normalizeFeatureHidden(layout.hidden))
     return fullOrder.filter(
       (k) => !hiddenSet.has(k) && (k !== "colorPicker" || isColorPickerSupported)
     )
@@ -223,11 +206,6 @@ function IndexPopup() {
       />
     ),
     elementToys: (
-      <ElementToysToggle
-        onConfigure={() => setCurrentView("element-toys-settings")}
-      />
-    ),
-    elementZapper: (
       <ElementToysToggle
         onConfigure={() => setCurrentView("element-toys-settings")}
       />
@@ -464,8 +442,7 @@ function IndexPopup() {
           <MouseZoomSettingsView onBack={() => setCurrentView("main")} />
         ) : currentView === "color-picker-settings" ? (
           <ColorPickerSettingsView onBack={() => setCurrentView("main")} />
-        ) : currentView === "element-toys-settings" ||
-          currentView === "element-zapper-settings" ? (
+        ) : currentView === "element-toys-settings" ? (
           <ElementToysSettingsView onBack={() => setCurrentView("main")} />
         ) : currentView === "quick-hub-settings" ? (
           <QuickHubSettingsView onBack={() => setCurrentView("main")} />
