@@ -1,0 +1,232 @@
+import { FileCode, Sparkles, Type } from "lucide-react"
+import type React from "react"
+import { useState } from "react"
+
+import { useStorage } from "@plasmohq/storage/hook"
+
+import { SubSettingsLayout } from "~components/SubSettingsLayout"
+import { Switch } from "~components/Switch"
+import {
+  DEFAULT_SETTINGS,
+  STORAGE_KEYS,
+  type ContextMenuActionId,
+  type ContextMenuActionsConfig,
+  type FeatureSettings
+} from "~core/types"
+
+interface ContextMenuActionsSettingsViewProps {
+  onBack: () => void
+}
+
+interface ActionMeta {
+  id: ContextMenuActionId
+  title: string
+  badge: string
+  badgeColor: string
+  description: string
+  icon: React.ReactNode
+}
+
+const ACTION_METAS: Record<ContextMenuActionId, ActionMeta> = {
+  copyLinkText: {
+    id: "copyLinkText",
+    title: "Copy Link Text",
+    badge: "Text only",
+    badgeColor: "badge-muted",
+    description: "Extracts and copies the anchor text without copying the URL.",
+    icon: <Type className="w-5 h-5 text-cyan-400" />
+  },
+  cleanLinkCopy: {
+    id: "cleanLinkCopy",
+    title: "Clean Link Copy",
+    badge: "Anti-Tracking",
+    badgeColor: "badge-success",
+    description: "Strips tracking parameters (utm_*, fbclid, si) before copying.",
+    icon: <Sparkles className="w-5 h-5 text-emerald-400" />
+  },
+  markdownLinkCopy: {
+    id: "markdownLinkCopy",
+    title: "Markdown Link Copy",
+    badge: "[Text](URL)",
+    badgeColor: "badge-accent",
+    description: "Copies formatted markdown hyperlink, ideal for Obsidian, Notion & GitHub.",
+    icon: <FileCode className="w-5 h-5 text-indigo-400" />
+  }
+}
+
+/**
+ * Sub-settings view for Context Menu Actions.
+ * Clean, flat list layout with HTML5 drag-and-drop & button reordering.
+ */
+export const ContextMenuActionsSettingsView: React.FC<
+  ContextMenuActionsSettingsViewProps
+> = ({ onBack }) => {
+  const [settings, setSettings] = useStorage<FeatureSettings>(
+    STORAGE_KEYS.SETTINGS,
+    DEFAULT_SETTINGS
+  )
+
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
+
+  const isMasterEnabled =
+    settings?.contextMenuActions ?? DEFAULT_SETTINGS.contextMenuActions
+  const currentConfig: ContextMenuActionsConfig =
+    settings?.contextMenuActionsConfig ?? DEFAULT_SETTINGS.contextMenuActionsConfig
+
+  const order: ContextMenuActionId[] = currentConfig.order || [
+    "copyLinkText",
+    "cleanLinkCopy",
+    "markdownLinkCopy"
+  ]
+
+  const handleToggleMaster = (enabled: boolean) => {
+    setSettings((prev) => ({
+      ...(prev ?? DEFAULT_SETTINGS),
+      contextMenuActions: enabled
+    }))
+  }
+
+  const handleToggleAction = (actionId: ContextMenuActionId) => {
+    setSettings((prev) => ({
+      ...(prev ?? DEFAULT_SETTINGS),
+      contextMenuActionsConfig: {
+        ...(prev?.contextMenuActionsConfig ??
+          DEFAULT_SETTINGS.contextMenuActionsConfig),
+        [actionId]: !(
+          (prev?.contextMenuActionsConfig ??
+            DEFAULT_SETTINGS.contextMenuActionsConfig)[actionId]
+        )
+      }
+    }))
+  }
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index)
+    e.dataTransfer.effectAllowed = "move"
+    if (e.dataTransfer.setData) {
+      e.dataTransfer.setData("text/plain", index.toString())
+    }
+  }
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = "move"
+    if (dragOverIndex !== index) {
+      setDragOverIndex(index)
+    }
+  }
+
+  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault()
+    if (draggedIndex === null || draggedIndex === dropIndex) {
+      setDraggedIndex(null)
+      setDragOverIndex(null)
+      return
+    }
+
+    const newOrder = [...order]
+    const [movedItem] = newOrder.splice(draggedIndex, 1)
+    newOrder.splice(dropIndex, 0, movedItem)
+
+    setDraggedIndex(null)
+    setDragOverIndex(null)
+
+    setSettings((prev) => ({
+      ...(prev ?? DEFAULT_SETTINGS),
+      contextMenuActionsConfig: {
+        ...(prev?.contextMenuActionsConfig ??
+          DEFAULT_SETTINGS.contextMenuActionsConfig),
+        order: newOrder
+      }
+    }))
+  }
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null)
+    setDragOverIndex(null)
+  }
+
+  return (
+    <SubSettingsLayout
+      title="Context Menu Actions"
+      enabled={isMasterEnabled}
+      onToggle={handleToggleMaster}
+      onBack={onBack}>
+      <div className="space-y-4">
+        <div>
+          <span className="section-header">
+            Right-Click Menu Items
+          </span>
+          <p className="text-xs text-content-muted mt-1">
+            Drag items to reorder or toggle their visibility in your right-click context menu.
+          </p>
+        </div>
+
+        {/* Clean, flat list separated by dividers with native drag & drop */}
+        <div className="divide-y divide-border-divider">
+          {order.map((actionId, index) => {
+            const item = ACTION_METAS[actionId]
+            if (!item) return null
+
+            const isItemEnabled = currentConfig[actionId]
+            const isDragging = draggedIndex === index
+            const isDragOver = dragOverIndex === index && draggedIndex !== index
+
+            return (
+              <div
+                key={actionId}
+                draggable
+                onDragStart={(e) => handleDragStart(e, index)}
+                onDragOver={(e) => handleDragOver(e, index)}
+                onDrop={(e) => handleDrop(e, index)}
+                onDragEnd={handleDragEnd}
+                className={`flex items-center justify-between gap-3 py-3 group cursor-grab active:cursor-grabbing transition-all duration-150 ${
+                  isDragging ? "opacity-30 scale-[0.98]" : "opacity-100"
+                } ${
+                  isDragOver
+                    ? "border-t-2 border-t-accent bg-accent-subtle"
+                    : ""
+                }`}>
+                {/* Left side: Icon + Title + Description */}
+                <div
+                  onClick={() => handleToggleAction(actionId)}
+                  className={`flex items-start gap-3 flex-1 min-w-0 ${
+                    isItemEnabled ? "feature-row-active" : "feature-row-dimmed"
+                  }`}>
+                  <div className="shrink-0 mt-0.5 flex items-center justify-center transition-transform duration-200 ease-out group-hover:scale-110">
+                    {item.icon}
+                  </div>
+
+                  <div className="flex flex-col min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-semibold text-content-primary">
+                        {item.title}
+                      </span>
+                      <span className={`font-mono ${item.badgeColor}`}>
+                        {item.badge}
+                      </span>
+                    </div>
+                    <span className="text-[11px] text-content-muted leading-snug mt-0.5">
+                      {item.description}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Right side: Switch toggle */}
+                <div className="flex items-center shrink-0">
+                  <Switch
+                    checked={isItemEnabled}
+                    onChange={() => handleToggleAction(actionId)}
+                    ariaLabel={`Toggle ${item.title}`}
+                  />
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </SubSettingsLayout>
+  )
+}
+

@@ -1,0 +1,470 @@
+import {
+  Coffee,
+  ExternalLink,
+  GitBranch,
+  Heart,
+  HelpCircle,
+  PictureInPicture2,
+  Settings as SettingsIcon,
+  X
+} from "lucide-react"
+import { Fragment, useEffect, useMemo, useRef, useState } from "react"
+
+import { Storage } from "@plasmohq/storage"
+import { useStorage } from "@plasmohq/storage/hook"
+
+import { AboutView } from "~components/AboutView"
+import { GlobalDialogHost } from "~components/GlobalDialogHost"
+import { PreferencesSettingsView } from "~components/PreferencesSettingsView"
+import { AppIcon } from "~core/assets"
+import { isColorPickerSupported } from "~core/browserDetect"
+import { APP_INFO, DONATE_OPTIONS } from "~core/constants"
+import {
+  MESSAGE_TYPES,
+  sendToBackground
+} from "~core/messaging"
+import { ViewModeContext } from "~core/viewModeContext"
+import {
+  DEFAULT_FEATURE_LAYOUT_CONFIG,
+  DEFAULT_POPUP_NAVIGATION_CONFIG,
+  DEFAULT_SETTINGS,
+  STORAGE_KEYS,
+  normalizeFeatureHidden,
+  normalizeFeatureOrder,
+  type ActiveView,
+  type FeatureKey,
+  type FeatureSettings
+} from "~core/types"
+import { AllowRightClickToggle } from "~features/allow-right-click/Toggle"
+import { ColorPickerSettingsView } from "~features/color-picker/SettingsView"
+import { ColorPickerToggle } from "~features/color-picker/Toggle"
+import { ContextMenuActionsSettingsView } from "~features/context-menu-actions/SettingsView"
+import { ContextMenuActionsToggle } from "~features/context-menu-actions/Toggle"
+import { ElementToysSettingsView } from "~features/element-toys/SettingsView"
+import { ElementToysToggle } from "~features/element-toys/Toggle"
+import { MouseZoomSettingsView } from "~features/mouse-zoom/SettingsView"
+import { MouseZoomToggle } from "~features/mouse-zoom/Toggle"
+import { PictureInPictureSettingsView } from "~features/picture-in-picture/SettingsView"
+import { PictureInPictureToggle } from "~features/picture-in-picture/Toggle"
+import { VideoWheelControlSettingsView } from "~features/video-wheel-control/SettingsView"
+import { VideoWheelControlToggle } from "~features/video-wheel-control/Toggle"
+import { QuickHubSettingsView } from "~features/quick-hub/SettingsView"
+import { QuickHubToggle } from "~features/quick-hub/Toggle"
+import { QuickScrollSettingsView } from "~features/quick-scroll/SettingsView"
+import { QuickScrollToggle } from "~features/quick-scroll/Toggle"
+import { SmoothScrollSettingsView } from "~features/smooth-scroll/SettingsView"
+import { SmoothScrollToggle } from "~features/smooth-scroll/Toggle"
+import { SuperDragSettingsView } from "~features/super-drag/SettingsView"
+import { SuperDragToggle } from "~features/super-drag/Toggle"
+
+import "~style.css"
+
+const sessionStorage = new Storage({ area: "local" })
+
+function IndexPopup() {
+  const urlParams =
+    typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search)
+      : null
+  const initialViewFromUrl =
+    (urlParams?.get("view") as ActiveView | null) || null
+
+  const [currentView, setCurrentView] = useState<ActiveView>(
+    initialViewFromUrl || "main"
+  )
+  const [isTabReady, setIsTabReady] = useState(false)
+  const [isDonateOpen, setIsDonateOpen] = useState(false)
+  const donateMenuRef = useRef<HTMLDivElement>(null)
+  const isInitialMount = useRef(true)
+
+  const [settings] = useStorage<FeatureSettings>(
+    STORAGE_KEYS.SETTINGS,
+    DEFAULT_SETTINGS
+  )
+
+  const popupNav = settings?.popupNavigation ?? DEFAULT_POPUP_NAVIGATION_CONFIG
+  const navRef = useRef(popupNav)
+  navRef.current = popupNav
+
+  // Restore last view on mount if enabled and within session timeout
+  useEffect(() => {
+    if (initialViewFromUrl) {
+      isInitialMount.current = false
+      return
+    }
+
+    async function restoreView() {
+      try {
+        const stored = await sessionStorage.get<{
+          view: ActiveView
+          timestamp: number
+        }>(STORAGE_KEYS.LAST_VIEW)
+
+        if (!stored?.view || stored.view === "main") {
+          isInitialMount.current = false
+          return
+        }
+
+        const nav = navRef.current
+        const timeout = nav?.sessionTimeoutMinutes ?? 10
+
+        const elapsed = (Date.now() - stored.timestamp) / 1000 / 60
+        if (elapsed <= timeout) {
+          setCurrentView(stored.view)
+        } else {
+          await sessionStorage.remove(STORAGE_KEYS.LAST_VIEW).catch(() => {})
+        }
+      } catch (err) {
+        console.error("Failed to restore last view:", err)
+      } finally {
+        isInitialMount.current = false
+      }
+    }
+    restoreView()
+  }, [initialViewFromUrl])
+
+  // Persist current view when it changes
+  useEffect(() => {
+    // Skip writing on initial mount before restoration has run
+    if (isInitialMount.current) return
+
+    const nav = navRef.current
+    if (!nav.rememberLastView) {
+      sessionStorage.remove(STORAGE_KEYS.LAST_VIEW).catch(() => {})
+      return
+    }
+
+    if (currentView === "main") {
+      sessionStorage.remove(STORAGE_KEYS.LAST_VIEW).catch(() => {})
+    } else {
+      sessionStorage
+        .set(STORAGE_KEYS.LAST_VIEW, {
+          view: currentView,
+          timestamp: Date.now()
+        })
+        .catch(() => {})
+    }
+  }, [currentView, popupNav.rememberLastView])
+
+  const [activePiP, setActivePiP] = useState<{
+    tabId: number
+    title: string
+  } | null>(null)
+
+  // Dynamic feature order & visibility
+  const orderedFeatures = useMemo(() => {
+    const layout = settings?.featureLayout ?? DEFAULT_FEATURE_LAYOUT_CONFIG
+    const fullOrder = normalizeFeatureOrder(layout.order)
+    const hiddenSet = new Set(normalizeFeatureHidden(layout.hidden))
+    return fullOrder.filter(
+      (k) => !hiddenSet.has(k) && (k !== "colorPicker" || isColorPickerSupported)
+    )
+  }, [settings?.featureLayout])
+
+  const featureToggleMap: Record<FeatureKey, React.ReactNode> = {
+    allowRightClick: (
+      <AllowRightClickToggle onReady={() => setIsTabReady(true)} />
+    ),
+    contextMenuActions: (
+      <ContextMenuActionsToggle
+        onConfigure={() => setCurrentView("context-menu-actions-settings")}
+      />
+    ),
+    superDrag: (
+      <SuperDragToggle
+        onConfigure={() => setCurrentView("super-drag-settings")}
+      />
+    ),
+    quickScroll: (
+      <QuickScrollToggle
+        onConfigure={() => setCurrentView("quick-scroll-settings")}
+      />
+    ),
+    pictureInPicture: (
+      <PictureInPictureToggle
+        onOpenSettings={() => setCurrentView("picture-in-picture-settings")}
+      />
+    ),
+    videoWheelControl: (
+      <VideoWheelControlToggle
+        onOpenSettings={() => setCurrentView("video-wheel-control-settings")}
+      />
+    ),
+    smoothScroll: (
+      <SmoothScrollToggle
+        onConfigure={() => setCurrentView("smooth-scroll-settings")}
+      />
+    ),
+    mouseZoom: (
+      <MouseZoomToggle
+        onConfigure={() => setCurrentView("mouse-zoom-settings")}
+      />
+    ),
+    colorPicker: (
+      <ColorPickerToggle
+        onConfigure={() => setCurrentView("color-picker-settings")}
+      />
+    ),
+    elementToys: (
+      <ElementToysToggle
+        onConfigure={() => setCurrentView("element-toys-settings")}
+      />
+    ),
+    quickHub: (
+      <QuickHubToggle
+        onConfigure={() => setCurrentView("quick-hub-settings")}
+      />
+    )
+  }
+
+  // Query background for active PiP session
+  useEffect(() => {
+    sendToBackground(MESSAGE_TYPES.GET_ACTIVE_PIP_SESSION).then((response) => {
+      if (response?.session) {
+        setActivePiP(response.session)
+      }
+    })
+  }, [])
+
+  const handleFocusPiPTab = async () => {
+    await sendToBackground(MESSAGE_TYPES.FOCUS_PIP_TAB)
+    window.close()
+  }
+
+  const handleClosePiP = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    await sendToBackground(MESSAGE_TYPES.CLOSE_PIP)
+    setActivePiP(null)
+  }
+
+  // Fallback: Ensure popup renders even if AllowRightClickToggle isn't mounted (e.g. sub-views or hidden feature)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsTabReady(true)
+    }, 150)
+    return () => clearTimeout(timer)
+  }, [])
+
+  // Ready when both storage settings and active tab state are hydrated
+  const isHydrated = (isTabReady || currentView !== "main") && settings !== undefined
+
+  // Close dropdown menus when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node
+      if (donateMenuRef.current && !donateMenuRef.current.contains(target)) {
+        setIsDonateOpen(false)
+      }
+    }
+    if (isDonateOpen) {
+      document.addEventListener("mousedown", handleClickOutside)
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [isDonateOpen])
+
+  const getDonateIcon = (iconName: string) => {
+    switch (iconName) {
+      case "coffee":
+        return <Coffee className="w-3.5 h-3.5 text-amber-400" />
+      case "github":
+        return <GitBranch className="w-3.5 h-3.5 text-slate-200" />
+      default:
+        return <Heart className="w-3.5 h-3.5 text-rose-400" />
+    }
+  }
+
+  // Evaluate active theme ("dark" vs "light")
+  const activeThemeMode = settings?.theme ?? DEFAULT_SETTINGS.theme
+  const [systemPrefersDark, setSystemPrefersDark] = useState<boolean>(() => {
+    return window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? true
+  })
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
+    const handler = (e: MediaQueryListEvent) => setSystemPrefersDark(e.matches)
+    mediaQuery.addEventListener("change", handler)
+    return () => mediaQuery.removeEventListener("change", handler)
+  }, [])
+
+  const isDark =
+    activeThemeMode === "dark" ||
+    (activeThemeMode === "system" && systemPrefersDark)
+
+  const themeClass = isDark ? "theme-dark" : "theme-light"
+
+  return (
+    <div
+      className={`w-[444px] h-[600px] bg-app text-content-primary font-sans select-none antialiased flex flex-col overflow-hidden transition-opacity duration-150 ${themeClass} ${
+        isHydrated ? "opacity-100" : "opacity-0 pointer-events-none"
+      }`}>
+      {/* Header - Crisp and cleanly separated from content */}
+      <header className="px-4 py-3 bg-app-header border-b border-border-divider flex items-center justify-between sticky top-0 z-20 backdrop-blur-md">
+        <div className="flex items-center gap-2.5">
+          <AppIcon className="w-8 h-8 rounded-md shadow-md shadow-accent-glow" />
+          <div>
+            <h1 className="text-sm font-bold tracking-tight text-content-primary leading-none">
+              {APP_INFO.name}
+            </h1>
+            <p className="text-[11px] text-content-muted font-normal mt-1">
+              {APP_INFO.slogan}
+            </p>
+          </div>
+        </div>
+
+        {/* Action icons: Preferences, About & Donate */}
+        <div className="flex items-center gap-1">
+          {/* Preferences / Settings Button */}
+          <button
+            type="button"
+            title="Preferences & Theme"
+            onClick={() => setCurrentView("preferences")}
+            className={`p-1.5 rounded-lg transition-all focus:outline-none ${
+              currentView === "preferences"
+                ? "bg-accent-subtle text-accent ring-1 ring-accent-glow"
+                : "text-content-muted hover:text-content-primary hover:bg-app-surface active:scale-95"
+            }`}>
+            <SettingsIcon className="w-4 h-4" />
+          </button>
+
+          {/* About Button */}
+          <button
+            type="button"
+            title="About Browse Assist"
+            onClick={() => setCurrentView("about")}
+            className={`p-1.5 rounded-lg transition-all focus:outline-none ${
+              currentView === "about"
+                ? "bg-accent-subtle text-accent ring-1 ring-accent-glow"
+                : "text-content-muted hover:text-content-primary hover:bg-app-surface active:scale-95"
+            }`}>
+            <HelpCircle className="w-4 h-4" />
+          </button>
+
+          {/* Donate Button & Dropdown (Last item) */}
+          <div className="relative" ref={donateMenuRef}>
+            <button
+              type="button"
+              title="Support & Donate"
+              onClick={() => setIsDonateOpen((prev) => !prev)}
+              className={`p-1.5 rounded-lg transition-all focus:outline-none ${
+                isDonateOpen
+                  ? "bg-rose-500/20 text-rose-400 ring-1 ring-rose-500/40"
+                  : "text-content-muted hover:text-rose-400 hover:bg-app-surface active:scale-95"
+              }`}>
+              <Heart className="w-4 h-4 fill-current/20" />
+            </button>
+
+            {/* Donate Popup Menu */}
+            {isDonateOpen && (
+              <div className="absolute right-0 mt-2 w-48 rounded-xl bg-app-elevated border border-border-subtle shadow-xl shadow-black/40 py-1.5 z-30 animate-in fade-in zoom-in-95 duration-100">
+                <div className="px-3 py-1 text-[10px] font-semibold text-content-muted tracking-wider uppercase border-b border-border-divider mb-1">
+                  Support the Project
+                </div>
+                {DONATE_OPTIONS.map((option) => (
+                  <a
+                    key={option.id}
+                    href={option.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setIsDonateOpen(false)}
+                    className="flex items-center justify-between px-3 py-2 text-xs text-content-secondary hover:text-content-primary hover:bg-app-surface transition-colors">
+                    <div className="flex items-center gap-2">
+                      {getDonateIcon(option.iconName)}
+                      <span className="font-medium">{option.label}</span>
+                    </div>
+                    <ExternalLink className="w-3 h-3 text-content-muted" />
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Body Area - Swappable between Main List, Feature Settings and About View */}
+      <div className="px-4 py-2.5 pb-3.5 flex-1 overflow-y-auto">
+        {/* Universal PiP Active Banner */}
+        {activePiP && currentView === "main" && (
+          <div
+            onClick={handleFocusPiPTab}
+            title="Click to jump to this video tab"
+            className="mb-2 py-1.5 px-2.5 rounded-lg bg-accent-subtle border border-accent/40 hover:border-accent transition-all cursor-pointer group flex items-center justify-between gap-2.5 shadow-lg shadow-black/20">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <div className="p-1 text-accent group-hover:scale-105 transition-transform shrink-0">
+                <PictureInPicture2 className="w-4 h-4 animate-pulse" />
+              </div>
+              <div className="flex flex-col min-w-0">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-accent leading-none">
+                  Video in PiP Mode
+                </span>
+                <span className="text-xs font-semibold text-content-primary truncate mt-0.5 group-hover:text-accent transition-colors">
+                  {activePiP.title}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center shrink-0">
+              <button
+                type="button"
+                onClick={handleClosePiP}
+                title="Exit Picture-in-Picture window"
+                className="flex items-center gap-1.5 text-[11px] font-semibold text-content-secondary bg-app-elevated border border-border-subtle px-2.5 py-1 rounded-lg transition-all duration-150 hover:bg-rose-500 hover:text-white hover:border-rose-500 hover:shadow-md hover:shadow-rose-500/25 hover:scale-[1.02] active:scale-95 focus:outline-none focus:ring-2 focus:ring-rose-500/50">
+                <X className="w-3.5 h-3.5 stroke-[2.5]" />
+                <span>Exit PiP</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {currentView === "main" ? (
+          <div>
+            <ViewModeContext.Provider
+              value={settings?.viewMode ?? DEFAULT_SETTINGS.viewMode ?? "list"}>
+              {/* PowerToys-style Utilities List with Dividers or Compact Grid */}
+              <main
+                className={
+                  (settings?.viewMode ?? DEFAULT_SETTINGS.viewMode) === "grid"
+                    ? "grid grid-cols-2 gap-2.5 py-1"
+                    : "divide-y divide-border-divider"
+                }>
+                {orderedFeatures.map((key) => (
+                  <Fragment key={key}>{featureToggleMap[key]}</Fragment>
+                ))}
+              </main>
+            </ViewModeContext.Provider>
+          </div>
+        ) : currentView === "context-menu-actions-settings" ? (
+          <ContextMenuActionsSettingsView
+            onBack={() => setCurrentView("main")}
+          />
+        ) : currentView === "super-drag-settings" ? (
+          <SuperDragSettingsView onBack={() => setCurrentView("main")} />
+        ) : currentView === "quick-scroll-settings" ? (
+          <QuickScrollSettingsView onBack={() => setCurrentView("main")} />
+        ) : currentView === "picture-in-picture-settings" ? (
+          <PictureInPictureSettingsView onBack={() => setCurrentView("main")} />
+        ) : currentView === "video-wheel-control-settings" ? (
+          <VideoWheelControlSettingsView onBack={() => setCurrentView("main")} />
+        ) : currentView === "smooth-scroll-settings" ? (
+          <SmoothScrollSettingsView onBack={() => setCurrentView("main")} />
+        ) : currentView === "mouse-zoom-settings" ? (
+          <MouseZoomSettingsView onBack={() => setCurrentView("main")} />
+        ) : currentView === "color-picker-settings" ? (
+          <ColorPickerSettingsView onBack={() => setCurrentView("main")} />
+        ) : currentView === "element-toys-settings" ? (
+          <ElementToysSettingsView onBack={() => setCurrentView("main")} />
+        ) : currentView === "quick-hub-settings" ? (
+          <QuickHubSettingsView onBack={() => setCurrentView("main")} />
+        ) : currentView === "preferences" ? (
+          <PreferencesSettingsView onBack={() => setCurrentView("main")} />
+        ) : (
+          <AboutView onBack={() => setCurrentView("main")} />
+        )}
+      </div>
+
+      {/* Global Dialog Modal Host */}
+      <GlobalDialogHost />
+    </div>
+  )
+}
+
+export default IndexPopup

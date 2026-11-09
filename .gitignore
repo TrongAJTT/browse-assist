@@ -31,3 +31,10 @@ dist/
 
 # typescript
 .tsbuildinfo
+tsconfig.tsbuildinfo
+
+# Misc
+SPECIFICATION.md
+assets/icon.svg
+.codegraph/
+docs/internal/
