@@ -18,6 +18,7 @@ This document outlines the catalog of active features, default keybindings, exec
 | 8   | **Quick Scroll**         | `quickScroll`        | Content Script | Double-click page edge        | Double-click configured browser window margins (or floating buttons) to jump quickly to the top or bottom of the page.                                                  |
 | 9   | **Color Picker**         | `colorPicker`        | Content Script | Popup Action                  | Eyedropper magnifier zooming into individual pixels under the cursor; click to copy HEX, RGB, or HSL codes.                                                             |
 | 10  | **Element Toys**         | `elementToys`        | Content Script | Popup Action                  | Point-and-click targeting mode to inspect, zap, edit text, or reposition elements on any web page; automatically unfreezes locked body scrolling (`overflow: hidden`). |
+| 11  | **Quick Hub**            | `quickHub`           | Content Script | Floating Trigger / Shortcut   | Fast on-screen pie/grid menu providing quick access to active toolkit toggles, actions, and settings directly on the page.                                             |
 
 ---
 

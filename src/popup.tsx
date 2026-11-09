@@ -237,8 +237,16 @@ function IndexPopup() {
     setActivePiP(null)
   }
 
+  // Fallback: Ensure popup renders even if AllowRightClickToggle isn't mounted (e.g. sub-views or hidden feature)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsTabReady(true)
+    }, 150)
+    return () => clearTimeout(timer)
+  }, [])
+
   // Ready when both storage settings and active tab state are hydrated
-  const isHydrated = isTabReady && settings !== undefined
+  const isHydrated = (isTabReady || currentView !== "main") && settings !== undefined
 
   // Close dropdown menus when clicking outside
   useEffect(() => {

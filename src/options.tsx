@@ -165,10 +165,6 @@ function OptionsPage() {
     }))
   }
 
-  const handleReset = () => {
-    setSettings(DEFAULT_SETTINGS)
-  }
-
   const handleClearAllData = async () => {
     setIsClearing(true)
     try {
@@ -232,13 +228,7 @@ function OptionsPage() {
               <span>About</span>
             </button>
 
-            {/* Reset to Defaults */}
-            {/* <button
-              type="button"
-              onClick={handleReset}
-              className="px-3 py-1.5 text-xs font-semibold text-content-secondary bg-app-surface hover:bg-app-surface-hover hover:text-content-primary border border-border-subtle rounded-xl transition-all shadow-sm cursor-pointer">
-              Reset to Defaults
-            </button> */}
+
           </div>
         </header>
 

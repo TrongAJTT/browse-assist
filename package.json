@@ -8,6 +8,7 @@
   "termsUrl": "https://www.trongajtt.com/apps/browse-assist/terms",
   "privacyPolicyUrl": "https://www.trongajtt.com/apps/browse-assist/policy",
   "author": "TrongAJTT. <trong.ajtt.dev@gmail.com>",
+  "license": "Apache-2.0",
   "scripts": {
     "dev": "plasmo dev",
     "dev:firefox": "plasmo dev --target=firefox-mv3",
