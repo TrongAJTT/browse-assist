@@ -54,11 +54,11 @@ export interface SuperDragActionOption {
 }
 
 export const SUPER_DRAG_ACTION_OPTIONS: SuperDragActionOption[] = [
-  { id: "open_bg_tab", label: "Background Tab" },
+  { id: "open_bg_tab", label: "Bg Tab" },
   { id: "open_active_tab", label: "Active Tab" },
   { id: "open_window_active", label: "New Window" },
   { id: "open_incognito_active", label: "Incognito Window", requiresIncognito: true },
-  { id: "copy_to_clipboard", label: "Copy to Clipboard" },
+  { id: "copy_to_clipboard", label: "Copy" },
   { id: "copy_link_text", label: "Copy Link Text" },
   { id: "none", label: "None (Do Nothing)" }
 ]
@@ -71,7 +71,7 @@ export function getSuperDragActionOptions(
 ): SuperDragActionOption[] {
   if (targetType === "link") {
     return [
-      { id: "open_bg_tab", label: "Background Tab" },
+      { id: "open_bg_tab", label: "Bg Tab" },
       { id: "open_active_tab", label: "Active Tab" },
       { id: "open_window_active", label: "New Window" },
       { id: "open_incognito_active", label: "Incognito Window", requiresIncognito: true },
@@ -83,7 +83,7 @@ export function getSuperDragActionOptions(
 
   if (targetType === "image") {
     return [
-      { id: "open_bg_tab", label: "Background Tab" },
+      { id: "open_bg_tab", label: "Bg Tab" },
       { id: "open_active_tab", label: "Active Tab" },
       { id: "open_window_active", label: "New Window" },
       { id: "open_incognito_active", label: "Incognito Window", requiresIncognito: true },
@@ -93,11 +93,11 @@ export function getSuperDragActionOptions(
   }
 
   return [
-    { id: "open_bg_tab", label: "Background Tab" },
+    { id: "open_bg_tab", label: "Bg Tab" },
     { id: "open_active_tab", label: "Active Tab" },
     { id: "open_window_active", label: "New Window" },
     { id: "open_incognito_active", label: "Incognito Window", requiresIncognito: true },
-    { id: "copy_to_clipboard", label: "Copy to Clipboard" },
+    { id: "copy_to_clipboard", label: "Copy" },
     { id: "none", label: "None (Do Nothing)" }
   ]
 }
