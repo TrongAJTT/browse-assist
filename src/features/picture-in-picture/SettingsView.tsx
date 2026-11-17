@@ -1,4 +1,4 @@
-import { Eye, MousePointerClick } from "lucide-react"
+import { Bell, Eye, MousePointerClick, PauseCircle } from "lucide-react"
 import type React from "react"
 import { useEffect, useState } from "react"
 
@@ -140,11 +140,20 @@ export const PictureInPictureSettingsView: React.FC<
 
             {/* Show Action Toast */}
             <SettingToggleRow
-              icon={<Eye className="w-5 h-5 text-emerald-400" />}
+              icon={<Bell className="w-5 h-5 text-emerald-400" />}
               title="Action Toast Notification"
               description="Display brief confirmation toast when entering or exiting PiP."
               enabled={currentConfig.showToast}
               onToggle={() => handleToggleOption("showToast")}
+            />
+
+            {/* Auto-Pause on Exit PiP */}
+            <SettingToggleRow
+              icon={<PauseCircle className="w-5 h-5 text-amber-400" />}
+              title="Auto-Pause on Exit PiP"
+              description="Automatically pause the video when closing the Picture-in-Picture window."
+              enabled={Boolean(currentConfig.autoPauseOnExit)}
+              onToggle={() => handleToggleOption("autoPauseOnExit")}
             />
 
             {/* Hover PiP Button */}

@@ -112,6 +112,8 @@ function ensureHoverButton(): HTMLButtonElement {
         if (document.pictureInPictureElement === hoveredVideoElement) {
           await document.exitPictureInPicture()
           showToast("Exited Picture-in-Picture")
+        } else if (typeof hoveredVideoElement.requestPictureInPicture !== "function") {
+          showToast("PiP is not supported in this browser", true)
         } else {
           await hoveredVideoElement.requestPictureInPicture()
           showToast("Entered Picture-in-Picture")
@@ -354,6 +356,11 @@ export async function togglePictureInPicture(): Promise<void> {
     return
   }
 
+  if (typeof video.requestPictureInPicture !== "function") {
+    showToast("PiP is not supported in this browser", true)
+    return
+  }
+
   try {
     prepareVideoForPiP(video)
     await video.requestPictureInPicture()
@@ -382,11 +389,37 @@ function onEnterPiP(): void {
   hideHoverButtonNow()
 }
 
+let isPointerListenerAttached = false
+
+function syncPointerListener(): void {
+  if (typeof window === "undefined") return
+  const shouldAttach = isActive && Boolean(currentConfig.hoverButton)
+  if (shouldAttach && !isPointerListenerAttached) {
+    window.addEventListener("pointermove", onWindowPointerMove, {
+      passive: true,
+      capture: true
+    })
+    isPointerListenerAttached = true
+  } else if (!shouldAttach && isPointerListenerAttached) {
+    window.removeEventListener("pointermove", onWindowPointerMove, {
+      capture: true
+    })
+    isPointerListenerAttached = false
+  }
+}
+
 /**
  * Global leavepictureinpicture event listener.
  */
-function onLeavePiP(): void {
+function onLeavePiP(event: Event): void {
   notifyPiPStatus(false)
+  if (
+    currentConfig.autoPauseOnExit &&
+    event.target instanceof HTMLVideoElement &&
+    !event.target.paused
+  ) {
+    event.target.pause()
+  }
 }
 
 /**
@@ -421,6 +454,7 @@ export function updatePictureInPictureConfig(
 ): void {
   if (!config) return
   currentConfig = { ...currentConfig, ...config }
+  syncPointerListener()
 
   if (!currentConfig.hoverButton) {
     hideHoverButtonNow()
@@ -442,7 +476,7 @@ export function activate(config?: PictureInPictureConfig): void {
 
   document.addEventListener("enterpictureinpicture", onEnterPiP, true)
   document.addEventListener("leavepictureinpicture", onLeavePiP, true)
-  window.addEventListener("pointermove", onWindowPointerMove, { passive: true, capture: true })
+  syncPointerListener()
   chrome.runtime.onMessage.addListener(onRuntimeMessage)
 }
 
@@ -461,7 +495,7 @@ export function deactivate(): void {
 
   document.removeEventListener("enterpictureinpicture", onEnterPiP, true)
   document.removeEventListener("leavepictureinpicture", onLeavePiP, true)
-  window.removeEventListener("pointermove", onWindowPointerMove, { capture: true })
+  syncPointerListener()
   chrome.runtime.onMessage.removeListener(onRuntimeMessage)
 
   hideHoverButtonNow()

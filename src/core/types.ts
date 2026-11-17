@@ -289,6 +289,7 @@ export interface PictureInPictureConfig {
   showBadge: boolean // Show "PiP" badge on extension icon when video is in PiP
   showToast: boolean // Show floating feedback notification on toggle
   hoverButton: boolean // Show a sleek floating PiP button when hovering over playing videos
+  autoPauseOnExit?: boolean // Pause video automatically when exiting PiP window
   placement: EdgePlacement // Edge position inside the video frame
   buttonPosition?: PipButtonPosition // Legacy fallback
 }
@@ -297,6 +298,7 @@ export const DEFAULT_PICTURE_IN_PICTURE_CONFIG: PictureInPictureConfig = {
   showBadge: true,
   showToast: true,
   hoverButton: true,
+  autoPauseOnExit: false,
   placement: { edge: "right", offsetPercent: 0 },
   buttonPosition: "top-right"
 }
