@@ -289,6 +289,7 @@ export interface PictureInPictureConfig {
   showBadge: boolean // Show "PiP" badge on extension icon when video is in PiP
   showToast: boolean // Show floating feedback notification on toggle
   hoverButton: boolean // Show a sleek floating PiP button when hovering over playing videos
+  hoverButtonOpacity?: number // Idle opacity of the floating PiP hover button (0.35 - 1)
   autoPauseOnExit?: boolean // Pause video automatically when exiting PiP window
   placement: EdgePlacement // Edge position inside the video frame
   buttonPosition?: PipButtonPosition // Legacy fallback
@@ -298,6 +299,7 @@ export const DEFAULT_PICTURE_IN_PICTURE_CONFIG: PictureInPictureConfig = {
   showBadge: true,
   showToast: true,
   hoverButton: true,
+  hoverButtonOpacity: 1,
   autoPauseOnExit: false,
   placement: { edge: "right", offsetPercent: 0 },
   buttonPosition: "top-right"
@@ -341,6 +343,7 @@ export interface VideoWheelControlConfig {
 
   enableScreenshot: boolean // Capture video frame to clipboard via Ctrl+Shift+Click or button
   showOsd: boolean // Display on-screen volume / speed / seek indicator HUD
+  osdOpacity?: number // Transparency of the floating OSD badge (0.35 - 1)
 }
 
 export const DEFAULT_VIDEO_WHEEL_CONTROL_CONFIG: VideoWheelControlConfig = {
@@ -366,7 +369,8 @@ export const DEFAULT_VIDEO_WHEEL_CONTROL_CONFIG: VideoWheelControlConfig = {
   boostSpeed: 2.0,
 
   enableScreenshot: true,
-  showOsd: true
+  showOsd: true,
+  osdOpacity: 1
 }
 
 /**

@@ -94,7 +94,8 @@ function ensureHoverButton(): HTMLButtonElement {
 
   btn.addEventListener("mouseleave", () => {
     isPointerOverHoverButton = false
-    btn.style.opacity = "0.65"
+    const idleOpacity = String(currentConfig.hoverButtonOpacity ?? 1)
+    btn.style.opacity = idleOpacity
     btn.style.background = "rgba(18, 18, 22, 0.85)"
     btn.style.borderColor = "rgba(255, 255, 255, 0.2)"
     btn.style.transform = "scale(1)"
@@ -209,9 +210,10 @@ function showHoverButtonForVideo(video: HTMLVideoElement): void {
   btn.style.left = `${targetX}px`
   btn.style.display = "flex"
 
-  // Trigger smooth instant reveal (dimmed by 35% to 0.65 by default, 1.0 on hover)
+  // Trigger smooth instant reveal
   requestAnimationFrame(() => {
-    btn.style.opacity = isPointerOverHoverButton ? "1" : "0.65"
+    const idleOpacity = String(currentConfig.hoverButtonOpacity ?? 1)
+    btn.style.opacity = isPointerOverHoverButton ? "1" : idleOpacity
     btn.style.transform = "scale(1)"
   })
 

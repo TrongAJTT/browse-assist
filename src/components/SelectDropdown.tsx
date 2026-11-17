@@ -18,27 +18,52 @@ export const OPACITY_DROPDOWN_OPTIONS: SelectDropdownOption<string>[] = [
   { id: "0.35", label: "35%" }
 ]
 
+export type SelectDropdownPlacement = "auto" | "top" | "bottom"
+
 interface SelectDropdownProps<T extends string> {
   value: T
   options: SelectDropdownOption<T>[]
   onChange: (value: T) => void
   disabled?: boolean
+  placement?: SelectDropdownPlacement
   ariaLabel?: string
   className?: string
 }
 
 /**
+ * Finds the nearest vertically scrollable ancestor, or falls back to viewport bounds.
+ */
+function getScrollBounds(el: HTMLElement): { top: number; bottom: number } {
+  let node = el.parentElement
+  while (node) {
+    const overflowY = window.getComputedStyle(node).overflowY
+    if (
+      (overflowY === "auto" || overflowY === "scroll") &&
+      node.scrollHeight > node.clientHeight
+    ) {
+      const rect = node.getBoundingClientRect()
+      return { top: rect.top, bottom: rect.bottom }
+    }
+    node = node.parentElement
+  }
+  return { top: 0, bottom: window.innerHeight }
+}
+
+/**
  * Reusable compact trailing dropdown menu adhering to Browse Assist Design Tokens.
+ * Automatically flips upward when near the bottom of its scroll container or viewport.
  */
 export function SelectDropdown<T extends string>({
   value,
   options,
   onChange,
   disabled = false,
+  placement = "auto",
   ariaLabel,
   className = ""
 }: SelectDropdownProps<T>) {
   const [isOpen, setIsOpen] = useState(false)
+  const [openUpward, setOpenUpward] = useState(placement === "top")
   const containerRef = useRef<HTMLDivElement>(null)
 
   const selectedOption =
@@ -79,7 +104,22 @@ export function SelectDropdown<T extends string>({
         aria-expanded={isOpen}
         aria-haspopup="listbox"
         onClick={() => {
-          if (!disabled) setIsOpen((prev) => !prev)
+          if (disabled) return
+          if (!isOpen) {
+            if (placement === "top") {
+              setOpenUpward(true)
+            } else if (placement === "bottom") {
+              setOpenUpward(false)
+            } else if (containerRef.current) {
+              const rect = containerRef.current.getBoundingClientRect()
+              const bounds = getScrollBounds(containerRef.current)
+              const estimatedHeight = options.length * 32 + 12
+              const spaceBelow = bounds.bottom - rect.bottom
+              const spaceAbove = rect.top - bounds.top
+              setOpenUpward(spaceBelow < estimatedHeight && spaceAbove > spaceBelow)
+            }
+          }
+          setIsOpen((prev) => !prev)
         }}
         className={`inline-flex items-center justify-between gap-2 min-w-[104px] px-2.5 py-1.5 rounded-lg text-xs font-medium bg-app-surface border transition-all focus:outline-none ${
           disabled
@@ -106,7 +146,9 @@ export function SelectDropdown<T extends string>({
       {isOpen && (
         <div
           role="listbox"
-          className="absolute right-0 mt-1.5 min-w-[136px] rounded-xl bg-app-elevated border border-border-subtle shadow-xl shadow-black/40 py-1 z-30 animate-in fade-in zoom-in-95 duration-100">
+          className={`absolute right-0 min-w-[136px] rounded-xl bg-app-elevated border border-border-subtle shadow-xl shadow-black/40 py-1 z-30 animate-in fade-in zoom-in-95 duration-100 ${
+            openUpward ? "bottom-full mb-1.5" : "top-full mt-1.5"
+          }`}>
           {options.map((opt) => {
             const isSelected = opt.id === value
             return (

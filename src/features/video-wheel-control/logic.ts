@@ -202,7 +202,7 @@ function showOsd(
 
   osd.style.display = "flex"
   requestAnimationFrame(() => {
-    osd.style.opacity = "1"
+    osd.style.opacity = String(currentConfig.osdOpacity ?? 1)
     osd.style.transform = "scale(1)"
   })
 

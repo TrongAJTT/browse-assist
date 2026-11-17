@@ -2,6 +2,7 @@ import {
   AlertTriangle,
   ArrowUpDown,
   Camera,
+  Droplets,
   Eye,
   FastForward,
   Film,
@@ -18,6 +19,7 @@ import React, { useState } from "react"
 import { useStorage } from "@plasmohq/storage/hook"
 
 import {
+  OPACITY_DROPDOWN_OPTIONS,
   SelectDropdown,
   type SelectDropdownOption
 } from "~components/SelectDropdown"
@@ -505,6 +507,34 @@ export const VideoWheelControlSettingsView: React.FC<
                 enabled={currentConfig.showOsd}
                 onToggle={(enabled) => updateConfig({ showOsd: enabled })}
               />
+
+              {currentConfig.showOsd && (
+                <div className="flex items-center justify-between gap-3 py-2.5">
+                  <div className="flex items-start gap-3 flex-1 min-w-0">
+                    <Droplets className="w-5 h-5 text-sky-400 shrink-0 mt-0.5" />
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-xs font-semibold text-content-primary">
+                        OSD Opacity
+                      </span>
+                      <span className="text-[11px] text-content-muted leading-snug mt-0.5">
+                        Adjust transparency of the floating OSD badge.
+                      </span>
+                    </div>
+                  </div>
+
+                  <SelectDropdown<string>
+                    value={String(currentConfig.osdOpacity ?? 1)}
+                    options={OPACITY_DROPDOWN_OPTIONS}
+                    onChange={(val) => {
+                      const osdOpacity = parseFloat(val)
+                      if (!Number.isNaN(osdOpacity)) {
+                        updateConfig({ osdOpacity })
+                      }
+                    }}
+                    ariaLabel="OSD Opacity"
+                  />
+                </div>
+              )}
             </div>
           </div>
         )}
