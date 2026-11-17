@@ -128,6 +128,15 @@ async function executeSuperDragAction(
     case "open_incognito_active":
       await handleNewWindow(url, { incognito: true, focused: true })
       break
+    case "search_image": {
+      const lensUrl = `https://lens.google.com/uploadbyurl?url=${encodeURIComponent(url)}`
+      let targetIndex: number | undefined
+      if (senderTab && typeof senderTab.index === "number") {
+        targetIndex = senderTab.index + 1
+      }
+      chrome.tabs.create({ url: lensUrl, active: true, index: targetIndex })
+      break
+    }
     default:
       chrome.tabs.create({ url, active: false })
       break

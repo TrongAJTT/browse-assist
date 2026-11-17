@@ -51,7 +51,7 @@ export const DirectionalDPadPicker: React.FC<DirectionalDPadPickerProps> = ({
 }) => {
   const actionOptions = getSuperDragActionOptions(targetType)
 
-  const renderDirectionNode = (direction: DragDirection, widthClass = "w-[126px]") => {
+  const renderDirectionNode = (direction: DragDirection, widthClass = "w-[140px]") => {
     const { key, label, Icon } = DIRECTIONS[direction]
     const rawAction = actions[key]
     const isValid = actionOptions.some((opt) => opt.id === rawAction)

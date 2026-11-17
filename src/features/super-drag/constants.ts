@@ -53,14 +53,23 @@ export interface SuperDragActionOption {
   requiresIncognito?: boolean
 }
 
-export const SUPER_DRAG_ACTION_OPTIONS: SuperDragActionOption[] = [
-  { id: "open_bg_tab", label: "Bg Tab" },
+const COMMON_OPEN_ACTIONS: SuperDragActionOption[] = [
+  { id: "open_bg_tab", label: "Background Tab" },
   { id: "open_active_tab", label: "Active Tab" },
   { id: "open_window_active", label: "New Window" },
-  { id: "open_incognito_active", label: "Incognito Window", requiresIncognito: true },
+  { id: "open_incognito_active", label: "Incognito Window", requiresIncognito: true }
+]
+
+const NONE_ACTION: SuperDragActionOption = {
+  id: "none",
+  label: "None (Do Nothing)"
+}
+
+export const SUPER_DRAG_ACTION_OPTIONS: SuperDragActionOption[] = [
+  ...COMMON_OPEN_ACTIONS,
   { id: "copy_to_clipboard", label: "Copy" },
   { id: "copy_link_text", label: "Copy Link Text" },
-  { id: "none", label: "None (Do Nothing)" }
+  NONE_ACTION
 ]
 
 /**
@@ -71,33 +80,26 @@ export function getSuperDragActionOptions(
 ): SuperDragActionOption[] {
   if (targetType === "link") {
     return [
-      { id: "open_bg_tab", label: "Bg Tab" },
-      { id: "open_active_tab", label: "Active Tab" },
-      { id: "open_window_active", label: "New Window" },
-      { id: "open_incognito_active", label: "Incognito Window", requiresIncognito: true },
+      ...COMMON_OPEN_ACTIONS,
       { id: "copy_to_clipboard", label: "Copy Link URL" },
       { id: "copy_link_text", label: "Copy Link Text" },
-      { id: "none", label: "None (Do Nothing)" }
+      { id: "copy_markdown", label: "Copy Markdown" },
+      NONE_ACTION
     ]
   }
 
   if (targetType === "image") {
     return [
-      { id: "open_bg_tab", label: "Bg Tab" },
-      { id: "open_active_tab", label: "Active Tab" },
-      { id: "open_window_active", label: "New Window" },
-      { id: "open_incognito_active", label: "Incognito Window", requiresIncognito: true },
+      ...COMMON_OPEN_ACTIONS,
       { id: "copy_to_clipboard", label: "Copy Image Link" },
-      { id: "none", label: "None (Do Nothing)" }
+      { id: "search_image", label: "Search Image" },
+      NONE_ACTION
     ]
   }
 
   return [
-    { id: "open_bg_tab", label: "Bg Tab" },
-    { id: "open_active_tab", label: "Active Tab" },
-    { id: "open_window_active", label: "New Window" },
-    { id: "open_incognito_active", label: "Incognito Window", requiresIncognito: true },
+    ...COMMON_OPEN_ACTIONS,
     { id: "copy_to_clipboard", label: "Copy" },
-    { id: "none", label: "None (Do Nothing)" }
+    NONE_ACTION
   ]
 }

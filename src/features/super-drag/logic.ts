@@ -258,6 +258,18 @@ function getActionDisplay(
         icon: ICONS.copyText,
         theme: "sky"
       }
+    case "copy_markdown":
+      return {
+        label: "Drop to Copy Markdown",
+        icon: ICONS.copyText,
+        theme: "sky"
+      }
+    case "search_image":
+      return {
+        label: "Drop to Search Image",
+        icon: ICONS.search,
+        theme: "indigo"
+      }
     case "copy_to_clipboard":
       return {
         label:
@@ -703,6 +715,14 @@ async function onDragEnd(event: DragEvent): Promise<void> {
       const success = await copyToClipboard(textToCopy)
       if (success) {
         showCopiedFeedback("Copied Link Text", textToCopy)
+      }
+    } else if (action === "copy_markdown") {
+      const cleaned = cleanUrl(activeSession.payload)
+      const title = (activeSession.extraText || cleaned).replace(/\[|\]/g, "")
+      const markdown = `[${title}](${cleaned})`
+      const success = await copyToClipboard(markdown)
+      if (success) {
+        showCopiedFeedback("Copied Markdown", markdown)
       }
     } else if (action === "copy_to_clipboard") {
       const payload =

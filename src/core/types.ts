@@ -94,6 +94,8 @@ export type SuperDragAction =
   | "open_incognito_active"
   | "copy_to_clipboard"
   | "copy_link_text"
+  | "copy_markdown"
+  | "search_image"
   | "none"
 
 export interface DirectionalActions {
