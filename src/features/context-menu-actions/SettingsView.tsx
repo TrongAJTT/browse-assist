@@ -134,7 +134,7 @@ export const ContextMenuActionsSettingsView: React.FC<
         ...(prev ?? DEFAULT_SETTINGS),
         contextMenuActionsConfig: {
           ...prevConfig,
-          [actionId]: !Boolean(prevValue)
+          [actionId]: !prevValue
         }
       }
     })

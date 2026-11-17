@@ -154,7 +154,10 @@ export async function updateContextMenus(
               contexts: def.contexts
             },
             () => {
-              const err = chrome.runtime?.lastError
+              const err =
+                typeof chrome !== "undefined"
+                  ? chrome.runtime?.lastError
+                  : undefined
               if (err) {
                 console.warn("[Browse Assist] Context menu error:", err.message)
               } else {
