@@ -208,7 +208,7 @@ export function SortableVisibilityList<T extends string = string>({
                       ? "bg-app-card text-content-muted border-border-subtle opacity-35 cursor-not-allowed"
                       : item.isHidden
                         ? "bg-app-card text-content-muted border-border-subtle hover:text-content-primary hover:border-accent cursor-pointer"
-                        : "bg-accent-subtle text-accent border-accent/20 hover:bg-accent/20 cursor-pointer"
+                        : "bg-accent-subtle text-accent border-transparent hover:bg-accent/20 cursor-pointer"
                   }`}>
                   {item.isHidden ? (
                     <EyeOff className="w-3.5 h-3.5" />

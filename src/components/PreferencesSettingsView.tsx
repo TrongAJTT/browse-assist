@@ -18,7 +18,10 @@ import React, { useEffect, useMemo, useRef, useState } from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
-import { SegmentedTabs, type SegmentedTabItem } from "~components/SegmentedTabs"
+import {
+  SelectDropdown,
+  type SelectDropdownOption
+} from "~components/SelectDropdown"
 import { Slider } from "~components/Slider"
 import {
   SortableVisibilityList,
@@ -30,6 +33,7 @@ import { isColorPickerSupported } from "~core/browserDetect"
 import { FEATURE_CATALOG } from "~core/featureCatalog"
 import {
   DEFAULT_FEATURE_LAYOUT_CONFIG,
+  DEFAULT_POPUP_NAVIGATION_CONFIG,
   DEFAULT_SETTINGS,
   STORAGE_KEYS,
   normalizeFeatureHidden,
@@ -44,7 +48,7 @@ interface PreferencesSettingsViewProps {
   onBack: () => void
 }
 
-const THEME_OPTIONS: SegmentedTabItem<ThemeMode>[] = [
+const THEME_OPTIONS: SelectDropdownOption<ThemeMode>[] = [
   {
     id: "dark",
     label: "Dark",
@@ -62,7 +66,7 @@ const THEME_OPTIONS: SegmentedTabItem<ThemeMode>[] = [
   }
 ]
 
-const VIEW_MODE_OPTIONS: SegmentedTabItem<ViewMode>[] = [
+const VIEW_MODE_OPTIONS: SelectDropdownOption<ViewMode>[] = [
   {
     id: "list",
     label: "List",
@@ -276,43 +280,48 @@ export const PreferencesSettingsView: React.FC<
         <div className="space-y-2.5">
           <span className="section-header">Appearance</span>
 
-          <div className="space-y-2.5">
-            <div>
-              <div className="flex items-center gap-1.5">
-                <Palette className="w-4 h-4 text-accent" />
-                <span className="text-xs font-semibold text-content-primary">
-                  Theme Mode
-                </span>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-3 py-0.5">
+              <div className="flex items-start gap-2.5 flex-1 min-w-0">
+                <Palette className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                <div className="flex flex-col min-w-0">
+                  <span className="text-xs font-semibold text-content-primary">
+                    Theme Mode
+                  </span>
+                  <p className="text-[11px] text-content-muted mt-0.5 leading-snug">
+                    Light, dark, or match your OS theme.
+                  </p>
+                </div>
               </div>
-              <p className="text-[11px] text-content-muted mt-0.5 leading-snug">
-                Choose light, dark, or automatically synchronize with your
-                operating system display settings.
-              </p>
+
+              <SelectDropdown<ThemeMode>
+                value={currentTheme}
+                options={THEME_OPTIONS}
+                onChange={handleSelectTheme}
+                ariaLabel="Theme Mode"
+              />
             </div>
 
-            <SegmentedTabs<ThemeMode>
-              items={THEME_OPTIONS}
-              value={currentTheme}
-              onChange={handleSelectTheme}
-            />
-
-            <div className="pt-2">
-              <div className="flex items-center gap-1.5">
-                <LayoutGrid className="w-4 h-4 text-accent" />
-                <span className="text-xs font-semibold text-content-primary">
-                  View Mode
-                </span>
+            <div className="flex items-center justify-between gap-3 py-0.5">
+              <div className="flex items-start gap-2.5 flex-1 min-w-0">
+                <LayoutGrid className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                <div className="flex flex-col min-w-0">
+                  <span className="text-xs font-semibold text-content-primary">
+                    View Mode
+                  </span>
+                  <p className="text-[11px] text-content-muted mt-0.5 leading-snug">
+                    Detailed list or compact tile grid.
+                  </p>
+                </div>
               </div>
-              <p className="text-[11px] text-content-muted mt-0.5 leading-snug">
-                Choose between detailed list view with descriptions or a compact grid layout.
-              </p>
-            </div>
 
-            <SegmentedTabs<ViewMode>
-              items={VIEW_MODE_OPTIONS}
-              value={currentViewMode}
-              onChange={handleSelectViewMode}
-            />
+              <SelectDropdown<ViewMode>
+                value={currentViewMode}
+                options={VIEW_MODE_OPTIONS}
+                onChange={handleSelectViewMode}
+                ariaLabel="View Mode"
+              />
+            </div>
           </div>
         </div>
 
