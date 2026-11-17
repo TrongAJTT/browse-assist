@@ -270,6 +270,60 @@ function getStyles(theme: "dark" | "light"): string {
       transform: scale(0.95);
     }
 
+    /* Rounded Square Shape */
+    .qs-container[data-shape="rounded"] .qs-button {
+      border-radius: 10px;
+    }
+
+    /* Unified Vertical Capsule Shape */
+    .qs-container[data-shape="capsule"] {
+      gap: 0;
+      padding: 0;
+      border-radius: 9999px;
+      overflow: hidden;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      ${
+        isDark
+          ? `
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        background: rgba(15, 23, 42, 0.76);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.2);
+      `
+          : `
+        border: 1px solid rgba(0, 0, 0, 0.12);
+        background: rgba(255, 255, 255, 0.88);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08);
+      `
+      }
+    }
+
+    .qs-container[data-shape="capsule"] .qs-button {
+      width: 38px;
+      height: 34px;
+      border: none;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+
+    .qs-container[data-shape="capsule"] .qs-button + .qs-button:not(.qs-hidden) {
+      border-top: 1px solid ${isDark ? "rgba(255, 255, 255, 0.12)" : "rgba(0, 0, 0, 0.08)"};
+    }
+
+    .qs-container[data-shape="capsule"] .qs-button:hover {
+      transform: none;
+      box-shadow: none;
+      background: ${isDark ? "#6366f1" : "#4f46e5"};
+      color: #ffffff;
+    }
+
+    .qs-container[data-shape="capsule"] .qs-button:active {
+      transform: scale(0.96);
+    }
+
     .qs-hidden {
       display: none !important;
     }
@@ -288,6 +342,10 @@ function updateThemeStyles(): void {
 
 function applyPlacementStyle(): void {
   if (!containerElement) return
+  containerElement.setAttribute(
+    "data-shape",
+    currentConfig.buttonShape ?? DEFAULT_QUICK_SCROLL_CONFIG.buttonShape ?? "circle"
+  )
   const placement = normalizeEdgePlacement(
     currentConfig.placement ?? currentConfig.position,
     DEFAULT_QUICK_SCROLL_CONFIG.placement
@@ -533,6 +591,10 @@ function updateButtonsVisibility(): void {
       containerElement?.classList.add("qs-dimmed")
     }, 2400)
   } else {
+    if (hideTimer) {
+      clearTimeout(hideTimer)
+      hideTimer = null
+    }
     containerElement.classList.remove("qs-dimmed")
   }
 }
@@ -617,4 +679,7 @@ export function deactivate(): void {
   btnTop = null
   btnBottom = null
   styleElement = null
+  returnMemory = null
+  isSmoothScrolling = false
+  isTicking = false
 }

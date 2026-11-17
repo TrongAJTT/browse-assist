@@ -377,9 +377,12 @@ export type QuickScrollPosition =
   | "bottom-right"
 export type QuickScrollButtonsMode = "both" | "top-only"
 
+export type QuickScrollButtonShape = "circle" | "capsule" | "rounded"
+
 export interface QuickScrollConfig {
   placement: EdgePlacement
   buttonsMode: QuickScrollButtonsMode
+  buttonShape?: QuickScrollButtonShape // Floating button visual shape
   autoHide: boolean // Dim buttons when user stops scrolling
   enableReturnMemory: boolean // Remember previous scroll position and allow return for both top and bottom
   position?: QuickScrollPosition // Legacy fallback
@@ -388,6 +391,7 @@ export interface QuickScrollConfig {
 export const DEFAULT_QUICK_SCROLL_CONFIG: QuickScrollConfig = {
   placement: { edge: "right", offsetPercent: 100 },
   buttonsMode: "both",
+  buttonShape: "circle",
   autoHide: true,
   enableReturnMemory: false,
   position: "bottom-right"

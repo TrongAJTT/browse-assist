@@ -1,10 +1,21 @@
-import { ArrowUpToLine, Compass, Eye, History } from "lucide-react"
+import {
+  ArrowUpToLine,
+  Circle,
+  Compass,
+  Eye,
+  History,
+  Pill,
+  Square
+} from "lucide-react"
 import type React from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
 import { EdgePositionPicker } from "~components/EdgePositionPicker"
-import { SegmentedTabs, type SegmentedTabItem } from "~components/SegmentedTabs"
+import {
+  SelectDropdown,
+  type SelectDropdownOption
+} from "~components/SelectDropdown"
 import { SettingToggleRow } from "~components/SettingToggleRow"
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
 import {
@@ -14,6 +25,7 @@ import {
   STORAGE_KEYS,
   type EdgePlacement,
   type FeatureSettings,
+  type QuickScrollButtonShape,
   type QuickScrollButtonsMode,
   type QuickScrollConfig
 } from "~core/types"
@@ -22,7 +34,7 @@ interface QuickScrollSettingsViewProps {
   onBack: () => void
 }
 
-const BUTTON_ITEMS: SegmentedTabItem<QuickScrollButtonsMode>[] = [
+const BUTTON_ITEMS: SelectDropdownOption<QuickScrollButtonsMode>[] = [
   {
     id: "both",
     label: "Top & Bottom",
@@ -32,6 +44,24 @@ const BUTTON_ITEMS: SegmentedTabItem<QuickScrollButtonsMode>[] = [
     id: "top-only",
     label: "Top Only",
     icon: <ArrowUpToLine className="w-3.5 h-3.5" />
+  }
+]
+
+const SHAPE_ITEMS: SelectDropdownOption<QuickScrollButtonShape>[] = [
+  {
+    id: "circle",
+    label: "Circle",
+    icon: <Circle className="w-3.5 h-3.5" />
+  },
+  {
+    id: "capsule",
+    label: "Capsule",
+    icon: <Pill className="w-3.5 h-3.5" />
+  },
+  {
+    id: "rounded",
+    label: "Rounded",
+    icon: <Square className="w-3.5 h-3.5" />
   }
 ]
 
@@ -83,6 +113,16 @@ export const QuickScrollSettingsView: React.FC<
     }))
   }
 
+  const handleSelectButtonShape = (buttonShape: QuickScrollButtonShape) => {
+    setSettings((prev) => ({
+      ...(prev ?? DEFAULT_SETTINGS),
+      quickScrollConfig: {
+        ...(prev?.quickScrollConfig ?? DEFAULT_SETTINGS.quickScrollConfig),
+        buttonShape
+      }
+    }))
+  }
+
   const handleToggleOption = (
     key: keyof Pick<QuickScrollConfig, "autoHide" | "enableReturnMemory">
   ) => {
@@ -121,21 +161,43 @@ export const QuickScrollSettingsView: React.FC<
           </div>
         </div>
 
-        {/* Section 2: Visible Buttons (Flat Layout) */}
-        <div className="space-y-2 pt-3 border-t border-border-divider">
-          <span className="section-header">Visible Controls</span>
-          <div className="space-y-1.5">
-            <span className="text-xs font-semibold text-content-primary">
-              Button Selection
-            </span>
-            <p className="text-[11px] text-content-muted leading-snug">
-              Choose whether to display both top & bottom buttons or only scroll
-              to top.
-            </p>
-            <SegmentedTabs<QuickScrollButtonsMode>
-              items={BUTTON_ITEMS}
+        {/* Section 2: Visible Controls & Button Shape (Trailing Dropdowns) */}
+        <div className="space-y-3 pt-3 border-t border-border-divider">
+          <span className="section-header">Controls & Style</span>
+
+          <div className="flex items-center justify-between gap-3 py-0.5">
+            <div className="flex flex-col min-w-0 flex-1">
+              <span className="text-xs font-semibold text-content-primary">
+                Button Selection
+              </span>
+              <p className="text-[11px] text-content-muted mt-0.5 leading-snug">
+                Show both top & bottom buttons or top only.
+              </p>
+            </div>
+
+            <SelectDropdown<QuickScrollButtonsMode>
               value={currentConfig.buttonsMode}
+              options={BUTTON_ITEMS}
               onChange={handleSelectButtonsMode}
+              ariaLabel="Button Selection"
+            />
+          </div>
+
+          <div className="flex items-center justify-between gap-3 py-0.5">
+            <div className="flex flex-col min-w-0 flex-1">
+              <span className="text-xs font-semibold text-content-primary">
+                Button Shape
+              </span>
+              <p className="text-[11px] text-content-muted mt-0.5 leading-snug">
+                Choose circle, unified capsule, or rounded square.
+              </p>
+            </div>
+
+            <SelectDropdown<QuickScrollButtonShape>
+              value={currentConfig.buttonShape ?? "circle"}
+              options={SHAPE_ITEMS}
+              onChange={handleSelectButtonShape}
+              ariaLabel="Button Shape"
             />
           </div>
         </div>
