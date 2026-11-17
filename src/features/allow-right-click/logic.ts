@@ -25,12 +25,13 @@ const RESTRICTED_EVENTS = [
  * Capture-phase event handler to stop malicious web scripts from blocking user actions.
  */
 function handleRestrictedEvent(event: Event): void {
-  // Only stop propagation for contextmenu, selectstart, copy, cut, dragstart unconditionally
+  // Only stop propagation for contextmenu, selectstart, copy, cut, paste, dragstart unconditionally
   if (
     event.type === "contextmenu" ||
     event.type === "selectstart" ||
     event.type === "copy" ||
     event.type === "cut" ||
+    event.type === "paste" ||
     event.type === "dragstart"
   ) {
     event.stopPropagation()
@@ -81,6 +82,7 @@ function clearInlineHandlers(): void {
     document.ondragstart = null
     document.oncopy = null
     document.oncut = null
+    document.onpaste = null
 
     if (document.body) {
       document.body.oncontextmenu = null
@@ -88,6 +90,7 @@ function clearInlineHandlers(): void {
       document.body.ondragstart = null
       document.body.oncopy = null
       document.body.oncut = null
+      document.body.onpaste = null
     }
   } catch {
     // Ignore restricted cross-origin frames or read-only documents
