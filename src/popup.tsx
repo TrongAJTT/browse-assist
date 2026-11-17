@@ -4,7 +4,10 @@ import {
   GitBranch,
   Heart,
   HelpCircle,
+  LayoutGrid,
+  List,
   PictureInPicture2,
+  Search,
   Settings as SettingsIcon,
   X
 } from "lucide-react"
@@ -19,6 +22,11 @@ import { PreferencesSettingsView } from "~components/PreferencesSettingsView"
 import { AppIcon } from "~core/assets"
 import { isColorPickerSupported } from "~core/browserDetect"
 import { APP_INFO, DONATE_OPTIONS } from "~core/constants"
+import {
+  FEATURE_CATALOG,
+  FEATURE_CATEGORIES,
+  type FeatureCategory
+} from "~core/featureCatalog"
 import {
   MESSAGE_TYPES,
   sendToBackground
@@ -74,10 +82,14 @@ function IndexPopup() {
   )
   const [isTabReady, setIsTabReady] = useState(false)
   const [isDonateOpen, setIsDonateOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [selectedCategory, setSelectedCategory] = useState<
+    FeatureCategory | "all"
+  >("all")
   const donateMenuRef = useRef<HTMLDivElement>(null)
   const isInitialMount = useRef(true)
 
-  const [settings] = useStorage<FeatureSettings>(
+  const [settings, setSettings] = useStorage<FeatureSettings>(
     STORAGE_KEYS.SETTINGS,
     DEFAULT_SETTINGS
   )
@@ -160,6 +172,37 @@ function IndexPopup() {
       (k) => !hiddenSet.has(k) && (k !== "colorPicker" || isColorPickerSupported)
     )
   }, [settings?.featureLayout])
+
+  const showSearchAndFilter = Boolean(popupNav.showSearchAndFilter)
+
+  const filteredFeatures = useMemo(() => {
+    if (!showSearchAndFilter) {
+      return orderedFeatures
+    }
+    const query = searchQuery.trim().toLowerCase()
+    return orderedFeatures.filter((key) => {
+      const meta = FEATURE_CATALOG[key]
+      if (!meta) return false
+      if (selectedCategory !== "all" && meta.category !== selectedCategory) {
+        return false
+      }
+      if (!query) return true
+      return (
+        meta.title.toLowerCase().includes(query) ||
+        meta.description.toLowerCase().includes(query)
+      )
+    })
+  }, [orderedFeatures, searchQuery, selectedCategory, showSearchAndFilter])
+
+  const activeViewMode = settings?.viewMode ?? DEFAULT_SETTINGS.viewMode ?? "list"
+
+  const handleToggleViewMode = () => {
+    const nextMode = activeViewMode === "grid" ? "list" : "grid"
+    setSettings((prev) => ({
+      ...(prev ?? DEFAULT_SETTINGS),
+      viewMode: nextMode
+    }))
+  }
 
   const featureToggleMap: Record<FeatureKey, React.ReactNode> = {
     allowRightClick: (
@@ -417,19 +460,97 @@ function IndexPopup() {
 
         {currentView === "main" ? (
           <div>
-            <ViewModeContext.Provider
-              value={settings?.viewMode ?? DEFAULT_SETTINGS.viewMode ?? "list"}>
-              {/* PowerToys-style Utilities List with Dividers or Compact Grid */}
-              <main
-                className={
-                  (settings?.viewMode ?? DEFAULT_SETTINGS.viewMode) === "grid"
-                    ? "grid grid-cols-2 gap-2.5 py-1"
-                    : "divide-y divide-border-divider"
-                }>
-                {orderedFeatures.map((key) => (
-                  <Fragment key={key}>{featureToggleMap[key]}</Fragment>
-                ))}
-              </main>
+            {/* Search & Category Filter Bar (Optional, off by default) */}
+            {showSearchAndFilter && (
+              <div className="mb-2.5 space-y-2">
+              <div className="flex items-center gap-1.5">
+                <div className="relative flex-1">
+                  <Search className="w-3.5 h-3.5 text-content-muted absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search utilities..."
+                    className="w-full h-7 pl-8 pr-7 text-xs rounded-lg bg-app-surface border border-border-subtle text-content-primary placeholder:text-content-muted focus:outline-none focus:border-accent/60 transition-colors"
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery("")}
+                      title="Clear search"
+                      className="absolute right-1.5 top-1/2 -translate-y-1/2 p-0.5 rounded text-content-muted hover:text-content-primary transition-colors">
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleToggleViewMode}
+                  title={
+                    activeViewMode === "grid"
+                      ? "Switch to List Layout"
+                      : "Switch to Compact Tile Grid"
+                  }
+                  className="h-7 w-7 shrink-0 flex items-center justify-center rounded-lg bg-app-surface border border-border-subtle text-content-muted hover:text-content-primary hover:border-accent/40 active:scale-95 transition-all">
+                  {activeViewMode === "grid" ? (
+                    <List className="w-3.5 h-3.5" />
+                  ) : (
+                    <LayoutGrid className="w-3.5 h-3.5" />
+                  )}
+                </button>
+              </div>
+
+              <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
+                {FEATURE_CATEGORIES.map((cat) => {
+                  const isActive = selectedCategory === cat.id
+                  return (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => setSelectedCategory(cat.id)}
+                      className={`px-2 py-0.5 rounded-md text-[11px] font-medium whitespace-nowrap transition-all ${
+                        isActive
+                          ? "bg-accent-subtle text-accent border border-accent/30"
+                          : "text-content-muted hover:text-content-primary hover:bg-app-surface border border-transparent"
+                      }`}>
+                      {cat.label}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+            )}
+
+            <ViewModeContext.Provider value={activeViewMode}>
+              {filteredFeatures.length === 0 ? (
+                <div className="py-10 text-center space-y-2">
+                  <p className="text-xs text-content-muted">
+                    No utilities match your filter.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery("")
+                      setSelectedCategory("all")
+                    }}
+                    className="text-[11px] font-medium text-accent hover:underline">
+                    Reset filters
+                  </button>
+                </div>
+              ) : (
+                /* PowerToys-style Utilities List with Dividers or Compact Tile Grid */
+                <main
+                  className={
+                    activeViewMode === "grid"
+                      ? "grid grid-cols-2 gap-2 py-0.5"
+                      : "divide-y divide-border-divider"
+                  }>
+                  {filteredFeatures.map((key) => (
+                    <Fragment key={key}>{featureToggleMap[key]}</Fragment>
+                  ))}
+                </main>
+              )}
             </ViewModeContext.Provider>
           </div>
         ) : currentView === "context-menu-actions-settings" ? (

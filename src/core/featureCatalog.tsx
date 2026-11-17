@@ -20,6 +20,16 @@ export interface FeatureIconProps {
   className?: string
 }
 
+export type FeatureCategory = "interaction" | "navigation" | "media" | "tools"
+
+export const FEATURE_CATEGORIES: { id: FeatureCategory | "all"; label: string }[] = [
+  { id: "all", label: "All" },
+  { id: "interaction", label: "Mouse" },
+  { id: "navigation", label: "Scroll" },
+  { id: "media", label: "Media" },
+  { id: "tools", label: "Tools" }
+]
+
 /**
  * Unified UI specification for a Browse Assist feature.
  */
@@ -27,6 +37,7 @@ export interface FeatureCatalogItem {
   key: FeatureKey
   title: string
   description: string
+  category: FeatureCategory
   icon: React.ComponentType<FeatureIconProps>
   colorClass: string
   bgClass: string
@@ -42,6 +53,7 @@ export const FEATURE_CATALOG: Record<FeatureKey, FeatureCatalogItem> = {
     title: "Allow Right Click",
     description:
       "Re-enable context menu, selection, and copy on restricted websites.",
+    category: "interaction",
     icon: MousePointerClick,
     colorClass: "text-emerald-400",
     bgClass: "bg-emerald-500/10 border-emerald-500/30"
@@ -51,6 +63,7 @@ export const FEATURE_CATALOG: Record<FeatureKey, FeatureCatalogItem> = {
     title: "Context Menu Actions",
     description:
       "Custom right-click menu actions for copying clean, formatted links.",
+    category: "interaction",
     icon: Link2,
     colorClass: "text-cyan-400",
     bgClass: "bg-cyan-500/10 border-cyan-500/30",
@@ -61,6 +74,7 @@ export const FEATURE_CATALOG: Record<FeatureKey, FeatureCatalogItem> = {
     title: "Super Drag",
     description:
       "Drag selected text to search or drag hyperlinks to open in new tabs.",
+    category: "interaction",
     icon: MousePointer2,
     colorClass: "text-pink-400",
     bgClass: "bg-pink-500/10 border-pink-500/30",
@@ -71,6 +85,7 @@ export const FEATURE_CATALOG: Record<FeatureKey, FeatureCatalogItem> = {
     title: "Quick Scroll Buttons",
     description:
       "Floating smart buttons to smoothly jump to page top or bottom.",
+    category: "navigation",
     icon: Compass,
     colorClass: "text-indigo-400",
     bgClass: "bg-indigo-500/10 border-indigo-500/30",
@@ -80,6 +95,7 @@ export const FEATURE_CATALOG: Record<FeatureKey, FeatureCatalogItem> = {
     key: "smoothScroll",
     title: "Smooth Scrolling",
     description: "Enhanced, fluid page scrolling with interpolated physics.",
+    category: "navigation",
     icon: Scroll,
     colorClass: "text-amber-400",
     bgClass: "bg-amber-500/10 border-amber-500/30",
@@ -90,6 +106,7 @@ export const FEATURE_CATALOG: Record<FeatureKey, FeatureCatalogItem> = {
     title: "Mouse Pin-to-Zoom",
     description:
       "Hold modifier key and scroll mouse wheel to zoom into cursor position.",
+    category: "navigation",
     icon: ZoomIn,
     colorClass: "text-violet-400",
     bgClass: "bg-violet-500/10 border-violet-500/30",
@@ -99,6 +116,7 @@ export const FEATURE_CATALOG: Record<FeatureKey, FeatureCatalogItem> = {
     key: "pictureInPicture",
     title: "Universal Picture-in-Picture",
     description: "Toggle floating video window using customizable shortcut.",
+    category: "media",
     icon: PictureInPicture2,
     colorClass: "text-indigo-400",
     bgClass: "bg-indigo-500/10 border-indigo-500/30",
@@ -109,6 +127,7 @@ export const FEATURE_CATALOG: Record<FeatureKey, FeatureCatalogItem> = {
     title: "Video Wheel Control",
     description:
       "Adjust video volume and playback speed smoothly using the mouse wheel.",
+    category: "media",
     icon: Volume2,
     colorClass: "text-violet-400",
     bgClass: "bg-violet-500/10 border-violet-500/30",
@@ -119,6 +138,7 @@ export const FEATURE_CATALOG: Record<FeatureKey, FeatureCatalogItem> = {
     title: "Color Picker",
     description:
       "Pick any pixel color from the screen with instant multi-format copy.",
+    category: "tools",
     icon: Pipette,
     colorClass: "text-pink-400",
     bgClass: "bg-pink-500/10 border-pink-500/30",
@@ -129,6 +149,7 @@ export const FEATURE_CATALOG: Record<FeatureKey, FeatureCatalogItem> = {
     title: "Element Toys",
     description:
       "Inspect, zap, edit text, or reposition elements on any web page.",
+    category: "tools",
     icon: Zap,
     colorClass: "text-amber-400",
     bgClass: "bg-amber-500/10 border-amber-500/30",
@@ -139,6 +160,7 @@ export const FEATURE_CATALOG: Record<FeatureKey, FeatureCatalogItem> = {
     title: "Quick Hub",
     description:
       "On-screen quick utility hub with smart corner hover activation.",
+    category: "navigation",
     icon: Sparkles,
     colorClass: "text-amber-400",
     bgClass: "bg-amber-500/10 border-amber-500/30",

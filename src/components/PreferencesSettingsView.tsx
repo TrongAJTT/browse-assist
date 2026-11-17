@@ -8,6 +8,7 @@ import {
   List,
   Moon,
   Palette,
+  Search,
   Sliders,
   Sparkles,
   Sun,
@@ -405,6 +406,35 @@ export const PreferencesSettingsView: React.FC<
           <span className="section-header">Navigation</span>
 
           <div className="space-y-2">
+            <div className="flex items-center justify-between gap-3 py-1">
+              <div className="flex items-start gap-2.5 flex-1 min-w-0">
+                <Search className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                <div className="flex flex-col min-w-0">
+                  <span className="text-xs font-semibold text-content-primary">
+                    Search & Category Filter
+                  </span>
+                  <p className="text-[11px] text-content-muted mt-0.5 leading-snug">
+                    Show search bar and category pills at the top of the main
+                    popup.
+                  </p>
+                </div>
+              </div>
+              <Switch
+                checked={Boolean(currentNav.showSearchAndFilter)}
+                onChange={(enabled) => {
+                  setSettings((prev) => ({
+                    ...(prev ?? DEFAULT_SETTINGS),
+                    popupNavigation: {
+                      ...(prev?.popupNavigation ??
+                        DEFAULT_POPUP_NAVIGATION_CONFIG),
+                      showSearchAndFilter: enabled
+                    }
+                  }))
+                }}
+                ariaLabel="Show search and category filter"
+              />
+            </div>
+
             <div className="flex items-center justify-between gap-3 py-1">
               <div className="flex items-start gap-2.5 flex-1 min-w-0">
                 <History className="w-4 h-4 text-accent shrink-0 mt-0.5" />

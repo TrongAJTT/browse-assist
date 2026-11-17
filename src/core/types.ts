@@ -604,11 +604,13 @@ export function normalizeQuickHubHiddenActions(hidden?: QuickHubActionId[]): Qui
 export interface PopupNavigationConfig {
   rememberLastView: boolean
   sessionTimeoutMinutes: number
+  showSearchAndFilter?: boolean
 }
 
 export const DEFAULT_POPUP_NAVIGATION_CONFIG: PopupNavigationConfig = {
   rememberLastView: true,
-  sessionTimeoutMinutes: 10
+  sessionTimeoutMinutes: 10,
+  showSearchAndFilter: false
 }
 
 /**
