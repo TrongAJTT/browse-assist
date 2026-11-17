@@ -383,8 +383,10 @@ export interface QuickScrollConfig {
   placement: EdgePlacement
   buttonsMode: QuickScrollButtonsMode
   buttonShape?: QuickScrollButtonShape // Floating button visual shape
+  opacity?: number // Idle/default opacity (0.35 - 1)
   autoHide: boolean // Dim buttons when user stops scrolling
   enableReturnMemory: boolean // Remember previous scroll position and allow return for both top and bottom
+  hideOnNativeButton?: boolean // Hide when page already has a fixed scroll-to-top button
   position?: QuickScrollPosition // Legacy fallback
 }
 
@@ -392,8 +394,10 @@ export const DEFAULT_QUICK_SCROLL_CONFIG: QuickScrollConfig = {
   placement: { edge: "right", offsetPercent: 100 },
   buttonsMode: "both",
   buttonShape: "circle",
+  opacity: 1,
   autoHide: true,
   enableReturnMemory: false,
+  hideOnNativeButton: false,
   position: "bottom-right"
 }
 

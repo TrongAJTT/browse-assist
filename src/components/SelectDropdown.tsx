@@ -7,6 +7,17 @@ export interface SelectDropdownOption<T extends string> {
   icon?: React.ReactNode
 }
 
+/**
+ * Shared opacity preset options reusable across feature settings.
+ */
+export const OPACITY_DROPDOWN_OPTIONS: SelectDropdownOption<string>[] = [
+  { id: "1", label: "100%" },
+  { id: "0.85", label: "85%" },
+  { id: "0.7", label: "70%" },
+  { id: "0.5", label: "50%" },
+  { id: "0.35", label: "35%" }
+]
+
 interface SelectDropdownProps<T extends string> {
   value: T
   options: SelectDropdownOption<T>[]

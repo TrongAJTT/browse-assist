@@ -180,6 +180,7 @@ function getStyles(theme: "dark" | "light"): string {
       padding: 5px;
       z-index: 2147483645;
       pointer-events: auto;
+      opacity: var(--qs-opacity, 1);
       transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       user-select: none;
       -webkit-user-select: none;
@@ -345,6 +346,10 @@ function applyPlacementStyle(): void {
   containerElement.setAttribute(
     "data-shape",
     currentConfig.buttonShape ?? DEFAULT_QUICK_SCROLL_CONFIG.buttonShape ?? "circle"
+  )
+  containerElement.style.setProperty(
+    "--qs-opacity",
+    String(currentConfig.opacity ?? DEFAULT_QUICK_SCROLL_CONFIG.opacity ?? 1)
   )
   const placement = normalizeEdgePlacement(
     currentConfig.placement ?? currentConfig.position,
@@ -520,8 +525,60 @@ function resetReturnMemory(): void {
   }
 }
 
+const NATIVE_SCROLL_BTN_SELECTOR = [
+  '[id*="back-to-top" i]',
+  '[id*="scroll-top" i]',
+  '[id*="scrolltop" i]',
+  '[id*="to-top" i]',
+  '[id*="gotop" i]',
+  '[class*="back-to-top" i]',
+  '[class*="scroll-top" i]',
+  '[class*="scrolltop" i]',
+  '[class*="to-top" i]',
+  '[class*="gotop" i]',
+  '[aria-label*="back to top" i]',
+  '[aria-label*="scroll to top" i]',
+  '[title*="back to top" i]',
+  '[title*="scroll to top" i]'
+].join(", ")
+
+/**
+ * Heuristic check for an existing visible fixed/sticky scroll-to-top button on the page.
+ */
+function hasNativeScrollButton(): boolean {
+  try {
+    const candidates = document.querySelectorAll(NATIVE_SCROLL_BTN_SELECTOR)
+    for (const el of Array.from(candidates)) {
+      if (el.id === "browse-assist-quick-scroll-host") continue
+      const style = window.getComputedStyle(el)
+      if (
+        style.display === "none" ||
+        style.visibility === "hidden" ||
+        parseFloat(style.opacity || "1") === 0
+      ) {
+        continue
+      }
+      if (style.position !== "fixed" && style.position !== "sticky") {
+        continue
+      }
+      const rect = el.getBoundingClientRect()
+      if (rect.width > 0 && rect.height > 0 && rect.width <= 120 && rect.height <= 120) {
+        return true
+      }
+    }
+  } catch {
+    // Ignore selector errors on malformed DOMs
+  }
+  return false
+}
+
 function updateButtonsVisibility(): void {
   if (!containerElement || !btnTop || !btnBottom) return
+
+  if (currentConfig.hideOnNativeButton && hasNativeScrollButton()) {
+    containerElement.classList.add("qs-hidden")
+    return
+  }
 
   const scrollY = window.scrollY || document.documentElement.scrollTop || 0
   const viewportHeight =

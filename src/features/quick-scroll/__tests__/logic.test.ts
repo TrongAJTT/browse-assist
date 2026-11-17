@@ -159,4 +159,44 @@ describe("quick-scroll content logic", () => {
       behavior: "smooth"
     })
   })
+
+  it("applies custom opacity CSS variable on container", () => {
+    setPageMetrics({ scrollY: 600, innerHeight: 800, scrollHeight: 3000 })
+    activate({ ...DEFAULT_QUICK_SCROLL_CONFIG, opacity: 0.7 })
+
+    const container = capturedShadowRoot!.querySelector(
+      ".qs-container"
+    ) as HTMLElement
+    expect(container.style.getPropertyValue("--qs-opacity")).toBe("0.7")
+  })
+
+  it("hides container when hideOnNativeButton is enabled and page has a fixed scroll-to-top button", () => {
+    setPageMetrics({ scrollY: 600, innerHeight: 800, scrollHeight: 3000 })
+
+    const nativeBtn = document.createElement("button")
+    nativeBtn.className = "back-to-top"
+    nativeBtn.style.position = "fixed"
+    nativeBtn.getBoundingClientRect = () =>
+      ({
+        width: 40,
+        height: 40,
+        top: 700,
+        left: 900,
+        right: 940,
+        bottom: 740,
+        x: 900,
+        y: 700,
+        toJSON: () => ({})
+      }) as DOMRect
+    document.body.appendChild(nativeBtn)
+
+    activate({ ...DEFAULT_QUICK_SCROLL_CONFIG, hideOnNativeButton: true })
+
+    const container = capturedShadowRoot!.querySelector(".qs-container")!
+    expect(container.classList.contains("qs-hidden")).toBe(true)
+
+    // Disabling hideOnNativeButton reveals Quick Scroll again
+    activate({ ...DEFAULT_QUICK_SCROLL_CONFIG, hideOnNativeButton: false })
+    expect(container.classList.contains("qs-hidden")).toBe(false)
+  })
 })
