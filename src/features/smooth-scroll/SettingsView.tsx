@@ -1,4 +1,4 @@
-import { Feather, Gauge, Sliders, Zap } from "lucide-react"
+import { Feather, Gauge, Keyboard, Laptop, ShieldAlert, Sliders, Zap } from "lucide-react"
 import type React from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
@@ -65,11 +65,17 @@ export const SmoothScrollSettingsView: React.FC<
       return
     }
 
-    const nextConfig = { ...SMOOTH_SCROLL_PRESETS[preset] }
-    setSettings((prev) => ({
-      ...(prev ?? DEFAULT_SETTINGS),
-      smoothScrollConfig: nextConfig
-    }))
+    setSettings((prev) => {
+      const prevConfig =
+        prev?.smoothScrollConfig ?? DEFAULT_SETTINGS.smoothScrollConfig
+      return {
+        ...(prev ?? DEFAULT_SETTINGS),
+        smoothScrollConfig: {
+          ...prevConfig,
+          ...SMOOTH_SCROLL_PRESETS[preset]
+        }
+      }
+    })
   }
 
   const handleUpdateParam = (key: "stepSize" | "smoothness", value: number) => {
@@ -160,21 +166,58 @@ export const SmoothScrollSettingsView: React.FC<
           onChange={(val) => handleUpdateParam("stepSize", val)}
         />
 
-        {/* Smoothness Slider */}
+        {/* Gliding Duration Slider (right = longer glide / higher %) */}
         <Slider
           label="Gliding Duration"
-          value={currentConfig.smoothness}
+          value={Number((0.45 - currentConfig.smoothness).toFixed(2))}
           valueDisplay={`${Math.round((1 - currentConfig.smoothness) * 100)}%`}
           min={0.05}
           max={0.4}
           step={0.01}
-          onChange={(val) => handleUpdateParam("smoothness", val)}
+          onChange={(val) =>
+            handleUpdateParam("smoothness", Number((0.45 - val).toFixed(2)))
+          }
         />
       </div>
 
-      {/* Advanced Compatibility Mode */}
-      <div className="pt-3 border-t border-border-divider">
+      {/* Behavior & Compatibility Toggles */}
+      <div className="pt-3 border-t border-border-divider divide-y divide-border-divider">
         <SettingToggleRow
+          icon={<Laptop className="w-5 h-5 text-sky-400" />}
+          title="Ignore Touchpad"
+          description="Keep native OS trackpad inertia by bypassing small-delta wheel events."
+          enabled={Boolean(currentConfig.ignoreTouchpad)}
+          onToggle={(enabled) => {
+            setSettings((prev) => ({
+              ...(prev ?? DEFAULT_SETTINGS),
+              smoothScrollConfig: {
+                ...(prev?.smoothScrollConfig ??
+                  DEFAULT_SETTINGS.smoothScrollConfig),
+                ignoreTouchpad: enabled
+              }
+            }))
+          }}
+        />
+
+        <SettingToggleRow
+          icon={<Keyboard className="w-5 h-5 text-indigo-400" />}
+          title="Keyboard Smooth Scroll"
+          description="Smoothly interpolate scrolling with Arrow, PageUp/Down, and Space keys."
+          enabled={Boolean(currentConfig.keyboardScroll)}
+          onToggle={(enabled) => {
+            setSettings((prev) => ({
+              ...(prev ?? DEFAULT_SETTINGS),
+              smoothScrollConfig: {
+                ...(prev?.smoothScrollConfig ??
+                  DEFAULT_SETTINGS.smoothScrollConfig),
+                keyboardScroll: enabled
+              }
+            }))
+          }}
+        />
+
+        <SettingToggleRow
+          icon={<ShieldAlert className="w-5 h-5 text-amber-400" />}
           title="Aggressive Interception"
           description="Force smooth scrolling across all sites. Keep disabled to protect canvas & web apps (e.g. Konva, Figma, Maps)."
           enabled={currentConfig.interceptionMode === "aggressive"}

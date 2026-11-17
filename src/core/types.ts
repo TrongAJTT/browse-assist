@@ -168,6 +168,8 @@ export interface SmoothScrollConfig {
   stepSize: number // Wheel multiplier (e.g. 1.0)
   smoothness: number // Easing factor (e.g. 0.18)
   interceptionMode?: "smart" | "aggressive" // 'smart' (bubble + respect apps) vs 'aggressive' (capture phase)
+  ignoreTouchpad?: boolean // Bypass interpolation for precision trackpad small-delta wheel events
+  keyboardScroll?: boolean // Smoothly interpolate Arrow/Page/Space key scrolling
 }
 
 export const SMOOTH_SCROLL_PRESETS: Record<

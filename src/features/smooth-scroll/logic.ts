@@ -267,6 +267,16 @@ function onWheel(event: WheelEvent): void {
     return
   }
 
+  // Bypass precision touchpad small-delta events when ignoreTouchpad is enabled
+  if (
+    activeConfig.ignoreTouchpad &&
+    event.deltaMode === 0 &&
+    Math.abs(event.deltaY) > 0 &&
+    Math.abs(event.deltaY) < 40
+  ) {
+    return
+  }
+
   // Only handle pure vertical scrolling
   if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) {
     return
@@ -344,6 +354,87 @@ function cancelAnimation(): void {
   }
 }
 
+function isEditableTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof Element)) return false
+  if ((target as HTMLElement).isContentEditable) return true
+  const tag = target.tagName
+  return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT"
+}
+
+function getKeyboardDelta(event: KeyboardEvent): number | null {
+  switch (event.key) {
+    case "ArrowUp":
+      return -60
+    case "ArrowDown":
+      return 60
+    case "PageUp":
+      return -Math.round(window.innerHeight * 0.85)
+    case "PageDown":
+      return Math.round(window.innerHeight * 0.85)
+    case " ":
+      return event.shiftKey
+        ? -Math.round(window.innerHeight * 0.85)
+        : Math.round(window.innerHeight * 0.85)
+    default:
+      return null
+  }
+}
+
+function onKeyDown(event: KeyboardEvent): void {
+  if (!activeConfig.keyboardScroll) {
+    cancelAnimation()
+    return
+  }
+
+  if (
+    event.defaultPrevented ||
+    event.ctrlKey ||
+    event.altKey ||
+    event.metaKey ||
+    isEditableTarget(event.target)
+  ) {
+    return
+  }
+
+  const rawDelta = getKeyboardDelta(event)
+  if (rawDelta === null) {
+    cancelAnimation()
+    return
+  }
+
+  if (
+    activeConfig.interceptionMode !== "aggressive" &&
+    isInteractiveSurface(event.target)
+  ) {
+    return
+  }
+
+  const container = window
+  const currentPos = getScrollPosition(container)
+  const maxPos = getMaxScrollPosition(container)
+  if (maxPos <= 0) return
+
+  const delta = rawDelta * activeConfig.stepSize
+  if ((currentPos <= 0 && delta < 0) || (currentPos >= maxPos && delta > 0)) {
+    return
+  }
+
+  event.preventDefault()
+
+  if (currentTargetElement !== container || animationFrameId === null) {
+    currentTargetElement = container
+    currentScrollY = currentPos
+    targetScrollY = currentPos
+  }
+
+  targetScrollY = Math.max(0, Math.min(maxPos, targetScrollY + delta))
+
+  if (animationFrameId === null) {
+    window.dispatchEvent(new CustomEvent("browse-assist:smooth-scroll-start"))
+    animationFrameId = window.requestAnimationFrame(updateScroll)
+  }
+}
+
 let registeredCapture = false
 
 function attachWheelListener(useCapture: boolean): void {
@@ -400,7 +491,7 @@ export function activate(config?: SmoothScrollConfig): void {
   attachWheelListener(useCapture)
 
   window.addEventListener("mousedown", cancelAnimation, { passive: true })
-  window.addEventListener("keydown", cancelAnimation, { passive: true })
+  window.addEventListener("keydown", onKeyDown, { passive: false })
   window.addEventListener("touchstart", cancelAnimation, { passive: true })
   window.addEventListener("browse-assist:cancel-scroll", cancelAnimation)
 }
@@ -415,7 +506,7 @@ export function deactivate(): void {
   cancelAnimation()
   window.removeEventListener("wheel", onWheel, registeredCapture)
   window.removeEventListener("mousedown", cancelAnimation)
-  window.removeEventListener("keydown", cancelAnimation)
+  window.removeEventListener("keydown", onKeyDown)
   window.removeEventListener("touchstart", cancelAnimation)
   window.removeEventListener("browse-assist:cancel-scroll", cancelAnimation)
 }
