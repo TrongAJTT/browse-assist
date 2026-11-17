@@ -32,9 +32,9 @@ function isModifierActive(
 ): boolean {
   switch (modifier) {
     case "ctrl+shift":
-      return event.ctrlKey && event.shiftKey
+      return event.ctrlKey && event.shiftKey && !event.altKey
     case "ctrl+alt":
-      return event.ctrlKey && event.altKey
+      return event.ctrlKey && event.altKey && !event.shiftKey
     case "alt+shift":
       return event.altKey && event.shiftKey && !event.ctrlKey
     case "alt":
@@ -495,9 +495,10 @@ function onClick(event: MouseEvent): void {
       currentConfig.enableScreenshot && event.shiftKey && event.altKey
 
     if (
-      (currentConfig.clickToMute && isVolumeModifier) ||
-      (currentConfig.clickToFullscreen && isSpeedModifier) ||
-      isScreenshotModifier
+      ((currentConfig.clickToMute && isVolumeModifier) ||
+        (currentConfig.clickToFullscreen && isSpeedModifier) ||
+        isScreenshotModifier) &&
+      findVideoUnderCursor(event) !== null
     ) {
       event.preventDefault()
       event.stopPropagation()
@@ -506,11 +507,24 @@ function onClick(event: MouseEvent): void {
   }
 }
 
+function restoreBoost(): void {
+  if (!isBoostKeyDown) return
+  isBoostKeyDown = false
+  if (boostedVideo && document.contains(boostedVideo)) {
+    const restoreRate = originalPlaybackRate || 1.0
+    boostedVideo.playbackRate = restoreRate
+    showOsd(boostedVideo, "speed", `${restoreRate}x`, restoreRate / 4.0)
+  }
+  boostedVideo = null
+  originalPlaybackRate = null
+}
+
 /**
  * Handles KeyDown for Hold-to-Boost (Hold 'X' key over video)
  */
 function onKeyDown(event: KeyboardEvent): void {
   if (!isActive || !currentConfig.enableHoldToBoost || isBoostKeyDown) return
+  if (event.repeat || event.ctrlKey || event.altKey || event.metaKey) return
   if (event.key.toLowerCase() !== "x") return
 
   // Don't boost if user is typing in an input / textarea / contenteditable
@@ -542,15 +556,7 @@ function onKeyDown(event: KeyboardEvent): void {
 function onKeyUp(event: KeyboardEvent): void {
   if (!isActive || !isBoostKeyDown) return
   if (event.key.toLowerCase() !== "x") return
-
-  isBoostKeyDown = false
-  if (boostedVideo && document.contains(boostedVideo)) {
-    const restoreRate = originalPlaybackRate || 1.0
-    boostedVideo.playbackRate = restoreRate
-    showOsd(boostedVideo, "speed", `${restoreRate}x`, restoreRate / 4.0)
-  }
-  boostedVideo = null
-  originalPlaybackRate = null
+  restoreBoost()
 }
 
 /**
@@ -585,6 +591,7 @@ export function activate(config?: VideoWheelControlConfig): void {
   window.addEventListener("click", onClick, { capture: true })
   window.addEventListener("keydown", onKeyDown)
   window.addEventListener("keyup", onKeyUp)
+  window.addEventListener("blur", restoreBoost)
 }
 
 /**
@@ -599,6 +606,7 @@ export function deactivate(): void {
   window.removeEventListener("click", onClick, { capture: true })
   window.removeEventListener("keydown", onKeyDown)
   window.removeEventListener("keyup", onKeyUp)
+  window.removeEventListener("blur", restoreBoost)
 
   if (isBoostKeyDown && boostedVideo && originalPlaybackRate !== null) {
     boostedVideo.playbackRate = originalPlaybackRate

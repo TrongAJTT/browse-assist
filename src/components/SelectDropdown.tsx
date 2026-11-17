@@ -22,6 +22,7 @@ interface SelectDropdownProps<T extends string> {
   value: T
   options: SelectDropdownOption<T>[]
   onChange: (value: T) => void
+  disabled?: boolean
   ariaLabel?: string
   className?: string
 }
@@ -33,6 +34,7 @@ export function SelectDropdown<T extends string>({
   value,
   options,
   onChange,
+  disabled = false,
   ariaLabel,
   className = ""
 }: SelectDropdownProps<T>) {
@@ -72,14 +74,19 @@ export function SelectDropdown<T extends string>({
     <div ref={containerRef} className={`relative shrink-0 ${className}`}>
       <button
         type="button"
+        disabled={disabled}
         aria-label={ariaLabel}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
-        onClick={() => setIsOpen((prev) => !prev)}
+        onClick={() => {
+          if (!disabled) setIsOpen((prev) => !prev)
+        }}
         className={`inline-flex items-center justify-between gap-2 min-w-[104px] px-2.5 py-1.5 rounded-lg text-xs font-medium bg-app-surface border transition-all focus:outline-none ${
-          isOpen
-            ? "border-accent text-content-primary ring-1 ring-accent-glow"
-            : "border-border-subtle text-content-primary hover:border-accent/40"
+          disabled
+            ? "opacity-50 cursor-not-allowed border-border-subtle text-content-muted"
+            : isOpen
+              ? "border-accent text-content-primary ring-1 ring-accent-glow"
+              : "border-border-subtle text-content-primary hover:border-accent/40"
         }`}>
         <span className="flex items-center gap-1.5 truncate">
           {selectedOption?.icon && (

@@ -17,7 +17,10 @@ import React, { useState } from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
-import { GridPicker, type GridPickerItem } from "~components/GridPicker"
+import {
+  SelectDropdown,
+  type SelectDropdownOption
+} from "~components/SelectDropdown"
 import { SegmentedTabs, type SegmentedTabItem } from "~components/SegmentedTabs"
 import { SettingToggleRow } from "~components/SettingToggleRow"
 import { Slider } from "~components/Slider"
@@ -60,8 +63,8 @@ const TABS: SegmentedTabItem<TabType>[] = [
   }
 ]
 
-// 6 modifier items arranged in 3 columns x 2 rows
-const MODIFIER_GRID_ITEMS: GridPickerItem<VideoWheelModifier>[] = [
+// 6 modifier options for trailing dropdown
+const MODIFIER_OPTIONS: SelectDropdownOption<VideoWheelModifier>[] = [
   { id: "shift", label: "Shift" },
   { id: "alt", label: "Alt" },
   { id: "ctrl", label: "Ctrl" },
@@ -181,19 +184,24 @@ export const VideoWheelControlSettingsView: React.FC<
                 </div>
               </div>
 
-              {/* Modifier 3x2 Grid Picker */}
-              <div className="space-y-1.5 pt-1">
-                <span className="text-[11px] font-medium text-content-muted block">
-                  Modifier Key (Hold key + scroll over video)
-                </span>
-                <GridPicker
-                  columns={3}
+              {/* Modifier Trailing Dropdown */}
+              <div className="flex items-center justify-between gap-3 pt-1">
+                <div className="flex flex-col min-w-0">
+                  <span className="text-xs font-medium text-content-primary">
+                    Modifier Key
+                  </span>
+                  <span className="text-[11px] text-content-muted">
+                    Hold key + scroll over video
+                  </span>
+                </div>
+                <SelectDropdown<VideoWheelModifier>
                   disabled={!currentConfig.enableVolume}
-                  items={MODIFIER_GRID_ITEMS}
+                  options={MODIFIER_OPTIONS}
                   value={currentConfig.volumeModifier}
                   onChange={(modifier) =>
                     updateConfig({ volumeModifier: modifier })
                   }
+                  ariaLabel="Volume Modifier Key"
                 />
               </div>
             </div>
@@ -279,19 +287,24 @@ export const VideoWheelControlSettingsView: React.FC<
                 </div>
               </div>
 
-              {/* Modifier 3x2 Grid Picker */}
-              <div className="space-y-1.5 pt-1">
-                <span className="text-[11px] font-medium text-content-muted block">
-                  Modifier Key (Hold key + scroll over video)
-                </span>
-                <GridPicker
-                  columns={3}
+              {/* Modifier Trailing Dropdown */}
+              <div className="flex items-center justify-between gap-3 pt-1">
+                <div className="flex flex-col min-w-0">
+                  <span className="text-xs font-medium text-content-primary">
+                    Modifier Key
+                  </span>
+                  <span className="text-[11px] text-content-muted">
+                    Hold key + scroll over video
+                  </span>
+                </div>
+                <SelectDropdown<VideoWheelModifier>
                   disabled={!currentConfig.enableSpeed}
-                  items={MODIFIER_GRID_ITEMS}
+                  options={MODIFIER_OPTIONS}
                   value={currentConfig.speedModifier}
                   onChange={(modifier) =>
                     updateConfig({ speedModifier: modifier })
                   }
+                  ariaLabel="Speed Modifier Key"
                 />
               </div>
             </div>
@@ -389,19 +402,24 @@ export const VideoWheelControlSettingsView: React.FC<
                 </div>
               </div>
 
-              {/* Modifier 3x2 Grid Picker */}
-              <div className="space-y-1.5 pt-1">
-                <span className="text-[11px] font-medium text-content-muted block">
-                  Modifier Key (Hold key + scroll over video)
-                </span>
-                <GridPicker
-                  columns={3}
+              {/* Modifier Trailing Dropdown */}
+              <div className="flex items-center justify-between gap-3 pt-1">
+                <div className="flex flex-col min-w-0">
+                  <span className="text-xs font-medium text-content-primary">
+                    Modifier Key
+                  </span>
+                  <span className="text-[11px] text-content-muted">
+                    Hold key + scroll over video
+                  </span>
+                </div>
+                <SelectDropdown<VideoWheelModifier>
                   disabled={!currentConfig.enableSeek}
-                  items={MODIFIER_GRID_ITEMS}
+                  options={MODIFIER_OPTIONS}
                   value={currentConfig.seekModifier}
                   onChange={(modifier) =>
                     updateConfig({ seekModifier: modifier })
                   }
+                  ariaLabel="Seek Modifier Key"
                 />
               </div>
             </div>
