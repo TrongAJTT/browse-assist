@@ -8,8 +8,10 @@
 
 import { extensionStorage } from "~core/storage"
 import {
+  DEFAULT_CONTEXT_MENU_ACTIONS_CONFIG,
   DEFAULT_SETTINGS,
   STORAGE_KEYS,
+  type ContextMenuActionId,
   type ContextMenuActionsConfig,
   type FeatureSettings
 } from "~core/types"
@@ -17,7 +19,10 @@ import {
 export const MENU_ITEMS = {
   COPY_LINK_TEXT: "browse_assist_copy_link_text",
   CLEAN_LINK_COPY: "browse_assist_clean_link_copy",
-  MARKDOWN_LINK_COPY: "browse_assist_markdown_link_copy"
+  MARKDOWN_LINK_COPY: "browse_assist_markdown_link_copy",
+  COPY_CLEAN_PAGE_URL: "browse_assist_copy_clean_page_url",
+  COPY_PAGE_MARKDOWN: "browse_assist_copy_page_markdown",
+  COPY_SELECTION_QUOTE: "browse_assist_copy_selection_quote"
 } as const
 
 type MenuItemId = (typeof MENU_ITEMS)[keyof typeof MENU_ITEMS]
@@ -83,27 +88,57 @@ export async function updateContextMenus(
 
     if (!masterEnabled) return
 
-    const order = config.order || [
-      "copyLinkText",
-      "cleanLinkCopy",
-      "markdownLinkCopy"
+    const defaultOrder = DEFAULT_CONTEXT_MENU_ACTIONS_CONFIG.order
+    const rawOrder = Array.isArray(config.order) ? config.order : defaultOrder
+    const order: ContextMenuActionId[] = [
+      ...rawOrder.filter((id) => defaultOrder.includes(id)),
+      ...defaultOrder.filter((id) => !rawOrder.includes(id))
     ]
 
-    const actionDefinitions = {
+    const actionDefinitions: Record<
+      ContextMenuActionId,
+      {
+        id: MenuItemId
+        title: string
+        contexts: [chrome.contextMenus.ContextType, ...chrome.contextMenus.ContextType[]]
+        enabled: boolean
+      }
+    > = {
       copyLinkText: {
         id: MENU_ITEMS.COPY_LINK_TEXT,
         title: "Copy Link Text",
+        contexts: ["link"],
         enabled: config.copyLinkText
       },
       cleanLinkCopy: {
         id: MENU_ITEMS.CLEAN_LINK_COPY,
         title: "Copy Clean Link",
+        contexts: ["link"],
         enabled: config.cleanLinkCopy
       },
       markdownLinkCopy: {
         id: MENU_ITEMS.MARKDOWN_LINK_COPY,
         title: "Copy Link as Markdown",
+        contexts: ["link"],
         enabled: config.markdownLinkCopy
+      },
+      copyCleanPageUrl: {
+        id: MENU_ITEMS.COPY_CLEAN_PAGE_URL,
+        title: "Copy Clean Page URL",
+        contexts: ["page"],
+        enabled: config.copyCleanPageUrl ?? true
+      },
+      copyPageMarkdown: {
+        id: MENU_ITEMS.COPY_PAGE_MARKDOWN,
+        title: "Copy Page as Markdown",
+        contexts: ["page"],
+        enabled: config.copyPageMarkdown ?? false
+      },
+      copySelectionQuote: {
+        id: MENU_ITEMS.COPY_SELECTION_QUOTE,
+        title: "Copy Selection as Quote",
+        contexts: ["selection"],
+        enabled: config.copySelectionQuote ?? true
       }
     }
 
@@ -116,7 +151,7 @@ export async function updateContextMenus(
             {
               id: def.id,
               title: def.title,
-              contexts: ["link"]
+              contexts: def.contexts
             },
             () => {
               const err = chrome.runtime?.lastError
@@ -152,21 +187,20 @@ export function handleContextMenuClick(
   if (!tab?.id) return
 
   const menuItemId = info.menuItemId as MenuItemId
-  if (
-    menuItemId !== MENU_ITEMS.COPY_LINK_TEXT &&
-    menuItemId !== MENU_ITEMS.CLEAN_LINK_COPY &&
-    menuItemId !== MENU_ITEMS.MARKDOWN_LINK_COPY
-  ) {
+  const validIds = Object.values(MENU_ITEMS) as string[]
+  if (!validIds.includes(menuItemId)) {
     return
   }
 
   chrome.tabs
     .sendMessage(tab.id, {
       action: menuItemId,
-      linkUrl: info.linkUrl || ""
+      linkUrl: info.linkUrl || "",
+      pageUrl: info.pageUrl || tab.url || "",
+      selectionText: info.selectionText || ""
     })
     .catch((err) => {
-      console.warn("Failed to dispatch link copy message to tab:", err)
+      console.warn("Failed to dispatch context menu action to tab:", err)
     })
 }
 

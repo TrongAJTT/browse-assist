@@ -1,4 +1,12 @@
-import { FileCode, Sparkles, Type } from "lucide-react"
+import {
+  FileCode,
+  FileText,
+  Globe,
+  HelpCircle,
+  Quote,
+  Sparkles,
+  Type
+} from "lucide-react"
 import type React from "react"
 import { useState } from "react"
 
@@ -7,6 +15,7 @@ import { useStorage } from "@plasmohq/storage/hook"
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
 import { Switch } from "~components/Switch"
 import {
+  DEFAULT_CONTEXT_MENU_ACTIONS_CONFIG,
   DEFAULT_SETTINGS,
   STORAGE_KEYS,
   type ContextMenuActionId,
@@ -51,6 +60,30 @@ const ACTION_METAS: Record<ContextMenuActionId, ActionMeta> = {
     badgeColor: "badge-accent",
     description: "Copies formatted markdown hyperlink, ideal for Obsidian, Notion & GitHub.",
     icon: <FileCode className="w-5 h-5 text-indigo-400" />
+  },
+  copyCleanPageUrl: {
+    id: "copyCleanPageUrl",
+    title: "Copy Clean Page URL",
+    badge: "Page",
+    badgeColor: "badge-success",
+    description: "Right-click anywhere on a page to copy its URL without tracking params.",
+    icon: <Globe className="w-5 h-5 text-emerald-400" />
+  },
+  copyPageMarkdown: {
+    id: "copyPageMarkdown",
+    title: "Copy Page as Markdown",
+    badge: "Page",
+    badgeColor: "badge-accent",
+    description: "Copies the current page title and clean URL as [Title](URL).",
+    icon: <FileText className="w-5 h-5 text-sky-400" />
+  },
+  copySelectionQuote: {
+    id: "copySelectionQuote",
+    title: "Copy Selection as Quote",
+    badge: "Selection",
+    badgeColor: "badge-muted",
+    description: "Copies highlighted text as a Markdown blockquote with source link.",
+    icon: <Quote className="w-5 h-5 text-amber-400" />
   }
 }
 
@@ -74,10 +107,13 @@ export const ContextMenuActionsSettingsView: React.FC<
   const currentConfig: ContextMenuActionsConfig =
     settings?.contextMenuActionsConfig ?? DEFAULT_SETTINGS.contextMenuActionsConfig
 
-  const order: ContextMenuActionId[] = currentConfig.order || [
-    "copyLinkText",
-    "cleanLinkCopy",
-    "markdownLinkCopy"
+  const defaultOrder = DEFAULT_CONTEXT_MENU_ACTIONS_CONFIG.order
+  const rawOrder = Array.isArray(currentConfig.order)
+    ? currentConfig.order
+    : defaultOrder
+  const order: ContextMenuActionId[] = [
+    ...rawOrder.filter((id) => defaultOrder.includes(id)),
+    ...defaultOrder.filter((id) => !rawOrder.includes(id))
   ]
 
   const handleToggleMaster = (enabled: boolean) => {
@@ -88,17 +124,20 @@ export const ContextMenuActionsSettingsView: React.FC<
   }
 
   const handleToggleAction = (actionId: ContextMenuActionId) => {
-    setSettings((prev) => ({
-      ...(prev ?? DEFAULT_SETTINGS),
-      contextMenuActionsConfig: {
-        ...(prev?.contextMenuActionsConfig ??
-          DEFAULT_SETTINGS.contextMenuActionsConfig),
-        [actionId]: !(
-          (prev?.contextMenuActionsConfig ??
-            DEFAULT_SETTINGS.contextMenuActionsConfig)[actionId]
-        )
+    setSettings((prev) => {
+      const prevConfig =
+        prev?.contextMenuActionsConfig ??
+        DEFAULT_SETTINGS.contextMenuActionsConfig
+      const prevValue =
+        prevConfig[actionId] ?? DEFAULT_CONTEXT_MENU_ACTIONS_CONFIG[actionId]
+      return {
+        ...(prev ?? DEFAULT_SETTINGS),
+        contextMenuActionsConfig: {
+          ...prevConfig,
+          [actionId]: !Boolean(prevValue)
+        }
       }
-    }))
+    })
   }
 
   const handleDragStart = (e: React.DragEvent, index: number) => {
@@ -169,7 +208,10 @@ export const ContextMenuActionsSettingsView: React.FC<
             const item = ACTION_METAS[actionId]
             if (!item) return null
 
-            const isItemEnabled = currentConfig[actionId]
+            const isItemEnabled = Boolean(
+              currentConfig[actionId] ??
+                DEFAULT_CONTEXT_MENU_ACTIONS_CONFIG[actionId]
+            )
             const isDragging = draggedIndex === index
             const isDragOver = dragOverIndex === index && draggedIndex !== index
 
@@ -188,27 +230,24 @@ export const ContextMenuActionsSettingsView: React.FC<
                     ? "border-t-2 border-t-accent bg-accent-subtle"
                     : ""
                 }`}>
-                {/* Left side: Icon + Title + Description */}
+                {/* Left side: Icon + Title + Help Tooltip */}
                 <div
                   onClick={() => handleToggleAction(actionId)}
-                  className={`flex items-start gap-3 flex-1 min-w-0 ${
+                  className={`flex items-center gap-3 flex-1 min-w-0 ${
                     isItemEnabled ? "feature-row-active" : "feature-row-dimmed"
                   }`}>
-                  <div className="shrink-0 mt-0.5 flex items-center justify-center transition-transform duration-200 ease-out group-hover:scale-110">
+                  <div className="shrink-0 flex items-center justify-center transition-transform duration-200 ease-out group-hover:scale-110">
                     {item.icon}
                   </div>
 
-                  <div className="flex flex-col min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-semibold text-content-primary">
-                        {item.title}
-                      </span>
-                      <span className={`font-mono ${item.badgeColor}`}>
-                        {item.badge}
-                      </span>
-                    </div>
-                    <span className="text-[11px] text-content-muted leading-snug mt-0.5">
-                      {item.description}
+                  <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                    <span className="text-xs font-semibold text-content-primary truncate">
+                      {item.title}
+                    </span>
+                    <span
+                      title={`${item.badge}: ${item.description}`}
+                      className="inline-flex items-center shrink-0 text-content-muted/70 hover:text-content-primary transition-colors">
+                      <HelpCircle className="w-3.5 h-3.5" />
                     </span>
                   </div>
                 </div>

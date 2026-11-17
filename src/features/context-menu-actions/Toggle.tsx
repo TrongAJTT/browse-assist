@@ -44,10 +44,13 @@ export const ContextMenuActionsToggle: React.FC<ContextMenuActionsToggleProps> =
   const activeCount = [
     config.copyLinkText,
     config.cleanLinkCopy,
-    config.markdownLinkCopy
+    config.markdownLinkCopy,
+    config.copyCleanPageUrl ?? true,
+    config.copyPageMarkdown ?? false,
+    config.copySelectionQuote ?? true
   ].filter(Boolean).length
 
-  const badgeText = `${activeCount}/3 Active`
+  const badgeText = `${activeCount}/6 Active`
 
   return (
     <ToggleSwitch

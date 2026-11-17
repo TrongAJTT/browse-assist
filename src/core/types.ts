@@ -66,6 +66,9 @@ export type ContextMenuActionId =
   | "copyLinkText"
   | "cleanLinkCopy"
   | "markdownLinkCopy"
+  | "copyCleanPageUrl"
+  | "copyPageMarkdown"
+  | "copySelectionQuote"
 
 /**
  * Context Menu Actions sub-configuration with custom ordering and toggle states.
@@ -74,6 +77,9 @@ export interface ContextMenuActionsConfig {
   copyLinkText: boolean // Copy plain anchor text
   cleanLinkCopy: boolean // Copy URL stripped of tracking parameters
   markdownLinkCopy: boolean // Copy formatted as [Anchor Text](Clean URL)
+  copyCleanPageUrl?: boolean // Copy current page URL stripped of tracking parameters
+  copyPageMarkdown?: boolean // Copy current page as [Title](Clean URL)
+  copySelectionQuote?: boolean // Copy selected text as Markdown blockquote with source
   order: ContextMenuActionId[] // Display and menu registration order
 }
 
@@ -81,7 +87,17 @@ export const DEFAULT_CONTEXT_MENU_ACTIONS_CONFIG: ContextMenuActionsConfig = {
   copyLinkText: true,
   cleanLinkCopy: true,
   markdownLinkCopy: true,
-  order: ["copyLinkText", "cleanLinkCopy", "markdownLinkCopy"]
+  copyCleanPageUrl: true,
+  copyPageMarkdown: false,
+  copySelectionQuote: true,
+  order: [
+    "copyLinkText",
+    "cleanLinkCopy",
+    "markdownLinkCopy",
+    "copyCleanPageUrl",
+    "copyPageMarkdown",
+    "copySelectionQuote"
+  ]
 }
 
 /**

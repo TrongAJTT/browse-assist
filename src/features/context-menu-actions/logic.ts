@@ -55,11 +55,17 @@ function resolveLinkText(linkUrl: string): string {
  * Handles incoming messages from background service worker.
  */
 async function onMessage(
-  message: { action?: string; linkUrl?: string },
+  message: {
+    action?: string
+    linkUrl?: string
+    pageUrl?: string
+    selectionText?: string
+  },
   _sender: chrome.runtime.MessageSender,
   _sendResponse: (response?: unknown) => void
 ): Promise<void> {
   const rawUrl = message?.linkUrl || ""
+  const pageUrl = message?.pageUrl || window.location.href
 
   switch (message?.action) {
     case "browse_assist_copy_link_text": {
@@ -81,11 +87,49 @@ async function onMessage(
     }
 
     case "browse_assist_markdown_link_copy": {
-      const linkText = resolveLinkText(rawUrl)
+      const linkText = resolveLinkText(rawUrl).replace(/\[|\]/g, "")
       const cleanedUrl = cleanUrl(rawUrl)
       const markdown = `[${linkText}](${cleanedUrl})`
       const success = await copyToClipboard(markdown)
       if (success) showCopiedFeedback("Copied Markdown", markdown)
+      break
+    }
+
+    case "browse_assist_copy_clean_page_url": {
+      const cleaned = cleanUrl(pageUrl)
+      if (cleaned) {
+        const success = await copyToClipboard(cleaned)
+        if (success) showCopiedFeedback("Copied Clean Page URL", cleaned)
+      }
+      break
+    }
+
+    case "browse_assist_copy_page_markdown": {
+      const cleaned = cleanUrl(pageUrl)
+      const title = (document.title || cleaned).replace(/\[|\]/g, "")
+      const markdown = `[${title}](${cleaned})`
+      const success = await copyToClipboard(markdown)
+      if (success) showCopiedFeedback("Copied Page Markdown", markdown)
+      break
+    }
+
+    case "browse_assist_copy_selection_quote": {
+      const selected = (
+        message?.selectionText ||
+        window.getSelection()?.toString() ||
+        ""
+      ).trim()
+      if (selected) {
+        const cleaned = cleanUrl(pageUrl)
+        const title = (document.title || cleaned).replace(/\[|\]/g, "")
+        const quoted = selected
+          .split(/\r?\n/)
+          .map((line) => `> ${line}`)
+          .join("\n")
+        const markdown = `${quoted}\n— [${title}](${cleaned})`
+        const success = await copyToClipboard(markdown)
+        if (success) showCopiedFeedback("Copied Quote", selected)
+      }
       break
     }
   }
@@ -111,6 +155,7 @@ export function activate(): void {
 export function deactivate(): void {
   if (!isActive || typeof window === "undefined") return
   isActive = false
+  lastContextMenuTarget = null
 
   window.removeEventListener("contextmenu", onContextMenu, true)
 
