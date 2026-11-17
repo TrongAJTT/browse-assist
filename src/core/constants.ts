@@ -5,7 +5,7 @@ export interface DonateOption {
   label: string
   url: string
   description?: string
-  iconName: "coffee" | "github" | "heart"
+  iconName: "coffee" | "github" | "heart" | "qr"
 }
 
 export const DONATE_OPTIONS: DonateOption[] = [
@@ -22,6 +22,13 @@ export const DONATE_OPTIONS: DonateOption[] = [
     url: "https://github.com/sponsors/TrongAJTT",
     description: "Sponsor via GitHub on a monthly or one-off basis",
     iconName: "github"
+  },
+  {
+    id: "vietqr",
+    label: "VietQR (VN Bank)",
+    url: "https://www.trongajtt.com/donate?vietqr=1",
+    description: "Instant bank transfer via VietQR (Vietnam)",
+    iconName: "qr"
   },
   {
     id: "author-donate",

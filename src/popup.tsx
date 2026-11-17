@@ -7,6 +7,7 @@ import {
   LayoutGrid,
   List,
   PictureInPicture2,
+  QrCode,
   Search,
   Settings as SettingsIcon,
   X
@@ -311,6 +312,8 @@ function IndexPopup() {
         return <Coffee className="w-3.5 h-3.5 text-amber-400" />
       case "github":
         return <GitBranch className="w-3.5 h-3.5 text-slate-200" />
+      case "qr":
+        return <QrCode className="w-3.5 h-3.5 text-emerald-400" />
       default:
         return <Heart className="w-3.5 h-3.5 text-rose-400" />
     }

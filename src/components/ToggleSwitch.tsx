@@ -152,7 +152,7 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
         title={description}
         className={`relative flex flex-col justify-between p-2.5 rounded-xl border transition-all duration-150 group select-none ${
           enabled
-            ? "bg-app-surface border-accent/25 shadow-sm hover:border-accent/45"
+            ? "bg-app-surface border-border-focus shadow-sm hover:border-accent"
             : "bg-app-surface/40 border-border-subtle hover:border-border-subtle/80 opacity-75 hover:opacity-100"
         } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}>
         {/* Top row: Icon + Badge/Shortcut (left) and Action buttons (Chevron config + Switch) (right) */}
