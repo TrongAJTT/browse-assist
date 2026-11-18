@@ -2,6 +2,7 @@ import {
   ChevronDown,
   Compass,
   ExternalLink,
+  Globe,
   History,
   Laptop,
   LayoutGrid,
@@ -30,7 +31,11 @@ import {
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
 import { Switch } from "~components/Switch"
 import { isColorPickerSupported } from "~core/browserDetect"
-import { FEATURE_CATALOG } from "~core/featureCatalog"
+import {
+  FEATURE_CATALOG,
+  getLocalizedFeatureMeta
+} from "~core/featureCatalog"
+import { useI18n } from "~core/useI18n"
 import {
   DEFAULT_FEATURE_LAYOUT_CONFIG,
   DEFAULT_POPUP_NAVIGATION_CONFIG,
@@ -40,6 +45,7 @@ import {
   normalizeFeatureOrder,
   type FeatureKey,
   type FeatureSettings,
+  type LanguageCode,
   type ThemeMode,
   type ViewMode
 } from "~core/types"
@@ -86,6 +92,7 @@ const VIEW_MODE_OPTIONS: SelectDropdownOption<ViewMode>[] = [
 export const PreferencesSettingsView: React.FC<
   PreferencesSettingsViewProps
 > = ({ onBack }) => {
+  const { t, locale } = useI18n()
   const [settings, setSettings] = useStorage<FeatureSettings>(
     STORAGE_KEYS.SETTINGS,
     DEFAULT_SETTINGS
@@ -235,10 +242,12 @@ export const PreferencesSettingsView: React.FC<
   }
 
   const listItems: SortableVisibilityItem<FeatureKey>[] = useMemo(() => {
+    void locale
     return order
       .map((key): SortableVisibilityItem<FeatureKey> | null => {
-        const item = FEATURE_CATALOG[key]
-        if (!item) return null
+        const base = FEATURE_CATALOG[key]
+        if (!base) return null
+        const item = getLocalizedFeatureMeta(key)
         return {
           id: key,
           title: item.title,
@@ -251,7 +260,7 @@ export const PreferencesSettingsView: React.FC<
       .filter(
         (item): item is SortableVisibilityItem<FeatureKey> => item !== null
       )
-  }, [order, hiddenSet])
+  }, [order, hiddenSet, locale])
 
   const handleToggleRememberLastView = (enabled: boolean) => {
     setSettings((prev) => ({
@@ -273,12 +282,28 @@ export const PreferencesSettingsView: React.FC<
     }))
   }
 
+  const languageOptions: SelectDropdownOption<LanguageCode>[] = [
+    { id: "auto", label: t("preferences.languageAuto") },
+    { id: "en", label: "English" },
+    { id: "vi", label: "Tiếng Việt" }
+  ]
+
+  const currentLanguage: LanguageCode =
+    settings?.language ?? DEFAULT_SETTINGS.language ?? "auto"
+
+  const handleSelectLanguage = (language: LanguageCode) => {
+    setSettings((prev) => ({
+      ...(prev ?? DEFAULT_SETTINGS),
+      language
+    }))
+  }
+
   return (
-    <SubSettingsLayout title="Preferences" onBack={onBack}>
+    <SubSettingsLayout title={t("preferences.title")} onBack={onBack}>
       <div className="space-y-6">
         {/* Appearance Section */}
         <div className="space-y-2.5">
-          <span className="section-header">Appearance</span>
+          <span className="section-header">{t("preferences.appearance")}</span>
 
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-3 py-0.5">
@@ -286,10 +311,10 @@ export const PreferencesSettingsView: React.FC<
                 <Palette className="w-4 h-4 text-accent shrink-0 mt-0.5" />
                 <div className="flex flex-col min-w-0">
                   <span className="text-xs font-semibold text-content-primary">
-                    Theme Mode
+                    {t("preferences.themeMode")}
                   </span>
                   <p className="text-[11px] text-content-muted mt-0.5 leading-snug">
-                    Light, dark, or match your OS theme.
+                    {t("preferences.themeModeDesc")}
                   </p>
                 </div>
               </div>
@@ -298,7 +323,7 @@ export const PreferencesSettingsView: React.FC<
                 value={currentTheme}
                 options={THEME_OPTIONS}
                 onChange={handleSelectTheme}
-                ariaLabel="Theme Mode"
+                ariaLabel={t("preferences.themeMode")}
               />
             </div>
 
@@ -307,10 +332,10 @@ export const PreferencesSettingsView: React.FC<
                 <LayoutGrid className="w-4 h-4 text-accent shrink-0 mt-0.5" />
                 <div className="flex flex-col min-w-0">
                   <span className="text-xs font-semibold text-content-primary">
-                    View Mode
+                    {t("preferences.viewMode")}
                   </span>
                   <p className="text-[11px] text-content-muted mt-0.5 leading-snug">
-                    Detailed list or compact tile grid.
+                    {t("preferences.viewModeDesc")}
                   </p>
                 </div>
               </div>
@@ -319,7 +344,28 @@ export const PreferencesSettingsView: React.FC<
                 value={currentViewMode}
                 options={VIEW_MODE_OPTIONS}
                 onChange={handleSelectViewMode}
-                ariaLabel="View Mode"
+                ariaLabel={t("preferences.viewMode")}
+              />
+            </div>
+
+            <div className="flex items-center justify-between gap-3 py-0.5">
+              <div className="flex items-start gap-2.5 flex-1 min-w-0">
+                <Globe className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                <div className="flex flex-col min-w-0">
+                  <span className="text-xs font-semibold text-content-primary">
+                    {t("preferences.language")}
+                  </span>
+                  <p className="text-[11px] text-content-muted mt-0.5 leading-snug">
+                    {t("preferences.languageDesc")}
+                  </p>
+                </div>
+              </div>
+
+              <SelectDropdown<LanguageCode>
+                value={currentLanguage}
+                options={languageOptions}
+                onChange={handleSelectLanguage}
+                ariaLabel={t("preferences.language")}
               />
             </div>
           </div>
@@ -328,8 +374,8 @@ export const PreferencesSettingsView: React.FC<
         {/* Customize Menu Section */}
         <div className="pt-3 border-t border-border-divider">
           <SortableVisibilityList<FeatureKey>
-            title="Customize Menu"
-            description="Drag items to reorder them in the popup list, or toggle visibility to hide features you don't use."
+            title={t("preferences.customizeMenu")}
+            description={t("preferences.customizeMenuDesc")}
             items={listItems}
             onOrderChange={(newOrder) => {
               setSettings((prev) => ({
@@ -412,7 +458,7 @@ export const PreferencesSettingsView: React.FC<
 
         {/* Navigation & Popup Memory Section */}
         <div className="space-y-2.5 pt-3 border-t border-border-divider">
-          <span className="section-header">Navigation</span>
+          <span className="section-header">{t("preferences.navigation")}</span>
 
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-3 py-1">
@@ -420,11 +466,10 @@ export const PreferencesSettingsView: React.FC<
                 <Search className="w-4 h-4 text-accent shrink-0 mt-0.5" />
                 <div className="flex flex-col min-w-0">
                   <span className="text-xs font-semibold text-content-primary">
-                    Search & Category Filter
+                    {t("preferences.searchAndFilter")}
                   </span>
                   <p className="text-[11px] text-content-muted mt-0.5 leading-snug">
-                    Show search bar and category pills at the top of the main
-                    popup.
+                    {t("preferences.searchAndFilterDesc")}
                   </p>
                 </div>
               </div>
@@ -440,7 +485,7 @@ export const PreferencesSettingsView: React.FC<
                     }
                   }))
                 }}
-                ariaLabel="Show search and category filter"
+                ariaLabel={t("preferences.searchAndFilter")}
               />
             </div>
 
@@ -449,18 +494,17 @@ export const PreferencesSettingsView: React.FC<
                 <History className="w-4 h-4 text-accent shrink-0 mt-0.5" />
                 <div className="flex flex-col min-w-0">
                   <span className="text-xs font-semibold text-content-primary">
-                    Remember Last View
+                    {t("preferences.rememberLastView")}
                   </span>
                   <p className="text-[11px] text-content-muted mt-0.5 leading-snug">
-                    Reopen the popup on the settings page you were previously
-                    browsing.
+                    {t("preferences.rememberLastViewDesc")}
                   </p>
                 </div>
               </div>
               <Switch
                 checked={currentNav.rememberLastView}
                 onChange={handleToggleRememberLastView}
-                ariaLabel="Remember last active view"
+                ariaLabel={t("preferences.rememberLastView")}
               />
             </div>
 
@@ -468,7 +512,7 @@ export const PreferencesSettingsView: React.FC<
               <div className="pt-1 pb-1 pl-3">
                 <div className="pl-3 border-l-2 border-border-subtle">
                   <Slider
-                    label="Session Timeout"
+                    label={t("preferences.sessionTimeout")}
                     value={currentNav.sessionTimeoutMinutes}
                     valueDisplay={`${currentNav.sessionTimeoutMinutes} min`}
                     min={1}

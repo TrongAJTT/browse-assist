@@ -4,14 +4,13 @@ import type React from "react"
 import { useStorage } from "@plasmohq/storage/hook"
 
 import { ToggleSwitch } from "~components/ToggleSwitch"
-import { FEATURE_CATALOG } from "~core/featureCatalog"
+import { getLocalizedFeatureMeta } from "~core/featureCatalog"
+import { useI18n } from "~core/useI18n"
 import {
   DEFAULT_SETTINGS,
   STORAGE_KEYS,
   type FeatureSettings
 } from "~core/types"
-
-const meta = FEATURE_CATALOG.superDrag
 
 interface SuperDragToggleProps {
   onConfigure?: () => void
@@ -23,6 +22,8 @@ interface SuperDragToggleProps {
 export const SuperDragToggle: React.FC<SuperDragToggleProps> = ({
   onConfigure
 }) => {
+  useI18n()
+  const meta = getLocalizedFeatureMeta("superDrag")
   const [settings, setSettings] = useStorage<FeatureSettings>(
     STORAGE_KEYS.SETTINGS,
     DEFAULT_SETTINGS

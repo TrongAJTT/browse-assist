@@ -15,6 +15,7 @@ import {
 import type React from "react"
 
 import { isColorPickerSupported } from "./browserDetect"
+import { t } from "./i18n"
 import type { FeatureKey } from "./types"
 
 export interface FeatureIconProps {
@@ -186,3 +187,15 @@ export const FEATURE_CATALOG: Record<FeatureKey, FeatureCatalogItem> = {
 export const FEATURE_CATALOG_LIST: FeatureCatalogItem[] = Object.values(
   FEATURE_CATALOG
 ).filter((item) => item.key !== "colorPicker" || isColorPickerSupported)
+
+/**
+ * Returns localized title and description for a feature key.
+ */
+export function getLocalizedFeatureMeta(key: FeatureKey): FeatureCatalogItem {
+  const base = FEATURE_CATALOG[key]
+  return {
+    ...base,
+    title: t(`features.${key}.title`),
+    description: t(`features.${key}.description`)
+  }
+}

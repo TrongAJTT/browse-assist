@@ -4,6 +4,7 @@
  * on websites that attempt to disable or restrict them via JavaScript or CSS.
  */
 
+import { t } from "~core/i18n"
 import { showContentToast } from "~core/toast"
 
 let isActive = false
@@ -144,8 +145,8 @@ export function toggleRightClick(showFeedback = true): boolean {
     deactivate()
     if (showFeedback) {
       showContentToast({
-        message: "Right Click Disabled",
-        detail: "Current Tab",
+        message: t("features.allowRightClick.toastDisabled"),
+        detail: t("features.allowRightClick.currentTab"),
         type: "info",
         iconSvg: RIGHT_CLICK_ICON_SVG,
         position: "bottom-right",
@@ -156,8 +157,8 @@ export function toggleRightClick(showFeedback = true): boolean {
     activate()
     if (showFeedback) {
       showContentToast({
-        message: "Right Click Enabled",
-        detail: "Current Tab",
+        message: t("features.allowRightClick.toastEnabled"),
+        detail: t("features.allowRightClick.currentTab"),
         type: "success",
         iconSvg: RIGHT_CLICK_ICON_SVG,
         position: "bottom-right",

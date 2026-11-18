@@ -3,10 +3,9 @@ import type React from "react"
 import { useEffect, useState } from "react"
 
 import { ToggleSwitch } from "~components/ToggleSwitch"
-import { FEATURE_CATALOG } from "~core/featureCatalog"
+import { getLocalizedFeatureMeta } from "~core/featureCatalog"
 import { MESSAGE_TYPES, sendToActiveTab } from "~core/messaging"
-
-const meta = FEATURE_CATALOG.allowRightClick
+import { useI18n } from "~core/useI18n"
 
 interface AllowRightClickToggleProps {
   onStatusChange?: (active: boolean) => void
@@ -21,6 +20,8 @@ export const AllowRightClickToggle: React.FC<AllowRightClickToggleProps> = ({
   onStatusChange,
   onReady
 }) => {
+  const { t } = useI18n()
+  const meta = getLocalizedFeatureMeta("allowRightClick")
   const [isActiveInTab, setIsActiveInTab] = useState(false)
   const [shortcut, setShortcut] = useState<string>("Alt + R")
 
@@ -55,7 +56,7 @@ export const AllowRightClickToggle: React.FC<AllowRightClickToggleProps> = ({
     <ToggleSwitch
       icon={<MousePointerClick className="w-5 h-5 text-emerald-400" />}
       title={meta.title}
-      description="Enable context menu and copy on the current tab without breaking other apps."
+      description={t("features.allowRightClick.popupDesc")}
       enabled={isActiveInTab}
       onChange={handleChange}
       shortcut={shortcut}

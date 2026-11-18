@@ -26,12 +26,14 @@ import { APP_INFO, DONATE_OPTIONS } from "~core/constants"
 import {
   FEATURE_CATALOG,
   FEATURE_CATEGORIES,
+  getLocalizedFeatureMeta,
   type FeatureCategory
 } from "~core/featureCatalog"
 import {
   MESSAGE_TYPES,
   sendToBackground
 } from "~core/messaging"
+import { useI18n } from "~core/useI18n"
 import { ViewModeContext } from "~core/viewModeContext"
 import {
   DEFAULT_FEATURE_LAYOUT_CONFIG,
@@ -73,6 +75,7 @@ import "~style.css"
 const sessionStorage = new Storage({ area: "local" })
 
 function IndexPopup() {
+  const { t } = useI18n()
   const urlParams =
     typeof window !== "undefined"
       ? new URLSearchParams(window.location.search)
@@ -184,12 +187,13 @@ function IndexPopup() {
     }
     const query = searchQuery.trim().toLowerCase()
     return orderedFeatures.filter((key) => {
-      const meta = FEATURE_CATALOG[key]
-      if (!meta) return false
-      if (selectedCategory !== "all" && meta.category !== selectedCategory) {
+      const base = FEATURE_CATALOG[key]
+      if (!base) return false
+      if (selectedCategory !== "all" && base.category !== selectedCategory) {
         return false
       }
       if (!query) return true
+      const meta = getLocalizedFeatureMeta(key)
       return (
         meta.title.toLowerCase().includes(query) ||
         meta.description.toLowerCase().includes(query)
@@ -410,7 +414,7 @@ function IndexPopup() {
             {isDonateOpen && (
               <div className="absolute right-0 mt-2 w-48 rounded-xl bg-app-elevated border border-border-subtle shadow-xl shadow-black/40 py-1.5 z-30 animate-in fade-in zoom-in-95 duration-100">
                 <div className="px-3 py-1 text-[10px] font-semibold text-content-muted tracking-wider uppercase border-b border-border-divider mb-1">
-                  Support the Project
+                  {t("popup.supportTitle")}
                 </div>
                 {DONATE_OPTIONS.map((option) => (
                   <a
@@ -447,7 +451,7 @@ function IndexPopup() {
               </div>
               <div className="flex flex-col min-w-0">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-accent leading-none">
-                  Video in PiP Mode
+                  {t("popup.pipBannerTitle")}
                 </span>
                 <span className="text-xs font-semibold text-content-primary truncate mt-0.5 group-hover:text-accent transition-colors">
                   {activePiP.title}
@@ -462,7 +466,7 @@ function IndexPopup() {
                 title="Exit Picture-in-Picture window"
                 className="flex items-center gap-1.5 text-[11px] font-semibold text-content-secondary bg-app-elevated border border-border-subtle px-2.5 py-1 rounded-lg transition-all duration-150 hover:bg-rose-500 hover:text-white hover:border-rose-500 hover:shadow-md hover:shadow-rose-500/25 hover:scale-[1.02] active:scale-95 focus:outline-none focus:ring-2 focus:ring-rose-500/50">
                 <X className="w-3.5 h-3.5 stroke-[2.5]" />
-                <span>Exit PiP</span>
+                <span>{t("popup.pipExit")}</span>
               </button>
             </div>
           </div>
@@ -480,14 +484,14 @@ function IndexPopup() {
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search utilities..."
+                    placeholder={t("popup.searchPlaceholder")}
                     className="w-full h-7 pl-8 pr-7 text-xs rounded-lg bg-app-surface border border-border-subtle text-content-primary placeholder:text-content-muted focus:outline-none focus:border-accent/60 transition-colors"
                   />
                   {searchQuery && (
                     <button
                       type="button"
                       onClick={() => setSearchQuery("")}
-                      title="Clear search"
+                      title={t("common.clear")}
                       className="absolute right-1.5 top-1/2 -translate-y-1/2 p-0.5 rounded text-content-muted hover:text-content-primary transition-colors">
                       <X className="w-3 h-3" />
                     </button>
@@ -499,8 +503,8 @@ function IndexPopup() {
                   onClick={handleToggleViewMode}
                   title={
                     activeViewMode === "grid"
-                      ? "Switch to List Layout"
-                      : "Switch to Compact Tile Grid"
+                      ? t("popup.switchToList")
+                      : t("popup.switchToGrid")
                   }
                   className="h-7 w-7 shrink-0 flex items-center justify-center rounded-lg bg-app-surface border border-border-subtle text-content-muted hover:text-content-primary hover:border-accent/40 active:scale-95 transition-all">
                   {activeViewMode === "grid" ? (
@@ -524,7 +528,7 @@ function IndexPopup() {
                           ? "bg-accent-subtle text-accent border border-accent/30"
                           : "text-content-muted hover:text-content-primary hover:bg-app-surface border border-transparent"
                       }`}>
-                      {cat.label}
+                      {t(`popup.categories.${cat.id}`)}
                     </button>
                   )
                 })}
@@ -536,7 +540,7 @@ function IndexPopup() {
               {filteredFeatures.length === 0 ? (
                 <div className="py-10 text-center space-y-2">
                   <p className="text-xs text-content-muted">
-                    No utilities match your filter.
+                    {t("popup.noResults")}
                   </p>
                   <button
                     type="button"
@@ -545,7 +549,7 @@ function IndexPopup() {
                       setSelectedCategory("all")
                     }}
                     className="text-[11px] font-medium text-accent hover:underline">
-                    Reset filters
+                    {t("popup.resetFilters")}
                   </button>
                 </div>
               ) : (

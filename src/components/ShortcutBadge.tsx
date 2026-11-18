@@ -2,6 +2,7 @@ import { Keyboard } from "lucide-react"
 import type React from "react"
 
 import { openBrowserShortcutsPage } from "~core/shortcutsHelper"
+import { useI18n } from "~core/useI18n"
 
 interface ShortcutBadgeProps {
   /** The shortcut key combination string (e.g. "Alt+R", "Alt+P") or empty string if unassigned */
@@ -22,6 +23,7 @@ export const ShortcutBadge: React.FC<ShortcutBadgeProps> = ({
   className = "",
   interactive = true
 }) => {
+  const { t } = useI18n()
   const isAssigned = Boolean(shortcut && shortcut.trim().length > 0)
 
   const handleOpenShortcutsPage = (e: React.MouseEvent) => {
@@ -60,7 +62,7 @@ export const ShortcutBadge: React.FC<ShortcutBadgeProps> = ({
           : ""
       } ${className}`}>
       <Keyboard className="w-2.5 h-2.5 opacity-75" />
-      <span>Unassigned</span>
+      <span>{t("common.unassigned")}</span>
     </button>
   )
 }

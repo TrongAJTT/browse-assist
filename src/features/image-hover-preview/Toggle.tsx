@@ -4,15 +4,14 @@ import type React from "react"
 import { useStorage } from "@plasmohq/storage/hook"
 
 import { ToggleSwitch } from "~components/ToggleSwitch"
-import { FEATURE_CATALOG } from "~core/featureCatalog"
+import { getLocalizedFeatureMeta } from "~core/featureCatalog"
+import { useI18n } from "~core/useI18n"
 import {
   DEFAULT_IMAGE_HOVER_PREVIEW_CONFIG,
   DEFAULT_SETTINGS,
   STORAGE_KEYS,
   type FeatureSettings
 } from "~core/types"
-
-const meta = FEATURE_CATALOG.imageHoverPreview
 
 interface ImageHoverPreviewToggleProps {
   onConfigure?: () => void
@@ -24,6 +23,8 @@ interface ImageHoverPreviewToggleProps {
 export const ImageHoverPreviewToggle: React.FC<
   ImageHoverPreviewToggleProps
 > = ({ onConfigure }) => {
+  useI18n()
+  const meta = getLocalizedFeatureMeta("imageHoverPreview")
   const [settings, setSettings] = useStorage<FeatureSettings>(
     STORAGE_KEYS.SETTINGS,
     DEFAULT_SETTINGS

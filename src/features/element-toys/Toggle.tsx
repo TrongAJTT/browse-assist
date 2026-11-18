@@ -5,14 +5,13 @@ import { useEffect, useState } from "react"
 import { useStorage } from "@plasmohq/storage/hook"
 
 import { ToggleSwitch } from "~components/ToggleSwitch"
-import { FEATURE_CATALOG } from "~core/featureCatalog"
+import { getLocalizedFeatureMeta } from "~core/featureCatalog"
+import { useI18n } from "~core/useI18n"
 import {
   DEFAULT_SETTINGS,
   STORAGE_KEYS,
   type FeatureSettings
 } from "~core/types"
-
-const meta = FEATURE_CATALOG.elementToys
 
 export interface ElementToysToggleProps {
   onConfigure?: () => void
@@ -24,6 +23,8 @@ export interface ElementToysToggleProps {
 export const ElementToysToggle: React.FC<ElementToysToggleProps> = ({
   onConfigure
 }) => {
+  useI18n()
+  const meta = getLocalizedFeatureMeta("elementToys")
   const [settings, setSettings] = useStorage<FeatureSettings>(
     STORAGE_KEYS.SETTINGS,
     DEFAULT_SETTINGS

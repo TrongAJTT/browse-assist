@@ -4,14 +4,17 @@ import type React from "react"
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
 import { AppIcon } from "~core/assets"
 import { APP_INFO } from "~core/constants"
+import { useI18n } from "~core/useI18n"
 
 interface AboutViewProps {
   onBack: () => void
 }
 
 export const AboutView: React.FC<AboutViewProps> = ({ onBack }) => {
+  const { t } = useI18n()
+
   return (
-    <SubSettingsLayout title="About" onBack={onBack}>
+    <SubSettingsLayout title={t("about.title")} onBack={onBack}>
       <div className="flex flex-col space-y-4 text-content-secondary">
         {/* Header summary */}
         <div className="flex items-center gap-3">
@@ -31,14 +34,14 @@ export const AboutView: React.FC<AboutViewProps> = ({ onBack }) => {
 
         {/* Project Links */}
         <div className="space-y-1.5">
-          <span className="section-header">Project & Legal</span>
+          <span className="section-header">{t("about.projectAndLegal")}</span>
           <div className="grid grid-cols-3 gap-2 text-xs">
             <a
               href={APP_INFO.homePageUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-between p-2.5 rounded-xl bg-app-surface hover:bg-app-card border border-border-subtle hover:border-accent/40 transition-all text-content-primary group">
-              <span className="font-medium truncate">Home page</span>
+              <span className="font-medium truncate">{t("about.homePage")}</span>
               <ExternalLink className="w-3 h-3 text-content-muted group-hover:text-accent shrink-0 ml-1" />
             </a>
             <a
@@ -46,7 +49,7 @@ export const AboutView: React.FC<AboutViewProps> = ({ onBack }) => {
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-between p-2.5 rounded-xl bg-app-surface hover:bg-app-card border border-border-subtle hover:border-accent/40 transition-all text-content-primary group">
-              <span className="font-medium truncate">Terms</span>
+              <span className="font-medium truncate">{t("about.terms")}</span>
               <ExternalLink className="w-3 h-3 text-content-muted group-hover:text-accent shrink-0 ml-1" />
             </a>
             <a
@@ -54,7 +57,7 @@ export const AboutView: React.FC<AboutViewProps> = ({ onBack }) => {
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-between p-2.5 rounded-xl bg-app-surface hover:bg-app-card border border-border-subtle hover:border-accent/40 transition-all text-content-primary group">
-              <span className="font-medium truncate">Policy</span>
+              <span className="font-medium truncate">{t("about.policy")}</span>
               <ExternalLink className="w-3 h-3 text-content-muted group-hover:text-accent shrink-0 ml-1" />
             </a>
           </div>
@@ -62,7 +65,9 @@ export const AboutView: React.FC<AboutViewProps> = ({ onBack }) => {
 
         {/* Core Libraries */}
         <div className="space-y-2">
-          <span className="section-header">Open Source Libraries</span>
+          <span className="section-header">
+            {t("about.openSourceLibraries")}
+          </span>
           <div className="space-y-1 rounded-lg bg-app-surface border border-border-subtle p-2 text-xs divide-y divide-border-divider">
             {APP_INFO.libraries.map((lib) => (
               <a
@@ -86,7 +91,9 @@ export const AboutView: React.FC<AboutViewProps> = ({ onBack }) => {
         {/* Declared Permissions & Privacy */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="section-header">Declared Permissions</span>
+            <span className="section-header">
+              {t("about.declaredPermissions")}
+            </span>
           </div>
 
           <div className="space-y-1.5 rounded-lg bg-app-surface border border-border-subtle p-2 text-xs divide-y divide-border-divider">
@@ -104,8 +111,8 @@ export const AboutView: React.FC<AboutViewProps> = ({ onBack }) => {
                     {perm.key}
                   </span>
                 </div>
-                <p className="text-[11px] text-content-muted leading-relaxed pl-4.5">
-                  {perm.description}
+                <p className="text-[11px] text-content-muted leading-relaxed">
+                  {t(`about.permissions.${perm.key}`) || perm.description}
                 </p>
               </div>
             ))}
