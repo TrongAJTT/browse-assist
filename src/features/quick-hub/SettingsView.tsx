@@ -32,6 +32,7 @@ import {
 } from "~components/SortableVisibilityList"
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
 import { isColorPickerSupported } from "~core/browserDetect"
+import { t as translate } from "~core/i18n"
 import { openBrowserShortcutsPage } from "~core/shortcutsHelper"
 import {
   DEFAULT_QUICK_HUB_ACTION_ORDER,
@@ -47,12 +48,7 @@ import {
   type QuickHubButtonShape,
   type QuickHubConfig
 } from "~core/types"
-
-const BUTTON_SHAPE_OPTIONS: SelectDropdownOption<QuickHubButtonShape>[] = [
-  { id: "rounded", label: "Rounded", icon: <Square className="w-3.5 h-3.5" /> },
-  { id: "circle", label: "Circle", icon: <Circle className="w-3.5 h-3.5" /> },
-  { id: "pill", label: "Pill", icon: <Pill className="w-3.5 h-3.5" /> }
-]
+import { useI18n } from "~core/useI18n"
 
 interface QuickHubSettingsViewProps {
   onBack: () => void
@@ -70,167 +66,197 @@ interface QuickHubActionMeta {
   }
 }
 
-const QUICK_HUB_ACTIONS_META: Record<QuickHubActionId, QuickHubActionMeta> = {
-  pip: {
-    id: "pip",
-    title: "Watch Video in PiP",
-    description: "Watch video in floating picture-in-picture window",
-    icon: PictureInPicture2,
-    colorClass: "text-indigo-400",
-    getSourceState: (s) => {
-      if (!s.pictureInPicture) {
-        return {
-          isDisabled: true,
-          reason: "Universal PiP is disabled in extension settings"
+function getQuickHubActionsMeta(
+  t: typeof translate
+): Record<QuickHubActionId, QuickHubActionMeta> {
+  return {
+    pip: {
+      id: "pip",
+      title: t("features.quickHub.settings.actions.pipTitle"),
+      description: t("features.quickHub.settings.actions.pipDesc"),
+      icon: PictureInPicture2,
+      colorClass: "text-indigo-400",
+      getSourceState: (s) => {
+        if (!s.pictureInPicture) {
+          return {
+            isDisabled: true,
+            reason: t("features.quickHub.settings.disabledInSettings", {
+              feature: t("features.pictureInPicture.title")
+            })
+          }
         }
-      }
-      if (s.featureLayout?.hidden?.includes("pictureInPicture")) {
-        return {
-          isDisabled: true,
-          reason: "Universal PiP is hidden in popup menu"
+        if (s.featureLayout?.hidden?.includes("pictureInPicture")) {
+          return {
+            isDisabled: true,
+            reason: t("features.quickHub.settings.hiddenInMenu", {
+              feature: t("features.pictureInPicture.title")
+            })
+          }
         }
+        return { isDisabled: false }
       }
-      return { isDisabled: false }
-    }
-  },
-  colorPicker: {
-    id: "colorPicker",
-    title: "Pick Color from Screen",
-    description: "Eyedropper pixel magnifier and instant hex copy",
-    icon: Pipette,
-    colorClass: "text-pink-400",
-    getSourceState: (s) => {
-      if (!s.colorPicker) {
-        return {
-          isDisabled: true,
-          reason: "Color Picker is disabled in extension settings"
+    },
+    colorPicker: {
+      id: "colorPicker",
+      title: t("features.quickHub.settings.actions.colorPickerTitle"),
+      description: t("features.quickHub.settings.actions.colorPickerDesc"),
+      icon: Pipette,
+      colorClass: "text-pink-400",
+      getSourceState: (s) => {
+        if (!s.colorPicker) {
+          return {
+            isDisabled: true,
+            reason: t("features.quickHub.settings.disabledInSettings", {
+              feature: t("features.colorPicker.title")
+            })
+          }
         }
-      }
-      if (s.featureLayout?.hidden?.includes("colorPicker")) {
-        return {
-          isDisabled: true,
-          reason: "Color Picker is hidden in popup menu"
+        if (s.featureLayout?.hidden?.includes("colorPicker")) {
+          return {
+            isDisabled: true,
+            reason: t("features.quickHub.settings.hiddenInMenu", {
+              feature: t("features.colorPicker.title")
+            })
+          }
         }
+        return { isDisabled: false }
       }
-      return { isDisabled: false }
-    }
-  },
-  elementToys: {
-    id: "elementToys",
-    title: "Element Toys",
-    description: "Inspect, zap, edit text, or reposition elements",
-    icon: Zap,
-    colorClass: "text-amber-400",
-    getSourceState: (s) => {
-      const isEnabled = s.elementToys
-      if (!isEnabled) {
-        return {
-          isDisabled: true,
-          reason: "Element Toys is disabled in extension settings"
+    },
+    elementToys: {
+      id: "elementToys",
+      title: t("features.quickHub.settings.actions.elementToysTitle"),
+      description: t("features.quickHub.settings.actions.elementToysDesc"),
+      icon: Zap,
+      colorClass: "text-amber-400",
+      getSourceState: (s) => {
+        if (!s.elementToys) {
+          return {
+            isDisabled: true,
+            reason: t("features.quickHub.settings.disabledInSettings", {
+              feature: t("features.elementToys.title")
+            })
+          }
         }
-      }
-      const isHidden = s.featureLayout?.hidden?.includes("elementToys")
-      if (isHidden) {
-        return {
-          isDisabled: true,
-          reason: "Element Toys is hidden in popup menu"
+        if (s.featureLayout?.hidden?.includes("elementToys")) {
+          return {
+            isDisabled: true,
+            reason: t("features.quickHub.settings.hiddenInMenu", {
+              feature: t("features.elementToys.title")
+            })
+          }
         }
+        return { isDisabled: false }
       }
-      return { isDisabled: false }
-    }
-  },
-  scrollTop: {
-    id: "scrollTop",
-    title: "Scroll to Top",
-    description: "Smoothly jump to page top",
-    icon: ArrowUp,
-    colorClass: "text-sky-400",
-    getSourceState: (s) => {
-      if (!s.quickScroll) {
-        return {
-          isDisabled: true,
-          reason: "Quick Scroll is disabled in extension settings"
+    },
+    scrollTop: {
+      id: "scrollTop",
+      title: t("features.quickHub.settings.actions.scrollTopTitle"),
+      description: t("features.quickHub.settings.actions.scrollTopDesc"),
+      icon: ArrowUp,
+      colorClass: "text-sky-400",
+      getSourceState: (s) => {
+        if (!s.quickScroll) {
+          return {
+            isDisabled: true,
+            reason: t("features.quickHub.settings.disabledInSettings", {
+              feature: t("features.quickScroll.title")
+            })
+          }
         }
-      }
-      if (s.featureLayout?.hidden?.includes("quickScroll")) {
-        return {
-          isDisabled: true,
-          reason: "Quick Scroll is hidden in popup menu"
+        if (s.featureLayout?.hidden?.includes("quickScroll")) {
+          return {
+            isDisabled: true,
+            reason: t("features.quickHub.settings.hiddenInMenu", {
+              feature: t("features.quickScroll.title")
+            })
+          }
         }
+        return { isDisabled: false }
       }
-      return { isDisabled: false }
-    }
-  },
-  scrollBottom: {
-    id: "scrollBottom",
-    title: "Scroll to Bottom",
-    description: "Smoothly jump to page bottom",
-    icon: ArrowDown,
-    colorClass: "text-sky-400",
-    getSourceState: (s) => {
-      if (!s.quickScroll) {
-        return {
-          isDisabled: true,
-          reason: "Quick Scroll is disabled in extension settings"
+    },
+    scrollBottom: {
+      id: "scrollBottom",
+      title: t("features.quickHub.settings.actions.scrollBottomTitle"),
+      description: t("features.quickHub.settings.actions.scrollBottomDesc"),
+      icon: ArrowDown,
+      colorClass: "text-sky-400",
+      getSourceState: (s) => {
+        if (!s.quickScroll) {
+          return {
+            isDisabled: true,
+            reason: t("features.quickHub.settings.disabledInSettings", {
+              feature: t("features.quickScroll.title")
+            })
+          }
         }
-      }
-      if (s.featureLayout?.hidden?.includes("quickScroll")) {
-        return {
-          isDisabled: true,
-          reason: "Quick Scroll is hidden in popup menu"
+        if (s.featureLayout?.hidden?.includes("quickScroll")) {
+          return {
+            isDisabled: true,
+            reason: t("features.quickHub.settings.hiddenInMenu", {
+              feature: t("features.quickScroll.title")
+            })
+          }
         }
-      }
-      if (s.quickScrollConfig?.buttonsMode === "top-only") {
-        return {
-          isDisabled: true,
-          reason: "Quick Scroll is configured as 'Top-only'"
+        if (s.quickScrollConfig?.buttonsMode === "top-only") {
+          return {
+            isDisabled: true,
+            reason: t("features.quickHub.settings.quickScrollTopOnly")
+          }
         }
+        return { isDisabled: false }
       }
-      return { isDisabled: false }
-    }
-  },
-  resetZoom: {
-    id: "resetZoom",
-    title: "Reset Page Zoom",
-    description: "Restore 100% viewport zoom",
-    icon: ZoomIn,
-    colorClass: "text-violet-400",
-    getSourceState: (s) => {
-      if (!s.mouseZoom) {
-        return {
-          isDisabled: true,
-          reason: "Mouse Zoom is disabled in extension settings"
+    },
+    resetZoom: {
+      id: "resetZoom",
+      title: t("features.quickHub.settings.actions.resetZoomTitle"),
+      description: t("features.quickHub.settings.actions.resetZoomDesc"),
+      icon: ZoomIn,
+      colorClass: "text-violet-400",
+      getSourceState: (s) => {
+        if (!s.mouseZoom) {
+          return {
+            isDisabled: true,
+            reason: t("features.quickHub.settings.disabledInSettings", {
+              feature: t("features.mouseZoom.title")
+            })
+          }
         }
-      }
-      if (s.featureLayout?.hidden?.includes("mouseZoom")) {
-        return {
-          isDisabled: true,
-          reason: "Mouse Zoom is hidden in popup menu"
+        if (s.featureLayout?.hidden?.includes("mouseZoom")) {
+          return {
+            isDisabled: true,
+            reason: t("features.quickHub.settings.hiddenInMenu", {
+              feature: t("features.mouseZoom.title")
+            })
+          }
         }
+        return { isDisabled: false }
       }
-      return { isDisabled: false }
-    }
-  },
-  cleanUrl: {
-    id: "cleanUrl",
-    title: "Copy Clean URL",
-    description: "Copy link without tracking queries (utm_*, fbclid)",
-    icon: Link2,
-    colorClass: "text-cyan-400",
-    getSourceState: (s) => {
-      if (!s.contextMenuActions) {
-        return {
-          isDisabled: true,
-          reason: "Context Menu Actions is disabled in extension settings"
+    },
+    cleanUrl: {
+      id: "cleanUrl",
+      title: t("features.quickHub.settings.actions.cleanUrlTitle"),
+      description: t("features.quickHub.settings.actions.cleanUrlDesc"),
+      icon: Link2,
+      colorClass: "text-cyan-400",
+      getSourceState: (s) => {
+        if (!s.contextMenuActions) {
+          return {
+            isDisabled: true,
+            reason: t("features.quickHub.settings.disabledInSettings", {
+              feature: t("features.contextMenuActions.title")
+            })
+          }
         }
-      }
-      if (s.featureLayout?.hidden?.includes("contextMenuActions")) {
-        return {
-          isDisabled: true,
-          reason: "Context Menu Actions is hidden in popup menu"
+        if (s.featureLayout?.hidden?.includes("contextMenuActions")) {
+          return {
+            isDisabled: true,
+            reason: t("features.quickHub.settings.hiddenInMenu", {
+              feature: t("features.contextMenuActions.title")
+            })
+          }
         }
+        return { isDisabled: false }
       }
-      return { isDisabled: false }
     }
   }
 }
@@ -241,11 +267,36 @@ const QUICK_HUB_ACTIONS_META: Record<QuickHubActionId, QuickHubActionMeta> = {
 export const QuickHubSettingsView: React.FC<QuickHubSettingsViewProps> = ({
   onBack
 }) => {
+  const { t, locale } = useI18n()
   const [settings, setSettings] = useStorage<FeatureSettings>(
     STORAGE_KEYS.SETTINGS,
     DEFAULT_SETTINGS
   )
   const [shortcut, setShortcut] = useState<string>("")
+
+  const buttonShapeOptions: SelectDropdownOption<QuickHubButtonShape>[] = [
+    {
+      id: "rounded",
+      label: t("common.shapes.rounded"),
+      icon: <Square className="w-3.5 h-3.5" />
+    },
+    {
+      id: "circle",
+      label: t("common.shapes.circle"),
+      icon: <Circle className="w-3.5 h-3.5" />
+    },
+    {
+      id: "pill",
+      label: t("common.shapes.pill"),
+      icon: <Pill className="w-3.5 h-3.5" />
+    }
+  ]
+
+  const actionsMeta = useMemo(
+    () => getQuickHubActionsMeta(t),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [locale]
+  )
 
   useEffect(() => {
     if (chrome.commands?.getAll) {
@@ -254,7 +305,7 @@ export const QuickHubSettingsView: React.FC<QuickHubSettingsViewProps> = ({
         if (cmd?.shortcut) {
           setShortcut(cmd.shortcut)
         } else {
-          setShortcut("Not configured")
+          setShortcut("")
         }
       })
     }
@@ -315,7 +366,7 @@ export const QuickHubSettingsView: React.FC<QuickHubSettingsViewProps> = ({
   )
 
   const handleToggleActionVisibility = (actionId: QuickHubActionId) => {
-    const meta = QUICK_HUB_ACTIONS_META[actionId]
+    const meta = actionsMeta[actionId]
     if (settings && meta?.getSourceState(settings).isDisabled) {
       // Do nothing if disabled or hidden in parent settings, preserving state
       return
@@ -362,7 +413,7 @@ export const QuickHubSettingsView: React.FC<QuickHubSettingsViewProps> = ({
     return actionOrder
       .map(
         (actionId): SortableVisibilityItem<QuickHubActionId> | null => {
-          const meta = QUICK_HUB_ACTIONS_META[actionId]
+          const meta = actionsMeta[actionId]
         if (!meta) return null
         const sourceState = settings
           ? meta.getSourceState(settings)
@@ -379,7 +430,7 @@ export const QuickHubSettingsView: React.FC<QuickHubSettingsViewProps> = ({
           disabledReason: sourceState.reason,
           badge: sourceState.isDisabled ? (
             <span className="text-[9px] px-1.5 py-0.5 rounded bg-app-card text-content-muted border border-border-subtle shrink-0">
-              Disabled
+              {t("common.disabled")}
             </span>
           ) : undefined
         }
@@ -388,25 +439,24 @@ export const QuickHubSettingsView: React.FC<QuickHubSettingsViewProps> = ({
         (item): item is SortableVisibilityItem<QuickHubActionId> =>
           item !== null
       )
-  }, [actionOrder, hiddenActionsSet, settings])
+  }, [actionOrder, actionsMeta, hiddenActionsSet, settings, t])
 
   return (
     <SubSettingsLayout
-      title="Quick Hub"
+      title={t("features.quickHub.title")}
       enabled={isMasterEnabled}
       onToggle={handleToggleMaster}
       onBack={onBack}>
       <div className="space-y-4">
         {/* Section 1: Screen Position Placement (Edge Position Picker with Snapping) */}
         <div className="space-y-2">
-          <span className="section-header">Screen Position</span>
+          <span className="section-header">{t("common.screenPosition")}</span>
           <div className="space-y-1.5">
             <span className="text-xs font-semibold text-content-primary">
-              Floating Button Placement
+              {t("features.quickHub.settings.floatingPlacement")}
             </span>
             <p className="text-[11px] text-content-muted leading-snug">
-              Drag or click along the perimeter to anchor the Quick Hub trigger
-              anywhere on screen.
+              {t("features.quickHub.settings.floatingPlacementDesc")}
             </p>
             <EdgePositionPicker
               allowedEdges={["top", "right", "bottom", "left"]}
@@ -420,17 +470,17 @@ export const QuickHubSettingsView: React.FC<QuickHubSettingsViewProps> = ({
               <Shapes className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
               <div className="flex flex-col min-w-0">
                 <span className="text-xs font-semibold text-content-primary">
-                  Button Shape
+                  {t("common.buttonShape")}
                 </span>
                 <p className="text-[11px] text-content-muted mt-0.5 leading-snug">
-                  Customize the floating trigger button shape.
+                  {t("features.quickHub.settings.buttonShapeDesc")}
                 </p>
               </div>
             </div>
 
             <SelectDropdown<QuickHubButtonShape>
               value={currentConfig.buttonShape ?? "rounded"}
-              options={BUTTON_SHAPE_OPTIONS}
+              options={buttonShapeOptions}
               onChange={(buttonShape) => {
                 setSettings((prev) => ({
                   ...(prev ?? DEFAULT_SETTINGS),
@@ -440,7 +490,7 @@ export const QuickHubSettingsView: React.FC<QuickHubSettingsViewProps> = ({
                   }
                 }))
               }}
-              ariaLabel="Quick Hub Button Shape"
+              ariaLabel={t("common.buttonShape")}
             />
           </div>
 
@@ -449,10 +499,10 @@ export const QuickHubSettingsView: React.FC<QuickHubSettingsViewProps> = ({
               <Droplets className="w-5 h-5 text-sky-400 shrink-0 mt-0.5" />
               <div className="flex flex-col min-w-0">
                 <span className="text-xs font-semibold text-content-primary">
-                  Button Opacity
+                  {t("common.buttonOpacity")}
                 </span>
                 <p className="text-[11px] text-content-muted mt-0.5 leading-snug">
-                  Adjust transparency of the floating trigger button.
+                  {t("features.quickHub.settings.buttonOpacityDesc")}
                 </p>
               </div>
             </div>
@@ -471,7 +521,7 @@ export const QuickHubSettingsView: React.FC<QuickHubSettingsViewProps> = ({
                   }
                 }))
               }}
-              ariaLabel="Quick Hub Button Opacity"
+              ariaLabel={t("common.buttonOpacity")}
             />
           </div>
         </div>
@@ -479,8 +529,8 @@ export const QuickHubSettingsView: React.FC<QuickHubSettingsViewProps> = ({
         {/* Section 2: Customize Menu Actions (Shared SortableVisibilityList) */}
         <div className="pt-3 border-t border-border-divider">
           <SortableVisibilityList<QuickHubActionId>
-            title="Customize Menu"
-            description="Drag items to reorder them in the Quick Hub list, or toggle visibility to hide features you don't use."
+            title={t("features.quickHub.settings.customizeMenu")}
+            description={t("features.quickHub.settings.customizeMenuDesc")}
             items={listItems}
             onOrderChange={handleOrderChange}
             onToggleVisibility={handleToggleActionVisibility}
@@ -490,12 +540,14 @@ export const QuickHubSettingsView: React.FC<QuickHubSettingsViewProps> = ({
 
         {/* Section 3: Proximity & Behavior */}
         <div className="space-y-2 pt-3 border-t border-border-divider">
-          <span className="section-header">Behavior & Proximity</span>
+          <span className="section-header">
+            {t("features.quickHub.settings.behaviorProximity")}
+          </span>
           <div className="divide-y divide-border-divider">
             <SettingToggleRow
               icon={<Eye className="w-5 h-5 text-amber-400" />}
-              title="Hover Proximity Reveal"
-              description="Reveal the floating button only when moving cursor near the corner. When disabled, the button stays visible at 30% idle opacity."
+              title={t("features.quickHub.settings.hoverProximity")}
+              description={t("features.quickHub.settings.hoverProximityDesc")}
               enabled={currentConfig.hoverToReveal}
               onToggle={() => handleToggleOption("hoverToReveal")}
             />
@@ -504,10 +556,12 @@ export const QuickHubSettingsView: React.FC<QuickHubSettingsViewProps> = ({
 
         {/* Section 4: Keyboard Shortcut (Secondary Method) */}
         <div className="space-y-2 pt-3 border-t border-border-divider">
-          <span className="section-header">Keyboard Shortcut</span>
+          <span className="section-header">
+            {t("features.quickHub.settings.keyboardShortcut")}
+          </span>
           <FeatureShortcutRow
-            title="Global Hotkey (Optional)"
-            description="Toggle the Quick Hub menu on active webpage."
+            title={t("features.quickHub.settings.globalHotkey")}
+            description={t("features.quickHub.settings.globalHotkeyDesc")}
             shortcut={shortcut}
             iconColorClass="text-amber-400"
             onConfigureShortcuts={handleOpenShortcutsPage}

@@ -4,6 +4,7 @@
  * Features smart page luminance detection for dynamic light/dark contrast.
  */
 
+import { t } from "~core/i18n"
 import { detectPageTheme } from "~core/themeDetect"
 import {
   DEFAULT_QUICK_SCROLL_CONFIG,
@@ -284,16 +285,16 @@ function createShadowDOM(): void {
   // Button Scroll to Top
   btnTop = document.createElement("button")
   btnTop.className = "qs-button qs-hidden"
-  btnTop.setAttribute("aria-label", "Scroll to top")
-  btnTop.title = "Scroll to top"
+  btnTop.setAttribute("aria-label", t("features.quickScroll.logic.scrollToTop"))
+  btnTop.title = t("features.quickScroll.logic.scrollToTop")
   btnTop.innerHTML = UP_ARROW_SVG
   btnTop.addEventListener("click", handleScrollTopClick)
 
   // Button Scroll to Bottom
   btnBottom = document.createElement("button")
   btnBottom.className = "qs-button qs-hidden"
-  btnBottom.setAttribute("aria-label", "Scroll to bottom")
-  btnBottom.title = "Scroll to bottom"
+  btnBottom.setAttribute("aria-label", t("features.quickScroll.logic.scrollToBottom"))
+  btnBottom.title = t("features.quickScroll.logic.scrollToBottom")
   btnBottom.innerHTML = DOWN_ARROW_SVG
   btnBottom.addEventListener("click", handleScrollBottomClick)
 
@@ -345,7 +346,7 @@ function handleScrollTopClick(e: MouseEvent): void {
     }
 
     if (btnTop) {
-      btnTop.title = "Return to previous position"
+      btnTop.title = t("features.quickScroll.logic.returnToPrevious")
       btnTop.innerHTML = RETURN_SVG
     }
 
@@ -393,7 +394,7 @@ function handleScrollBottomClick(e: MouseEvent): void {
     }
 
     if (btnBottom) {
-      btnBottom.title = "Return to previous position"
+      btnBottom.title = t("features.quickScroll.logic.returnToPrevious")
       btnBottom.innerHTML = RETURN_SVG
     }
 
@@ -416,11 +417,11 @@ function resetReturnMemory(): void {
     memoryTimer = null
   }
   if (btnTop) {
-    btnTop.title = "Scroll to top"
+    btnTop.title = t("features.quickScroll.logic.scrollToTop")
     btnTop.innerHTML = UP_ARROW_SVG
   }
   if (btnBottom) {
-    btnBottom.title = "Scroll to bottom"
+    btnBottom.title = t("features.quickScroll.logic.scrollToBottom")
     btnBottom.innerHTML = DOWN_ARROW_SVG
   }
 }

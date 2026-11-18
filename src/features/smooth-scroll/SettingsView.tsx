@@ -15,6 +15,7 @@ import {
   type SmoothScrollConfig,
   type SmoothScrollPreset
 } from "~core/types"
+import { useI18n } from "~core/useI18n"
 
 interface SmoothScrollSettingsViewProps {
   onBack: () => void
@@ -45,6 +46,7 @@ function resolvePresetFromParams(
 export const SmoothScrollSettingsView: React.FC<
   SmoothScrollSettingsViewProps
 > = ({ onBack }) => {
+  const { t } = useI18n()
   const [settings, setSettings] = useStorage<FeatureSettings>(
     STORAGE_KEYS.SETTINGS,
     DEFAULT_SETTINGS
@@ -100,22 +102,22 @@ export const SmoothScrollSettingsView: React.FC<
   const profileGridItems: SegmentedTabItem<SmoothScrollPreset>[] = [
     {
       id: "balanced",
-      label: "Balanced",
+      label: t("features.smoothScroll.settings.presetBalanced"),
       icon: <Gauge className="w-3.5 h-3.5" />
     },
     {
       id: "ultra",
-      label: "Ultra",
+      label: t("features.smoothScroll.settings.presetUltra"),
       icon: <Feather className="w-3.5 h-3.5" />
     },
     {
       id: "snappy",
-      label: "Snappy",
+      label: t("features.smoothScroll.settings.presetSnappy"),
       icon: <Zap className="w-3.5 h-3.5" />
     },
     {
       id: "custom",
-      label: "Custom",
+      label: t("features.smoothScroll.settings.presetCustom"),
       icon: <Sliders className="w-3.5 h-3.5" />
     }
   ]
@@ -132,14 +134,14 @@ export const SmoothScrollSettingsView: React.FC<
 
   return (
     <SubSettingsLayout
-      title="Smooth Scrolling"
+      title={t("features.smoothScroll.title")}
       enabled={isSmoothScrollEnabled}
       onToggle={handleToggleFeature}
       onBack={onBack}>
       {/* 4-item Horizontal SegmentedTabs for Profiles */}
       <div className="space-y-2">
         <span className="section-header">
-          Profiles
+          {t("features.smoothScroll.settings.profiles")}
         </span>
 
         <SegmentedTabs<SmoothScrollPreset>
@@ -152,12 +154,12 @@ export const SmoothScrollSettingsView: React.FC<
       {/* Fine-Tuning Physics Sliders (without enclosing cards) */}
       <div className="space-y-4 pt-3 border-t border-border-divider">
         <span className="section-header">
-          Fine Tuning
+          {t("features.smoothScroll.settings.fineTuning")}
         </span>
 
         {/* Step Size Slider */}
         <Slider
-          label="Scroll Distance"
+          label={t("features.smoothScroll.settings.scrollDistance")}
           value={currentConfig.stepSize}
           valueDisplay={`${currentConfig.stepSize.toFixed(1)}x`}
           min={0.5}
@@ -168,7 +170,7 @@ export const SmoothScrollSettingsView: React.FC<
 
         {/* Gliding Duration Slider (right = longer glide / higher %) */}
         <Slider
-          label="Gliding Duration"
+          label={t("features.smoothScroll.settings.glidingDuration")}
           value={Number((0.45 - currentConfig.smoothness).toFixed(2))}
           valueDisplay={`${Math.round((1 - currentConfig.smoothness) * 100)}%`}
           min={0.05}
@@ -184,8 +186,8 @@ export const SmoothScrollSettingsView: React.FC<
       <div className="pt-3 border-t border-border-divider divide-y divide-border-divider">
         <SettingToggleRow
           icon={<Laptop className="w-5 h-5 text-sky-400" />}
-          title="Ignore Touchpad"
-          description="Keep native OS trackpad inertia by bypassing small-delta wheel events."
+          title={t("features.smoothScroll.settings.ignoreTouchpad")}
+          description={t("features.smoothScroll.settings.ignoreTouchpadDesc")}
           enabled={Boolean(currentConfig.ignoreTouchpad)}
           onToggle={(enabled) => {
             setSettings((prev) => ({
@@ -201,8 +203,8 @@ export const SmoothScrollSettingsView: React.FC<
 
         <SettingToggleRow
           icon={<Keyboard className="w-5 h-5 text-indigo-400" />}
-          title="Keyboard Smooth Scroll"
-          description="Smoothly interpolate scrolling with Arrow, PageUp/Down, and Space keys."
+          title={t("features.smoothScroll.settings.keyboardScroll")}
+          description={t("features.smoothScroll.settings.keyboardScrollDesc")}
           enabled={Boolean(currentConfig.keyboardScroll)}
           onToggle={(enabled) => {
             setSettings((prev) => ({
@@ -218,8 +220,8 @@ export const SmoothScrollSettingsView: React.FC<
 
         <SettingToggleRow
           icon={<ShieldAlert className="w-5 h-5 text-amber-400" />}
-          title="Aggressive Interception"
-          description="Force smooth scrolling across all sites. Keep disabled to protect canvas & web apps (e.g. Konva, Figma, Maps)."
+          title={t("features.smoothScroll.settings.aggressiveMode")}
+          description={t("features.smoothScroll.settings.aggressiveModeDesc")}
           enabled={currentConfig.interceptionMode === "aggressive"}
           onToggle={() => {
             const nextMode =

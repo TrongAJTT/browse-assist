@@ -21,6 +21,7 @@ import {
   type ColorPickerConfig,
   type FeatureSettings
 } from "~core/types"
+import { useI18n } from "~core/useI18n"
 
 import { getColorValueByFormat } from "./colorUtils"
 
@@ -51,6 +52,7 @@ const FORMAT_ITEMS: SelectDropdownOption<ColorFormat>[] = [
 export const ColorPickerSettingsView: React.FC<
   ColorPickerSettingsViewProps
 > = ({ onBack }) => {
+  const { t } = useI18n()
   const [settings, setSettings] = useStorage<FeatureSettings>(
     STORAGE_KEYS.SETTINGS,
     DEFAULT_SETTINGS
@@ -133,15 +135,15 @@ export const ColorPickerSettingsView: React.FC<
 
   return (
     <SubSettingsLayout
-      title="Color Picker"
+      title={t("features.colorPicker.title")}
       enabled={isMasterEnabled}
       onToggle={handleToggleMaster}
       onBack={onBack}>
       <div className="space-y-4">
         {/* Section 1: Keyboard Shortcut */}
         <FeatureShortcutRow
-          title="Eyedropper Shortcut"
-          description="Quickly activate screen color picker"
+          title={t("features.colorPicker.settings.shortcutTitle")}
+          description={t("features.colorPicker.settings.shortcutDesc")}
           shortcut={shortcut}
           iconColorClass="text-pink-400"
           onConfigureShortcuts={handleOpenShortcutsPage}
@@ -152,16 +154,18 @@ export const ColorPickerSettingsView: React.FC<
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <History className="w-3.5 h-3.5 text-content-muted" />
-              <span className="section-header">Recent Colors</span>
+              <span className="section-header">
+                {t("features.colorPicker.settings.recentColors")}
+              </span>
             </div>
             {colorHistory && colorHistory.length > 0 && (
               <button
                 type="button"
                 onClick={handleClearHistory}
-                title="Clear all recent color history"
+                title={t("features.colorPicker.settings.clearHistoryTooltip")}
                 className="flex items-center gap-1 text-[11px] font-medium text-content-muted hover:text-rose-400 transition-colors">
                 <Trash2 className="w-3 h-3" />
-                <span>Clear</span>
+                <span>{t("common.clear")}</span>
               </button>
             )}
           </div>
@@ -173,7 +177,12 @@ export const ColorPickerSettingsView: React.FC<
                   key={item.hex + item.timestamp}
                   type="button"
                   onClick={() => handleCopyColor(item)}
-                  title={`Click to copy ${getColorValueByFormat(item, currentConfig.defaultFormat)}`}
+                  title={t("features.colorPicker.settings.clickToCopy", {
+                    value: getColorValueByFormat(
+                      item,
+                      currentConfig.defaultFormat
+                    )
+                  })}
                   className="group relative flex flex-col items-center overflow-hidden rounded-md bg-app-surface border border-border-subtle hover:border-accent hover:shadow-md transition-all active:scale-95">
                   <div
                     className="w-full h-7 border-b border-border-subtle flex items-center justify-center relative"
@@ -192,24 +201,25 @@ export const ColorPickerSettingsView: React.FC<
             </div>
           ) : (
             <p className="text-[11px] text-content-muted italic py-1">
-              No recent colors picked yet. Use shortcut or button above to pick
-              colors.
+              {t("features.colorPicker.settings.noRecentColors")}
             </p>
           )}
         </div>
 
         {/* Section 3: Default Format Selection (Trailing Dropdown) */}
         <div className="space-y-2 pt-2 border-t border-border-divider">
-          <span className="section-header">Default Copy Format</span>
+          <span className="section-header">
+            {t("features.colorPicker.settings.defaultFormat")}
+          </span>
           <div className="flex items-center justify-between gap-3 py-0.5">
             <div className="flex items-start gap-3 flex-1 min-w-0">
               <Palette className="w-5 h-5 text-pink-400 shrink-0 mt-0.5" />
               <div className="flex flex-col min-w-0">
                 <span className="text-xs font-semibold text-content-primary">
-                  Clipboard Color Format
+                  {t("features.colorPicker.settings.clipboardFormat")}
                 </span>
                 <p className="text-[11px] text-content-muted mt-0.5 leading-snug">
-                  Color standard copied automatically when picking.
+                  {t("features.colorPicker.settings.clipboardFormatDesc")}
                 </p>
               </div>
             </div>
@@ -218,21 +228,23 @@ export const ColorPickerSettingsView: React.FC<
               value={currentConfig.defaultFormat}
               options={FORMAT_ITEMS}
               onChange={handleSelectFormat}
-              ariaLabel="Clipboard Color Format"
+              ariaLabel={t("features.colorPicker.settings.clipboardFormat")}
             />
           </div>
         </div>
 
         {/* Section 4: Behavior & Feedback */}
         <div className="space-y-1 pt-2 border-t border-border-divider">
-          <span className="section-header">Behavior & Feedback</span>
+          <span className="section-header">
+            {t("features.colorPicker.settings.behaviorFeedback")}
+          </span>
 
           <div className="divide-y divide-border-divider">
             {/* Auto-Copy to Clipboard */}
             <SettingToggleRow
               icon={<Copy className="w-5 h-5 text-emerald-400" />}
-              title="Auto-Copy to Clipboard"
-              description="Automatically copy selected color value immediately upon picking"
+              title={t("features.colorPicker.settings.autoCopy")}
+              description={t("features.colorPicker.settings.autoCopyDesc")}
               enabled={currentConfig.autoCopy}
               onToggle={() => handleToggleOption("autoCopy")}
             />
@@ -240,8 +252,8 @@ export const ColorPickerSettingsView: React.FC<
             {/* Floating Palette Modal */}
             <SettingToggleRow
               icon={<LayoutPanelTop className="w-5 h-5 text-indigo-400" />}
-              title="Show Floating Palette"
-              description="Show interactive HEX / RGB / HSL palette modal after picking"
+              title={t("features.colorPicker.settings.showPalette")}
+              description={t("features.colorPicker.settings.showPaletteDesc")}
               enabled={currentConfig.showPaletteModal ?? true}
               onToggle={() => handleToggleOption("showPaletteModal")}
             />
@@ -249,11 +261,11 @@ export const ColorPickerSettingsView: React.FC<
             {/* Feedback Notification (disabled when Floating Palette is active) */}
             <SettingToggleRow
               icon={<Bell className="w-5 h-5 text-pink-400" />}
-              title="Feedback Notification"
+              title={t("features.colorPicker.settings.feedbackNotification")}
               description={
                 (currentConfig.showPaletteModal ?? true)
-                  ? "Disabled while Floating Palette is active"
-                  : "Display confirmation toast upon picking a color"
+                  ? t("features.colorPicker.settings.feedbackDisabledDesc")
+                  : t("features.colorPicker.settings.feedbackEnabledDesc")
               }
               enabled={
                 currentConfig.showToast &&

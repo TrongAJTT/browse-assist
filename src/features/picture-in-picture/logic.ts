@@ -4,6 +4,7 @@
  * and dispatching status updates to the background service worker.
  */
 
+import { t } from "~core/i18n"
 import { MESSAGE_TYPES, sendToBackground } from "~core/messaging"
 import { removeContentToast, showContentToast } from "~core/toast"
 import {
@@ -46,7 +47,7 @@ function ensureHoverButton(): HTMLButtonElement {
   btn.id = PIP_BUTTON_ID
   btn.setAttribute("data-browse-assist-internal", "true")
   btn.type = "button"
-  btn.title = "Watch in Picture-in-Picture"
+  btn.title = t("features.pictureInPicture.logic.watchInPip")
   btn.style.cssText = `
     position: fixed;
     top: 0;
@@ -112,16 +113,16 @@ function ensureHoverButton(): HTMLButtonElement {
         prepareVideoForPiP(hoveredVideoElement)
         if (document.pictureInPictureElement === hoveredVideoElement) {
           await document.exitPictureInPicture()
-          showToast("Exited Picture-in-Picture")
+          showToast(t("features.pictureInPicture.logic.exitedPip"))
         } else if (typeof hoveredVideoElement.requestPictureInPicture !== "function") {
-          showToast("PiP is not supported in this browser", true)
+          showToast(t("features.pictureInPicture.logic.notSupported"), true)
         } else {
           await hoveredVideoElement.requestPictureInPicture()
-          showToast("Entered Picture-in-Picture")
+          showToast(t("features.pictureInPicture.logic.enteredPip"))
         }
       } catch (err) {
         console.error("[Browse Assist] Failed to toggle PiP on hover:", err)
-        showToast("Cannot enter Picture-in-Picture", true)
+        showToast(t("features.pictureInPicture.logic.cannotEnter"), true)
       }
     }
     hideHoverButtonNow()
@@ -344,7 +345,7 @@ export async function togglePictureInPicture(): Promise<void> {
   if (document.pictureInPictureElement) {
     try {
       await document.exitPictureInPicture()
-      showToast("Exited Picture-in-Picture")
+      showToast(t("features.pictureInPicture.logic.exitedPip"))
     } catch (err) {
       console.error("[Browse Assist] Failed to exit PiP:", err)
     }
@@ -354,22 +355,22 @@ export async function togglePictureInPicture(): Promise<void> {
   // 2. Otherwise, find candidate video
   const video = findBestCandidateVideo()
   if (!video) {
-    showToast("No video found on page", true)
+    showToast(t("features.pictureInPicture.logic.noVideoFound"), true)
     return
   }
 
   if (typeof video.requestPictureInPicture !== "function") {
-    showToast("PiP is not supported in this browser", true)
+    showToast(t("features.pictureInPicture.logic.notSupported"), true)
     return
   }
 
   try {
     prepareVideoForPiP(video)
     await video.requestPictureInPicture()
-    showToast("Entered Picture-in-Picture")
+    showToast(t("features.pictureInPicture.logic.enteredPip"))
   } catch (err) {
     console.error("[Browse Assist] Failed to request PiP:", err)
-    showToast("Cannot enter Picture-in-Picture", true)
+    showToast(t("features.pictureInPicture.logic.cannotEnter"), true)
   }
 }
 

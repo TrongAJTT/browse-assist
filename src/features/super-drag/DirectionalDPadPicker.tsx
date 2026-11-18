@@ -9,6 +9,7 @@ import {
 import type React from "react"
 
 import type { DirectionalActions, SuperDragAction } from "~core/types"
+import { useI18n } from "~core/useI18n"
 import type { DragDirection } from "~features/super-drag/logic"
 
 export interface DirectionalDPadPickerProps {
@@ -49,10 +50,38 @@ export const DirectionalDPadPicker: React.FC<DirectionalDPadPickerProps> = ({
   centerIcon,
   targetType = "text"
 }) => {
+  const { t } = useI18n()
   const actionOptions = getSuperDragActionOptions(targetType)
 
+  const getLocalizedDirectionLabel = (dir: DragDirection): string => {
+    switch (dir) {
+      case "up":
+        return t("common.top")
+      case "left":
+        return t("common.left")
+      case "right":
+        return t("common.right")
+      case "down":
+        return t("common.bottom")
+    }
+  }
+
+  const getLocalizedActionLabel = (actionId: SuperDragAction): string => {
+    if (actionId === "copy_to_clipboard") {
+      if (targetType === "link") {
+        return t("features.superDrag.settings.actions.copy_link_url")
+      }
+      if (targetType === "image") {
+        return t("features.superDrag.settings.actions.copy_image_link")
+      }
+      return t("features.superDrag.settings.actions.copy_to_clipboard")
+    }
+    return t(`features.superDrag.settings.actions.${actionId}`)
+  }
+
   const renderDirectionNode = (direction: DragDirection, widthClass = "w-[140px]") => {
-    const { key, label, Icon } = DIRECTIONS[direction]
+    const { key, Icon } = DIRECTIONS[direction]
+    const label = getLocalizedDirectionLabel(direction)
     const rawAction = actions[key]
     const isValid = actionOptions.some((opt) => opt.id === rawAction)
     const currentAction = isValid ? rawAction : "open_bg_tab"
@@ -82,7 +111,7 @@ export const DirectionalDPadPicker: React.FC<DirectionalDPadPickerProps> = ({
                 value={opt.id}
                 disabled={isDisabled}
                 className={isDisabled ? "text-content-muted/50" : ""}>
-                {opt.label} {isDisabled ? "(N/A)" : ""}
+                {getLocalizedActionLabel(opt.id)} {isDisabled ? "(N/A)" : ""}
               </option>
             )
           })}
@@ -96,7 +125,7 @@ export const DirectionalDPadPicker: React.FC<DirectionalDPadPickerProps> = ({
       {/* Header & Reset */}
       <div className="flex items-center justify-between">
         <span className="text-[10px] uppercase font-bold text-content-muted tracking-wider">
-          Directional Gestures
+          {t("features.superDrag.settings.directionalGestures")}
         </span>
         {onReset && (
           <button
@@ -104,7 +133,7 @@ export const DirectionalDPadPicker: React.FC<DirectionalDPadPickerProps> = ({
             onClick={onReset}
             className="flex items-center gap-1 text-[11px] font-medium text-accent hover:text-accent-hover transition-colors">
             <RotateCcw className="w-3 h-3" />
-            <span>Reset</span>
+            <span>{t("common.reset")}</span>
           </button>
         )}
       </div>

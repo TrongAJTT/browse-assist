@@ -25,30 +25,13 @@ import {
   type SuperDragAction,
   type SuperDragConfig
 } from "~core/types"
+import { useI18n } from "~core/useI18n"
 import { DirectionalDPadPicker } from "~features/super-drag/DirectionalDPadPicker"
 import type { DragDirection } from "~features/super-drag/logic"
 
 interface SuperDragSettingsViewProps {
   onBack: () => void
 }
-
-const INDICATOR_ITEMS: GridPickerItem<DragIndicatorStyle>[] = [
-  {
-    id: "none",
-    label: "Disabled",
-    icon: <EyeOff className="w-4 h-4" />
-  },
-  {
-    id: "badge",
-    label: "Floating Badge",
-    icon: <Compass className="w-4 h-4" />
-  },
-  {
-    id: "radial",
-    label: "Circular Segments",
-    icon: <PieChart className="w-4 h-4" />
-  }
-]
 
 type TargetTab = "text" | "link" | "image"
 
@@ -60,10 +43,29 @@ type TargetTab = "text" | "link" | "image"
 export const SuperDragSettingsView: React.FC<SuperDragSettingsViewProps> = ({
   onBack
 }) => {
+  const { t } = useI18n()
   const [settings, setSettings] = useStorage<FeatureSettings>(
     STORAGE_KEYS.SETTINGS,
     DEFAULT_SETTINGS
   )
+
+  const indicatorItems: GridPickerItem<DragIndicatorStyle>[] = [
+    {
+      id: "none",
+      label: t("features.superDrag.settings.indicatorStyles.none"),
+      icon: <EyeOff className="w-4 h-4" />
+    },
+    {
+      id: "badge",
+      label: t("features.superDrag.settings.indicatorStyles.badge"),
+      icon: <Compass className="w-4 h-4" />
+    },
+    {
+      id: "radial",
+      label: t("features.superDrag.settings.indicatorStyles.radial"),
+      icon: <PieChart className="w-4 h-4" />
+    }
+  ]
 
   const [activeTab, setActiveTab] = useState<TargetTab>("text")
   const [isIncognitoAllowed, setIsIncognitoAllowed] = useState(false)
@@ -84,19 +86,19 @@ export const SuperDragSettingsView: React.FC<SuperDragSettingsViewProps> = ({
   const targetTabs: SegmentedTabItem<TargetTab>[] = [
     {
       id: "text",
-      label: "Text",
+      label: t("features.superDrag.settings.tabs.text"),
       icon: <Type className="w-3.5 h-3.5" />,
       showOffDot: !currentConfig.searchSelectedText
     },
     {
       id: "link",
-      label: "Links",
+      label: t("features.superDrag.settings.tabs.link"),
       icon: <Link2 className="w-3.5 h-3.5" />,
       showOffDot: !currentConfig.openHyperlinks
     },
     {
       id: "image",
-      label: "Images",
+      label: t("features.superDrag.settings.tabs.image"),
       icon: <ImageIcon className="w-3.5 h-3.5" />,
       showOffDot: !currentConfig.openImages
     }
@@ -170,14 +172,16 @@ export const SuperDragSettingsView: React.FC<SuperDragSettingsViewProps> = ({
 
   return (
     <SubSettingsLayout
-      title="Super Drag"
+      title={t("features.superDrag.title")}
       enabled={isMasterEnabled}
       onToggle={handleToggleMaster}
       onBack={onBack}>
       <div className="space-y-4">
         {/* Section 1: Drag Targets (Segmented Tabs with Off Indicator) */}
         <div className="space-y-2.5">
-          <span className="section-header">Drag Targets</span>
+          <span className="section-header">
+            {t("features.superDrag.settings.dragTargets")}
+          </span>
 
           {/* Segmented Tab Bar for Targets */}
           <SegmentedTabs<TargetTab>
@@ -192,8 +196,8 @@ export const SuperDragSettingsView: React.FC<SuperDragSettingsViewProps> = ({
               <div className="space-y-2">
                 <SettingToggleRow
                   icon={<Search className="w-5 h-5 text-amber-400" />}
-                  title="Search Highlighted Text"
-                  description="Drag selected text in 4 directions to search, open windows, or copy."
+                  title={t("features.superDrag.settings.searchText")}
+                  description={t("features.superDrag.settings.searchTextDesc")}
                   enabled={currentConfig.searchSelectedText}
                   onToggle={() => handleToggleOption("searchSelectedText")}
                 />
@@ -216,7 +220,7 @@ export const SuperDragSettingsView: React.FC<SuperDragSettingsViewProps> = ({
                   </div>
                 ) : (
                   <p className="text-xs text-content-muted py-2 text-center">
-                    Highlighted text dragging is currently disabled.
+                    {t("features.superDrag.settings.textDisabled")}
                   </p>
                 )}
               </div>
@@ -226,8 +230,8 @@ export const SuperDragSettingsView: React.FC<SuperDragSettingsViewProps> = ({
               <div className="space-y-2">
                 <SettingToggleRow
                   icon={<ExternalLink className="w-5 h-5 text-emerald-400" />}
-                  title="Open Hyperlinks"
-                  description="Drag hyperlinks to open in tabs, new windows, or copy link URL or text."
+                  title={t("features.superDrag.settings.openLinks")}
+                  description={t("features.superDrag.settings.openLinksDesc")}
                   enabled={currentConfig.openHyperlinks}
                   onToggle={() => handleToggleOption("openHyperlinks")}
                 />
@@ -250,7 +254,7 @@ export const SuperDragSettingsView: React.FC<SuperDragSettingsViewProps> = ({
                   </div>
                 ) : (
                   <p className="text-xs text-content-muted py-2 text-center">
-                    Hyperlink dragging is currently disabled.
+                    {t("features.superDrag.settings.linksDisabled")}
                   </p>
                 )}
               </div>
@@ -260,8 +264,8 @@ export const SuperDragSettingsView: React.FC<SuperDragSettingsViewProps> = ({
               <div className="space-y-2">
                 <SettingToggleRow
                   icon={<ImageIcon className="w-5 h-5 text-amber-400" />}
-                  title="Drag Images"
-                  description="Drag images to view in tabs, new windows, or copy direct image URLs."
+                  title={t("features.superDrag.settings.dragImages")}
+                  description={t("features.superDrag.settings.dragImagesDesc")}
                   enabled={currentConfig.openImages}
                   onToggle={() => handleToggleOption("openImages")}
                 />
@@ -284,7 +288,7 @@ export const SuperDragSettingsView: React.FC<SuperDragSettingsViewProps> = ({
                   </div>
                 ) : (
                   <p className="text-xs text-content-muted py-2 text-center">
-                    Image dragging is currently disabled.
+                    {t("features.superDrag.settings.imagesDisabled")}
                   </p>
                 )}
               </div>
@@ -294,20 +298,22 @@ export const SuperDragSettingsView: React.FC<SuperDragSettingsViewProps> = ({
 
         {/* Section 2: Visual Feedback / Indicator (GridPicker) */}
         <div className="space-y-2 pt-2 border-t border-border-divider">
-          <span className="section-header">Display & Feedback</span>
+          <span className="section-header">
+            {t("features.superDrag.settings.displayFeedback")}
+          </span>
 
           <div className="space-y-2 pt-1">
             <div className="flex flex-col gap-0.5">
               <span className="text-xs font-semibold text-content-primary">
-                Drag Visual Indicator
+                {t("features.superDrag.settings.dragIndicator")}
               </span>
               <p className="text-[11px] text-content-muted leading-snug">
-                Choose the visual feedback style displayed while dragging elements.
+                {t("features.superDrag.settings.dragIndicatorDesc")}
               </p>
             </div>
 
             <GridPicker<DragIndicatorStyle>
-              items={INDICATOR_ITEMS}
+              items={indicatorItems}
               value={currentIndicatorStyle}
               onChange={handleChangeIndicatorStyle}
               columns={3}

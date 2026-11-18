@@ -2,6 +2,7 @@ import type React from "react"
 import { useCallback, useMemo, useRef, useState } from "react"
 
 import type { EdgePlacement, ScreenEdge } from "~core/types"
+import { useI18n } from "~core/useI18n"
 
 export interface EdgePositionPickerProps {
   value: EdgePlacement
@@ -26,6 +27,7 @@ export const EdgePositionPicker: React.FC<EdgePositionPickerProps> = ({
   disabled = false,
   className = ""
 }) => {
+  const { t } = useI18n()
   const containerRef = useRef<HTMLDivElement>(null)
   const [isDragging, setIsDragging] = useState(false)
 
@@ -152,16 +154,16 @@ export const EdgePositionPicker: React.FC<EdgePositionPickerProps> = ({
 
   // Landmark label for footer display
   const landmarkLabel = useMemo(() => {
-    if (snappedPoint === 50) return "Center"
+    if (snappedPoint === 50) return t("common.center")
     if (currentEdge === "top" || currentEdge === "bottom") {
-      if (snappedPoint === 0) return "Left"
-      if (snappedPoint === 100) return "Right"
+      if (snappedPoint === 0) return t("common.left")
+      if (snappedPoint === 100) return t("common.right")
     } else {
-      if (snappedPoint === 0) return "Top"
-      if (snappedPoint === 100) return "Bottom"
+      if (snappedPoint === 0) return t("common.top")
+      if (snappedPoint === 100) return t("common.bottom")
     }
     return null
-  }, [currentEdge, snappedPoint])
+  }, [currentEdge, snappedPoint, t])
 
   return (
     <div className={`space-y-2 select-none ${className}`}>
@@ -278,14 +280,14 @@ export const EdgePositionPicker: React.FC<EdgePositionPickerProps> = ({
             const isSelected = currentOffset === snap
             const label =
               snap === 50
-                ? "Center"
+                ? t("common.center")
                 : currentEdge === "top" || currentEdge === "bottom"
                   ? snap === 0
-                    ? "Left"
-                    : "Right"
+                    ? t("common.left")
+                    : t("common.right")
                   : snap === 0
-                    ? "Top"
-                    : "Bottom"
+                    ? t("common.top")
+                    : t("common.bottom")
 
             return (
               <button

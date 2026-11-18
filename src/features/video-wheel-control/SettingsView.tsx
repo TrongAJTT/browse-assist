@@ -35,35 +35,13 @@ import {
   type VideoWheelControlConfig,
   type VideoWheelModifier
 } from "~core/types"
+import { useI18n } from "~core/useI18n"
 
 interface VideoWheelControlSettingsViewProps {
   onBack: () => void
 }
 
 type TabType = "volume" | "speed" | "seek" | "extra"
-
-const TABS: SegmentedTabItem<TabType>[] = [
-  {
-    id: "volume",
-    label: "Volume",
-    icon: <Volume2 className="w-3.5 h-3.5" />
-  },
-  {
-    id: "speed",
-    label: "Speed",
-    icon: <Gauge className="w-3.5 h-3.5" />
-  },
-  {
-    id: "seek",
-    label: "Seek",
-    icon: <FastForward className="w-3.5 h-3.5" />
-  },
-  {
-    id: "extra",
-    label: "Extra",
-    icon: <Sliders className="w-3.5 h-3.5" />
-  }
-]
 
 // 6 modifier options for trailing dropdown
 const MODIFIER_OPTIONS: SelectDropdownOption<VideoWheelModifier>[] = [
@@ -82,7 +60,31 @@ const MODIFIER_OPTIONS: SelectDropdownOption<VideoWheelModifier>[] = [
 export const VideoWheelControlSettingsView: React.FC<
   VideoWheelControlSettingsViewProps
 > = ({ onBack }) => {
+  const { t } = useI18n()
   const [activeTab, setActiveTab] = useState<TabType>("volume")
+
+  const tabs: SegmentedTabItem<TabType>[] = [
+    {
+      id: "volume",
+      label: t("features.videoWheelControl.settings.tabs.volume"),
+      icon: <Volume2 className="w-3.5 h-3.5" />
+    },
+    {
+      id: "speed",
+      label: t("features.videoWheelControl.settings.tabs.speed"),
+      icon: <Gauge className="w-3.5 h-3.5" />
+    },
+    {
+      id: "seek",
+      label: t("features.videoWheelControl.settings.tabs.seek"),
+      icon: <FastForward className="w-3.5 h-3.5" />
+    },
+    {
+      id: "extra",
+      label: t("features.videoWheelControl.settings.tabs.extra"),
+      icon: <Sliders className="w-3.5 h-3.5" />
+    }
+  ]
 
   const [settings, setSettings] = useStorage<FeatureSettings>(
     STORAGE_KEYS.SETTINGS,
@@ -132,14 +134,14 @@ export const VideoWheelControlSettingsView: React.FC<
 
   return (
     <SubSettingsLayout
-      title="Video Wheel Control"
+      title={t("features.videoWheelControl.title")}
       enabled={isEnabled}
       onToggle={handleToggleFeature}
       onBack={onBack}>
       <div className="space-y-4">
         {/* Navigation Tabs */}
         <SegmentedTabs
-          items={TABS}
+          items={tabs}
           value={activeTab}
           onChange={(tab) => setActiveTab(tab)}
         />
@@ -150,11 +152,9 @@ export const VideoWheelControlSettingsView: React.FC<
             <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-amber-400" />
             <div>
               <span className="font-semibold block text-amber-300">
-                Modifier Key Conflict Detected
+                {t("features.videoWheelControl.settings.conflictTitle")}
               </span>
-              Two or more active controls share the same modifier key (Seek &gt;
-              Speed &gt; Volume priority). Please assign unique modifier keys to
-              avoid collisions.
+              {t("features.videoWheelControl.settings.conflictDesc")}
             </div>
           </div>
         )}
@@ -168,12 +168,14 @@ export const VideoWheelControlSettingsView: React.FC<
                 <div className="flex items-center gap-2">
                   <Volume2 className="w-4 h-4 text-violet-400" />
                   <span className="text-xs font-semibold text-content-primary">
-                    Volume Control
+                    {t("features.videoWheelControl.settings.volumeControl")}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-[11px] text-content-muted">
-                    {currentConfig.enableVolume ? "Enabled" : "Disabled"}
+                    {currentConfig.enableVolume
+                      ? t("common.enabled")
+                      : t("common.disabled")}
                   </span>
                   <Switch
                     size="sm"
@@ -181,7 +183,9 @@ export const VideoWheelControlSettingsView: React.FC<
                     onChange={(checked) =>
                       updateConfig({ enableVolume: checked })
                     }
-                    ariaLabel="Toggle Volume Control"
+                    ariaLabel={t(
+                      "features.videoWheelControl.settings.volumeControl"
+                    )}
                   />
                 </div>
               </div>
@@ -190,10 +194,10 @@ export const VideoWheelControlSettingsView: React.FC<
               <div className="flex items-center justify-between gap-3 pt-1">
                 <div className="flex flex-col min-w-0">
                   <span className="text-xs font-medium text-content-primary">
-                    Modifier Key
+                    {t("features.videoWheelControl.settings.modifierKey")}
                   </span>
                   <span className="text-[11px] text-content-muted">
-                    Hold key + scroll over video
+                    {t("features.videoWheelControl.settings.modifierKeyDesc")}
                   </span>
                 </div>
                 <SelectDropdown<VideoWheelModifier>
@@ -203,7 +207,7 @@ export const VideoWheelControlSettingsView: React.FC<
                   onChange={(modifier) =>
                     updateConfig({ volumeModifier: modifier })
                   }
-                  ariaLabel="Volume Modifier Key"
+                  ariaLabel={t("features.videoWheelControl.settings.modifierKey")}
                 />
               </div>
             </div>
@@ -215,7 +219,7 @@ export const VideoWheelControlSettingsView: React.FC<
                   <div className="flex items-center gap-2">
                     <Volume2 className="w-3.5 h-3.5 text-violet-400" />
                     <span className="text-xs font-semibold text-content-primary">
-                      Volume Step
+                      {t("features.videoWheelControl.settings.volumeStep")}
                     </span>
                   </div>
                   <span className="text-xs font-bold text-violet-400">
@@ -228,7 +232,7 @@ export const VideoWheelControlSettingsView: React.FC<
                   min={0.01}
                   max={0.2}
                   step={0.01}
-                  ariaLabel="Volume Step"
+                  ariaLabel={t("features.videoWheelControl.settings.volumeStep")}
                 />
               </div>
             )}
@@ -237,8 +241,11 @@ export const VideoWheelControlSettingsView: React.FC<
             <div className="divide-y divide-border-divider">
               <SettingToggleRow
                 icon={<MousePointerClick className="w-5 h-5 text-violet-400" />}
-                title="Click to Mute"
-                description={`Click video while holding ${currentConfig.volumeModifier.toUpperCase()} to toggle mute.`}
+                title={t("features.videoWheelControl.settings.clickToMute")}
+                description={t(
+                  "features.videoWheelControl.settings.clickToMuteDesc",
+                  { key: currentConfig.volumeModifier.toUpperCase() }
+                )}
                 enabled={
                   currentConfig.clickToMute && currentConfig.enableVolume
                 }
@@ -248,8 +255,10 @@ export const VideoWheelControlSettingsView: React.FC<
 
               <SettingToggleRow
                 icon={<ArrowUpDown className="w-5 h-5 text-content-muted" />}
-                title="Invert Volume Scroll"
-                description="Reverse wheel scroll direction when adjusting volume."
+                title={t("features.videoWheelControl.settings.invertVolume")}
+                description={t(
+                  "features.videoWheelControl.settings.invertVolumeDesc"
+                )}
                 enabled={
                   currentConfig.invertVolumeScroll && currentConfig.enableVolume
                 }
@@ -271,12 +280,14 @@ export const VideoWheelControlSettingsView: React.FC<
                 <div className="flex items-center gap-2">
                   <Gauge className="w-4 h-4 text-indigo-400" />
                   <span className="text-xs font-semibold text-content-primary">
-                    Speed Control
+                    {t("features.videoWheelControl.settings.speedControl")}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-[11px] text-content-muted">
-                    {currentConfig.enableSpeed ? "Enabled" : "Disabled"}
+                    {currentConfig.enableSpeed
+                      ? t("common.enabled")
+                      : t("common.disabled")}
                   </span>
                   <Switch
                     size="sm"
@@ -284,7 +295,9 @@ export const VideoWheelControlSettingsView: React.FC<
                     onChange={(checked) =>
                       updateConfig({ enableSpeed: checked })
                     }
-                    ariaLabel="Toggle Speed Control"
+                    ariaLabel={t(
+                      "features.videoWheelControl.settings.speedControl"
+                    )}
                   />
                 </div>
               </div>
@@ -293,10 +306,10 @@ export const VideoWheelControlSettingsView: React.FC<
               <div className="flex items-center justify-between gap-3 pt-1">
                 <div className="flex flex-col min-w-0">
                   <span className="text-xs font-medium text-content-primary">
-                    Modifier Key
+                    {t("features.videoWheelControl.settings.modifierKey")}
                   </span>
                   <span className="text-[11px] text-content-muted">
-                    Hold key + scroll over video
+                    {t("features.videoWheelControl.settings.modifierKeyDesc")}
                   </span>
                 </div>
                 <SelectDropdown<VideoWheelModifier>
@@ -306,7 +319,7 @@ export const VideoWheelControlSettingsView: React.FC<
                   onChange={(modifier) =>
                     updateConfig({ speedModifier: modifier })
                   }
-                  ariaLabel="Speed Modifier Key"
+                  ariaLabel={t("features.videoWheelControl.settings.modifierKey")}
                 />
               </div>
             </div>
@@ -318,7 +331,7 @@ export const VideoWheelControlSettingsView: React.FC<
                   <div className="flex items-center gap-2">
                     <Gauge className="w-3.5 h-3.5 text-indigo-400" />
                     <span className="text-xs font-semibold text-content-primary">
-                      Speed Step
+                      {t("features.videoWheelControl.settings.speedStep")}
                     </span>
                   </div>
                   <span className="text-xs font-bold text-indigo-400">
@@ -331,7 +344,7 @@ export const VideoWheelControlSettingsView: React.FC<
                   min={0.05}
                   max={0.5}
                   step={0.05}
-                  ariaLabel="Speed Step"
+                  ariaLabel={t("features.videoWheelControl.settings.speedStep")}
                 />
               </div>
             )}
@@ -340,8 +353,10 @@ export const VideoWheelControlSettingsView: React.FC<
             <div className="divide-y divide-border-divider pt-1">
               <SettingToggleRow
                 icon={<Zap className="w-5 h-5 text-amber-500" />}
-                title="Hold 'X' to Boost (2.0x)"
-                description="Hold the 'X' key while watching a video to temporarily speed it up to 2.0x."
+                title={t("features.videoWheelControl.settings.holdXBoost")}
+                description={t(
+                  "features.videoWheelControl.settings.holdXBoostDesc"
+                )}
                 enabled={currentConfig.enableHoldToBoost}
                 onToggle={(enabled) =>
                   updateConfig({ enableHoldToBoost: enabled })
@@ -350,8 +365,13 @@ export const VideoWheelControlSettingsView: React.FC<
 
               <SettingToggleRow
                 icon={<Maximize2 className="w-5 h-5 text-sky-400" />}
-                title="Click to Fullscreen"
-                description={`Click video while holding ${currentConfig.speedModifier.toUpperCase()} to toggle fullscreen.`}
+                title={t(
+                  "features.videoWheelControl.settings.clickToFullscreen"
+                )}
+                description={t(
+                  "features.videoWheelControl.settings.clickToFullscreenDesc",
+                  { key: currentConfig.speedModifier.toUpperCase() }
+                )}
                 enabled={
                   currentConfig.clickToFullscreen && currentConfig.enableSpeed
                 }
@@ -363,8 +383,10 @@ export const VideoWheelControlSettingsView: React.FC<
 
               <SettingToggleRow
                 icon={<ArrowUpDown className="w-5 h-5 text-content-muted" />}
-                title="Invert Speed Scroll"
-                description="Reverse wheel scroll direction when adjusting playback speed."
+                title={t("features.videoWheelControl.settings.invertSpeed")}
+                description={t(
+                  "features.videoWheelControl.settings.invertSpeedDesc"
+                )}
                 enabled={
                   currentConfig.invertSpeedScroll && currentConfig.enableSpeed
                 }
@@ -386,12 +408,14 @@ export const VideoWheelControlSettingsView: React.FC<
                 <div className="flex items-center gap-2">
                   <FastForward className="w-4 h-4 text-emerald-400" />
                   <span className="text-xs font-semibold text-content-primary">
-                    Seek Control
+                    {t("features.videoWheelControl.settings.seekControl")}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-[11px] text-content-muted">
-                    {currentConfig.enableSeek ? "Enabled" : "Disabled"}
+                    {currentConfig.enableSeek
+                      ? t("common.enabled")
+                      : t("common.disabled")}
                   </span>
                   <Switch
                     size="sm"
@@ -399,7 +423,9 @@ export const VideoWheelControlSettingsView: React.FC<
                     onChange={(checked) =>
                       updateConfig({ enableSeek: checked })
                     }
-                    ariaLabel="Toggle Seek Control"
+                    ariaLabel={t(
+                      "features.videoWheelControl.settings.seekControl"
+                    )}
                   />
                 </div>
               </div>
@@ -408,10 +434,10 @@ export const VideoWheelControlSettingsView: React.FC<
               <div className="flex items-center justify-between gap-3 pt-1">
                 <div className="flex flex-col min-w-0">
                   <span className="text-xs font-medium text-content-primary">
-                    Modifier Key
+                    {t("features.videoWheelControl.settings.modifierKey")}
                   </span>
                   <span className="text-[11px] text-content-muted">
-                    Hold key + scroll over video
+                    {t("features.videoWheelControl.settings.modifierKeyDesc")}
                   </span>
                 </div>
                 <SelectDropdown<VideoWheelModifier>
@@ -421,7 +447,7 @@ export const VideoWheelControlSettingsView: React.FC<
                   onChange={(modifier) =>
                     updateConfig({ seekModifier: modifier })
                   }
-                  ariaLabel="Seek Modifier Key"
+                  ariaLabel={t("features.videoWheelControl.settings.modifierKey")}
                 />
               </div>
             </div>
@@ -433,7 +459,7 @@ export const VideoWheelControlSettingsView: React.FC<
                   <div className="flex items-center gap-2">
                     <FastForward className="w-3.5 h-3.5 text-emerald-400" />
                     <span className="text-xs font-semibold text-content-primary">
-                      Seek Step (Seconds)
+                      {t("features.videoWheelControl.settings.seekStep")}
                     </span>
                   </div>
                   <span className="text-xs font-bold text-emerald-400">
@@ -448,7 +474,7 @@ export const VideoWheelControlSettingsView: React.FC<
                   min={1}
                   max={30}
                   step={1}
-                  ariaLabel="Seek Step"
+                  ariaLabel={t("features.videoWheelControl.settings.seekStep")}
                 />
               </div>
             )}
@@ -457,8 +483,10 @@ export const VideoWheelControlSettingsView: React.FC<
             <div className="divide-y divide-border-divider pt-1">
               <SettingToggleRow
                 icon={<Film className="w-5 h-5 text-amber-400" />}
-                title="Frame-by-Frame Stepper"
-                description="When video is paused, wheel scrolling steps frame-by-frame (~1/30s)."
+                title={t("features.videoWheelControl.settings.frameStepper")}
+                description={t(
+                  "features.videoWheelControl.settings.frameStepperDesc"
+                )}
                 enabled={
                   currentConfig.enableFrameStep && currentConfig.enableSeek
                 }
@@ -470,8 +498,10 @@ export const VideoWheelControlSettingsView: React.FC<
 
               <SettingToggleRow
                 icon={<ArrowUpDown className="w-5 h-5 text-content-muted" />}
-                title="Invert Seek Scroll"
-                description="Reverse wheel scroll direction when seeking video."
+                title={t("features.videoWheelControl.settings.invertSeek")}
+                description={t(
+                  "features.videoWheelControl.settings.invertSeekDesc"
+                )}
                 enabled={
                   currentConfig.invertSeekScroll && currentConfig.enableSeek
                 }
@@ -491,8 +521,10 @@ export const VideoWheelControlSettingsView: React.FC<
               {/* Video Screenshot */}
               <SettingToggleRow
                 icon={<Camera className="w-5 h-5 text-pink-400" />}
-                title="Video Screenshot (Shift+Alt+Click)"
-                description="Capture current video frame directly to clipboard as PNG."
+                title={t("features.videoWheelControl.settings.screenshot")}
+                description={t(
+                  "features.videoWheelControl.settings.screenshotDesc"
+                )}
                 enabled={currentConfig.enableScreenshot}
                 onToggle={(enabled) =>
                   updateConfig({ enableScreenshot: enabled })
@@ -502,8 +534,8 @@ export const VideoWheelControlSettingsView: React.FC<
               {/* Show OSD */}
               <SettingToggleRow
                 icon={<Eye className="w-5 h-5 text-indigo-400" />}
-                title="On-Screen Display (OSD)"
-                description="Show sleek floating HUD badges for volume, speed, seek, and boost."
+                title={t("features.videoWheelControl.settings.osd")}
+                description={t("features.videoWheelControl.settings.osdDesc")}
                 enabled={currentConfig.showOsd}
                 onToggle={(enabled) => updateConfig({ showOsd: enabled })}
               />
@@ -514,10 +546,12 @@ export const VideoWheelControlSettingsView: React.FC<
                     <Droplets className="w-5 h-5 text-sky-400 shrink-0 mt-0.5" />
                     <div className="flex flex-col min-w-0">
                       <span className="text-xs font-semibold text-content-primary">
-                        OSD Opacity
+                        {t("features.videoWheelControl.settings.osdOpacity")}
                       </span>
                       <span className="text-[11px] text-content-muted leading-snug mt-0.5">
-                        Adjust transparency of the floating OSD badge.
+                        {t(
+                          "features.videoWheelControl.settings.osdOpacityDesc"
+                        )}
                       </span>
                     </div>
                   </div>
@@ -531,7 +565,9 @@ export const VideoWheelControlSettingsView: React.FC<
                         updateConfig({ osdOpacity })
                       }
                     }}
-                    ariaLabel="OSD Opacity"
+                    ariaLabel={t(
+                      "features.videoWheelControl.settings.osdOpacity"
+                    )}
                   />
                 </div>
               )}
@@ -543,20 +579,13 @@ export const VideoWheelControlSettingsView: React.FC<
         <div className="card-subtle p-3 text-[11px] text-content-muted space-y-1.5 border border-border-subtle/80 pt-2.5">
           <div className="flex items-center gap-1.5 font-semibold text-content-secondary">
             <Info className="w-3.5 h-3.5 text-violet-400 shrink-0" />
-            <span>Compatibility & State Notice</span>
+            <span>{t("features.videoWheelControl.settings.noticeTitle")}</span>
           </div>
           <p className="leading-relaxed">
-            This feature interacts directly with the underlying HTML5 media
-            element (
-            <code className="text-violet-300 font-mono text-[10px]">
-              &lt;video&gt;
-            </code>
-            ).
+            {t("features.videoWheelControl.settings.noticeBody1")}
           </p>
           <p className="leading-relaxed text-content-muted">
-            On advanced web platforms, custom state managers may occasionally
-            reset playback rate or mute status when a video loops, changes
-            stream resolution, or auto-plays the next item.
+            {t("features.videoWheelControl.settings.noticeBody2")}
           </p>
         </div>
       </div>

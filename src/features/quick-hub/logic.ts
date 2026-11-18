@@ -6,6 +6,7 @@
  */
 
 import { isColorPickerSupported } from "~core/browserDetect"
+import { t } from "~core/i18n"
 import { cleanUrl, copyToClipboard, showCopiedFeedback } from "~core/linkUtils"
 import { getStoredSettings, subscribeToSettings } from "~core/storage"
 import { detectPageTheme, observePageTheme } from "~core/themeDetect"
@@ -370,7 +371,7 @@ const ACTION_RENDERERS: Record<
     btn.innerHTML = `
       <div class="qh-item-content">
         <div class="qh-icon-box qh-icon-pip">${PIP_ICON_SVG}</div>
-        <span class="qh-item-name">Watch Video in PiP</span>
+        <span class="qh-item-name">${t("features.quickHub.settings.actions.pipTitle")}</span>
       </div>
     `
     btn.addEventListener("click", () => {
@@ -394,7 +395,7 @@ const ACTION_RENDERERS: Record<
     btn.innerHTML = `
       <div class="qh-item-content">
         <div class="qh-icon-box qh-icon-color">${EYEDROPPER_ICON_SVG}</div>
-        <span class="qh-item-name">Pick Color from Screen</span>
+        <span class="qh-item-name">${t("features.quickHub.settings.actions.colorPickerTitle")}</span>
       </div>
     `
     btn.addEventListener("click", () => {
@@ -417,7 +418,7 @@ const ACTION_RENDERERS: Record<
     btn.innerHTML = `
       <div class="qh-item-content">
         <div class="qh-icon-box qh-icon-zap">${ZAP_ICON_SVG}</div>
-        <span class="qh-item-name">Element Toys</span>
+        <span class="qh-item-name">${t("features.quickHub.settings.actions.elementToysTitle")}</span>
       </div>
     `
     btn.addEventListener("click", () => {
@@ -440,7 +441,7 @@ const ACTION_RENDERERS: Record<
     btn.innerHTML = `
       <div class="qh-item-content">
         <div class="qh-icon-box qh-icon-scroll">${ARROW_UP_SVG}</div>
-        <span class="qh-item-name">Scroll to Top</span>
+        <span class="qh-item-name">${t("features.quickHub.settings.actions.scrollTopTitle")}</span>
       </div>
     `
     btn.addEventListener("click", () => {
@@ -464,7 +465,7 @@ const ACTION_RENDERERS: Record<
     btn.innerHTML = `
       <div class="qh-item-content">
         <div class="qh-icon-box qh-icon-scroll">${ARROW_DOWN_SVG}</div>
-        <span class="qh-item-name">Scroll to Bottom</span>
+        <span class="qh-item-name">${t("features.quickHub.settings.actions.scrollBottomTitle")}</span>
       </div>
     `
     btn.addEventListener("click", () => {
@@ -491,7 +492,7 @@ const ACTION_RENDERERS: Record<
     btn.innerHTML = `
       <div class="qh-item-content">
         <div class="qh-icon-box qh-icon-zoom">${ZOOM_SVG}</div>
-        <span class="qh-item-name">Reset Page Zoom</span>
+        <span class="qh-item-name">${t("features.quickHub.settings.actions.resetZoomTitle")}</span>
       </div>
     `
     btn.addEventListener("click", () => {
@@ -514,7 +515,7 @@ const ACTION_RENDERERS: Record<
     btn.innerHTML = `
       <div class="qh-item-content">
         <div class="qh-icon-box qh-icon-link">${LINK_SVG}</div>
-        <span class="qh-item-name">Copy Clean URL</span>
+        <span class="qh-item-name">${t("features.quickHub.settings.actions.cleanUrlTitle")}</span>
       </div>
     `
     btn.addEventListener("click", async () => {
@@ -523,7 +524,7 @@ const ACTION_RENDERERS: Record<
       const cleaned = cleanUrl(rawUrl)
       const ok = await copyToClipboard(cleaned)
       if (ok) {
-        showCopiedFeedback("Clean URL Copied", cleaned)
+        showCopiedFeedback(t("features.quickHub.logic.cleanUrlCopied"), cleaned)
       }
     })
     list.appendChild(btn)
@@ -559,7 +560,7 @@ function renderMenuContent(): void {
   if (renderedCount === 0) {
     const empty = document.createElement("div")
     empty.className = "qh-empty-msg"
-    empty.textContent = "No tools active. Enable features in Browse Assist popup."
+    empty.textContent = t("features.quickHub.logic.noToolsActive")
     list.appendChild(empty)
   }
 
@@ -672,7 +673,7 @@ function createDOM(): void {
   triggerBtn.className = `qh-trigger ${
     currentConfig.hoverToReveal ? "qh-proximity qh-hidden" : "qh-persistent"
   }`
-  triggerBtn.title = "Quick Hub (Instant Tools)"
+  triggerBtn.title = t("features.quickHub.logic.triggerTooltip")
   triggerBtn.setAttribute("aria-label", "Quick Hub")
   triggerBtn.innerHTML = SPARKLES_ICON_SVG
   triggerBtn.addEventListener("click", (e) => {

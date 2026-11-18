@@ -1,6 +1,8 @@
 import { Eye, EyeOff, Move, RotateCcw } from "lucide-react"
 import React, { useState } from "react"
 
+import { useI18n } from "~core/useI18n"
+
 export interface SortableVisibilityItem<T extends string = string> {
   id: T
   title: string
@@ -36,10 +38,12 @@ export function SortableVisibilityList<T extends string = string>({
   onOrderChange,
   onToggleVisibility,
   onResetOrder,
-  resetLabel = "Reset order",
+  resetLabel,
   headerActions,
   className = ""
 }: SortableVisibilityListProps<T>): React.ReactElement {
+  const { t } = useI18n()
+  const resolvedResetLabel = resetLabel ?? t("common.resetOrder")
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
 
@@ -119,7 +123,7 @@ export function SortableVisibilityList<T extends string = string>({
                 onClick={onResetOrder}
                 className="flex items-center gap-1 text-[11px] font-medium text-accent hover:text-accent-hover transition-colors">
                 <RotateCcw className="w-3 h-3" />
-                <span>{resetLabel}</span>
+                <span>{resolvedResetLabel}</span>
               </button>
             )}
           </div>
@@ -199,10 +203,10 @@ export function SortableVisibilityList<T extends string = string>({
                     item.isDisabled
                       ? item.disabledReason
                       : item.isHidden
-                        ? `Show ${item.title}`
-                        : `Hide ${item.title}`
+                        ? `${t("common.show")} ${item.title}`
+                        : `${t("common.hide")} ${item.title}`
                   }
-                  aria-label={`${item.isHidden ? "Show" : "Hide"} ${item.title}`}
+                  aria-label={`${item.isHidden ? t("common.show") : t("common.hide")} ${item.title}`}
                   className={`p-1.5 rounded-lg border transition-all duration-150 ${
                     item.isDisabled
                       ? "bg-app-card text-content-muted border-border-subtle opacity-35 cursor-not-allowed"

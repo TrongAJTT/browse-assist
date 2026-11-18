@@ -22,6 +22,7 @@ import {
   type ContextMenuActionsConfig,
   type FeatureSettings
 } from "~core/types"
+import { useI18n } from "~core/useI18n"
 
 interface ContextMenuActionsSettingsViewProps {
   onBack: () => void
@@ -36,57 +37,6 @@ interface ActionMeta {
   icon: React.ReactNode
 }
 
-const ACTION_METAS: Record<ContextMenuActionId, ActionMeta> = {
-  copyLinkText: {
-    id: "copyLinkText",
-    title: "Copy Link Text",
-    badge: "Text only",
-    badgeColor: "badge-muted",
-    description: "Extracts and copies the anchor text without copying the URL.",
-    icon: <Type className="w-5 h-5 text-cyan-400" />
-  },
-  cleanLinkCopy: {
-    id: "cleanLinkCopy",
-    title: "Clean Link Copy",
-    badge: "Anti-Tracking",
-    badgeColor: "badge-success",
-    description: "Strips tracking parameters (utm_*, fbclid, si) before copying.",
-    icon: <Sparkles className="w-5 h-5 text-emerald-400" />
-  },
-  markdownLinkCopy: {
-    id: "markdownLinkCopy",
-    title: "Markdown Link Copy",
-    badge: "[Text](URL)",
-    badgeColor: "badge-accent",
-    description: "Copies formatted markdown hyperlink, ideal for Obsidian, Notion & GitHub.",
-    icon: <FileCode className="w-5 h-5 text-indigo-400" />
-  },
-  copyCleanPageUrl: {
-    id: "copyCleanPageUrl",
-    title: "Copy Clean Page URL",
-    badge: "Page",
-    badgeColor: "badge-success",
-    description: "Right-click anywhere on a page to copy its URL without tracking params.",
-    icon: <Globe className="w-5 h-5 text-emerald-400" />
-  },
-  copyPageMarkdown: {
-    id: "copyPageMarkdown",
-    title: "Copy Page as Markdown",
-    badge: "Page",
-    badgeColor: "badge-accent",
-    description: "Copies the current page title and clean URL as [Title](URL).",
-    icon: <FileText className="w-5 h-5 text-sky-400" />
-  },
-  copySelectionQuote: {
-    id: "copySelectionQuote",
-    title: "Copy Selection as Quote",
-    badge: "Selection",
-    badgeColor: "badge-muted",
-    description: "Copies highlighted text as a Markdown blockquote with source link.",
-    icon: <Quote className="w-5 h-5 text-amber-400" />
-  }
-}
-
 /**
  * Sub-settings view for Context Menu Actions.
  * Clean, flat list layout with HTML5 drag-and-drop & button reordering.
@@ -94,10 +44,74 @@ const ACTION_METAS: Record<ContextMenuActionId, ActionMeta> = {
 export const ContextMenuActionsSettingsView: React.FC<
   ContextMenuActionsSettingsViewProps
 > = ({ onBack }) => {
+  const { t } = useI18n()
   const [settings, setSettings] = useStorage<FeatureSettings>(
     STORAGE_KEYS.SETTINGS,
     DEFAULT_SETTINGS
   )
+
+  const actionMetas: Record<ContextMenuActionId, ActionMeta> = {
+    copyLinkText: {
+      id: "copyLinkText",
+      title: t("features.contextMenuActions.copyLinkText"),
+      badge: t("features.contextMenuActions.settings.badges.textOnly"),
+      badgeColor: "badge-muted",
+      description: t(
+        "features.contextMenuActions.settings.descriptions.copyLinkText"
+      ),
+      icon: <Type className="w-5 h-5 text-cyan-400" />
+    },
+    cleanLinkCopy: {
+      id: "cleanLinkCopy",
+      title: t("features.contextMenuActions.cleanLinkCopy"),
+      badge: t("features.contextMenuActions.settings.badges.antiTracking"),
+      badgeColor: "badge-success",
+      description: t(
+        "features.contextMenuActions.settings.descriptions.cleanLinkCopy"
+      ),
+      icon: <Sparkles className="w-5 h-5 text-emerald-400" />
+    },
+    markdownLinkCopy: {
+      id: "markdownLinkCopy",
+      title: t("features.contextMenuActions.markdownLinkCopy"),
+      badge: t("features.contextMenuActions.settings.badges.markdown"),
+      badgeColor: "badge-accent",
+      description: t(
+        "features.contextMenuActions.settings.descriptions.markdownLinkCopy"
+      ),
+      icon: <FileCode className="w-5 h-5 text-indigo-400" />
+    },
+    copyCleanPageUrl: {
+      id: "copyCleanPageUrl",
+      title: t("features.contextMenuActions.copyCleanPageUrl"),
+      badge: t("features.contextMenuActions.settings.badges.page"),
+      badgeColor: "badge-success",
+      description: t(
+        "features.contextMenuActions.settings.descriptions.copyCleanPageUrl"
+      ),
+      icon: <Globe className="w-5 h-5 text-emerald-400" />
+    },
+    copyPageMarkdown: {
+      id: "copyPageMarkdown",
+      title: t("features.contextMenuActions.copyPageMarkdown"),
+      badge: t("features.contextMenuActions.settings.badges.page"),
+      badgeColor: "badge-accent",
+      description: t(
+        "features.contextMenuActions.settings.descriptions.copyPageMarkdown"
+      ),
+      icon: <FileText className="w-5 h-5 text-sky-400" />
+    },
+    copySelectionQuote: {
+      id: "copySelectionQuote",
+      title: t("features.contextMenuActions.copySelectionQuote"),
+      badge: t("features.contextMenuActions.settings.badges.selection"),
+      badgeColor: "badge-muted",
+      description: t(
+        "features.contextMenuActions.settings.descriptions.copySelectionQuote"
+      ),
+      icon: <Quote className="w-5 h-5 text-amber-400" />
+    }
+  }
 
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
@@ -188,24 +202,24 @@ export const ContextMenuActionsSettingsView: React.FC<
 
   return (
     <SubSettingsLayout
-      title="Context Menu Actions"
+      title={t("features.contextMenuActions.title")}
       enabled={isMasterEnabled}
       onToggle={handleToggleMaster}
       onBack={onBack}>
       <div className="space-y-4">
         <div>
           <span className="section-header">
-            Right-Click Menu Items
+            {t("features.contextMenuActions.settings.sectionTitle")}
           </span>
           <p className="text-xs text-content-muted mt-1">
-            Drag items to reorder or toggle their visibility in your right-click context menu.
+            {t("features.contextMenuActions.settings.sectionDesc")}
           </p>
         </div>
 
         {/* Clean, flat list separated by dividers with native drag & drop */}
         <div className="divide-y divide-border-divider">
           {order.map((actionId, index) => {
-            const item = ACTION_METAS[actionId]
+            const item = actionMetas[actionId]
             if (!item) return null
 
             const isItemEnabled = Boolean(

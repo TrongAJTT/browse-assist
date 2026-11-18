@@ -18,6 +18,7 @@ import {
   type ImageHoverPreviewConfig,
   type ImageHoverPreviewModifier
 } from "~core/types"
+import { useI18n } from "~core/useI18n"
 
 interface ImageHoverPreviewSettingsViewProps {
   onBack: () => void
@@ -29,23 +30,24 @@ const MODIFIER_OPTIONS: SelectDropdownOption<ImageHoverPreviewModifier>[] = [
   { id: "ctrl", label: "Ctrl" }
 ]
 
-const DELAY_OPTIONS: SelectDropdownOption<string>[] = [
-  { id: "0", label: "Instant" },
-  { id: "150", label: "150ms" },
-  { id: "250", label: "250ms" },
-  { id: "450", label: "450ms" }
-]
-
 /**
  * Sub-settings view for Image Hover Preview.
  */
 export const ImageHoverPreviewSettingsView: React.FC<
   ImageHoverPreviewSettingsViewProps
 > = ({ onBack }) => {
+  const { t } = useI18n()
   const [settings, setSettings] = useStorage<FeatureSettings>(
     STORAGE_KEYS.SETTINGS,
     DEFAULT_SETTINGS
   )
+
+  const delayOptions: SelectDropdownOption<string>[] = [
+    { id: "0", label: t("features.imageHoverPreview.settings.instant") },
+    { id: "150", label: "150ms" },
+    { id: "250", label: "250ms" },
+    { id: "450", label: "450ms" }
+  ]
 
   const isMasterEnabled =
     settings?.imageHoverPreview ?? DEFAULT_SETTINGS.imageHoverPreview
@@ -65,7 +67,7 @@ export const ImageHoverPreviewSettingsView: React.FC<
 
   return (
     <SubSettingsLayout
-      title="Image Hover Preview"
+      title={t("features.imageHoverPreview.title")}
       enabled={isMasterEnabled}
       onToggle={(enabled) =>
         setSettings((prev) => ({
@@ -77,17 +79,19 @@ export const ImageHoverPreviewSettingsView: React.FC<
       <div className="space-y-4">
         {/* Trigger & Timing */}
         <div className="space-y-3">
-          <span className="section-header">Activation</span>
+          <span className="section-header">
+            {t("features.imageHoverPreview.settings.activation")}
+          </span>
 
           <div className="flex items-center justify-between gap-3 py-0.5">
             <div className="flex items-start gap-3 flex-1 min-w-0">
               <Command className="w-5 h-5 text-sky-400 shrink-0 mt-0.5" />
               <div className="flex flex-col min-w-0">
                 <span className="text-xs font-semibold text-content-primary">
-                  Trigger Modifier
+                  {t("features.imageHoverPreview.settings.triggerModifier")}
                 </span>
                 <p className="text-[11px] text-content-muted mt-0.5 leading-snug">
-                  Hold this key while hovering an image to preview.
+                  {t("features.imageHoverPreview.settings.triggerModifierDesc")}
                 </p>
               </div>
             </div>
@@ -96,7 +100,7 @@ export const ImageHoverPreviewSettingsView: React.FC<
               value={currentConfig.triggerModifier}
               options={MODIFIER_OPTIONS}
               onChange={(triggerModifier) => updateConfig({ triggerModifier })}
-              ariaLabel="Trigger Modifier"
+              ariaLabel={t("features.imageHoverPreview.settings.triggerModifier")}
             />
           </div>
 
@@ -105,22 +109,22 @@ export const ImageHoverPreviewSettingsView: React.FC<
               <Clock className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
               <div className="flex flex-col min-w-0">
                 <span className="text-xs font-semibold text-content-primary">
-                  Hover Delay
+                  {t("features.imageHoverPreview.settings.hoverDelay")}
                 </span>
                 <p className="text-[11px] text-content-muted mt-0.5 leading-snug">
-                  Wait time before opening the preview card.
+                  {t("features.imageHoverPreview.settings.hoverDelayDesc")}
                 </p>
               </div>
             </div>
 
             <SelectDropdown<string>
               value={String(currentConfig.delayMs)}
-              options={DELAY_OPTIONS}
+              options={delayOptions}
               onChange={(val) => {
                 const delayMs = parseInt(val, 10)
                 if (!Number.isNaN(delayMs)) updateConfig({ delayMs })
               }}
-              ariaLabel="Hover Delay"
+              ariaLabel={t("features.imageHoverPreview.settings.hoverDelay")}
             />
           </div>
         </div>
@@ -129,11 +133,13 @@ export const ImageHoverPreviewSettingsView: React.FC<
         <div className="space-y-2 pt-3 border-t border-border-divider">
           <div className="flex items-center gap-1.5">
             <Maximize2 className="w-3.5 h-3.5 text-sky-400" />
-            <span className="section-header">Display Size</span>
+            <span className="section-header">
+              {t("features.imageHoverPreview.settings.displaySize")}
+            </span>
           </div>
 
           <Slider
-            label="Max Viewport Size"
+            label={t("features.imageHoverPreview.settings.maxViewportSize")}
             value={currentConfig.maxSizePercent}
             valueDisplay={`${currentConfig.maxSizePercent}%`}
             min={35}
@@ -145,12 +151,16 @@ export const ImageHoverPreviewSettingsView: React.FC<
 
         {/* Behavior Toggles */}
         <div className="space-y-1 pt-3 border-t border-border-divider">
-          <span className="section-header">Behavior</span>
+          <span className="section-header">
+            {t("features.imageHoverPreview.settings.behavior")}
+          </span>
           <div className="divide-y divide-border-divider">
             <SettingToggleRow
               icon={<Link2 className="w-5 h-5 text-cyan-400" />}
-              title="Preview Image Links"
-              description="Show image preview when hovering hyperlinks pointing to image files."
+              title={t("features.imageHoverPreview.settings.previewImageLinks")}
+              description={t(
+                "features.imageHoverPreview.settings.previewImageLinksDesc"
+              )}
               enabled={currentConfig.previewImageLinks}
               onToggle={(previewImageLinks) =>
                 updateConfig({ previewImageLinks })
@@ -159,8 +169,10 @@ export const ImageHoverPreviewSettingsView: React.FC<
 
             <SettingToggleRow
               icon={<Ruler className="w-5 h-5 text-amber-400" />}
-              title="Show Dimensions Badge"
-              description="Display natural width × height (px) on the preview corner."
+              title={t("features.imageHoverPreview.settings.showDimensions")}
+              description={t(
+                "features.imageHoverPreview.settings.showDimensionsDesc"
+              )}
               enabled={currentConfig.showDimensions}
               onToggle={(showDimensions) => updateConfig({ showDimensions })}
             />

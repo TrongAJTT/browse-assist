@@ -35,25 +35,43 @@ import {
   type FeatureSettings,
   type ElementToysMode
 } from "~core/types"
+import { useI18n } from "~core/useI18n"
 
 export interface ElementToysSettingsViewProps {
   onBack: () => void
 }
 
-const DEFAULT_MODE_OPTIONS: SelectDropdownOption<ElementToysMode>[] = [
-  { id: "zap", label: "Zap", icon: <Trash2 className="w-3.5 h-3.5 text-red-400" /> },
-  { id: "edit", label: "Edit", icon: <Type className="w-3.5 h-3.5 text-sky-400" /> },
-  { id: "move", label: "Move", icon: <Move className="w-3.5 h-3.5 text-emerald-400" /> },
-  { id: "hide", label: "Hide", icon: <EyeOff className="w-3.5 h-3.5 text-amber-400" /> }
-]
-
 export const ElementToysSettingsView: React.FC<
   ElementToysSettingsViewProps
 > = ({ onBack }) => {
+  const { t } = useI18n()
   const [settings, setSettings] = useStorage<FeatureSettings>(
     STORAGE_KEYS.SETTINGS,
     DEFAULT_SETTINGS
   )
+
+  const defaultModeOptions: SelectDropdownOption<ElementToysMode>[] = [
+    {
+      id: "zap",
+      label: t("features.elementToys.settings.modes.zap"),
+      icon: <Trash2 className="w-3.5 h-3.5 text-red-400" />
+    },
+    {
+      id: "edit",
+      label: t("features.elementToys.settings.modes.edit"),
+      icon: <Type className="w-3.5 h-3.5 text-sky-400" />
+    },
+    {
+      id: "move",
+      label: t("features.elementToys.settings.modes.move"),
+      icon: <Move className="w-3.5 h-3.5 text-emerald-400" />
+    },
+    {
+      id: "hide",
+      label: t("features.elementToys.settings.modes.hide"),
+      icon: <EyeOff className="w-3.5 h-3.5 text-amber-400" />
+    }
+  ]
   const [shortcut, setShortcut] = useState<string>("Alt + Shift + Z")
   const [isTipsOpen, setIsTipsOpen] = useState(false)
 
@@ -114,7 +132,7 @@ export const ElementToysSettingsView: React.FC<
 
   return (
     <SubSettingsLayout
-      title="Element Toys"
+      title={t("features.elementToys.title")}
       enabled={isMasterEnabled}
       onToggle={handleToggleMaster}
       onBack={onBack}
@@ -123,17 +141,17 @@ export const ElementToysSettingsView: React.FC<
           type="button"
           onClick={handleLaunchNow}
           disabled={!isMasterEnabled}
-          title="Launch Element Toys on Page"
+          title={t("features.elementToys.settings.launchTooltip")}
           className="px-2.5 py-1 rounded-lg bg-accent hover:bg-accent-hover text-white font-semibold text-xs shadow-sm shadow-accent-glow active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none flex items-center gap-1.5">
           <Zap className="w-3.5 h-3.5 fill-current" />
-          <span>Launch</span>
+          <span>{t("common.launch")}</span>
         </button>
       }>
       <div className="space-y-4">
         {/* Keyboard Shortcut Row */}
         <FeatureShortcutRow
-          title="Activation Shortcut"
-          description="Open floating Element Toys toolbar on active page"
+          title={t("features.elementToys.settings.shortcutTitle")}
+          description={t("features.elementToys.settings.shortcutDesc")}
           shortcut={shortcut}
           iconColorClass="text-amber-400"
           onConfigureShortcuts={() => {
@@ -143,14 +161,18 @@ export const ElementToysSettingsView: React.FC<
 
         {/* Element Inspector Badge Options */}
         <div className="space-y-1 pt-2 border-t border-border-divider">
-          <span className="section-header">Element Inspector Badge</span>
+          <span className="section-header">
+            {t("features.elementToys.settings.inspectorBadge")}
+          </span>
 
           <div className="divide-y divide-border-divider">
             {/* Show Dimensions Switch */}
             <SettingToggleRow
               icon={<Ruler className="w-5 h-5 text-sky-400" />}
-              title="Show Element Dimensions"
-              description="Measure and display width × height (px) on hover badge"
+              title={t("features.elementToys.settings.showDimensions")}
+              description={t(
+                "features.elementToys.settings.showDimensionsDesc"
+              )}
               enabled={currentConfig.showDimensions}
               onToggle={() => handleToggleConfig("showDimensions")}
             />
@@ -158,8 +180,8 @@ export const ElementToysSettingsView: React.FC<
             {/* Show Tag & Class Names Switch */}
             <SettingToggleRow
               icon={<Tag className="w-5 h-5 text-amber-400" />}
-              title="Show Tag & Class Names"
-              description="Display HTML tag name and CSS class selectors (e.g. div.banner#hero)"
+              title={t("features.elementToys.settings.showTags")}
+              description={t("features.elementToys.settings.showTagsDesc")}
               enabled={currentConfig.showTagDescriptor}
               onToggle={() => handleToggleConfig("showTagDescriptor")}
             />
@@ -168,7 +190,9 @@ export const ElementToysSettingsView: React.FC<
 
         {/* Behavior & Default Mode */}
         <div className="space-y-1 pt-2 border-t border-border-divider">
-          <span className="section-header">Element Toys Behavior</span>
+          <span className="section-header">
+            {t("features.elementToys.settings.behaviorSection")}
+          </span>
 
           {/* Default Starting Mode (Trailing Dropdown) */}
           <div className="flex items-center justify-between gap-3 py-2">
@@ -176,18 +200,18 @@ export const ElementToysSettingsView: React.FC<
               <Wrench className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
               <div className="flex flex-col min-w-0">
                 <span className="text-xs font-semibold text-content-primary">
-                  Default Tool on Launch
+                  {t("features.elementToys.settings.defaultTool")}
                 </span>
                 <span className="text-[11px] text-content-muted leading-tight mt-0.5">
-                  Tool selected when activating Element Toys
+                  {t("features.elementToys.settings.defaultToolDesc")}
                 </span>
               </div>
             </div>
             <SelectDropdown<ElementToysMode>
-              options={DEFAULT_MODE_OPTIONS}
+              options={defaultModeOptions}
               value={currentConfig.defaultMode ?? "zap"}
               onChange={handleSetDefaultMode}
-              ariaLabel="Default Tool on Launch"
+              ariaLabel={t("features.elementToys.settings.defaultTool")}
             />
           </div>
 
@@ -195,8 +219,10 @@ export const ElementToysSettingsView: React.FC<
             {/* Continuous Mode Switch */}
             <SettingToggleRow
               icon={<Repeat className="w-5 h-5 text-indigo-400" />}
-              title="Continuous Session"
-              description="Keep tools active after each action until pressing Esc or Exit"
+              title={t("features.elementToys.settings.continuousSession")}
+              description={t(
+                "features.elementToys.settings.continuousSessionDesc"
+              )}
               enabled={currentConfig.continuousMode}
               onToggle={() => handleToggleConfig("continuousMode")}
             />
@@ -204,8 +230,8 @@ export const ElementToysSettingsView: React.FC<
             {/* Auto Unfreeze Scroll Switch */}
             <SettingToggleRow
               icon={<Sparkles className="w-5 h-5 text-emerald-400" />}
-              title="Auto Unfreeze Page Scroll"
-              description="Restore scrollability (overflow: auto) if target was a locking modal overlay"
+              title={t("features.elementToys.settings.autoUnfreeze")}
+              description={t("features.elementToys.settings.autoUnfreezeDesc")}
               enabled={currentConfig.autoUnfreezeScroll}
               onToggle={() => handleToggleConfig("autoUnfreezeScroll")}
             />
@@ -213,8 +239,8 @@ export const ElementToysSettingsView: React.FC<
             {/* Show Toast Notifications Switch */}
             <SettingToggleRow
               icon={<Bell className="w-5 h-5 text-rose-400" />}
-              title="Show Floating Toast"
-              description="Display confirmation banner on page when actions are executed"
+              title={t("features.elementToys.settings.showToast")}
+              description={t("features.elementToys.settings.showToastDesc")}
               enabled={currentConfig.showToast}
               onToggle={() => handleToggleConfig("showToast")}
             />
@@ -229,7 +255,7 @@ export const ElementToysSettingsView: React.FC<
             className="w-full flex items-center justify-between px-3 py-2.5 text-xs font-semibold text-content-primary hover:bg-app-surface transition-colors">
             <span className="flex items-center gap-1.5">
               <HelpCircle className="w-3.5 h-3.5 text-amber-400" />
-              <span>How to Use Element Toys</span>
+              <span>{t("features.elementToys.settings.howToUse")}</span>
             </span>
             <ChevronDown
               className={`w-3.5 h-3.5 text-content-muted transition-transform duration-150 ${
@@ -243,40 +269,56 @@ export const ElementToysSettingsView: React.FC<
               <li>
                 {shortcut ? (
                   <>
-                    Press{" "}
+                    {t("features.elementToys.settings.tipShortcutPrefix")}{" "}
                     <span className="font-mono text-content-primary font-semibold">
                       {shortcut}
                     </span>{" "}
-                    to open the in-page floating HUD toolbar.
+                    {t("features.elementToys.settings.tipShortcutSuffix")}
                   </>
                 ) : (
                   <>
-                    Assign a keyboard shortcut above or click{" "}
+                    {t("features.elementToys.settings.tipNoShortcutPrefix")}{" "}
                     <span className="font-semibold text-content-primary">
-                      Launch
+                      {t("common.launch")}
                     </span>{" "}
-                    to open the in-page floating HUD toolbar.
+                    {t("features.elementToys.settings.tipNoShortcutSuffix")}
                   </>
                 )}
               </li>
               <li>
-                <span className="text-red-400 font-semibold">Zap</span>: Click any banner, overlay, or widget to remove it from the DOM.
+                <span className="text-red-400 font-semibold">
+                  {t("features.elementToys.settings.modes.zap")}
+                </span>
+                : {t("features.elementToys.settings.tipZapDesc")}
               </li>
               <li>
-                <span className="text-sky-400 font-semibold">Edit</span>: Click any text to edit inline in real-time (keystrokes are completely isolated from the page).
+                <span className="text-sky-400 font-semibold">
+                  {t("features.elementToys.settings.modes.edit")}
+                </span>
+                : {t("features.elementToys.settings.tipEditDesc")}
               </li>
               <li>
-                <span className="text-emerald-400 font-semibold">Move</span>: Drag to reposition elements across page layouts. Toggle Flow & Free mode directly on the toolbar, and press + / - to expand or shrink element scope.
+                <span className="text-emerald-400 font-semibold">
+                  {t("features.elementToys.settings.modes.move")}
+                </span>
+                : {t("features.elementToys.settings.tipMoveDesc")}
               </li>
               <li>
-                <span className="text-amber-400 font-semibold">Hide</span>: Click to make elements invisible without breaking page flow.
+                <span className="text-amber-400 font-semibold">
+                  {t("features.elementToys.settings.modes.hide")}
+                </span>
+                : {t("features.elementToys.settings.tipHideDesc")}
               </li>
               <li>
-                Press{" "}
+                {t("features.elementToys.settings.tipUndoPrefix")}{" "}
                 <span className="font-mono text-content-primary font-semibold">
                   Ctrl + Z
                 </span>{" "}
-                to undo any action, or click the <span className="font-semibold text-content-primary">Settings</span> button on the toolbar to configure options.
+                {t("features.elementToys.settings.tipUndoMiddle")}{" "}
+                <span className="font-semibold text-content-primary">
+                  {t("features.elementToys.settings.tipUndoSettings")}
+                </span>{" "}
+                {t("features.elementToys.settings.tipUndoSuffix")}
               </li>
             </ul>
           )}

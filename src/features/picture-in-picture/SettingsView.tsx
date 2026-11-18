@@ -22,6 +22,7 @@ import {
   type PictureInPictureConfig,
   normalizeEdgePlacement
 } from "~core/types"
+import { useI18n } from "~core/useI18n"
 
 interface PictureInPictureSettingsViewProps {
   onBack: () => void
@@ -34,6 +35,7 @@ interface PictureInPictureSettingsViewProps {
 export const PictureInPictureSettingsView: React.FC<
   PictureInPictureSettingsViewProps
 > = ({ onBack }) => {
+  const { t } = useI18n()
   const [settings, setSettings] = useStorage<FeatureSettings>(
     STORAGE_KEYS.SETTINGS,
     DEFAULT_SETTINGS
@@ -47,7 +49,7 @@ export const PictureInPictureSettingsView: React.FC<
         if (cmd?.shortcut) {
           setShortcut(cmd.shortcut)
         } else {
-          setShortcut("Not configured")
+          setShortcut("")
         }
       })
     }
@@ -114,15 +116,17 @@ export const PictureInPictureSettingsView: React.FC<
 
   return (
     <SubSettingsLayout
-      title="Picture-in-Picture"
+      title={t("features.pictureInPicture.settings.shortTitle")}
       enabled={isMasterEnabled}
       onToggle={handleToggleMaster}
       onBack={onBack}>
       <div className="space-y-4">
         {/* Shortcut Section */}
         <FeatureShortcutRow
-          title="Global Shortcut"
-          description="Toggle floating video window"
+          title={t("features.pictureInPicture.settings.globalShortcut")}
+          description={t(
+            "features.pictureInPicture.settings.globalShortcutDesc"
+          )}
           shortcut={shortcut}
           iconColorClass="text-indigo-400"
           onConfigureShortcuts={handleOpenShortcutsPage}
@@ -130,14 +134,18 @@ export const PictureInPictureSettingsView: React.FC<
 
         {/* Options */}
         <div className="space-y-2 pt-2 border-t border-border-divider">
-          <span className="section-header">Display & Feedback</span>
+          <span className="section-header">
+            {t("features.pictureInPicture.settings.displayFeedback")}
+          </span>
 
           <div className="divide-y divide-border-divider">
             {/* Show Badge */}
             <SettingToggleRow
               icon={<Eye className="w-5 h-5 text-accent" />}
-              title="Extension Badge Indicator"
-              description="Show “PiP” badge on extension icon whenever a video is playing in PiP."
+              title={t("features.pictureInPicture.settings.extensionBadge")}
+              description={t(
+                "features.pictureInPicture.settings.extensionBadgeDesc"
+              )}
               enabled={currentConfig.showBadge}
               onToggle={() => handleToggleOption("showBadge")}
             />
@@ -145,8 +153,10 @@ export const PictureInPictureSettingsView: React.FC<
             {/* Show Action Toast */}
             <SettingToggleRow
               icon={<Bell className="w-5 h-5 text-emerald-400" />}
-              title="Action Toast Notification"
-              description="Display brief confirmation toast when entering or exiting PiP."
+              title={t("features.pictureInPicture.settings.actionToast")}
+              description={t(
+                "features.pictureInPicture.settings.actionToastDesc"
+              )}
               enabled={currentConfig.showToast}
               onToggle={() => handleToggleOption("showToast")}
             />
@@ -154,8 +164,10 @@ export const PictureInPictureSettingsView: React.FC<
             {/* Auto-Pause on Exit PiP */}
             <SettingToggleRow
               icon={<PauseCircle className="w-5 h-5 text-amber-400" />}
-              title="Auto-Pause on Exit PiP"
-              description="Automatically pause the video when closing the Picture-in-Picture window."
+              title={t("features.pictureInPicture.settings.autoPauseOnExit")}
+              description={t(
+                "features.pictureInPicture.settings.autoPauseOnExitDesc"
+              )}
               enabled={Boolean(currentConfig.autoPauseOnExit)}
               onToggle={() => handleToggleOption("autoPauseOnExit")}
             />
@@ -163,14 +175,16 @@ export const PictureInPictureSettingsView: React.FC<
             {/* Hover PiP Button */}
             <SettingToggleRow
               icon={<MousePointerClick className="w-5 h-5 text-indigo-400" />}
-              title="Hover Video PiP Button"
+              title={t("features.pictureInPicture.settings.hoverButton")}
               badge={{
-                text: "Unstable",
+                text: t("common.unstable"),
                 bgClass: "bg-amber-500/10",
                 colorClass: "text-amber-400",
                 borderClass: "border-amber-500/25"
               }}
-              description="Show a floating PiP trigger inside playing videos. May be unstable or blocked on some custom web video players."
+              description={t(
+                "features.pictureInPicture.settings.hoverButtonDesc"
+              )}
               enabled={currentConfig.hoverButton}
               onToggle={() => handleToggleOption("hoverButton")}
             />
@@ -180,13 +194,15 @@ export const PictureInPictureSettingsView: React.FC<
         {/* Hover Button Corner Position (when enabled) */}
         {currentConfig.hoverButton && (
           <div className="space-y-2 pt-2 border-t border-border-divider">
-            <span className="section-header">Button Position</span>
+            <span className="section-header">
+              {t("features.pictureInPicture.settings.buttonPosition")}
+            </span>
             <div className="space-y-1.5">
               <span className="text-xs font-semibold text-content-primary">
-                Edge & Alignment
+                {t("features.pictureInPicture.settings.edgeAlignment")}
               </span>
               <p className="text-[11px] text-content-muted leading-snug">
-                Drag or click along the edges to anchor the floating PiP button inside the video frame.
+                {t("features.pictureInPicture.settings.edgeAlignmentDesc")}
               </p>
               <EdgePositionPicker
                 value={currentPlacement}
@@ -200,10 +216,12 @@ export const PictureInPictureSettingsView: React.FC<
                 <Droplets className="w-5 h-5 text-sky-400 shrink-0 mt-0.5" />
                 <div className="flex flex-col min-w-0">
                   <span className="text-xs font-semibold text-content-primary">
-                    Button Opacity
+                    {t("common.buttonOpacity")}
                   </span>
                   <p className="text-[11px] text-content-muted mt-0.5 leading-snug">
-                    Adjust hover button transparency when not focused.
+                    {t(
+                      "features.pictureInPicture.settings.buttonOpacityDesc"
+                    )}
                   </p>
                 </div>
               </div>
@@ -223,7 +241,7 @@ export const PictureInPictureSettingsView: React.FC<
                     }
                   }))
                 }}
-                ariaLabel="PiP Hover Button Opacity"
+                ariaLabel={t("common.buttonOpacity")}
               />
             </div>
           </div>

@@ -23,33 +23,11 @@ import {
   type MouseZoomConfig,
   type MouseZoomModifier
 } from "~core/types"
+import { useI18n } from "~core/useI18n"
 
 interface MouseZoomSettingsViewProps {
   onBack: () => void
 }
-
-const MODIFIER_ITEMS: GridPickerItem<MouseZoomModifier>[] = [
-  {
-    id: "alt",
-    label: "Alt Key",
-    icon: <Command className="w-3.5 h-3.5" />
-  },
-  {
-    id: "shift",
-    label: "Shift Key",
-    icon: <Command className="w-3.5 h-3.5" />
-  },
-  {
-    id: "right-click",
-    label: "Right Click",
-    icon: <MousePointer className="w-3.5 h-3.5" />
-  },
-  {
-    id: "left-click",
-    label: "Left Click",
-    icon: <MousePointer className="w-3.5 h-3.5" />
-  }
-]
 
 /**
  * Dedicated sub-settings view for Mouse Pin-to-Zoom.
@@ -57,10 +35,34 @@ const MODIFIER_ITEMS: GridPickerItem<MouseZoomModifier>[] = [
 export const MouseZoomSettingsView: React.FC<MouseZoomSettingsViewProps> = ({
   onBack
 }) => {
+  const { t } = useI18n()
   const [settings, setSettings] = useStorage<FeatureSettings>(
     STORAGE_KEYS.SETTINGS,
     DEFAULT_SETTINGS
   )
+
+  const modifierItems: GridPickerItem<MouseZoomModifier>[] = [
+    {
+      id: "alt",
+      label: t("common.modifiers.altKey"),
+      icon: <Command className="w-3.5 h-3.5" />
+    },
+    {
+      id: "shift",
+      label: t("common.modifiers.shiftKey"),
+      icon: <Command className="w-3.5 h-3.5" />
+    },
+    {
+      id: "right-click",
+      label: t("common.modifiers.rightClick"),
+      icon: <MousePointer className="w-3.5 h-3.5" />
+    },
+    {
+      id: "left-click",
+      label: t("common.modifiers.leftClick"),
+      icon: <MousePointer className="w-3.5 h-3.5" />
+    }
+  ]
 
   const isEnabled = settings?.mouseZoom ?? DEFAULT_SETTINGS.mouseZoom
   const currentConfig: MouseZoomConfig =
@@ -115,7 +117,7 @@ export const MouseZoomSettingsView: React.FC<MouseZoomSettingsViewProps> = ({
 
   return (
     <SubSettingsLayout
-      title="Mouse Pin-to-Zoom"
+      title={t("features.mouseZoom.title")}
       enabled={isEnabled}
       onToggle={handleToggleFeature}
       onBack={onBack}
@@ -123,7 +125,7 @@ export const MouseZoomSettingsView: React.FC<MouseZoomSettingsViewProps> = ({
         <button
           type="button"
           onClick={handleResetZoom}
-          title="Reset Zoom to 100% on current tab"
+          title={t("features.mouseZoom.settings.resetZoomTooltip")}
           className="flex items-center justify-center p-1.5 rounded-lg text-content-muted hover:text-content-primary hover:bg-app-card active:scale-95 transition-all focus:outline-none focus:ring-1 focus:ring-accent">
           <RotateCcw
             className={`w-3.5 h-3.5 transition-transform duration-500 ${
@@ -134,10 +136,12 @@ export const MouseZoomSettingsView: React.FC<MouseZoomSettingsViewProps> = ({
       }>
       {/* Modifier Key Grid Picker */}
       <div className="space-y-2">
-        <span className="section-header">Trigger Modifier Key</span>
+        <span className="section-header">
+          {t("features.mouseZoom.settings.triggerModifier")}
+        </span>
 
         <GridPicker<MouseZoomModifier>
-          items={MODIFIER_ITEMS}
+          items={modifierItems}
           value={currentConfig.modifier}
           onChange={handleSelectModifier}
           columns={4}
@@ -146,10 +150,12 @@ export const MouseZoomSettingsView: React.FC<MouseZoomSettingsViewProps> = ({
 
       {/* Zoom Sensitivity / Step Size Slider */}
       <div className="space-y-4 pt-3 border-t border-border-divider">
-        <span className="section-header">Zoom Sensitivity</span>
+        <span className="section-header">
+          {t("features.mouseZoom.settings.zoomSensitivity")}
+        </span>
 
         <Slider
-          label="Step Increment"
+          label={t("features.mouseZoom.settings.stepIncrement")}
           value={currentConfig.stepSize}
           valueDisplay={`${Math.round(currentConfig.stepSize * 100)}%`}
           min={0.04}
@@ -157,23 +163,25 @@ export const MouseZoomSettingsView: React.FC<MouseZoomSettingsViewProps> = ({
           step={0.01}
           onChange={handleUpdateStepSize}
           ticks={[
-            { label: "4% (Fine)" },
-            { label: "10% (Default)" },
-            { label: "25% (Fast)" }
+            { label: t("features.mouseZoom.settings.tickFine") },
+            { label: t("features.mouseZoom.settings.tickDefault") },
+            { label: t("features.mouseZoom.settings.tickFast") }
           ]}
         />
       </div>
 
       {/* Behavior Toggles */}
       <div className="space-y-1 pt-3 border-t border-border-divider">
-        <span className="section-header">Behavior & Display</span>
+        <span className="section-header">
+          {t("features.mouseZoom.settings.behaviorDisplay")}
+        </span>
 
         <div className="divide-y divide-border-divider">
           {/* Smooth Transition */}
           <SettingToggleRow
             icon={<Sparkles className="w-5 h-5 text-amber-400" />}
-            title="Smooth Animation"
-            description="Smoothly interpolate zoom transitions for a fluid feel."
+            title={t("features.mouseZoom.settings.smoothAnimation")}
+            description={t("features.mouseZoom.settings.smoothAnimationDesc")}
             enabled={currentConfig.smooth}
             onToggle={() => handleToggleOption("smooth")}
           />
@@ -181,8 +189,8 @@ export const MouseZoomSettingsView: React.FC<MouseZoomSettingsViewProps> = ({
           {/* Invert Scroll Direction */}
           <SettingToggleRow
             icon={<ArrowUpDown className="w-5 h-5 text-cyan-400" />}
-            title="Invert Direction"
-            description="Scroll down to zoom in, scroll up to zoom out."
+            title={t("features.mouseZoom.settings.invertDirection")}
+            description={t("features.mouseZoom.settings.invertDirectionDesc")}
             enabled={currentConfig.invertDirection}
             onToggle={() => handleToggleOption("invertDirection")}
           />
@@ -190,8 +198,8 @@ export const MouseZoomSettingsView: React.FC<MouseZoomSettingsViewProps> = ({
           {/* Show Zoom Toast Badge */}
           <SettingToggleRow
             icon={<Eye className="w-5 h-5 text-violet-400" />}
-            title="Show Zoom Toast"
-            description="Display floating percentage badge on the top-right of the page."
+            title={t("features.mouseZoom.settings.showZoomToast")}
+            description={t("features.mouseZoom.settings.showZoomToastDesc")}
             enabled={currentConfig.showToast}
             onToggle={() => handleToggleOption("showToast")}
           />

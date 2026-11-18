@@ -4,6 +4,7 @@
  * adds to persistent color history, and displays a floating color palette modal.
  */
 
+import { t } from "~core/i18n"
 import { copyToClipboard } from "~core/linkUtils"
 import { MESSAGE_TYPES } from "~core/messaging"
 import { extensionStorage } from "~core/storage"
@@ -279,7 +280,7 @@ function showPaletteModal(color: ColorHistoryItem): void {
 
       if (currentConfig.showToast) {
         showContentToast({
-          message: "Copied Color",
+          message: t("features.colorPicker.logic.copiedColor"),
           detail: val,
           type: "success",
           iconSvg: EYE_DROPPER_ICON_SVG,
@@ -303,7 +304,7 @@ export async function pickColor(): Promise<void> {
   if (typeof window === "undefined" || !("EyeDropper" in window)) {
     if (currentConfig.showToast) {
       showContentToast({
-        message: "EyeDropper not supported on this page/browser",
+        message: t("features.colorPicker.logic.notSupported"),
         type: "error",
         duration: 2500
       })
@@ -346,8 +347,8 @@ export async function pickColor(): Promise<void> {
         )
         showContentToast({
           message: currentConfig.autoCopy
-            ? "Color Picked & Copied"
-            : "Color Picked",
+            ? t("features.colorPicker.logic.pickedAndCopied")
+            : t("features.colorPicker.logic.picked"),
           detail: copyVal,
           type: "success",
           iconSvg: EYE_DROPPER_ICON_SVG,
@@ -368,8 +369,9 @@ export async function pickColor(): Promise<void> {
       console.warn("Browse Assist Color Picker error:", err)
       if (currentConfig.showToast) {
         showContentToast({
-          message: "Could not open Color Picker",
-          detail: error?.message || "User interaction required or not permitted",
+          message: t("features.colorPicker.logic.couldNotOpen"),
+          detail:
+            error?.message || t("features.colorPicker.logic.permissionRequired"),
           type: "error",
           duration: 2500
         })

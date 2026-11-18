@@ -33,41 +33,11 @@ import {
   type QuickScrollButtonsMode,
   type QuickScrollConfig
 } from "~core/types"
+import { useI18n } from "~core/useI18n"
 
 interface QuickScrollSettingsViewProps {
   onBack: () => void
 }
-
-const BUTTON_ITEMS: SelectDropdownOption<QuickScrollButtonsMode>[] = [
-  {
-    id: "both",
-    label: "Top & Bottom",
-    icon: <Compass className="w-3.5 h-3.5" />
-  },
-  {
-    id: "top-only",
-    label: "Top Only",
-    icon: <ArrowUpToLine className="w-3.5 h-3.5" />
-  }
-]
-
-const SHAPE_ITEMS: SelectDropdownOption<QuickScrollButtonShape>[] = [
-  {
-    id: "circle",
-    label: "Circle",
-    icon: <Circle className="w-3.5 h-3.5" />
-  },
-  {
-    id: "capsule",
-    label: "Capsule",
-    icon: <Pill className="w-3.5 h-3.5" />
-  },
-  {
-    id: "rounded",
-    label: "Rounded",
-    icon: <Square className="w-3.5 h-3.5" />
-  }
-]
 
 /**
  * Sub-settings view for Quick Scroll Buttons.
@@ -76,10 +46,42 @@ const SHAPE_ITEMS: SelectDropdownOption<QuickScrollButtonShape>[] = [
 export const QuickScrollSettingsView: React.FC<
   QuickScrollSettingsViewProps
 > = ({ onBack }) => {
+  const { t } = useI18n()
   const [settings, setSettings] = useStorage<FeatureSettings>(
     STORAGE_KEYS.SETTINGS,
     DEFAULT_SETTINGS
   )
+
+  const buttonItems: SelectDropdownOption<QuickScrollButtonsMode>[] = [
+    {
+      id: "both",
+      label: t("features.quickScroll.settings.modes.both"),
+      icon: <Compass className="w-3.5 h-3.5" />
+    },
+    {
+      id: "top-only",
+      label: t("features.quickScroll.settings.modes.topOnly"),
+      icon: <ArrowUpToLine className="w-3.5 h-3.5" />
+    }
+  ]
+
+  const shapeItems: SelectDropdownOption<QuickScrollButtonShape>[] = [
+    {
+      id: "circle",
+      label: t("common.shapes.circle"),
+      icon: <Circle className="w-3.5 h-3.5" />
+    },
+    {
+      id: "capsule",
+      label: t("common.shapes.capsule"),
+      icon: <Pill className="w-3.5 h-3.5" />
+    },
+    {
+      id: "rounded",
+      label: t("common.shapes.rounded"),
+      icon: <Square className="w-3.5 h-3.5" />
+    }
+  ]
 
   const isMasterEnabled = settings?.quickScroll ?? DEFAULT_SETTINGS.quickScroll
   const currentConfig: QuickScrollConfig =
@@ -156,21 +158,20 @@ export const QuickScrollSettingsView: React.FC<
 
   return (
     <SubSettingsLayout
-      title="Quick Scroll Buttons"
+      title={t("features.quickScroll.title")}
       enabled={isMasterEnabled}
       onToggle={handleToggleMaster}
       onBack={onBack}>
       <div className="space-y-4">
         {/* Section 1: Screen Position (Edge Position Picker with Snapping) */}
         <div className="space-y-2">
-          <span className="section-header">Screen Position</span>
+          <span className="section-header">{t("common.screenPosition")}</span>
           <div className="space-y-1.5">
             <span className="text-xs font-semibold text-content-primary">
-              Button Placement
+              {t("features.quickScroll.settings.buttonPlacement")}
             </span>
             <p className="text-[11px] text-content-muted leading-snug">
-              Drag or click along the left or right perimeter to anchor the
-              floating scroll buttons.
+              {t("features.quickScroll.settings.buttonPlacementDesc")}
             </p>
             <EdgePositionPicker
               allowedEdges={["left", "right"]}
@@ -182,26 +183,28 @@ export const QuickScrollSettingsView: React.FC<
 
         {/* Section 2: Visible Controls & Button Shape (Trailing Dropdowns) */}
         <div className="space-y-3 pt-3 border-t border-border-divider">
-          <span className="section-header">Controls & Style</span>
+          <span className="section-header">
+            {t("features.quickScroll.settings.controlsStyle")}
+          </span>
 
           <div className="flex items-center justify-between gap-3 py-0.5">
             <div className="flex items-start gap-3 flex-1 min-w-0">
               <Compass className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
               <div className="flex flex-col min-w-0">
                 <span className="text-xs font-semibold text-content-primary">
-                  Button Selection
+                  {t("features.quickScroll.settings.buttonSelection")}
                 </span>
                 <p className="text-[11px] text-content-muted mt-0.5 leading-snug">
-                  Show both top & bottom buttons or top only.
+                  {t("features.quickScroll.settings.buttonSelectionDesc")}
                 </p>
               </div>
             </div>
 
             <SelectDropdown<QuickScrollButtonsMode>
               value={currentConfig.buttonsMode}
-              options={BUTTON_ITEMS}
+              options={buttonItems}
               onChange={handleSelectButtonsMode}
-              ariaLabel="Button Selection"
+              ariaLabel={t("features.quickScroll.settings.buttonSelection")}
             />
           </div>
 
@@ -210,19 +213,19 @@ export const QuickScrollSettingsView: React.FC<
               <Shapes className="w-5 h-5 text-pink-400 shrink-0 mt-0.5" />
               <div className="flex flex-col min-w-0">
                 <span className="text-xs font-semibold text-content-primary">
-                  Button Shape
+                  {t("common.buttonShape")}
                 </span>
                 <p className="text-[11px] text-content-muted mt-0.5 leading-snug">
-                  Choose circle, unified capsule, or rounded square.
+                  {t("features.quickScroll.settings.buttonShapeDesc")}
                 </p>
               </div>
             </div>
 
             <SelectDropdown<QuickScrollButtonShape>
               value={currentConfig.buttonShape ?? "circle"}
-              options={SHAPE_ITEMS}
+              options={shapeItems}
               onChange={handleSelectButtonShape}
-              ariaLabel="Button Shape"
+              ariaLabel={t("common.buttonShape")}
             />
           </div>
 
@@ -231,10 +234,10 @@ export const QuickScrollSettingsView: React.FC<
               <Droplets className="w-5 h-5 text-sky-400 shrink-0 mt-0.5" />
               <div className="flex flex-col min-w-0">
                 <span className="text-xs font-semibold text-content-primary">
-                  Button Opacity
+                  {t("common.buttonOpacity")}
                 </span>
                 <p className="text-[11px] text-content-muted mt-0.5 leading-snug">
-                  Adjust transparency when not hovered.
+                  {t("features.quickScroll.settings.buttonOpacityDesc")}
                 </p>
               </div>
             </div>
@@ -243,21 +246,23 @@ export const QuickScrollSettingsView: React.FC<
               value={String(currentConfig.opacity ?? 1)}
               options={OPACITY_DROPDOWN_OPTIONS}
               onChange={handleSelectOpacity}
-              ariaLabel="Button Opacity"
+              ariaLabel={t("common.buttonOpacity")}
             />
           </div>
         </div>
 
         {/* Section 3: Smart Behavior Toggles */}
         <div className="space-y-1 pt-3 border-t border-border-divider">
-          <span className="section-header">Behavior & Intelligence</span>
+          <span className="section-header">
+            {t("features.quickScroll.settings.behaviorIntel")}
+          </span>
 
           <div className="divide-y divide-border-divider">
             {/* Auto-Dim on Idle */}
             <SettingToggleRow
               icon={<Eye className="w-5 h-5 text-cyan-400" />}
-              title="Auto-Dim on Idle"
-              description="Fade buttons to subtle opacity when you pause scrolling; restore instantly on hover."
+              title={t("features.quickScroll.settings.autoDim")}
+              description={t("features.quickScroll.settings.autoDimDesc")}
               enabled={currentConfig.autoHide}
               onToggle={() => handleToggleOption("autoHide")}
             />
@@ -265,16 +270,16 @@ export const QuickScrollSettingsView: React.FC<
             {/* Scroll Memory Return */}
             <SettingToggleRow
               icon={<History className="w-5 h-5 text-amber-400" />}
-              title="Scroll Position Memory"
-              description="Save your exact reading spot upon jumping away, allowing 1-click return to where you were."
+              title={t("features.quickScroll.settings.scrollMemory")}
+              description={t("features.quickScroll.settings.scrollMemoryDesc")}
               enabled={currentConfig.enableReturnMemory}
               onToggle={() => handleToggleOption("enableReturnMemory")}
             />
             {/* Hide if Page Has Native Scroll Button */}
             <SettingToggleRow
               icon={<Ban className="w-5 h-5 text-rose-400" />}
-              title="Hide on Native Scroll Button"
-              description="Automatically hide when the webpage already provides a fixed scroll-to-top button."
+              title={t("features.quickScroll.settings.hideOnNative")}
+              description={t("features.quickScroll.settings.hideOnNativeDesc")}
               enabled={Boolean(currentConfig.hideOnNativeButton)}
               onToggle={() => handleToggleOption("hideOnNativeButton")}
             />
