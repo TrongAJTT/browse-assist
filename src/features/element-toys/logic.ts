@@ -383,6 +383,13 @@ function onContextMenu(e: MouseEvent): void {
     renderToolbar()
   } else {
     stopZapping(false)
+    if (currentConfig.showToast) {
+      showContentToast({
+        message: "Element Toys Closed",
+        type: "info",
+        duration: 1500
+      })
+    }
   }
 }
 
@@ -461,5 +468,6 @@ export function activate(config?: ElementToysConfig): void {
 export function deactivate(): void {
   isActive = false
   stopZapping(false)
+  undoManager.clear()
   overlayView.destroy()
 }
