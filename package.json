@@ -1,8 +1,8 @@
 {
   "name": "browse-assist",
-  "displayName": "Browse Assist",
+  "displayName": "__MSG_extName__",
   "version": "1.1.0",
-  "description": "A lightweight, modular collection of quality-of-life tools designed to boost productivity and elevate your browsing flow.",
+  "description": "__MSG_extDescription__",
   "slogan": "Supercharge Your Web Browsing",
   "homepage": "https://www.trongajtt.com/apps/browse-assist",
   "termsUrl": "https://www.trongajtt.com/apps/browse-assist/terms",
@@ -57,6 +57,7 @@
     "vitest": "^2.1.8"
   },
   "manifest": {
+    "default_locale": "en",
     "permissions": [
       "storage",
       "contextMenus",
@@ -80,31 +81,31 @@
           "default": "Alt+P",
           "mac": "Alt+P"
         },
-        "description": "Toggle Picture-in-Picture for current playing video"
+        "description": "__MSG_cmdPiP__"
       },
       "toggle_allow_right_click": {
         "suggested_key": {
           "default": "Alt+R",
           "mac": "Alt+R"
         },
-        "description": "Toggle Allow Right Click on current tab"
+        "description": "__MSG_cmdAllowRightClick__"
       },
       "toggle_color_picker": {
         "suggested_key": {
           "default": "Alt+Shift+C",
           "mac": "Alt+Shift+C"
         },
-        "description": "Pick color from screen"
+        "description": "__MSG_cmdColorPicker__"
       },
       "toggle_element_toys": {
         "suggested_key": {
           "default": "Alt+Shift+Z",
           "mac": "Alt+Shift+Z"
         },
-        "description": "Activate Element Toys to inspect and manipulate page elements"
+        "description": "__MSG_cmdElementToys__"
       },
       "toggle_quick_hub": {
-        "description": "Toggle Quick Hub on-screen menu"
+        "description": "__MSG_cmdQuickHub__"
       }
     },
     "overrides": {
@@ -122,24 +123,24 @@
               "default": "Alt+P",
               "mac": "Alt+P"
             },
-            "description": "Toggle Picture-in-Picture for current playing video"
+            "description": "__MSG_cmdPiP__"
           },
           "toggle_allow_right_click": {
             "suggested_key": {
               "default": "Alt+R",
               "mac": "Alt+R"
             },
-            "description": "Toggle Allow Right Click on current tab"
+            "description": "__MSG_cmdAllowRightClick__"
           },
           "toggle_element_toys": {
             "suggested_key": {
               "default": "Alt+Shift+Z",
               "mac": "Alt+Shift+Z"
             },
-            "description": "Activate Element Toys to inspect and manipulate page elements"
+            "description": "__MSG_cmdElementToys__"
           },
           "toggle_quick_hub": {
-            "description": "Toggle Quick Hub on-screen menu"
+            "description": "__MSG_cmdQuickHub__"
           }
         }
       }

@@ -6,6 +6,7 @@
  * - Copy Link as Markdown
  */
 
+import { setLocale, t } from "~core/i18n"
 import { extensionStorage } from "~core/storage"
 import {
   DEFAULT_CONTEXT_MENU_ACTIONS_CONFIG,
@@ -106,37 +107,37 @@ export async function updateContextMenus(
     > = {
       copyLinkText: {
         id: MENU_ITEMS.COPY_LINK_TEXT,
-        title: "Copy Link Text",
+        title: t("features.contextMenuActions.copyLinkText"),
         contexts: ["link"],
         enabled: config.copyLinkText
       },
       cleanLinkCopy: {
         id: MENU_ITEMS.CLEAN_LINK_COPY,
-        title: "Copy Clean Link",
+        title: t("features.contextMenuActions.cleanLinkCopy"),
         contexts: ["link"],
         enabled: config.cleanLinkCopy
       },
       markdownLinkCopy: {
         id: MENU_ITEMS.MARKDOWN_LINK_COPY,
-        title: "Copy Link as Markdown",
+        title: t("features.contextMenuActions.markdownLinkCopy"),
         contexts: ["link"],
         enabled: config.markdownLinkCopy
       },
       copyCleanPageUrl: {
         id: MENU_ITEMS.COPY_CLEAN_PAGE_URL,
-        title: "Copy Clean Page URL",
+        title: t("features.contextMenuActions.copyCleanPageUrl"),
         contexts: ["page"],
         enabled: config.copyCleanPageUrl ?? true
       },
       copyPageMarkdown: {
         id: MENU_ITEMS.COPY_PAGE_MARKDOWN,
-        title: "Copy Page as Markdown",
+        title: t("features.contextMenuActions.copyPageMarkdown"),
         contexts: ["page"],
         enabled: config.copyPageMarkdown ?? false
       },
       copySelectionQuote: {
         id: MENU_ITEMS.COPY_SELECTION_QUOTE,
-        title: "Copy Selection as Quote",
+        title: t("features.contextMenuActions.copySelectionQuote"),
         contexts: ["selection"],
         enabled: config.copySelectionQuote ?? true
       }
@@ -214,6 +215,7 @@ async function syncMenusFromStorage(): Promise<void> {
   const settings = await extensionStorage.get<FeatureSettings>(
     STORAGE_KEYS.SETTINGS
   )
+  setLocale(settings?.language ?? "auto")
   const isMasterEnabled =
     settings?.contextMenuActions ?? DEFAULT_SETTINGS.contextMenuActions
   const config =
@@ -251,6 +253,7 @@ export async function initContextMenuActionsBackground(): Promise<void> {
   extensionStorage.watch({
     [STORAGE_KEYS.SETTINGS]: (change) => {
       const nextSettings = change.newValue as FeatureSettings | undefined
+      setLocale(nextSettings?.language ?? "auto")
       const nextMaster =
         nextSettings?.contextMenuActions ?? DEFAULT_SETTINGS.contextMenuActions
       const nextConfig =

@@ -1,0 +1,23 @@
+{
+  "extName": {
+    "message": "Browse Assist"
+  },
+  "extDescription": {
+    "message": "Bộ công cụ tiện ích nhẹ, mô-đun hóa giúp tăng năng suất và nâng tầm trải nghiệm duyệt web."
+  },
+  "cmdPiP": {
+    "message": "Bật/tắt Picture-in-Picture cho video đang phát"
+  },
+  "cmdAllowRightClick": {
+    "message": "Bật/tắt Mở khóa chuột phải trên tab hiện tại"
+  },
+  "cmdColorPicker": {
+    "message": "Chấm màu từ màn hình"
+  },
+  "cmdElementToys": {
+    "message": "Kích hoạt Element Toys để kiểm tra và chỉnh sửa phần tử trang"
+  },
+  "cmdQuickHub": {
+    "message": "Bật/tắt menu nhanh Quick Hub trên trang"
+  }
+}

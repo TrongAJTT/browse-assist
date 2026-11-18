@@ -6,6 +6,7 @@
 import type { PlasmoCSConfig } from "plasmo"
 
 import { isColorPickerSupported } from "~core/browserDetect"
+import { setLocale } from "~core/i18n"
 import { MESSAGE_TYPES } from "~core/messaging"
 import { getStoredSettings, subscribeToSettings } from "~core/storage"
 import type { FeatureSettings } from "~core/types"
@@ -71,6 +72,7 @@ export const config: PlasmoCSConfig = {
 let isElementToysEnabled = true
 
 function applySettings(nextSettings: FeatureSettings): void {
+  setLocale(nextSettings?.language ?? "auto")
   isElementToysEnabled = Boolean(nextSettings?.elementToys)
   // Allow Right Click is managed per-tab on-demand, not auto-activated globally.
 

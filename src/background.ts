@@ -3,6 +3,8 @@
  * Orchestrates background workers and services across extension features.
  */
 
+import { setLocale } from "~core/i18n"
+import { getStoredSettings, subscribeToSettings } from "~core/storage"
 import { initAllowRightClickBackground } from "~features/allow-right-click/background"
 import { initContextMenuActionsBackground } from "~features/context-menu-actions/background"
 import { initPictureInPictureBackground } from "~features/picture-in-picture/background"
@@ -43,6 +45,14 @@ import { initQuickHubBackground } from "~features/quick-hub/background"
 
 initQuickHubBackground().catch((err) => {
   console.error("Failed to initialize quick-hub background service:", err)
+})
+
+getStoredSettings()
+  .then((settings) => setLocale(settings.language ?? "auto"))
+  .catch(() => {})
+
+subscribeToSettings((nextSettings) => {
+  setLocale(nextSettings.language ?? "auto")
 })
 
 
