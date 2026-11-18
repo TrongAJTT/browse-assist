@@ -1,10 +1,15 @@
 import {
   ArrowDown,
   ArrowUp,
+  Circle,
+  Droplets,
   Eye,
   Link2,
   PictureInPicture2,
+  Pill,
   Pipette,
+  Shapes,
+  Square,
   Zap,
   ZoomIn
 } from "lucide-react"
@@ -15,6 +20,11 @@ import { useStorage } from "@plasmohq/storage/hook"
 
 import { EdgePositionPicker } from "~components/EdgePositionPicker"
 import { FeatureShortcutRow } from "~components/FeatureShortcutRow"
+import {
+  OPACITY_DROPDOWN_OPTIONS,
+  SelectDropdown,
+  type SelectDropdownOption
+} from "~components/SelectDropdown"
 import { SettingToggleRow } from "~components/SettingToggleRow"
 import {
   SortableVisibilityList,
@@ -34,8 +44,15 @@ import {
   type EdgePlacement,
   type FeatureSettings,
   type QuickHubActionId,
+  type QuickHubButtonShape,
   type QuickHubConfig
 } from "~core/types"
+
+const BUTTON_SHAPE_OPTIONS: SelectDropdownOption<QuickHubButtonShape>[] = [
+  { id: "rounded", label: "Rounded", icon: <Square className="w-3.5 h-3.5" /> },
+  { id: "circle", label: "Circle", icon: <Circle className="w-3.5 h-3.5" /> },
+  { id: "pill", label: "Pill", icon: <Pill className="w-3.5 h-3.5" /> }
+]
 
 interface QuickHubSettingsViewProps {
   onBack: () => void
@@ -395,6 +412,66 @@ export const QuickHubSettingsView: React.FC<QuickHubSettingsViewProps> = ({
               allowedEdges={["top", "right", "bottom", "left"]}
               value={currentPlacement}
               onChange={handlePlacementChange}
+            />
+          </div>
+
+          <div className="flex items-center justify-between gap-3 pt-2">
+            <div className="flex items-start gap-3 flex-1 min-w-0">
+              <Shapes className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+              <div className="flex flex-col min-w-0">
+                <span className="text-xs font-semibold text-content-primary">
+                  Button Shape
+                </span>
+                <p className="text-[11px] text-content-muted mt-0.5 leading-snug">
+                  Customize the floating trigger button shape.
+                </p>
+              </div>
+            </div>
+
+            <SelectDropdown<QuickHubButtonShape>
+              value={currentConfig.buttonShape ?? "rounded"}
+              options={BUTTON_SHAPE_OPTIONS}
+              onChange={(buttonShape) => {
+                setSettings((prev) => ({
+                  ...(prev ?? DEFAULT_SETTINGS),
+                  quickHubConfig: {
+                    ...(prev?.quickHubConfig ?? DEFAULT_QUICK_HUB_CONFIG),
+                    buttonShape
+                  }
+                }))
+              }}
+              ariaLabel="Quick Hub Button Shape"
+            />
+          </div>
+
+          <div className="flex items-center justify-between gap-3 pt-1">
+            <div className="flex items-start gap-3 flex-1 min-w-0">
+              <Droplets className="w-5 h-5 text-sky-400 shrink-0 mt-0.5" />
+              <div className="flex flex-col min-w-0">
+                <span className="text-xs font-semibold text-content-primary">
+                  Button Opacity
+                </span>
+                <p className="text-[11px] text-content-muted mt-0.5 leading-snug">
+                  Adjust transparency of the floating trigger button.
+                </p>
+              </div>
+            </div>
+
+            <SelectDropdown<string>
+              value={String(currentConfig.buttonOpacity ?? 1)}
+              options={OPACITY_DROPDOWN_OPTIONS}
+              onChange={(val) => {
+                const buttonOpacity = parseFloat(val)
+                if (Number.isNaN(buttonOpacity)) return
+                setSettings((prev) => ({
+                  ...(prev ?? DEFAULT_SETTINGS),
+                  quickHubConfig: {
+                    ...(prev?.quickHubConfig ?? DEFAULT_QUICK_HUB_CONFIG),
+                    buttonOpacity
+                  }
+                }))
+              }}
+              ariaLabel="Quick Hub Button Opacity"
             />
           </div>
         </div>

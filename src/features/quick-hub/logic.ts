@@ -8,6 +8,7 @@
 import { isColorPickerSupported } from "~core/browserDetect"
 import { cleanUrl, copyToClipboard, showCopiedFeedback } from "~core/linkUtils"
 import { getStoredSettings, subscribeToSettings } from "~core/storage"
+import { detectPageTheme, observePageTheme } from "~core/themeDetect"
 import {
   DEFAULT_QUICK_HUB_CONFIG,
   normalizeEdgePlacement,
@@ -38,6 +39,8 @@ let styleElement: HTMLStyleElement | null = null
 // State
 let isMenuOpen = false
 let hideTimeout: number | null = null
+let themeObserver: MutationObserver | null = null
+let detectedTheme: "dark" | "light" = "dark"
 const PROXIMITY_RADIUS = 80 // px distance from corner to reveal
 
 // SVG Icons
@@ -122,12 +125,24 @@ function getPlacementCss(placement: EdgePlacement): {
   }
 }
 
-function getShadowStyles(config: QuickHubConfig): string {
+function getShadowStyles(
+  config: QuickHubConfig,
+  pageTheme: "dark" | "light" = "dark"
+): string {
   const placement = normalizeEdgePlacement(
     config.placement ?? config.corner,
     DEFAULT_QUICK_HUB_CONFIG.placement
   )
   const { btnCss, menuCss } = getPlacementCss(placement)
+  const isDark = pageTheme === "dark"
+  const opacity = config.buttonOpacity ?? 1
+  const shape = config.buttonShape ?? "rounded"
+  const shapeCss =
+    shape === "circle"
+      ? "width: 36px; height: 36px; border-radius: 9999px;"
+      : shape === "pill"
+        ? "width: 44px; height: 32px; border-radius: 9999px;"
+        : "width: 36px; height: 36px; border-radius: 10px;"
 
   return `
     :host {
@@ -146,15 +161,17 @@ function getShadowStyles(config: QuickHubConfig): string {
     .qh-trigger {
       position: fixed;
       ${btnCss}
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      background: rgba(18, 18, 24, 0.82);
+      ${shapeCss}
+      background: ${isDark ? "rgba(18, 18, 24, 0.84)" : "rgba(255, 255, 255, 0.88)"};
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05);
-      color: #fbbf24;
+      border: 1px solid ${isDark ? "rgba(255, 255, 255, 0.16)" : "rgba(15, 23, 42, 0.14)"};
+      box-shadow: ${
+        isDark
+          ? "0 4px 18px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05)"
+          : "0 4px 16px rgba(15, 23, 42, 0.12), 0 1px 3px rgba(15, 23, 42, 0.08)"
+      };
+      color: ${isDark ? "#fbbf24" : "#d97706"};
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -170,9 +187,14 @@ function getShadowStyles(config: QuickHubConfig): string {
     }
 
     .qh-trigger:hover {
-      background: rgba(28, 28, 38, 0.95);
-      border-color: rgba(251, 191, 36, 0.5);
-      box-shadow: 0 6px 22px rgba(0, 0, 0, 0.5), 0 0 12px rgba(251, 191, 36, 0.25);
+      background: ${isDark ? "rgba(28, 28, 38, 0.95)" : "rgba(255, 255, 255, 0.98)"};
+      border-color: rgba(251, 191, 36, 0.55);
+      box-shadow: ${
+        isDark
+          ? "0 6px 22px rgba(0, 0, 0, 0.5), 0 0 12px rgba(251, 191, 36, 0.25)"
+          : "0 6px 20px rgba(15, 23, 42, 0.16), 0 0 10px rgba(245, 158, 11, 0.22)"
+      };
+      opacity: 1 !important;
       transform: scale(1.06);
     }
 
@@ -183,7 +205,7 @@ function getShadowStyles(config: QuickHubConfig): string {
     .qh-trigger.qh-open {
       background: rgba(251, 191, 36, 0.15);
       border-color: #fbbf24;
-      color: #fbbf24;
+      color: #f59e0b;
       box-shadow: 0 0 16px rgba(251, 191, 36, 0.35);
       opacity: 1 !important;
       pointer-events: auto !important;
@@ -198,14 +220,14 @@ function getShadowStyles(config: QuickHubConfig): string {
     }
 
     .qh-trigger.qh-proximity.qh-visible {
-      opacity: 1;
+      opacity: ${opacity};
       pointer-events: auto;
       transform: scale(1);
     }
 
-    /* Persistent mode (hoverToReveal === false): 30% opacity when idle, 100% on hover/open */
+    /* Persistent mode (hoverToReveal === false): idle opacity * 0.3, 100% on hover/open */
     .qh-trigger.qh-persistent {
-      opacity: 0.3;
+      opacity: ${Number((opacity * 0.35).toFixed(2))};
       pointer-events: auto;
       transform: scale(1);
     }
@@ -670,8 +692,9 @@ function createDOM(): void {
 }
 
 function updateStyles(): void {
+  detectedTheme = detectPageTheme(cachedSettings?.theme ?? "system")
   if (styleElement) {
-    styleElement.textContent = getShadowStyles(currentConfig)
+    styleElement.textContent = getShadowStyles(currentConfig, detectedTheme)
   }
   if (triggerBtn) {
     if (currentConfig.hoverToReveal) {
@@ -737,6 +760,7 @@ export function activate(config?: QuickHubConfig): void {
   window.addEventListener("pointermove", handleMouseMove, { passive: true })
   window.addEventListener("pointerdown", handleDocumentPointerDown, { capture: true })
   window.addEventListener("keydown", handleDocumentKeyDown, { capture: true })
+  themeObserver = observePageTheme(() => updateStyles())
 }
 
 /**
@@ -747,6 +771,11 @@ export function deactivate(): void {
   isActive = false
 
   closeMenu()
+
+  if (themeObserver) {
+    themeObserver.disconnect()
+    themeObserver = null
+  }
 
   if (settingsUnsubscribe) {
     settingsUnsubscribe()

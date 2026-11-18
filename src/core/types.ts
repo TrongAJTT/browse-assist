@@ -504,9 +504,13 @@ export const DEFAULT_QUICK_HUB_ACTION_ORDER: QuickHubActionId[] = [
 /**
  * Quick Hub configuration.
  */
+export type QuickHubButtonShape = "circle" | "rounded" | "pill"
+
 export interface QuickHubConfig {
   placement: EdgePlacement
   hoverToReveal: boolean
+  buttonShape?: QuickHubButtonShape
+  buttonOpacity?: number
   corner?: QuickHubCorner // Legacy fallback
   actionOrder?: QuickHubActionId[]
   hiddenActions?: QuickHubActionId[]
@@ -515,6 +519,8 @@ export interface QuickHubConfig {
 export const DEFAULT_QUICK_HUB_CONFIG: QuickHubConfig = {
   placement: { edge: "right", offsetPercent: 0 },
   hoverToReveal: true,
+  buttonShape: "rounded",
+  buttonOpacity: 1,
   corner: "top-right",
   actionOrder: [...DEFAULT_QUICK_HUB_ACTION_ORDER],
   hiddenActions: []
