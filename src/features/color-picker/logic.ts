@@ -336,8 +336,10 @@ export async function pickColor(): Promise<void> {
         await copyToClipboard(copyVal)
       }
 
-      // 3. Show feedback toast
-      if (currentConfig.showToast) {
+      const shouldShowPalette = currentConfig.showPaletteModal ?? true
+
+      // 3. Show feedback toast (only when Floating Palette is disabled to avoid overlapping feedback)
+      if (currentConfig.showToast && !shouldShowPalette) {
         const copyVal = getColorValueByFormat(
           colorItem,
           currentConfig.defaultFormat
@@ -355,7 +357,7 @@ export async function pickColor(): Promise<void> {
       }
 
       // 4. Show floating palette modal with all formats if enabled
-      if (currentConfig.showPaletteModal ?? true) {
+      if (shouldShowPalette) {
         showPaletteModal(colorItem)
       }
     }

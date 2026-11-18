@@ -81,7 +81,7 @@ describe("color-picker content logic", () => {
     })
   }
 
-  it("picks color, saves history, auto-copies, shows toast, and mounts floating palette modal", async () => {
+  it("picks color, saves history, auto-copies, and mounts floating palette modal without duplicate toast", async () => {
     activate({
       ...DEFAULT_COLOR_PICKER_CONFIG,
       defaultFormat: "hex",
@@ -94,12 +94,7 @@ describe("color-picker content logic", () => {
 
     expect(mockStorage.set).toHaveBeenCalledTimes(1)
     expect(mockCopyToClipboard).toHaveBeenCalledWith("#4F46E5")
-    expect(mockShowContentToast).toHaveBeenCalledWith(
-      expect.objectContaining({
-        message: "Color Picked & Copied",
-        detail: "#4F46E5"
-      })
-    )
+    expect(mockShowContentToast).not.toHaveBeenCalled()
     expect(
       document.getElementById("browse-assist-color-palette-host")
     ).not.toBeNull()
@@ -110,9 +105,10 @@ describe("color-picker content logic", () => {
     ).toBeNull()
   })
 
-  it("skips floating palette modal when showPaletteModal is false", async () => {
+  it("shows feedback toast instead of floating palette modal when showPaletteModal is false", async () => {
     activate({
       ...DEFAULT_COLOR_PICKER_CONFIG,
+      showToast: true,
       showPaletteModal: false
     })
     updateColorPickerConfig({ defaultFormat: "rgb" })
@@ -120,6 +116,12 @@ describe("color-picker content logic", () => {
     await triggerPicker()
 
     expect(mockCopyToClipboard).toHaveBeenCalledWith("rgb(79, 70, 229)")
+    expect(mockShowContentToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "Color Picked & Copied",
+        detail: "rgb(79, 70, 229)"
+      })
+    )
     expect(
       document.getElementById("browse-assist-color-palette-host")
     ).toBeNull()

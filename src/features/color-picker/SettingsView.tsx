@@ -1,4 +1,4 @@
-import { Bell, Check, Copy, History, LayoutPanelTop, Palette, Pipette, Trash2 } from "lucide-react"
+import { Bell, Check, Copy, History, LayoutPanelTop, Palette, Trash2 } from "lucide-react"
 import type React from "react"
 import { useEffect, useState } from "react"
 
@@ -11,7 +11,6 @@ import {
 } from "~components/SelectDropdown"
 import { SettingToggleRow } from "~components/SettingToggleRow"
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
-import { MESSAGE_TYPES, sendToActiveTab } from "~core/messaging"
 import { openBrowserShortcutsPage } from "~core/shortcutsHelper"
 import {
   DEFAULT_COLOR_PICKER_CONFIG,
@@ -23,7 +22,7 @@ import {
   type FeatureSettings
 } from "~core/types"
 
-import { getColorValueByFormat, parseColor } from "./colorUtils"
+import { getColorValueByFormat } from "./colorUtils"
 
 interface ColorPickerSettingsViewProps {
   onBack: () => void
@@ -113,54 +112,6 @@ export const ColorPickerSettingsView: React.FC<
     }))
   }
 
-  const handlePickNow = async () => {
-    // 1. If EyeDropper API is available directly in the current window (popup context),
-    // calling it synchronously preserves user activation gesture and never fails!
-    if (typeof window !== "undefined" && "EyeDropper" in window) {
-      try {
-        const EyeDropperClass = (
-          window as unknown as {
-            EyeDropper: new () => { open: () => Promise<{ sRGBHex: string }> }
-          }
-        ).EyeDropper
-        const eyeDropper = new EyeDropperClass()
-        const result = await eyeDropper.open()
-
-        if (result?.sRGBHex) {
-          const colorItem = parseColor(result.sRGBHex)
-
-          // Save to persistent storage history
-          setColorHistory((prev) => {
-            const existing = prev ?? []
-            const filtered = existing.filter((c) => c.hex !== colorItem.hex)
-            return [colorItem, ...filtered].slice(0, 20)
-          })
-
-          // Auto-copy to clipboard if enabled
-          if (currentConfig.autoCopy) {
-            const val = getColorValueByFormat(
-              colorItem,
-              currentConfig.defaultFormat
-            )
-            await navigator.clipboard.writeText(val).catch(() => {})
-          }
-        }
-      } catch {
-        // User cancelled or pressed Escape
-      } finally {
-        window.close()
-      }
-      return
-    }
-
-    // 2. Fallback: Dispatch message to active tab content script
-    try {
-      await sendToActiveTab(MESSAGE_TYPES.TRIGGER_COLOR_PICKER)
-    } finally {
-      window.close()
-    }
-  }
-
   const handleCopyColor = async (item: ColorHistoryItem) => {
     const val = getColorValueByFormat(item, currentConfig.defaultFormat)
     try {
@@ -185,18 +136,7 @@ export const ColorPickerSettingsView: React.FC<
       title="Color Picker"
       enabled={isMasterEnabled}
       onToggle={handleToggleMaster}
-      onBack={onBack}
-      rightActions={
-        <button
-          type="button"
-          onClick={handlePickNow}
-          disabled={!isMasterEnabled}
-          title="Pick Color from Screen"
-          className="px-2.5 py-1 rounded-lg bg-accent hover:bg-accent-hover text-white font-semibold text-xs shadow-sm shadow-accent-glow active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none flex items-center gap-1.5">
-          <Pipette className="w-3.5 h-3.5" />
-          <span>Pick</span>
-        </button>
-      }>
+      onBack={onBack}>
       <div className="space-y-4">
         {/* Section 1: Keyboard Shortcut */}
         <FeatureShortcutRow
@@ -297,15 +237,6 @@ export const ColorPickerSettingsView: React.FC<
               onToggle={() => handleToggleOption("autoCopy")}
             />
 
-            {/* Feedback Notification */}
-            <SettingToggleRow
-              icon={<Bell className="w-5 h-5 text-pink-400" />}
-              title="Feedback Notification"
-              description="Display confirmation toast upon picking a color"
-              enabled={currentConfig.showToast}
-              onToggle={() => handleToggleOption("showToast")}
-            />
-
             {/* Floating Palette Modal */}
             <SettingToggleRow
               icon={<LayoutPanelTop className="w-5 h-5 text-indigo-400" />}
@@ -313,6 +244,23 @@ export const ColorPickerSettingsView: React.FC<
               description="Show interactive HEX / RGB / HSL palette modal after picking"
               enabled={currentConfig.showPaletteModal ?? true}
               onToggle={() => handleToggleOption("showPaletteModal")}
+            />
+
+            {/* Feedback Notification (disabled when Floating Palette is active) */}
+            <SettingToggleRow
+              icon={<Bell className="w-5 h-5 text-pink-400" />}
+              title="Feedback Notification"
+              description={
+                (currentConfig.showPaletteModal ?? true)
+                  ? "Disabled while Floating Palette is active"
+                  : "Display confirmation toast upon picking a color"
+              }
+              enabled={
+                currentConfig.showToast &&
+                !(currentConfig.showPaletteModal ?? true)
+              }
+              disabled={currentConfig.showPaletteModal ?? true}
+              onToggle={() => handleToggleOption("showToast")}
             />
           </div>
         </div>
