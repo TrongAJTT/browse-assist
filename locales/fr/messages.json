@@ -1,0 +1,23 @@
+{
+  "extName": {
+    "message": "Browse Assist"
+  },
+  "extDescription": {
+    "message": "Une collection légère et modulaire d'outils pratiques conçue pour booster votre productivité et fluidifier votre navigation."
+  },
+  "cmdPiP": {
+    "message": "Activer/désactiver le mode Picture-in-Picture pour la vidéo en cours"
+  },
+  "cmdAllowRightClick": {
+    "message": "Activer/désactiver le clic droit sur l'onglet actuel"
+  },
+  "cmdColorPicker": {
+    "message": "Capturer une couleur à l'écran"
+  },
+  "cmdElementToys": {
+    "message": "Activer Element Toys pour inspecter et manipuler les éléments de la page"
+  },
+  "cmdQuickHub": {
+    "message": "Afficher/masquer le menu Quick Hub à l'écran"
+  }
+}

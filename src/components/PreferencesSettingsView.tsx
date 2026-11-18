@@ -285,7 +285,14 @@ export const PreferencesSettingsView: React.FC<
   const languageOptions: SelectDropdownOption<LanguageCode>[] = [
     { id: "auto", label: t("preferences.languageAuto") },
     { id: "en", label: "English" },
-    { id: "vi", label: "Tiếng Việt" }
+    { id: "vi", label: "Tiếng Việt" },
+    { id: "de", label: "Deutsch" },
+    { id: "es", label: "Español" },
+    { id: "fr", label: "Français" },
+    { id: "ja", label: "日本語" },
+    { id: "ko", label: "한국어" },
+    { id: "zh_CN", label: "简体中文" },
+    { id: "zh_TW", label: "繁體中文" }
   ]
 
   const currentLanguage: LanguageCode =

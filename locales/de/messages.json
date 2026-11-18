@@ -1,0 +1,23 @@
+{
+  "extName": {
+    "message": "Browse Assist"
+  },
+  "extDescription": {
+    "message": "Eine leichte, modulare Sammlung praktischer Werkzeuge für mehr Produktivität und angenehmeres Surfen."
+  },
+  "cmdPiP": {
+    "message": "Bild-im-Bild-Modus für das aktuelle Video umschalten"
+  },
+  "cmdAllowRightClick": {
+    "message": "Rechtsklick-Freigabe im aktuellen Tab umschalten"
+  },
+  "cmdColorPicker": {
+    "message": "Farbe vom Bildschirm aufnehmen"
+  },
+  "cmdElementToys": {
+    "message": "Element Toys zum Inspizieren und Bearbeiten von Seitenelementen aktivieren"
+  },
+  "cmdQuickHub": {
+    "message": "Quick-Hub-Menü auf dem Bildschirm umschalten"
+  }
+}

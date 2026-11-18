@@ -2,12 +2,12 @@ import { describe, expect, it } from "vitest"
 
 import {
   getCurrentLocale,
+  LOCALE_TABLES,
   resolveBrowserLocale,
   setLocale,
   t
 } from "~core/i18n"
 import { en } from "~locales/en"
-import { vi } from "~locales/vi"
 
 function collectLeafKeys(obj: Record<string, unknown>, prefix = ""): string[] {
   const keys: string[] = []
@@ -64,16 +64,35 @@ describe("i18n core (rosetta)", () => {
     )
   })
 
-  it("maintains 100% key and placeholder parity between en and vi", () => {
+  it("maintains 100% key and placeholder parity across all supported locales", () => {
     const enKeys = collectLeafKeys(en as unknown as Record<string, unknown>)
-    const viKeys = collectLeafKeys(vi as unknown as Record<string, unknown>)
+    const locales = Object.entries(LOCALE_TABLES)
 
-    expect(viKeys).toEqual(enKeys)
+    expect(locales.map(([code]) => code).sort()).toEqual([
+      "de",
+      "en",
+      "es",
+      "fr",
+      "ja",
+      "ko",
+      "vi",
+      "zh_CN",
+      "zh_TW"
+    ])
 
-    for (const key of enKeys) {
-      const enVal = getNestedValue(en as unknown as Record<string, unknown>, key)
-      const viVal = getNestedValue(vi as unknown as Record<string, unknown>, key)
-      expect(extractPlaceholders(viVal)).toEqual(extractPlaceholders(enVal))
+    for (const [localeCode, dict] of locales) {
+      const localeKeys = collectLeafKeys(dict as unknown as Record<string, unknown>)
+      expect(localeKeys, `Key parity mismatch for ${localeCode}`).toEqual(enKeys)
+
+      for (const key of enKeys) {
+        const enVal = getNestedValue(en as unknown as Record<string, unknown>, key)
+        const locVal = getNestedValue(dict as unknown as Record<string, unknown>, key)
+        expect(locVal.trim().length, `Empty value in ${localeCode}.${key}`).toBeGreaterThan(0)
+        expect(
+          extractPlaceholders(locVal),
+          `Placeholder mismatch in ${localeCode}.${key}`
+        ).toEqual(extractPlaceholders(enVal))
+      }
     }
   })
 })

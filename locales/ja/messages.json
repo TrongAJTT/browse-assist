@@ -1,0 +1,23 @@
+{
+  "extName": {
+    "message": "Browse Assist"
+  },
+  "extDescription": {
+    "message": "ブラウジングの快適さと生産性を高める、軽量でモジュラーな便利ツール集。"
+  },
+  "cmdPiP": {
+    "message": "再生中の動画のピクチャーインピクチャーを切り替える"
+  },
+  "cmdAllowRightClick": {
+    "message": "現在のタブで右クリック許可を切り替える"
+  },
+  "cmdColorPicker": {
+    "message": "画面から色を取得する"
+  },
+  "cmdElementToys": {
+    "message": "Element Toys を起動してページ要素を検査・操作する"
+  },
+  "cmdQuickHub": {
+    "message": "画面上の Quick Hub メニューを切り替える"
+  }
+}

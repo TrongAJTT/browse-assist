@@ -1,15 +1,29 @@
 import rosetta from "rosetta"
 
 import type { LanguageCode, SupportedLocale } from "~core/types"
+import { de } from "~locales/de"
 import { en, type TranslationDict } from "~locales/en"
+import { es } from "~locales/es"
+import { fr } from "~locales/fr"
+import { ja } from "~locales/ja"
+import { ko } from "~locales/ko"
 import { vi } from "~locales/vi"
+import { zh_CN } from "~locales/zh_CN"
+import { zh_TW } from "~locales/zh_TW"
 
-const LOCALE_TABLES: Partial<Record<SupportedLocale, TranslationDict>> = {
+const LOCALE_TABLES: Record<SupportedLocale, TranslationDict> = {
   en,
-  vi
+  vi,
+  de,
+  es,
+  fr,
+  ja,
+  ko,
+  zh_CN,
+  zh_TW
 }
 
-const i18n = rosetta<TranslationDict>(LOCALE_TABLES as Record<SupportedLocale, TranslationDict>)
+const i18n = rosetta<TranslationDict>(LOCALE_TABLES)
 i18n.locale("en")
 
 let activeLocale: SupportedLocale = "en"

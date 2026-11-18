@@ -1,0 +1,23 @@
+{
+  "extName": {
+    "message": "Browse Assist"
+  },
+  "extDescription": {
+    "message": "웹 브라우징의 생산성과 편의성을 높여주는 가볍고 모듈화된 유틸리티 모음입니다."
+  },
+  "cmdPiP": {
+    "message": "재생 중인 동영상의 PIP(화면 속 화면) 모드 전환"
+  },
+  "cmdAllowRightClick": {
+    "message": "현재 탭에서 우클릭 허용 전환"
+  },
+  "cmdColorPicker": {
+    "message": "화면에서 색상 추출"
+  },
+  "cmdElementToys": {
+    "message": "페이지 요소를 검사 및 조작하는 Element Toys 활성화"
+  },
+  "cmdQuickHub": {
+    "message": "화면 내 Quick Hub 메뉴 전환"
+  }
+}
