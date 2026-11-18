@@ -425,12 +425,14 @@ export interface ColorPickerConfig {
   defaultFormat: ColorFormat // Default format copied on pick
   autoCopy: boolean // Automatically copy default format to clipboard immediately upon picking
   showToast: boolean // Show notification toast upon picking
+  showPaletteModal?: boolean // Show floating palette modal with HEX/RGB/HSL after picking
 }
 
 export const DEFAULT_COLOR_PICKER_CONFIG: ColorPickerConfig = {
   defaultFormat: "hex",
   autoCopy: true,
-  showToast: true
+  showToast: true,
+  showPaletteModal: true
 }
 
 /**

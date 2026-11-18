@@ -4,6 +4,7 @@
  * adds to persistent color history, and displays a floating color palette modal.
  */
 
+import { copyToClipboard } from "~core/linkUtils"
 import { MESSAGE_TYPES } from "~core/messaging"
 import { extensionStorage } from "~core/storage"
 import { showContentToast } from "~core/toast"
@@ -29,30 +30,6 @@ const EYE_DROPPER_ICON_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fi
 const COPY_ICON_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`
 const CHECK_ICON_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`
 const CLOSE_ICON_SVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`
-
-/**
- * Copies plain text to clipboard.
- */
-async function copyToClipboard(text: string): Promise<boolean> {
-  try {
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(text)
-      return true
-    }
-    const textarea = document.createElement("textarea")
-    textarea.value = text
-    textarea.style.position = "fixed"
-    textarea.style.opacity = "0"
-    textarea.style.pointerEvents = "none"
-    document.body.appendChild(textarea)
-    textarea.select()
-    const success = document.execCommand("copy")
-    document.body.removeChild(textarea)
-    return success
-  } catch {
-    return false
-  }
-}
 
 /**
  * Saves a new color into persistent color history (capped at 20 items).
@@ -377,8 +354,10 @@ export async function pickColor(): Promise<void> {
         })
       }
 
-      // 4. Show floating palette modal with all formats
-      showPaletteModal(colorItem)
+      // 4. Show floating palette modal with all formats if enabled
+      if (currentConfig.showPaletteModal ?? true) {
+        showPaletteModal(colorItem)
+      }
     }
   } catch (err: unknown) {
     const error = err as { name?: string; message?: string }

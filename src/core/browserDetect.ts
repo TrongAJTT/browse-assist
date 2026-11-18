@@ -68,6 +68,9 @@ export function getBrowserShortcutUrl(): string | null {
 /**
  * Whether the EyeDropper Color Picker is supported in the current target/environment.
  * Combines compile-time target check (for tree-shaking Firefox builds) and runtime EyeDropper check.
+ *
+ * TODO(firefox): Remove `process.env.PLASMO_TARGET !== "firefox-mv3"` once Firefox
+ * exposes `window.EyeDropper` Web API to extensions/content scripts.
  */
 export const isColorPickerSupported: boolean =
   process.env.PLASMO_TARGET !== "firefox-mv3" &&

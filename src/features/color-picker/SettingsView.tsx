@@ -1,11 +1,14 @@
-import { Bell, Check, Copy, History, Pipette, Trash2 } from "lucide-react"
+import { Bell, Check, Copy, History, LayoutPanelTop, Palette, Pipette, Trash2 } from "lucide-react"
 import type React from "react"
 import { useEffect, useState } from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
 import { FeatureShortcutRow } from "~components/FeatureShortcutRow"
-import { SegmentedTabs, type SegmentedTabItem } from "~components/SegmentedTabs"
+import {
+  SelectDropdown,
+  type SelectDropdownOption
+} from "~components/SelectDropdown"
 import { SettingToggleRow } from "~components/SettingToggleRow"
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
 import { MESSAGE_TYPES, sendToActiveTab } from "~core/messaging"
@@ -26,7 +29,7 @@ interface ColorPickerSettingsViewProps {
   onBack: () => void
 }
 
-const FORMAT_ITEMS: SegmentedTabItem<ColorFormat>[] = [
+const FORMAT_ITEMS: SelectDropdownOption<ColorFormat>[] = [
   {
     id: "hex",
     label: "HEX",
@@ -95,13 +98,17 @@ export const ColorPickerSettingsView: React.FC<
   }
 
   const handleToggleOption = (
-    key: keyof Pick<ColorPickerConfig, "autoCopy" | "showToast">
+    key: keyof Pick<ColorPickerConfig, "autoCopy" | "showToast" | "showPaletteModal">
   ) => {
+    const currentValue =
+      key === "showPaletteModal"
+        ? (currentConfig.showPaletteModal ?? true)
+        : currentConfig[key]
     setSettings((prev) => ({
       ...(prev ?? DEFAULT_SETTINGS),
       colorPickerConfig: {
         ...(prev?.colorPickerConfig ?? DEFAULT_COLOR_PICKER_CONFIG),
-        [key]: !currentConfig[key]
+        [key]: !currentValue
       }
     }))
   }
@@ -251,24 +258,29 @@ export const ColorPickerSettingsView: React.FC<
           )}
         </div>
 
-        {/* Section 3: Default Format Selection */}
+        {/* Section 3: Default Format Selection (Trailing Dropdown) */}
         <div className="space-y-2 pt-2 border-t border-border-divider">
           <span className="section-header">Default Copy Format</span>
-          <div className="space-y-1.5">
-            <span className="text-xs font-semibold text-content-primary">
-              Clipboard Color Format
-            </span>
-            <p className="text-[11px] text-content-muted leading-snug">
-              Select which color standard is copied automatically when you pick
-              a pixel.
-            </p>
-          </div>
+          <div className="flex items-center justify-between gap-3 py-0.5">
+            <div className="flex items-start gap-3 flex-1 min-w-0">
+              <Palette className="w-5 h-5 text-pink-400 shrink-0 mt-0.5" />
+              <div className="flex flex-col min-w-0">
+                <span className="text-xs font-semibold text-content-primary">
+                  Clipboard Color Format
+                </span>
+                <p className="text-[11px] text-content-muted mt-0.5 leading-snug">
+                  Color standard copied automatically when picking.
+                </p>
+              </div>
+            </div>
 
-          <SegmentedTabs<ColorFormat>
-            items={FORMAT_ITEMS}
-            value={currentConfig.defaultFormat}
-            onChange={handleSelectFormat}
-          />
+            <SelectDropdown<ColorFormat>
+              value={currentConfig.defaultFormat}
+              options={FORMAT_ITEMS}
+              onChange={handleSelectFormat}
+              ariaLabel="Clipboard Color Format"
+            />
+          </div>
         </div>
 
         {/* Section 4: Behavior & Feedback */}
@@ -289,9 +301,18 @@ export const ColorPickerSettingsView: React.FC<
             <SettingToggleRow
               icon={<Bell className="w-5 h-5 text-pink-400" />}
               title="Feedback Notification"
-              description="Display confirmation toast and floating palette modal on page"
+              description="Display confirmation toast upon picking a color"
               enabled={currentConfig.showToast}
               onToggle={() => handleToggleOption("showToast")}
+            />
+
+            {/* Floating Palette Modal */}
+            <SettingToggleRow
+              icon={<LayoutPanelTop className="w-5 h-5 text-indigo-400" />}
+              title="Show Floating Palette"
+              description="Show interactive HEX / RGB / HSL palette modal after picking"
+              enabled={currentConfig.showPaletteModal ?? true}
+              onToggle={() => handleToggleOption("showPaletteModal")}
             />
           </div>
         </div>
