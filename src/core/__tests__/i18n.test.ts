@@ -5,7 +5,8 @@ import {
   LOCALE_TABLES,
   resolveBrowserLocale,
   setLocale,
-  t
+  t,
+  translateFor
 } from "~core/i18n"
 import { en } from "~locales/en"
 
@@ -62,6 +63,13 @@ describe("i18n core (rosetta)", () => {
     expect(t("features.contextMenuActions.activeCount", { count: 4 })).toBe(
       "4/6 Active"
     )
+    expect(
+      translateFor("ja", "features.videoWheelControl.logic.frameStep", {
+        sign: "+1",
+        time: "0:12"
+      })
+    ).toBe("フレーム +1 (0:12)")
+    expect(getCurrentLocale()).toBe("en")
   })
 
   it("maintains 100% key and placeholder parity across all supported locales", () => {

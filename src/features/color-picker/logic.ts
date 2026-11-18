@@ -4,6 +4,7 @@
  * adds to persistent color history, and displays a floating color palette modal.
  */
 
+import { escapeHtml } from "~core/escapeHtml"
 import { t } from "~core/i18n"
 import { copyToClipboard } from "~core/linkUtils"
 import { MESSAGE_TYPES } from "~core/messaging"
@@ -227,10 +228,10 @@ function showPaletteModal(color: ColorHistoryItem): void {
         <div class="swatch" style="background-color: ${color.hex}"></div>
         <div class="title-text">
           <span class="title">${color.hex}</span>
-          <span class="subtitle">Picked Color</span>
+          <span class="subtitle">${escapeHtml(t("features.colorPicker.logic.palette.pickedColor"))}</span>
         </div>
       </div>
-      <button class="close-btn" id="btn-close" title="Close">${CLOSE_ICON_SVG}</button>
+      <button class="close-btn" id="btn-close" title="${escapeHtml(t("features.colorPicker.logic.palette.close"))}">${CLOSE_ICON_SVG}</button>
     </div>
 
     <div class="values-list">
@@ -238,21 +239,21 @@ function showPaletteModal(color: ColorHistoryItem): void {
       <div class="value-row">
         <span class="format-label">HEX</span>
         <span class="format-value">${color.hex}</span>
-        <button class="copy-btn" data-val="${color.hex}" title="Copy HEX">${COPY_ICON_SVG}</button>
+        <button class="copy-btn" data-val="${color.hex}" title="${escapeHtml(t("features.colorPicker.logic.palette.copyHex"))}">${COPY_ICON_SVG}</button>
       </div>
 
       <!-- RGB -->
       <div class="value-row">
         <span class="format-label">RGB</span>
         <span class="format-value">${color.rgb}</span>
-        <button class="copy-btn" data-val="${color.rgb}" title="Copy RGB">${COPY_ICON_SVG}</button>
+        <button class="copy-btn" data-val="${color.rgb}" title="${escapeHtml(t("features.colorPicker.logic.palette.copyRgb"))}">${COPY_ICON_SVG}</button>
       </div>
 
       <!-- HSL -->
       <div class="value-row">
         <span class="format-label">HSL</span>
         <span class="format-value">${color.hsl}</span>
-        <button class="copy-btn" data-val="${color.hsl}" title="Copy HSL">${COPY_ICON_SVG}</button>
+        <button class="copy-btn" data-val="${color.hsl}" title="${escapeHtml(t("features.colorPicker.logic.palette.copyHsl"))}">${COPY_ICON_SVG}</button>
       </div>
     </div>
   `

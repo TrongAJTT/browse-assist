@@ -191,11 +191,14 @@ export const FEATURE_CATALOG_LIST: FeatureCatalogItem[] = Object.values(
 /**
  * Returns localized title and description for a feature key.
  */
-export function getLocalizedFeatureMeta(key: FeatureKey): FeatureCatalogItem {
+export function getLocalizedFeatureMeta(
+  key: FeatureKey,
+  translateFn: typeof t = t
+): FeatureCatalogItem {
   const base = FEATURE_CATALOG[key]
   return {
     ...base,
-    title: t(`features.${key}.title`),
-    description: t(`features.${key}.description`)
+    title: translateFn(`features.${key}.title`),
+    description: translateFn(`features.${key}.description`)
   }
 }

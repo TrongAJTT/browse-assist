@@ -402,7 +402,7 @@ export const PreferencesSettingsView: React.FC<
                   onClick={() => setIsPresetMenuOpen((prev) => !prev)}
                   className="flex items-center gap-1 text-[11px] font-medium text-accent hover:text-accent-hover transition-colors">
                   <Sparkles className="w-3 h-3" />
-                  <span>Presets</span>
+                  <span>{t("preferences.presets")}</span>
                   <ChevronDown
                     className={`w-3 h-3 transition-transform duration-150 ${
                       isPresetMenuOpen ? "rotate-180" : ""
@@ -419,10 +419,10 @@ export const PreferencesSettingsView: React.FC<
                       <Compass className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
                       <div className="flex flex-col min-w-0">
                         <span className="text-xs font-medium">
-                          Reading & Navigation
+                          {t("preferences.presetReading")}
                         </span>
                         <span className="text-[10px] text-content-muted">
-                          Scroll, drag & read
+                          {t("preferences.presetReadingDesc")}
                         </span>
                       </div>
                     </button>
@@ -434,10 +434,10 @@ export const PreferencesSettingsView: React.FC<
                       <Palette className="w-3.5 h-3.5 text-pink-400 shrink-0" />
                       <div className="flex flex-col min-w-0">
                         <span className="text-xs font-medium">
-                          Designer & Dev
+                          {t("preferences.presetDesigner")}
                         </span>
                         <span className="text-[10px] text-content-muted">
-                          Color, inspect & toys
+                          {t("preferences.presetDesignerDesc")}
                         </span>
                       </div>
                     </button>
@@ -449,10 +449,10 @@ export const PreferencesSettingsView: React.FC<
                       <Zap className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                       <div className="flex flex-col min-w-0">
                         <span className="text-xs font-medium">
-                          Essentials Only
+                          {t("preferences.presetEssential")}
                         </span>
                         <span className="text-[10px] text-content-muted">
-                          Minimal & focused
+                          {t("preferences.presetEssentialDesc")}
                         </span>
                       </div>
                     </button>
@@ -540,7 +540,7 @@ export const PreferencesSettingsView: React.FC<
 
         {/* Other Section */}
         <div className="space-y-2.5 pt-3 border-t border-border-divider">
-          <span className="section-header">Other</span>
+          <span className="section-header">{t("preferences.other")}</span>
 
           <button
             type="button"
@@ -558,10 +558,10 @@ export const PreferencesSettingsView: React.FC<
               </div>
               <div className="flex flex-col text-left min-w-0">
                 <span className="text-xs font-semibold text-content-primary">
-                  Extension Options Page
+                  {t("preferences.optionsPage")}
                 </span>
                 <span className="text-[10px] text-content-muted truncate">
-                  Full settings dashboard &amp; shortcut guide
+                  {t("preferences.optionsPageDesc")}
                 </span>
               </div>
             </div>

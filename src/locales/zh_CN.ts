@@ -2,22 +2,23 @@ import type { TranslationDict } from "./en"
 
 export const zh_CN: TranslationDict = {
   common: {
+    appName: "Browse Assist",
     enabled: "已启用",
     disabled: "已禁用",
-    on: "开",
-    off: "关",
     reset: "重置",
     clear: "清除",
     cancel: "取消",
-    save: "保存",
-    back: "返回",
+    gotIt: "知道了",
+    viewportScreen: "视口屏幕",
     unassigned: "未分配",
-    notConfigured: "未配置",
-    configure: "配置",
     launch: "启动",
     all: "全部",
     none: "无",
     customizeShortcuts: "在浏览器快捷键设置中自定义",
+    shortcutNotAssignedTip: "未分配快捷键，点击在浏览器设置中配置",
+    customizeShortcutTip: "点击在浏览器设置中自定义快捷键",
+    backTip: "返回 (退格键或 `)",
+    toggleFeatureAria: "切换 {{feature}}",
     resetOrder: "重置顺序",
     show: "显示",
     hide: "隐藏",
@@ -61,6 +62,13 @@ export const zh_CN: TranslationDict = {
       navigation: "滚动",
       media: "媒体",
       tools: "工具"
+    },
+    tooltips: {
+      preferencesAndTheme: "偏好设置与主题",
+      about: "关于 Browse Assist",
+      supportDonate: "支持与捐赠",
+      jumpToVideoTab: "点击跳转到此视频标签页",
+      exitPipWindow: "退出画中画窗口"
     }
   },
   preferences: {
@@ -80,7 +88,160 @@ export const zh_CN: TranslationDict = {
     rememberLastViewDesc: "重新打开弹窗时回到上次浏览的设置页面。",
     sessionTimeout: "会话超时",
     customizeMenu: "自定义菜单",
-    customizeMenuDesc: "拖动以重新排序，或切换功能在弹窗中的显示状态。"
+    customizeMenuDesc: "拖动以重新排序，或切换功能在弹窗中的显示状态。",
+    presets: "预设方案",
+    presetReading: "阅读与导航",
+    presetReadingDesc: "滚动、拖拽与阅读",
+    presetDesigner: "设计与开发",
+    presetDesignerDesc: "取色、检查与编辑",
+    presetEssential: "仅保留核心",
+    presetEssentialDesc: "精简而专注",
+    other: "其他",
+    optionsPage: "扩展选项页面",
+    optionsPageDesc: "完整设置面板与快捷键指南"
+  },
+  donate: {
+    buyMeACoffeeDesc: "买杯咖啡支持项目持续维护",
+    githubSponsorsDesc: "通过 GitHub 按月或单次赞助",
+    vietqrDesc: "通过 VietQR 即时银行转账 (越南)",
+    authorDonateDesc: "直接向作者捐赠"
+  },
+  dialogs: {
+    firefoxGuide: {
+      title: "Firefox 快捷键配置指南",
+      intro: "您可以直接在浏览器的扩展设置中自定义快捷键：",
+      step1Prefix: "在 Firefox 中打开新标签页并访问",
+      copyUrlTip: "点击复制网址",
+      step2Prefix: "点击附加组件管理器右上角的",
+      step2Target: "齿轮图标 ⚙",
+      step2Suffix: "。",
+      step3Prefix: "在下拉菜单中选择",
+      step3Target: "“管理扩展快捷键”",
+      step3Suffix: "。",
+      step4Prefix: "找到",
+      step4Suffix: "并为每项命令分配您喜欢的快捷键。"
+    }
+  },
+  options: {
+    title: "Browse Assist 设置",
+    subtitle: "配置您的浏览器效率工具集与快捷键",
+    openPopup: "打开弹窗",
+    openPopupTip: "打开扩展弹窗",
+    preferences: "偏好设置",
+    preferencesTip: "在弹窗中打开偏好设置",
+    about: "关于",
+    aboutTip: "在弹窗中打开关于信息",
+    activeModules: "已启用模块",
+    configureInPopup: "在弹窗中配置 {{feature}}",
+    shortcutsTitle: "键盘与鼠标快捷键参考",
+    shortcutsSubtitle: "实时浏览器热键与交互手势触发器",
+    customizeShortcuts: "自定义快捷键",
+    table: {
+      action: "操作",
+      shortcut: "快捷键 / 触发器",
+      description: "说明"
+    },
+    triggers: {
+      mouseWheel: "{{modifier}} + 鼠标滚轮",
+      mouseDrag: "鼠标拖拽",
+      doubleClickMargin: "双击页面边缘",
+      rightClickLink: "右键点击链接"
+    },
+    shortcuts: {
+      pip: {
+        name: "通用画中画 (PiP)",
+        desc: "将当前播放的视频分离为悬浮画中画窗口"
+      },
+      allowRightClick: {
+        name: "允许右键",
+        desc: "在当前标签页解锁右键菜单与文本复制"
+      },
+      elementToys: {
+        name: "元素工具",
+        desc: "启用点选定位，移除、编辑、隐藏或移动页面元素"
+      },
+      colorPicker: {
+        name: "屏幕取色器",
+        desc: "启动屏幕像素放大镜以拾取并复制颜色代码"
+      },
+      quickHub: {
+        name: "Quick Hub 快捷键",
+        desc: "通过键盘切换屏幕上的 Quick Hub 悬浮菜单"
+      },
+      volume: {
+        name: "视频音量控制",
+        desc: "悬停视频滚动调节音量；按住修饰键点击静音"
+      },
+      speed: {
+        name: "视频倍速控制",
+        desc: "悬停视频平滑调节播放速度；点击切换全屏"
+      },
+      seek: {
+        name: "视频快进与逐帧步进",
+        desc: "快进/快退；视频暂停时支持逐帧微调"
+      },
+      boost: {
+        name: "视频倍速加速",
+        desc: "在视频上按住 X 键临时以 {{speed}}x 倍速播放"
+      },
+      mouseZoom: {
+        name: "鼠标定点缩放",
+        desc: "以鼠标光标位置为中心平滑缩放页面"
+      },
+      superDrag: {
+        name: "超级拖拽",
+        desc: "拖拽文字在新标签页搜索；拖拽链接在后台标签页打开"
+      },
+      quickScroll: {
+        name: "快速滚动",
+        desc: "双击屏幕边缘或点击悬浮按钮跳转至顶部或底部"
+      },
+      smoothScroll: {
+        name: "平滑滚动",
+        desc: "在所有可滚动容器中应用惯性物理插值"
+      },
+      cleanLink: {
+        name: "复制纯净链接",
+        desc: "去除追踪参数 (utm_*, fbclid) 并复制纯净或 Markdown 链接"
+      },
+      quickHubZone: {
+        name: "Quick Hub 触发区",
+        desc: "鼠标悬停屏幕角落触发区以展开快捷工具"
+      }
+    },
+    storage: {
+      title: "扩展存储与数据",
+      desc: "永久清除 Browse Assist 在浏览器中保存的所有数据与设置，包括自定义配置、快捷键偏好、Quick Hub 排序及取色记录。",
+      clearAll: "清除所有数据...",
+      cleared: "所有扩展数据已清除并恢复为出厂默认设置。",
+      footer:
+        "Browse Assist • Manifest V3 • 基于 Plasmo、React 与 Tailwind CSS 构建"
+    },
+    modal: {
+      title: "清除所有扩展数据？",
+      body: "这将永久删除 Browse Assist 在您浏览器配置文件中存储的所有数据。",
+      listHeader: "以下内容将被删除：",
+      item1: "所有功能开关状态及子配置",
+      item2: "Quick Hub 排序、置顶操作及隐藏模块",
+      item3: "取色器中的颜色历史记录",
+      item4: "主题偏好与弹窗导航记忆",
+      warning: "⚠️ 此操作不可撤销。所有设置将立即恢复为默认状态。",
+      clearing: "正在清除数据...",
+      confirm: "确认删除全部数据"
+    }
+  },
+  content: {
+    copied: {
+      linkText: "已复制链接文本",
+      cleanLink: "已复制纯净链接",
+      markdown: "已复制 Markdown",
+      cleanPageUrl: "已复制纯净页面 URL",
+      pageMarkdown: "已复制页面 Markdown",
+      quote: "已复制引用",
+      text: "已复制文本",
+      imageLink: "已复制图片链接",
+      linkUrl: "已复制链接 URL"
+    }
   },
   about: {
     title: "关于",
@@ -99,7 +260,7 @@ export const zh_CN: TranslationDict = {
   },
   features: {
     allowRightClick: {
-      title: "Allow Right Click",
+      title: "允许右键",
       description: "在限制右键的网站上恢复右键菜单、文本选择与复制功能。",
       popupDesc: "在当前标签页启用右键菜单和复制，不影响其他应用。",
       toastEnabled: "已启用右键",
@@ -107,7 +268,7 @@ export const zh_CN: TranslationDict = {
       currentTab: "当前标签页"
     },
     contextMenuActions: {
-      title: "Context Menu Actions",
+      title: "右键菜单操作",
       description: "自定义右键菜单操作，用于复制纯净链接或 Markdown 格式。",
       activeCount: "{{count}}/6 已启用",
       copyLinkText: "复制链接文本",
@@ -141,7 +302,7 @@ export const zh_CN: TranslationDict = {
       }
     },
     superDrag: {
-      title: "Super Drag",
+      title: "超级拖拽",
       description: "拖拽选中文本即可搜索，拖拽链接即可在新标签页打开。",
       settings: {
         dragTargets: "拖拽目标",
@@ -181,10 +342,40 @@ export const zh_CN: TranslationDict = {
           copy_image_link: "复制图片链接",
           search_image: "搜索图片"
         }
+      },
+      logic: {
+        types: {
+          search: "搜索",
+          image: "图片",
+          link: "链接"
+        },
+        dropOpenBackground: "松开以在后台打开{{type}}",
+        shortOpenBackground: "{{type}} (后台)",
+        dropOpenActive: "松开以在新标签页打开{{type}}",
+        shortOpenActive: "{{type}} (新标签页)",
+        dropOpenWindow: "松开以在新窗口打开{{type}}",
+        shortOpenWindow: "{{type}} (新窗口)",
+        dropOpenIncognito: "松开以在无痕窗口打开{{type}}",
+        shortOpenIncognito: "{{type}} (无痕)",
+        dropCopyLinkText: "松开以复制链接文本",
+        shortCopyLinkText: "复制文本",
+        dropCopyMarkdown: "松开以复制 Markdown",
+        shortCopyMarkdown: "复制 Markdown",
+        dropSearchImage: "松开以搜索图片",
+        shortSearchImage: "搜索图片",
+        dropCopyText: "松开以复制文本",
+        shortCopyText: "复制文本",
+        dropCopyImageLink: "松开以复制图片链接",
+        shortCopyImageLink: "复制图片链接",
+        dropCopyLinkUrl: "松开以复制链接 URL",
+        shortCopyLinkUrl: "复制链接",
+        noAction: "无操作",
+        releaseToCancel: "松开取消",
+        exceededMax: "超出最大距离 (松开取消)"
       }
     },
     quickScroll: {
-      title: "Quick Scroll Buttons",
+      title: "快速滚动按钮",
       description: "智能悬浮按钮，平滑快速跳转至页面顶部或底部。",
       settings: {
         buttonPlacement: "按钮位置",
@@ -213,7 +404,7 @@ export const zh_CN: TranslationDict = {
       }
     },
     smoothScroll: {
-      title: "Smooth Scrolling",
+      title: "平滑滚动",
       description: "基于插值物理效果的丝滑页面滚动。",
       settings: {
         profiles: "预设方案",
@@ -235,7 +426,7 @@ export const zh_CN: TranslationDict = {
       }
     },
     mouseZoom: {
-      title: "Mouse Pin-to-Zoom",
+      title: "鼠标定点缩放",
       description: "按住修饰键并滚动滚轮，以鼠标光标为中心缩放页面。",
       settings: {
         resetZoomTooltip: "将当前标签页缩放重置为 100%",
@@ -252,10 +443,13 @@ export const zh_CN: TranslationDict = {
         invertDirectionDesc: "向下滚动放大，向上滚动缩小。",
         showZoomToast: "显示缩放提示",
         showZoomToastDesc: "在页面右上角显示悬浮缩放百分比徽章。"
+      },
+      logic: {
+        pageZoom: "页面缩放"
       }
     },
     pictureInPicture: {
-      title: "Universal Picture-in-Picture",
+      title: "通用画中画 (PiP)",
       description: "使用可自定义快捷键切换视频悬浮画中画窗口。",
       settings: {
         shortTitle: "Picture-in-Picture",
@@ -283,10 +477,14 @@ export const zh_CN: TranslationDict = {
         notSupported: "当前浏览器不支持画中画",
         cannotEnter: "无法进入画中画",
         noVideoFound: "页面上未找到视频"
+      },
+      background: {
+        playing: "画中画播放中: {{title}}",
+        untitledVideo: "视频"
       }
     },
     videoWheelControl: {
-      title: "Video Wheel Control",
+      title: "视频滚轮控制",
       description: "使用鼠标滚轮平滑调节视频音量、倍速和进度。",
       settings: {
         tabs: {
@@ -330,10 +528,21 @@ export const zh_CN: TranslationDict = {
         noticeBody1: "此功能直接与底层 HTML5 媒体元素 (<video>) 交互。",
         noticeBody2:
           "在大型视频网站上，播放器状态管理器可能会在循环播放、切换清晰度或自动连播时重置倍速或静音状态。"
+      },
+      logic: {
+        muted: "已静音",
+        fullscreen: "全屏",
+        exitFullscreen: "退出全屏",
+        frameCopied: "已复制帧画面！",
+        captureFailed: "截图失败",
+        clipboardDenied: "剪贴板权限被拒",
+        corsProtected: "受 CORS 保护",
+        frameStep: "帧 {{sign}} ({{time}})",
+        boost: "⚡ {{rate}}x 加速"
       }
     },
     colorPicker: {
-      title: "Color Picker",
+      title: "屏幕取色器",
       description: "拾取屏幕任意像素颜色并支持多格式即时复制。",
       settings: {
         shortcutTitle: "取色器快捷键",
@@ -360,11 +569,18 @@ export const zh_CN: TranslationDict = {
         pickedAndCopied: "已拾取并复制颜色",
         picked: "已拾取颜色",
         couldNotOpen: "无法打开取色器",
-        permissionRequired: "需要用户交互或未获得权限"
+        permissionRequired: "需要用户交互或未获得权限",
+        palette: {
+          pickedColor: "已拾取颜色",
+          close: "关闭",
+          copyHex: "复制 HEX",
+          copyRgb: "复制 RGB",
+          copyHsl: "复制 HSL"
+        }
       }
     },
     elementToys: {
-      title: "Element Toys",
+      title: "元素工具",
       description: "在任意网页上检查、移除、编辑文本或重新定位页面元素。",
       settings: {
         launchTooltip: "在当前页面启动 Element Toys",
@@ -406,6 +622,50 @@ export const zh_CN: TranslationDict = {
         tipUndoMiddle: "撤销任意操作，或点击工具栏上的",
         tipUndoSettings: "设置",
         tipUndoSuffix: "按钮配置更多选项。"
+      },
+      toolbar: {
+        title: "元素工具",
+        zap: "移除",
+        zapTip: "移除：点击从 DOM 中删除元素",
+        edit: "编辑",
+        editTip: "编辑文本：点击任意文字即可内联编辑",
+        move: "移动",
+        moveActiveTip: "移动工具已激活 (按 +/- 调整父级范围)",
+        moveTip: "移动：点击启用移动模式 (Flow / Free)",
+        moveLabel: "移动 ({{mode}})",
+        flow: "Flow",
+        flowTip: "Flow 模式：在 DOM 布局中重排并推动其他元素",
+        free: "Free",
+        freeTip: "Free 模式：自由变换位置，不改变原有布局",
+        hide: "隐藏",
+        hideTip: "隐藏：点击软隐藏元素，不影响页面排版",
+        undo: "撤销",
+        undoTip: "撤销上一步操作 (Ctrl+Z)",
+        settings: "设置",
+        settingsTip: "打开元素工具设置",
+        exit: "退出",
+        exitTip: "退出元素工具 (Esc)"
+      },
+      overlay: {
+        clickToZap: "点击移除",
+        clickToEdit: "点击编辑文本",
+        dragBody: "拖动主体以{{type}} • 拖动边角以调整大小",
+        clickToHide: "点击隐藏"
+      },
+      logic: {
+        zapped: "已移除元素！",
+        hidden: "已隐藏元素",
+        resized: "已调整元素大小",
+        textUpdated: "文本已更新",
+        undone: "操作已撤销",
+        undoneDetail: "已撤销 {{action}}",
+        closed: "已关闭元素工具",
+        active: "元素工具已启用",
+        activeDetail: "从顶部工具栏选择工具 • 按 Esc 退出",
+        scope: "范围: <{{tag}}>",
+        scopeDetail: "层级 +{{depth}} (按 - 缩小)",
+        scrollUnfrozen: "已解锁页面滚动",
+        scrollUnfrozenDetail: "已恢复 overflow: auto"
       }
     },
     quickHub: {
@@ -450,11 +710,12 @@ export const zh_CN: TranslationDict = {
       logic: {
         noToolsActive: "暂无可用工具，请在 Browse Assist 弹窗中启用功能。",
         triggerTooltip: "Quick Hub (快捷工具)",
+        triggerAria: "Quick Hub",
         cleanUrlCopied: "已复制纯净 URL"
       }
     },
     imageHoverPreview: {
-      title: "Image Hover Preview",
+      title: "图片悬停预览",
       description: "悬停在图片或图片链接上即可预览原图尺寸。",
       settings: {
         activation: "激活方式",

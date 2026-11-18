@@ -4,6 +4,7 @@
  * chrome.commands routing, and tracking the single active PiP tab.
  */
 
+import { t } from "~core/i18n"
 import { MESSAGE_TYPES, sendToActiveTab, sendToTab } from "~core/messaging"
 import { extensionStorage } from "~core/storage"
 import {
@@ -34,14 +35,16 @@ async function updateBadge(isPip: boolean, title?: string): Promise<void> {
 
   if (!isMasterEnabled || !config.showBadge || !isPip) {
     await chrome.action.setBadgeText({ text: "" })
-    await chrome.action.setTitle({ title: "Browse Assist" })
+    await chrome.action.setTitle({ title: t("common.appName") })
     return
   }
 
   await chrome.action.setBadgeText({ text: "PiP" })
   await chrome.action.setBadgeBackgroundColor({ color: "#6366f1" }) // Indigo
   if (title) {
-    await chrome.action.setTitle({ title: `Playing in PiP: ${title}` })
+    await chrome.action.setTitle({
+      title: t("features.pictureInPicture.background.playing", { title })
+    })
   }
 }
 
@@ -94,7 +97,10 @@ function onMessageListener(
     if (message.isPip && sender.tab?.id) {
       activeSession = {
         tabId: sender.tab.id,
-        title: message.title || sender.tab.title || "Video"
+        title:
+          message.title ||
+          sender.tab.title ||
+          t("features.pictureInPicture.background.untitledVideo")
       }
       updateBadge(true, activeSession.title).catch(() => {})
     } else {

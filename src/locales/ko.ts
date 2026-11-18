@@ -2,22 +2,24 @@ import type { TranslationDict } from "./en"
 
 export const ko: TranslationDict = {
   common: {
+    appName: "Browse Assist",
     enabled: "사용",
     disabled: "사용 안 함",
-    on: "켜짐",
-    off: "꺼짐",
     reset: "초기화",
     clear: "지우기",
     cancel: "취소",
-    save: "저장",
-    back: "뒤로",
+    gotIt: "확인",
+    viewportScreen: "뷰포트 화면",
     unassigned: "지정되지 않음",
-    notConfigured: "설정되지 않음",
-    configure: "설정",
     launch: "실행",
     all: "전체",
     none: "없음",
     customizeShortcuts: "브라우저 단축키 설정에서 변경",
+    shortcutNotAssignedTip:
+      "단축키가 지정되지 않았습니다. 클릭하여 브라우저에서 설정",
+    customizeShortcutTip: "클릭하여 브라우저 단축키 설정 변경",
+    backTip: "뒤로 (Backspace 또는 `)",
+    toggleFeatureAria: "{{feature}} 전환",
     resetOrder: "순서 초기화",
     show: "표시",
     hide: "숨기기",
@@ -61,6 +63,13 @@ export const ko: TranslationDict = {
       navigation: "스크롤",
       media: "미디어",
       tools: "도구"
+    },
+    tooltips: {
+      preferencesAndTheme: "환경설정 및 테마",
+      about: "Browse Assist 정보",
+      supportDonate: "프로젝트 후원",
+      jumpToVideoTab: "클릭하여 이 동영상 탭으로 이동",
+      exitPipWindow: "Picture-in-Picture 창 닫기"
     }
   },
   preferences: {
@@ -81,7 +90,162 @@ export const ko: TranslationDict = {
     sessionTimeout: "세션 시간 제한",
     customizeMenu: "메뉴 사용자 지정",
     customizeMenuDesc:
-      "드래그하여 순서를 바꾸거나 팝업에서 표시 여부를 전환합니다."
+      "드래그하여 순서를 바꾸거나 팝업에서 표시 여부를 전환합니다.",
+    presets: "프리셋",
+    presetReading: "읽기 및 탐색",
+    presetReadingDesc: "스크롤, 드래그 및 읽기",
+    presetDesigner: "디자인 및 개발",
+    presetDesignerDesc: "색상, 검사 및 편집",
+    presetEssential: "필수 기능만",
+    presetEssentialDesc: "최소한으로 집중",
+    other: "기타",
+    optionsPage: "확장 옵션 페이지",
+    optionsPageDesc: "전체 설정 대시보드 및 단축키 가이드"
+  },
+  donate: {
+    buyMeACoffeeDesc: "커피 한 잔으로 프로젝트 유지 관리 후원",
+    githubSponsorsDesc: "GitHub를 통해 월간 또는 일회성 후원",
+    vietqrDesc: "VietQR을 통한 즉시 계좌 이체 (베트남)",
+    authorDonateDesc: "작성자에게 직접 후원"
+  },
+  dialogs: {
+    firefoxGuide: {
+      title: "Firefox 단축키 설정 가이드",
+      intro:
+        "브라우저의 확장 기능 설정에서 단축키를 직접 사용자 지정할 수 있습니다:",
+      step1Prefix: "Firefox에서 새 탭을 열고 다음 주소로 이동하세요:",
+      copyUrlTip: "클릭하여 URL 복사",
+      step2Prefix: "부가 기능 관리자 페이지 오른쪽 상단의",
+      step2Target: "톱니바퀴 아이콘 ⚙",
+      step2Suffix: "을 클릭합니다.",
+      step3Prefix: "드롭다운 메뉴에서",
+      step3Target: "‘확장 기능 단축키 관리’",
+      step3Suffix: "를 선택합니다.",
+      step4Prefix: "다음을 찾아",
+      step4Suffix: "각 명령에 원하는 단축키를 지정하세요."
+    }
+  },
+  options: {
+    title: "Browse Assist 설정",
+    subtitle: "웹 브라우징 편의 도구 및 단축키를 구성합니다",
+    openPopup: "팝업 열기",
+    openPopupTip: "확장 프로그램 팝업 열기",
+    preferences: "환경설정",
+    preferencesTip: "팝업에서 환경설정 열기",
+    about: "정보",
+    aboutTip: "팝업에서 정보 보기",
+    activeModules: "활성 모듈",
+    configureInPopup: "팝업에서 {{feature}} 설정",
+    shortcutsTitle: "키보드 및 마우스 단축키 참조",
+    shortcutsSubtitle: "실시간 브라우저 단축키 및 대화형 제스처 트리거",
+    customizeShortcuts: "단축키 사용자 지정",
+    table: {
+      action: "동작",
+      shortcut: "단축키 / 트리거",
+      description: "설명"
+    },
+    triggers: {
+      mouseWheel: "{{modifier}} + 마우스 휠",
+      mouseDrag: "마우스 드래그",
+      doubleClickMargin: "가장자리 더블 클릭",
+      rightClickLink: "링크 우클릭"
+    },
+    shortcuts: {
+      pip: {
+        name: "화면 속 화면 (PiP)",
+        desc: "재생 중인 동영상을 플로팅 PiP 창으로 분리"
+      },
+      allowRightClick: {
+        name: "우클릭 허용",
+        desc: "현재 탭에서 우클릭 메뉴와 복사 제한 해제 전환"
+      },
+      elementToys: {
+        name: "요소 도구",
+        desc: "페이지 요소 제거, 편집, 숨기기 또는 이동 도구 활성화"
+      },
+      colorPicker: {
+        name: "색상 추출기",
+        desc: "화면 스포이드 돋보기로 색상 코드 확인 및 복사"
+      },
+      quickHub: {
+        name: "Quick Hub 단축키",
+        desc: "키보드로 화면 Quick Hub 플로팅 메뉴 전환"
+      },
+      volume: {
+        name: "동영상 볼륨 제어",
+        desc: "동영상 위에서 휠로 볼륨 조절; 보조 키+클릭으로 음소거"
+      },
+      speed: {
+        name: "동영상 속도 제어",
+        desc: "동영상 위에서 휠로 재생 속도 조절; 클릭으로 전체 화면"
+      },
+      seek: {
+        name: "동영상 탐색 및 프레임 이동",
+        desc: "앞으로/뒤로 탐색; 일시정지 시 프레임 단위 이동"
+      },
+      boost: {
+        name: "동영상 배속 부스트",
+        desc: "동영상 위에서 X 키를 길게 눌러 일시적으로 {{speed}}x 속도 재생"
+      },
+      mouseZoom: {
+        name: "커서 위치 확대/축소",
+        desc: "마우스 커서 위치를 중심으로 페이지 부드럽게 확대/축소"
+      },
+      superDrag: {
+        name: "슈퍼 드래그",
+        desc: "텍스트 드래그로 새 탭 검색; 링크 드래그로 백그라운드 탭 열기"
+      },
+      quickScroll: {
+        name: "빠른 스크롤",
+        desc: "화면 가장자리 더블 클릭 또는 플로팅 버튼으로 맨 위/아래 이동"
+      },
+      smoothScroll: {
+        name: "부드러운 스크롤",
+        desc: "모든 스크롤 영역에 관성 물리 보간 적용"
+      },
+      cleanLink: {
+        name: "깔끔한 링크 복사",
+        desc: "추적 매개변수(utm_*, fbclid)를 제거하고 링크 또는 마크다운 복사"
+      },
+      quickHubZone: {
+        name: "Quick Hub 트리거 영역",
+        desc: "화면 모서리에 마우스를 올려 빠른 도구 런처 열기"
+      }
+    },
+    storage: {
+      title: "확장 저장소 및 데이터",
+      desc: "브라우저에 저장된 Browse Assist의 모든 데이터와 설정(사용자 지정 구성, 단축키, Quick Hub 순서, 색상 기록)을 영구적으로 삭제합니다.",
+      clearAll: "모든 데이터 지우기...",
+      cleared: "모든 확장 프로그램 데이터가 삭제되고 기본값으로 초기화되었습니다.",
+      footer:
+        "Browse Assist • Manifest V3 • Plasmo, React 및 Tailwind CSS로 제작"
+    },
+    modal: {
+      title: "모든 확장 데이터를 삭제할까요?",
+      body: "브라우저 프로필에 저장된 Browse Assist의 모든 데이터가 영구적으로 삭제됩니다.",
+      listHeader: "다음 항목이 삭제됩니다:",
+      item1: "모든 활성 기능 토글 상태 및 세부 설정",
+      item2: "Quick Hub 순서, 고정된 동작 및 숨겨진 모듈",
+      item3: "스포이드 색상 추출기의 색상 기록",
+      item4: "테마 환경설정 및 팝업 탐색 기록",
+      warning:
+        "⚠️ 이 작업은 되돌릴 수 없습니다. 모든 설정이 즉시 공장 기본값으로 돌아갑니다.",
+      clearing: "데이터 삭제 중...",
+      confirm: "예, 모든 데이터 삭제"
+    }
+  },
+  content: {
+    copied: {
+      linkText: "링크 텍스트 복사됨",
+      cleanLink: "깔끔한 링크 복사됨",
+      markdown: "마크다운 복사됨",
+      cleanPageUrl: "깔끔한 페이지 URL 복사됨",
+      pageMarkdown: "페이지 마크다운 복사됨",
+      quote: "인용구 복사됨",
+      text: "텍스트 복사됨",
+      imageLink: "이미지 링크 복사됨",
+      linkUrl: "링크 URL 복사됨"
+    }
   },
   about: {
     title: "정보",
@@ -100,7 +264,7 @@ export const ko: TranslationDict = {
   },
   features: {
     allowRightClick: {
-      title: "Allow Right Click",
+      title: "우클릭 허용",
       description:
         "제한된 웹사이트에서 우클릭 메뉴, 텍스트 선택 및 복사를 복원합니다.",
       popupDesc:
@@ -110,7 +274,7 @@ export const ko: TranslationDict = {
       currentTab: "현재 탭"
     },
     contextMenuActions: {
-      title: "Context Menu Actions",
+      title: "우클릭 메뉴 작업",
       description:
         "추적 매개변수가 제거된 깔끔한 링크와 마크다운 복사를 위한 우클릭 작업.",
       activeCount: "{{count}}/6 활성",
@@ -147,7 +311,7 @@ export const ko: TranslationDict = {
       }
     },
     superDrag: {
-      title: "Super Drag",
+      title: "슈퍼 드래그",
       description:
         "선택한 텍스트를 드래그하여 검색하거나 링크를 드래그하여 새 탭에서 엽니다.",
       settings: {
@@ -192,10 +356,40 @@ export const ko: TranslationDict = {
           copy_image_link: "이미지 링크 복사",
           search_image: "이미지 검색"
         }
+      },
+      logic: {
+        types: {
+          search: "검색",
+          image: "이미지",
+          link: "링크"
+        },
+        dropOpenBackground: "놓아서 {{type}} 열기 (백그라운드)",
+        shortOpenBackground: "{{type}} (백그라운드)",
+        dropOpenActive: "놓아서 {{type}} 열기 (새 탭)",
+        shortOpenActive: "{{type}} (새 탭)",
+        dropOpenWindow: "놓아서 {{type}} 열기 (새 창)",
+        shortOpenWindow: "{{type}} (새 창)",
+        dropOpenIncognito: "놓아서 {{type}} 열기 (시크릿 창)",
+        shortOpenIncognito: "{{type}} (시크릿 창)",
+        dropCopyLinkText: "놓아서 링크 텍스트 복사",
+        shortCopyLinkText: "텍스트 복사",
+        dropCopyMarkdown: "놓아서 마크다운 복사",
+        shortCopyMarkdown: "마크다운 복사",
+        dropSearchImage: "놓아서 이미지 검색",
+        shortSearchImage: "이미지 검색",
+        dropCopyText: "놓아서 텍스트 복사",
+        shortCopyText: "텍스트 복사",
+        dropCopyImageLink: "놓아서 이미지 링크 복사",
+        shortCopyImageLink: "이미지 링크 복사",
+        dropCopyLinkUrl: "놓아서 링크 URL 복사",
+        shortCopyLinkUrl: "URL 복사",
+        noAction: "동작 없음",
+        releaseToCancel: "놓아서 취소",
+        exceededMax: "최대 거리 초과 (놓아서 취소)"
       }
     },
     quickScroll: {
-      title: "Quick Scroll Buttons",
+      title: "빠른 스크롤 버튼",
       description:
         "페이지 맨 위나 아래로 부드럽게 이동하는 스마트 플로팅 버튼.",
       settings: {
@@ -229,7 +423,7 @@ export const ko: TranslationDict = {
       }
     },
     smoothScroll: {
-      title: "Smooth Scrolling",
+      title: "부드러운 스크롤",
       description: "보간 물리를 적용한 매끄럽고 자연스러운 페이지 스크롤.",
       settings: {
         profiles: "프로필",
@@ -252,7 +446,7 @@ export const ko: TranslationDict = {
       }
     },
     mouseZoom: {
-      title: "Mouse Pin-to-Zoom",
+      title: "커서 위치 확대/축소",
       description:
         "보조 키를 누른 채 마우스 휠을 돌려 커서 위치를 확대/축소합니다.",
       settings: {
@@ -270,10 +464,13 @@ export const ko: TranslationDict = {
         invertDirectionDesc: "아래로 스크롤하여 확대, 위로 스크롤하여 축소합니다.",
         showZoomToast: "확대/축소 알림 표시",
         showZoomToastDesc: "페이지 오른쪽 상단에 플로팅 배율 배지를 표시합니다."
+      },
+      logic: {
+        pageZoom: "페이지 확대/축소"
       }
     },
     pictureInPicture: {
-      title: "Universal Picture-in-Picture",
+      title: "화면 속 화면 (PiP)",
       description: "사용자 지정 단축키로 플로팅 비디오 창을 전환합니다.",
       settings: {
         shortTitle: "Picture-in-Picture",
@@ -304,10 +501,14 @@ export const ko: TranslationDict = {
         notSupported: "이 브라우저에서는 PiP가 지원되지 않습니다",
         cannotEnter: "Picture-in-Picture를 시작할 수 없습니다",
         noVideoFound: "페이지에서 동영상을 찾을 수 없습니다"
+      },
+      background: {
+        playing: "PiP 재생 중: {{title}}",
+        untitledVideo: "동영상"
       }
     },
     videoWheelControl: {
-      title: "Video Wheel Control",
+      title: "동영상 휠 제어",
       description:
         "마우스 휠을 사용하여 동영상 볼륨, 재생 속도 및 탐색을 부드럽게 조절합니다.",
       settings: {
@@ -357,10 +558,21 @@ export const ko: TranslationDict = {
           "이 기능은 HTML5 미디어 요소(<video>)와 직접 상호작용합니다.",
         noticeBody2:
           "일부 대형 플랫폼에서는 반복, 해상도 변경 또는 자동 재생 시 자체 상태 관리자가 속도나 음소거를 초기화할 수 있습니다."
+      },
+      logic: {
+        muted: "음소거됨",
+        fullscreen: "전체 화면",
+        exitFullscreen: "전체 화면 종료",
+        frameCopied: "프레임 복사됨!",
+        captureFailed: "캡처 실패",
+        clipboardDenied: "클립보드 거부됨",
+        corsProtected: "CORS 보호됨",
+        frameStep: "프레임 {{sign}} ({{time}})",
+        boost: "⚡ {{rate}}x 부스트"
       }
     },
     colorPicker: {
-      title: "Color Picker",
+      title: "색상 추출기",
       description:
         "화면의 모든 픽셀 색상을 추출하고 다양한 형식으로 즉시 복사합니다.",
       settings: {
@@ -390,11 +602,18 @@ export const ko: TranslationDict = {
         pickedAndCopied: "색상 추출 및 복사됨",
         picked: "색상 추출됨",
         couldNotOpen: "Color Picker를 열 수 없습니다",
-        permissionRequired: "사용자 상호작용이 필요하거나 허용되지 않았습니다"
+        permissionRequired: "사용자 상호작용이 필요하거나 허용되지 않았습니다",
+        palette: {
+          pickedColor: "추출한 색상",
+          close: "닫기",
+          copyHex: "HEX 복사",
+          copyRgb: "RGB 복사",
+          copyHsl: "HSL 복사"
+        }
       }
     },
     elementToys: {
-      title: "Element Toys",
+      title: "요소 도구",
       description:
         "모든 웹페이지에서 요소를 검사, 제거, 텍스트 편집 또는 재배치합니다.",
       settings: {
@@ -441,6 +660,50 @@ export const ko: TranslationDict = {
         tipUndoMiddle: "키로 작업을 실행 취소하거나 도구 모음의",
         tipUndoSettings: "설정",
         tipUndoSuffix: "버튼을 클릭해 옵션을 구성하세요."
+      },
+      toolbar: {
+        title: "요소 도구",
+        zap: "제거",
+        zapTip: "제거: 클릭하여 DOM에서 요소 삭제",
+        edit: "편집",
+        editTip: "텍스트 편집: 텍스트를 클릭해 인라인 편집",
+        move: "이동",
+        moveActiveTip: "이동 도구 활성 (+/- 로 상위 범위 조절)",
+        moveTip: "이동: 클릭하여 이동 모드 활성화 (Flow / Free)",
+        moveLabel: "이동 ({{mode}})",
+        flow: "Flow",
+        flowTip: "Flow 모드: DOM 레이아웃 내에서 재배치 및 다른 요소 밀어내기",
+        free: "Free",
+        freeTip: "Free 모드: 레이아웃을 바꾸지 않고 자유롭게 이동",
+        hide: "숨기기",
+        hideTip: "숨기기: 레이아웃을 깨지 않고 숨김",
+        undo: "실행 취소",
+        undoTip: "마지막 작업 실행 취소 (Ctrl+Z)",
+        settings: "설정",
+        settingsTip: "요소 도구 설정 열기",
+        exit: "종료",
+        exitTip: "요소 도구 종료 (Esc)"
+      },
+      overlay: {
+        clickToZap: "클릭하여 제거",
+        clickToEdit: "클릭하여 텍스트 편집",
+        dragBody: "본문을 드래그하여 {{type}} • 모서리로 크기 조절",
+        clickToHide: "클릭하여 숨기기"
+      },
+      logic: {
+        zapped: "요소 제거됨!",
+        hidden: "요소 숨김",
+        resized: "크기 조절됨",
+        textUpdated: "텍스트 업데이트됨",
+        undone: "작업 실행 취소됨",
+        undoneDetail: "{{action}} 되돌림",
+        closed: "요소 도구 닫힘",
+        active: "요소 도구 활성",
+        activeDetail: "상단 도구 모음에서 선택 • Esc 로 종료",
+        scope: "범위: <{{tag}}>",
+        scopeDetail: "단계 +{{depth}} (- 로 축소)",
+        scrollUnfrozen: "페이지 스크롤 잠금 해제됨",
+        scrollUnfrozenDetail: "overflow: auto 복원됨"
       }
     },
     quickHub: {
@@ -486,11 +749,12 @@ export const ko: TranslationDict = {
         noToolsActive:
           "활성화된 도구가 없습니다. Browse Assist 팝업에서 기능을 켜세요.",
         triggerTooltip: "Quick Hub (빠른 도구)",
+        triggerAria: "Quick Hub",
         cleanUrlCopied: "깔끔한 URL 복사됨"
       }
     },
     imageHoverPreview: {
-      title: "Image Hover Preview",
+      title: "이미지 호버 미리보기",
       description:
         "이미지나 이미지 링크 위에 마우스를 올리면 전체 크기로 미리 봅니다.",
       settings: {

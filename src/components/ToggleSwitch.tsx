@@ -5,6 +5,7 @@ import { ShortcutBadge } from "~components/ShortcutBadge"
 import { Switch } from "~components/Switch"
 import { openBrowserShortcutsPage } from "~core/shortcutsHelper"
 import type { ViewMode } from "~core/types"
+import { useI18n } from "~core/useI18n"
 import { useViewMode } from "~core/viewModeContext"
 
 interface ToggleSwitchProps {
@@ -28,6 +29,7 @@ const GridMarqueeBadge: React.FC<{
   badge?: string
   shortcut?: string
 }> = ({ badge, shortcut }) => {
+  const { t } = useI18n()
   const containerRef = useRef<HTMLDivElement>(null)
   const textRef = useRef<HTMLSpanElement>(null)
   const [overflow, setOverflow] = useState(0)
@@ -89,7 +91,7 @@ const GridMarqueeBadge: React.FC<{
         <button
           type="button"
           onClick={handleOpenShortcutsPage}
-          title="Shortcut not assigned. Click to configure in browser settings"
+          title={t("common.shortcutNotAssignedTip")}
           className="flex-1 min-w-0 overflow-hidden inline-flex items-center justify-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-app-surface text-content-muted border border-border-subtle cursor-pointer hover:text-content-primary hover:border-accent/40 active:scale-95 transition-all">
           <Keyboard className="w-3 h-3 shrink-0 opacity-75" />
           {inner}
@@ -100,7 +102,7 @@ const GridMarqueeBadge: React.FC<{
     return (
       <kbd
         onClick={handleOpenShortcutsPage}
-        title="Click to customize shortcut in browser settings"
+        title={t("common.customizeShortcutTip")}
         className="flex-1 min-w-0 overflow-hidden badge-kbd px-1.5 py-0.5 justify-center cursor-pointer hover:border-accent hover:text-accent active:scale-95 transition-all">
         {inner}
       </kbd>

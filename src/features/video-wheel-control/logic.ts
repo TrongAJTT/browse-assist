@@ -1,4 +1,5 @@
 import { VIDEO_WHEEL_CONSTANTS } from "~core/constants"
+import { t } from "~core/i18n"
 import {
   DEFAULT_VIDEO_WHEEL_CONTROL_CONFIG,
   type VideoWheelControlConfig,
@@ -237,21 +238,41 @@ async function captureVideoFrame(video: HTMLVideoElement): Promise<void> {
 
     canvas.toBlob(async (blob) => {
       if (!blob) {
-        showOsd(video, "screenshot", "Failed to capture", 0)
+        showOsd(
+          video,
+          "screenshot",
+          t("features.videoWheelControl.logic.captureFailed"),
+          0
+        )
         return
       }
       try {
         await navigator.clipboard.write([
           new ClipboardItem({ "image/png": blob })
         ])
-        showOsd(video, "screenshot", "Frame Copied!", 1)
+        showOsd(
+          video,
+          "screenshot",
+          t("features.videoWheelControl.logic.frameCopied"),
+          1
+        )
       } catch {
-        showOsd(video, "screenshot", "Clipboard Denied", 0)
+        showOsd(
+          video,
+          "screenshot",
+          t("features.videoWheelControl.logic.clipboardDenied"),
+          0
+        )
       }
     }, "image/png")
   } catch {
     // Cross-origin tainted canvas
-    showOsd(video, "screenshot", "CORS Protected", 0)
+    showOsd(
+      video,
+      "screenshot",
+      t("features.videoWheelControl.logic.corsProtected"),
+      0
+    )
   }
 }
 
@@ -294,7 +315,10 @@ function onWheelDecision(event: WheelEvent): boolean {
       showOsd(
         video,
         "frame",
-        `Frame ${sign} (${formatTime(targetTime)})`,
+        t("features.videoWheelControl.logic.frameStep", {
+          sign,
+          time: formatTime(targetTime)
+        }),
         progress
       )
       return true
@@ -435,12 +459,22 @@ function handleLeftClick(event: MouseEvent): void {
       } else if (video.requestFullscreen) {
         video.requestFullscreen().catch(() => {})
       }
-      showOsd(video, "fullscreen", "Fullscreen", 1)
+      showOsd(
+        video,
+        "fullscreen",
+        t("features.videoWheelControl.logic.fullscreen"),
+        1
+      )
     } else {
       if (document.exitFullscreen) {
         document.exitFullscreen().catch(() => {})
       }
-      showOsd(video, "fullscreen", "Exit Fullscreen", 0)
+      showOsd(
+        video,
+        "fullscreen",
+        t("features.videoWheelControl.logic.exitFullscreen"),
+        0
+      )
     }
     return
   }
@@ -448,7 +482,7 @@ function handleLeftClick(event: MouseEvent): void {
   if (wantsMute) {
     video.muted = !video.muted
     if (video.muted) {
-      showOsd(video, "mute", "Muted", 0)
+      showOsd(video, "mute", t("features.videoWheelControl.logic.muted"), 0)
     } else {
       const percent = Math.round(video.volume * 100)
       showOsd(video, "volume", `${percent}%`, video.volume)
@@ -547,7 +581,12 @@ function onKeyDown(event: KeyboardEvent): void {
 
   const boostRate = currentConfig.boostSpeed || 2.0
   video.playbackRate = boostRate
-  showOsd(video, "boost", `⚡ ${boostRate}x Boost`, 1)
+  showOsd(
+    video,
+    "boost",
+    t("features.videoWheelControl.logic.boost", { rate: boostRate }),
+    1
+  )
 }
 
 /**

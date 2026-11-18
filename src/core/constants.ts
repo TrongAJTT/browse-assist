@@ -1,10 +1,11 @@
 import packageJson from "../../package.json"
+import type { TranslationKey } from "./i18n"
 
 export interface DonateOption {
   id: string
   label: string
   url: string
-  description?: string
+  descriptionKey: TranslationKey
   iconName: "coffee" | "github" | "heart" | "qr"
 }
 
@@ -13,28 +14,28 @@ export const DONATE_OPTIONS: DonateOption[] = [
     id: "buy-me-a-coffee",
     label: "Buy Me a Coffee",
     url: "https://buymeacoffee.com/trongajtt",
-    description: "Support project maintenance with a coffee",
+    descriptionKey: "donate.buyMeACoffeeDesc",
     iconName: "coffee"
   },
   {
     id: "github-sponsors",
     label: "GitHub Sponsors",
     url: "https://github.com/sponsors/TrongAJTT",
-    description: "Sponsor via GitHub on a monthly or one-off basis",
+    descriptionKey: "donate.githubSponsorsDesc",
     iconName: "github"
   },
   {
     id: "vietqr",
     label: "VietQR (VN Bank)",
     url: "https://www.trongajtt.com/donate?vietqr=1",
-    description: "Instant bank transfer via VietQR (Vietnam)",
+    descriptionKey: "donate.vietqrDesc",
     iconName: "qr"
   },
   {
     id: "author-donate",
     label: "Author Donation Page",
     url: "https://www.trongajtt.com/sponsor",
-    description: "Direct donation to the author",
+    descriptionKey: "donate.authorDonateDesc",
     iconName: "heart"
   }
 ]

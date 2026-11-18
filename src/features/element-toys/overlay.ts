@@ -1,7 +1,9 @@
+import { t } from "~core/i18n"
+import type { ElementToysConfig, ElementToysMode } from "~core/types"
+
 import { MODE_COLORS, ELEMENT_TOYS_CONTAINER_ID } from "./constants"
 import { getElementDescriptor, isInternalElement } from "./domUtils"
 import type { FlowDropTarget, ResizeHandle } from "./types"
-import type { ElementToysConfig, ElementToysMode } from "~core/types"
 
 export class OverlayView {
   private container: HTMLDivElement | null = null
@@ -316,14 +318,19 @@ export class OverlayView {
       parts.push(`${Math.round(rect.width)} × ${Math.round(rect.height)}px`)
     }
 
-    let actionHint = "Click to zap"
+    let actionHint = t("features.elementToys.overlay.clickToZap")
     if (mode === "edit") {
-      actionHint = "Click to edit text"
+      actionHint = t("features.elementToys.overlay.clickToEdit")
     } else if (mode === "move") {
-      const typeLabel = config.moveType === "relative" ? "Flow Reorder" : "Free Move"
-      actionHint = `Drag body for ${typeLabel} • Drag corners to resize`
+      const typeLabel =
+        config.moveType === "relative"
+          ? t("features.elementToys.toolbar.flow")
+          : t("features.elementToys.toolbar.free")
+      actionHint = t("features.elementToys.overlay.dragBody", {
+        type: typeLabel
+      })
     } else if (mode === "hide") {
-      actionHint = "Click to hide"
+      actionHint = t("features.elementToys.overlay.clickToHide")
     }
 
     const prefix = parts.length > 0 ? `${parts.join(" • ")} — ` : ""

@@ -2,6 +2,9 @@ import { Check, Copy, HelpCircle, X } from "lucide-react"
 import type React from "react"
 import { useState } from "react"
 
+import { t } from "~core/i18n"
+import { useI18n } from "~core/useI18n"
+
 export interface DialogOptions {
   title: string
   icon?: React.ReactNode
@@ -31,7 +34,7 @@ export function showGlobalDialog(options: DialogOptions): Promise<boolean> {
  */
 export function showFirefoxShortcutGuide(): Promise<boolean> {
   return showGlobalDialog({
-    title: "Firefox Shortcut Configuration Guide",
+    title: t("dialogs.firefoxGuide.title"),
     icon: <HelpCircle className="w-5 h-5 text-sky-400" />,
     content: <FirefoxShortcutGuideContent />
   })
@@ -41,6 +44,7 @@ export function showFirefoxShortcutGuide(): Promise<boolean> {
  * Rich content component for the Firefox Shortcut Guide matching the user's design.
  */
 const FirefoxShortcutGuideContent: React.FC = () => {
+  const { t } = useI18n()
   const [copied, setCopied] = useState(false)
 
   const handleCopyAddons = async (e: React.MouseEvent) => {
@@ -56,10 +60,7 @@ const FirefoxShortcutGuideContent: React.FC = () => {
 
   return (
     <div className="space-y-3 text-xs text-content-secondary leading-relaxed select-text">
-      <p>
-        Shortcut hotkeys can be customized directly in your browser&apos;s
-        extension settings:
-      </p>
+      <p>{t("dialogs.firefoxGuide.intro")}</p>
 
       <ol className="space-y-2 list-none pl-0">
         <li className="flex items-start gap-2">
@@ -67,11 +68,11 @@ const FirefoxShortcutGuideContent: React.FC = () => {
             1.
           </span>
           <div className="flex flex-wrap items-center gap-1.5">
-            <span>Open a new tab in Firefox and navigate to</span>
+            <span>{t("dialogs.firefoxGuide.step1Prefix")}</span>
             <button
               type="button"
               onClick={handleCopyAddons}
-              title="Click to copy URL"
+              title={t("dialogs.firefoxGuide.copyUrlTip")}
               className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/25 font-mono text-[11px] transition-all cursor-pointer">
               <span>about:addons</span>
               {copied ? (
@@ -88,9 +89,11 @@ const FirefoxShortcutGuideContent: React.FC = () => {
             2.
           </span>
           <span>
-            Click the{" "}
-            <strong className="text-content-primary">Gear icon ⚙</strong> in
-            the top right corner of the Add-ons Manager page.
+            {t("dialogs.firefoxGuide.step2Prefix")}{" "}
+            <strong className="text-content-primary">
+              {t("dialogs.firefoxGuide.step2Target")}
+            </strong>{" "}
+            {t("dialogs.firefoxGuide.step2Suffix")}
           </span>
         </li>
 
@@ -99,11 +102,11 @@ const FirefoxShortcutGuideContent: React.FC = () => {
             3.
           </span>
           <span>
-            Select{" "}
+            {t("dialogs.firefoxGuide.step3Prefix")}{" "}
             <strong className="text-content-primary">
-              &apos;Manage Extension Shortcuts&apos;
+              {t("dialogs.firefoxGuide.step3Target")}
             </strong>{" "}
-            from the dropdown menu.
+            {t("dialogs.firefoxGuide.step3Suffix")}
           </span>
         </li>
 
@@ -112,11 +115,11 @@ const FirefoxShortcutGuideContent: React.FC = () => {
             4.
           </span>
           <span>
-            Locate{" "}
+            {t("dialogs.firefoxGuide.step4Prefix")}{" "}
             <strong className="text-content-primary">
-              &apos;Browse Assist&apos;
+              {t("common.appName")}
             </strong>{" "}
-            and assign your preferred hotkeys for each command action.
+            {t("dialogs.firefoxGuide.step4Suffix")}
           </span>
         </li>
       </ol>
@@ -128,6 +131,7 @@ const FirefoxShortcutGuideContent: React.FC = () => {
  * Root Dialog Host Component to mount at the root of popup.tsx.
  */
 export const GlobalDialogHost: React.FC = () => {
+  const { t } = useI18n()
   const [currentDialog, setCurrentDialog] = useState<DialogOptions | null>(null)
   const [resolver, setResolver] = useState<((val: boolean) => void) | null>(
     null
@@ -182,7 +186,7 @@ export const GlobalDialogHost: React.FC = () => {
             type="button"
             onClick={() => handleClose(true)}
             className="px-3.5 py-1.5 rounded-xl bg-accent-hover text-white text-xs font-semibold shadow-sm hover:brightness-105 active:scale-95 transition-all">
-            {currentDialog.confirmText || "Got it"}
+            {currentDialog.confirmText || t("common.gotIt")}
           </button>
         </div>
       </div>

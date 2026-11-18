@@ -1,3 +1,4 @@
+import { t } from "~core/i18n"
 import { removeContentToast, showContentToast } from "~core/toast"
 import { DEFAULT_MOUSE_ZOOM_CONFIG, type MouseZoomConfig } from "~core/types"
 import {
@@ -61,7 +62,7 @@ function showZoomToast(zoomLevel: number): void {
 
   const percent = Math.round(zoomLevel * 100)
   showContentToast({
-    message: "Page Zoom",
+    message: t("features.mouseZoom.logic.pageZoom"),
     detail: `${percent}%`,
     type: "info",
     iconSvg: ZOOM_ICON_SVG,

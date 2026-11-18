@@ -4,22 +4,24 @@ type DeepString<T> = {
 
 export const en = {
   common: {
+    appName: "Browse Assist",
     enabled: "Enabled",
     disabled: "Disabled",
-    on: "On",
-    off: "Off",
     reset: "Reset",
     clear: "Clear",
     cancel: "Cancel",
-    save: "Save",
-    back: "Back",
+    gotIt: "Got it",
+    viewportScreen: "Viewport Screen",
     unassigned: "Unassigned",
-    notConfigured: "Not configured",
-    configure: "Configure",
     launch: "Launch",
     all: "All",
     none: "None",
     customizeShortcuts: "Customize in browser shortcut settings",
+    shortcutNotAssignedTip:
+      "Shortcut not assigned. Click to configure in browser settings",
+    customizeShortcutTip: "Click to customize shortcut in browser settings",
+    backTip: "Back (Backspace or `)",
+    toggleFeatureAria: "Toggle {{feature}}",
     resetOrder: "Reset order",
     show: "Show",
     hide: "Hide",
@@ -63,6 +65,13 @@ export const en = {
       navigation: "Scroll",
       media: "Media",
       tools: "Tools"
+    },
+    tooltips: {
+      preferencesAndTheme: "Preferences & Theme",
+      about: "About Browse Assist",
+      supportDonate: "Support & Donate",
+      jumpToVideoTab: "Click to jump to this video tab",
+      exitPipWindow: "Exit Picture-in-Picture window"
     }
   },
   preferences: {
@@ -85,7 +94,165 @@ export const en = {
     sessionTimeout: "Session Timeout",
     customizeMenu: "Customize Menu",
     customizeMenuDesc:
-      "Drag items to reorder them in the popup, or toggle visibility to hide features."
+      "Drag items to reorder them in the popup, or toggle visibility to hide features.",
+    presets: "Presets",
+    presetReading: "Reading & Navigation",
+    presetReadingDesc: "Scroll, drag & read",
+    presetDesigner: "Designer & Dev",
+    presetDesignerDesc: "Color, inspect & toys",
+    presetEssential: "Essentials Only",
+    presetEssentialDesc: "Minimal & focused",
+    other: "Other",
+    optionsPage: "Extension Options Page",
+    optionsPageDesc: "Full settings dashboard & shortcut guide"
+  },
+  donate: {
+    buyMeACoffeeDesc: "Support project maintenance with a coffee",
+    githubSponsorsDesc: "Sponsor via GitHub on a monthly or one-off basis",
+    vietqrDesc: "Instant bank transfer via VietQR (Vietnam)",
+    authorDonateDesc: "Direct donation to the author"
+  },
+  dialogs: {
+    firefoxGuide: {
+      title: "Firefox Shortcut Configuration Guide",
+      intro:
+        "Shortcut hotkeys can be customized directly in your browser's extension settings:",
+      step1Prefix: "Open a new tab in Firefox and navigate to",
+      copyUrlTip: "Click to copy URL",
+      step2Prefix: "Click the",
+      step2Target: "Gear icon ⚙",
+      step2Suffix: "in the top right corner of the Add-ons Manager page.",
+      step3Prefix: "Select",
+      step3Target: "'Manage Extension Shortcuts'",
+      step3Suffix: "from the dropdown menu.",
+      step4Prefix: "Locate",
+      step4Suffix:
+        "and assign your preferred hotkeys for each command action."
+    }
+  },
+  options: {
+    title: "Browse Assist Settings",
+    subtitle: "Configure your browsing quality-of-life toolkit and shortcuts",
+    openPopup: "Open Popup",
+    openPopupTip: "Open extension popup",
+    preferences: "Preferences",
+    preferencesTip: "Open extension preferences in popup",
+    about: "About",
+    aboutTip: "Open about information in popup",
+    activeModules: "Active Modules",
+    configureInPopup: "Configure {{feature}} in popup",
+    shortcutsTitle: "Keyboard & Mouse Shortcuts Reference",
+    shortcutsSubtitle:
+      "Real-time browser hotkeys and interactive gesture triggers",
+    customizeShortcuts: "Customize Shortcuts",
+    table: {
+      action: "Action",
+      shortcut: "Shortcut / Trigger",
+      description: "Description"
+    },
+    triggers: {
+      mouseWheel: "{{modifier}} + Mouse Wheel",
+      mouseDrag: "Mouse Drag",
+      doubleClickMargin: "Double Click Margin",
+      rightClickLink: "Right Click Link"
+    },
+    shortcuts: {
+      pip: {
+        name: "Universal Picture-in-Picture",
+        desc: "Detach currently playing video into a floating PiP window"
+      },
+      allowRightClick: {
+        name: "Allow Right Click",
+        desc: "Toggle unblocking context menus and text copying on active tab"
+      },
+      elementToys: {
+        name: "Element Toys",
+        desc: "Activate point-and-click targeting to zap, edit, hide, or move elements"
+      },
+      colorPicker: {
+        name: "Color Picker",
+        desc: "Activate screen eyedropper magnifier to inspect and copy color codes"
+      },
+      quickHub: {
+        name: "Quick Hub Shortcut",
+        desc: "Toggle on-screen Quick Hub floating menu launcher via keyboard"
+      },
+      volume: {
+        name: "Video Volume Control",
+        desc: "Hover over video to adjust volume; click with modifier to mute"
+      },
+      speed: {
+        name: "Video Speed Control",
+        desc: "Hover over video to adjust playback speed smoothly; click for fullscreen"
+      },
+      seek: {
+        name: "Video Seeking & Stepper",
+        desc: "Seek backward/forward; frame-by-frame stepper when paused"
+      },
+      boost: {
+        name: "Video Speed Boost",
+        desc: "Hold X key over video to temporarily boost speed to {{speed}}x"
+      },
+      mouseZoom: {
+        name: "Mouse Pin-to-Zoom",
+        desc: "Fluidly zoom page centered directly at cursor position"
+      },
+      superDrag: {
+        name: "Super Drag",
+        desc: "Drag text to search in new tab; drag link to open in background tab"
+      },
+      quickScroll: {
+        name: "Quick Scroll",
+        desc: "Double-click screen edge margins or click floating buttons to jump to top or bottom"
+      },
+      smoothScroll: {
+        name: "Smooth Scrolling",
+        desc: "Inertial physics interpolation across all scrollable containers"
+      },
+      cleanLink: {
+        name: "Clean Link Copy",
+        desc: "Strip tracking queries (utm_*, fbclid) and copy clean or markdown link"
+      },
+      quickHubZone: {
+        name: "Quick Hub Trigger Zone",
+        desc: "Hover screen trigger zone to expand in-page quick tools launcher"
+      }
+    },
+    storage: {
+      title: "Extension Storage & Data",
+      desc: "Permanently erase all data and settings saved by Browse Assist in your browser. This will wipe your custom configurations, shortcut preferences, Quick Hub order, and Color Picker history.",
+      clearAll: "Clear All Data...",
+      cleared:
+        "All extension data has been wiped and reset to factory defaults.",
+      footer:
+        "Browse Assist • Manifest V3 • Built with Plasmo, React & Tailwind CSS"
+    },
+    modal: {
+      title: "Clear all extension data?",
+      body: "This will permanently delete all data stored by Browse Assist across your browser profile.",
+      listHeader: "The following will be deleted:",
+      item1: "All active feature toggle states & sub-configurations",
+      item2: "Quick Hub ordering, pinned actions & hidden modules",
+      item3: "Color history in Eyedropper Color Picker",
+      item4: "Theme preferences and popup navigation memory",
+      warning:
+        "⚠️ This action cannot be undone. All settings will immediately revert to factory defaults.",
+      clearing: "Clearing data...",
+      confirm: "Yes, Delete All Data"
+    }
+  },
+  content: {
+    copied: {
+      linkText: "Copied Link Text",
+      cleanLink: "Copied Clean Link",
+      markdown: "Copied Markdown",
+      cleanPageUrl: "Copied Clean Page URL",
+      pageMarkdown: "Copied Page Markdown",
+      quote: "Copied Quote",
+      text: "Copied Text",
+      imageLink: "Copied Image Link",
+      linkUrl: "Copied Link URL"
+    }
   },
   about: {
     title: "About",
@@ -197,6 +364,36 @@ export const en = {
           copy_image_link: "Copy Image Link",
           search_image: "Search Image"
         }
+      },
+      logic: {
+        types: {
+          search: "Search",
+          image: "Image",
+          link: "Link"
+        },
+        dropOpenBackground: "Drop to Open {{type}} (Background)",
+        shortOpenBackground: "{{type}} (Background)",
+        dropOpenActive: "Drop to Open {{type}} (New Tab)",
+        shortOpenActive: "{{type}} (New Tab)",
+        dropOpenWindow: "Drop to Open {{type}} (New Window)",
+        shortOpenWindow: "{{type}} (New Window)",
+        dropOpenIncognito: "Drop to Open {{type}} (Incognito)",
+        shortOpenIncognito: "{{type}} (Incognito)",
+        dropCopyLinkText: "Drop to Copy Link Text",
+        shortCopyLinkText: "Copy Link Text",
+        dropCopyMarkdown: "Drop to Copy Markdown",
+        shortCopyMarkdown: "Copy Markdown",
+        dropSearchImage: "Drop to Search Image",
+        shortSearchImage: "Search Image",
+        dropCopyText: "Drop to Copy Text",
+        shortCopyText: "Copy Text",
+        dropCopyImageLink: "Drop to Copy Image Link",
+        shortCopyImageLink: "Copy Image Link",
+        dropCopyLinkUrl: "Drop to Copy Link URL",
+        shortCopyLinkUrl: "Copy Link URL",
+        noAction: "No action",
+        releaseToCancel: "Release to cancel",
+        exceededMax: "Exceeded max distance (Release to cancel)"
       }
     },
     quickScroll: {
@@ -277,6 +474,9 @@ export const en = {
         showZoomToast: "Show Zoom Toast",
         showZoomToastDesc:
           "Display floating percentage badge on the top-right of the page."
+      },
+      logic: {
+        pageZoom: "Page Zoom"
       }
     },
     pictureInPicture: {
@@ -312,6 +512,10 @@ export const en = {
         notSupported: "PiP is not supported in this browser",
         cannotEnter: "Cannot enter Picture-in-Picture",
         noVideoFound: "No video found on page"
+      },
+      background: {
+        playing: "Playing in PiP: {{title}}",
+        untitledVideo: "Video"
       }
     },
     videoWheelControl: {
@@ -367,6 +571,17 @@ export const en = {
           "This feature interacts directly with the underlying HTML5 media element (<video>).",
         noticeBody2:
           "On advanced web platforms, custom state managers may occasionally reset playback rate or mute status when a video loops, changes stream resolution, or auto-plays the next item."
+      },
+      logic: {
+        muted: "Muted",
+        fullscreen: "Fullscreen",
+        exitFullscreen: "Exit Fullscreen",
+        frameCopied: "Frame Copied!",
+        captureFailed: "Failed to capture",
+        clipboardDenied: "Clipboard Denied",
+        corsProtected: "CORS Protected",
+        frameStep: "Frame {{sign}} ({{time}})",
+        boost: "⚡ {{rate}}x Boost"
       }
     },
     colorPicker: {
@@ -402,7 +617,14 @@ export const en = {
         pickedAndCopied: "Color Picked & Copied",
         picked: "Color Picked",
         couldNotOpen: "Could not open Color Picker",
-        permissionRequired: "User interaction required or not permitted"
+        permissionRequired: "User interaction required or not permitted",
+        palette: {
+          pickedColor: "Picked Color",
+          close: "Close",
+          copyHex: "Copy HEX",
+          copyRgb: "Copy RGB",
+          copyHsl: "Copy HSL"
+        }
       }
     },
     elementToys: {
@@ -455,6 +677,51 @@ export const en = {
         tipUndoMiddle: "to undo any action, or click the",
         tipUndoSettings: "Settings",
         tipUndoSuffix: "button on the toolbar to configure options."
+      },
+      toolbar: {
+        title: "Element Toys",
+        zap: "Zap",
+        zapTip: "Zap: Click to eliminate element from DOM",
+        edit: "Edit",
+        editTip: "Edit Text: Click any text to edit inline",
+        move: "Move",
+        moveActiveTip: "Move Tool Active (Press +/- to adjust parent scope)",
+        moveTip: "Move: Click to activate Move mode (Flow / Free)",
+        moveLabel: "Move ({{mode}})",
+        flow: "Flow",
+        flowTip:
+          "Flow Mode: Reorders in DOM layout across containers & pushes other elements",
+        free: "Free",
+        freeTip: "Free Mode: Freeform transform without altering layout",
+        hide: "Hide",
+        hideTip: "Hide: Click to soft-hide without shifting layout",
+        undo: "Undo",
+        undoTip: "Undo Last Action (Ctrl+Z)",
+        settings: "Settings",
+        settingsTip: "Open Element Toys Settings",
+        exit: "Exit",
+        exitTip: "Exit Element Toys (Esc)"
+      },
+      overlay: {
+        clickToZap: "Click to zap",
+        clickToEdit: "Click to edit text",
+        dragBody: "Drag body for {{type}} • Drag corners to resize",
+        clickToHide: "Click to hide"
+      },
+      logic: {
+        zapped: "Element Zapped!",
+        hidden: "Element Hidden",
+        resized: "Element Resized",
+        textUpdated: "Text Updated",
+        undone: "Action Undone",
+        undoneDetail: "Reverted {{action}}",
+        closed: "Element Toys Closed",
+        active: "Element Toys Active",
+        activeDetail: "Select tools from top toolbar • Esc to exit",
+        scope: "Scope: <{{tag}}>",
+        scopeDetail: "Level +{{depth}} (Press - to shrink)",
+        scrollUnfrozen: "Page Scroll Unfrozen",
+        scrollUnfrozenDetail: "overflow: auto restored"
       }
     },
     quickHub: {
@@ -501,6 +768,7 @@ export const en = {
         noToolsActive:
           "No tools active. Enable features in Browse Assist popup.",
         triggerTooltip: "Quick Hub (Instant Tools)",
+        triggerAria: "Quick Hub",
         cleanUrlCopied: "Clean URL Copied"
       }
     },

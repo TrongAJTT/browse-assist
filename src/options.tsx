@@ -18,7 +18,10 @@ import { ShortcutBadge } from "~components/ShortcutBadge"
 import { Switch } from "~components/Switch"
 import { AppIcon } from "~core/assets"
 import { isColorPickerSupported } from "~core/browserDetect"
-import { FEATURE_CATALOG_LIST } from "~core/featureCatalog"
+import {
+  FEATURE_CATALOG_LIST,
+  getLocalizedFeatureMeta
+} from "~core/featureCatalog"
 import { openExtensionPopup } from "~core/popupHelper"
 import { openBrowserShortcutsPage } from "~core/shortcutsHelper"
 import { clearAllExtensionData } from "~core/storage"
@@ -29,10 +32,12 @@ import {
   type FeatureKey,
   type FeatureSettings
 } from "~core/types"
+import { useI18n } from "~core/useI18n"
 
 import "~style.css"
 
 function OptionsPage() {
+  const { t } = useI18n()
   const [settings, setSettings] = useStorage<FeatureSettings>(
     STORAGE_KEYS.SETTINGS,
     DEFAULT_SETTINGS
@@ -189,10 +194,10 @@ function OptionsPage() {
             <AppIcon className="w-12 h-12 rounded-2xl object-contain shadow-xl shadow-indigo-500/20 ring-1 ring-white/20 shrink-0" />
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-content-primary">
-                Browse Assist Settings
+                {t("options.title")}
               </h1>
               <p className="text-sm text-content-muted mt-0.5">
-                Configure your browsing quality-of-life toolkit and shortcuts
+                {t("options.subtitle")}
               </p>
             </div>
           </div>
@@ -202,30 +207,30 @@ function OptionsPage() {
             <button
               type="button"
               onClick={() => openExtensionPopup("main")}
-              title="Open extension popup"
+              title={t("options.openPopupTip")}
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-content-secondary bg-app-surface hover:bg-app-surface-hover hover:text-content-primary border border-border-subtle rounded-xl transition-all shadow-sm cursor-pointer">
               <AppWindow className="w-3.5 h-3.5 text-accent" />
-              <span>Open Popup</span>
+              <span>{t("options.openPopup")}</span>
             </button>
 
             {/* View Preferences Button */}
             <button
               type="button"
               onClick={() => openExtensionPopup("preferences")}
-              title="Open extension preferences in popup"
+              title={t("options.preferencesTip")}
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-content-secondary bg-app-surface hover:bg-app-surface-hover hover:text-content-primary border border-border-subtle rounded-xl transition-all shadow-sm cursor-pointer">
               <Sliders className="w-3.5 h-3.5 text-indigo-400" />
-              <span>Preferences</span>
+              <span>{t("options.preferences")}</span>
             </button>
 
             {/* View About Button */}
             <button
               type="button"
               onClick={() => openExtensionPopup("about")}
-              title="Open about information in popup"
+              title={t("options.aboutTip")}
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-content-secondary bg-app-surface hover:bg-app-surface-hover hover:text-content-primary border border-border-subtle rounded-xl transition-all shadow-sm cursor-pointer">
               <Info className="w-3.5 h-3.5 text-sky-400" />
-              <span>About</span>
+              <span>{t("options.about")}</span>
             </button>
 
 
@@ -235,11 +240,12 @@ function OptionsPage() {
         {/* Feature List */}
         <section className="mt-8 space-y-4">
           <h2 className="text-base font-semibold text-content-primary">
-            Active Modules
+            {t("options.activeModules")}
           </h2>
 
           <div className="grid gap-3.5">
-            {FEATURE_CATALOG_LIST.map((feature) => {
+            {FEATURE_CATALOG_LIST.map((rawFeature) => {
+              const feature = getLocalizedFeatureMeta(rawFeature.key, t)
               const isEnabled = resolved[feature.key]
               const IconComp = feature.icon
               const iconColor = feature.colorClass
@@ -293,7 +299,9 @@ function OptionsPage() {
                       {hasSettings && (
                         <button
                           type="button"
-                          title={`Configure ${feature.title} in popup`}
+                          title={t("options.configureInPopup", {
+                            feature: feature.title
+                          })}
                           onClick={(e) => {
                             e.stopPropagation()
                             if (settingsView) openExtensionPopup(settingsView)
@@ -308,7 +316,9 @@ function OptionsPage() {
                           checked={isEnabled}
                           onChange={() => handleToggle(feature.key)}
                           size="md"
-                          aria-label={`Toggle ${feature.title}`}
+                          aria-label={t("common.toggleFeatureAria", {
+                            feature: feature.title
+                          })}
                         />
                       </div>
                     </div>
@@ -324,10 +334,10 @@ function OptionsPage() {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-base font-semibold text-content-primary">
-                Keyboard &amp; Mouse Shortcuts Reference
+                {t("options.shortcutsTitle")}
               </h2>
               <p className="text-xs text-content-muted mt-0.5">
-                Real-time browser hotkeys and interactive gesture triggers
+                {t("options.shortcutsSubtitle")}
               </p>
             </div>
             <button
@@ -335,7 +345,7 @@ function OptionsPage() {
               onClick={() => openBrowserShortcutsPage().catch(() => {})}
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-accent bg-accent-subtle hover:bg-accent-glow active:scale-[0.98] border border-accent/30 rounded-xl transition-all shadow-sm">
               <ExternalLink className="w-3.5 h-3.5" />
-              <span>Customize Shortcuts</span>
+              <span>{t("options.customizeShortcuts")}</span>
             </button>
           </div>
 
@@ -343,48 +353,48 @@ function OptionsPage() {
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-border-divider text-xs font-semibold text-content-muted uppercase tracking-wider">
-                  <th className="pb-3">Action</th>
-                  <th className="pb-3">Shortcut / Trigger</th>
-                  <th className="pb-3">Description</th>
+                  <th className="pb-3">{t("options.table.action")}</th>
+                  <th className="pb-3">{t("options.table.shortcut")}</th>
+                  <th className="pb-3">{t("options.table.description")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border-divider text-content-secondary">
                 {/* 1. Universal Picture-in-Picture */}
                 <tr>
                   <td className="py-3 font-medium text-content-primary">
-                    Universal Picture-in-Picture
+                    {t("options.shortcuts.pip.name")}
                   </td>
                   <td className="py-3">
                     <ShortcutBadge shortcut={commands["toggle_picture_in_picture"]} />
                   </td>
                   <td className="py-3 text-content-muted text-xs">
-                    Detach currently playing video into a floating PiP window
+                    {t("options.shortcuts.pip.desc")}
                   </td>
                 </tr>
 
                 {/* 2. Allow Right Click */}
                 <tr>
                   <td className="py-3 font-medium text-content-primary">
-                    Allow Right Click
+                    {t("options.shortcuts.allowRightClick.name")}
                   </td>
                   <td className="py-3">
                     <ShortcutBadge shortcut={commands["toggle_allow_right_click"]} />
                   </td>
                   <td className="py-3 text-content-muted text-xs">
-                    Toggle unblocking context menus and text copying on active tab
+                    {t("options.shortcuts.allowRightClick.desc")}
                   </td>
                 </tr>
 
                 {/* 3. Element Toys */}
                 <tr>
                   <td className="py-3 font-medium text-content-primary">
-                    Element Toys
+                    {t("options.shortcuts.elementToys.name")}
                   </td>
                   <td className="py-3">
                     <ShortcutBadge shortcut={commands["toggle_element_toys"]} />
                   </td>
                   <td className="py-3 text-content-muted text-xs">
-                    Activate point-and-click targeting to zap, edit, hide, or move elements
+                    {t("options.shortcuts.elementToys.desc")}
                   </td>
                 </tr>
 
@@ -392,13 +402,13 @@ function OptionsPage() {
                 {isColorPickerSupported && (
                   <tr>
                     <td className="py-3 font-medium text-content-primary">
-                      Color Picker
+                      {t("options.shortcuts.colorPicker.name")}
                     </td>
                     <td className="py-3">
                       <ShortcutBadge shortcut={commands["toggle_color_picker"]} />
                     </td>
                     <td className="py-3 text-content-muted text-xs">
-                      Activate screen eyedropper magnifier to inspect and copy color codes
+                      {t("options.shortcuts.colorPicker.desc")}
                     </td>
                   </tr>
                 )}
@@ -406,153 +416,179 @@ function OptionsPage() {
                 {/* 5. Quick Hub Menu Hotkey */}
                 <tr>
                   <td className="py-3 font-medium text-content-primary">
-                    Quick Hub Shortcut
+                    {t("options.shortcuts.quickHub.name")}
                   </td>
                   <td className="py-3">
                     <ShortcutBadge shortcut={commands["toggle_quick_hub"]} />
                   </td>
                   <td className="py-3 text-content-muted text-xs">
-                    Toggle on-screen Quick Hub floating menu launcher via keyboard
+                    {t("options.shortcuts.quickHub.desc")}
                   </td>
                 </tr>
 
                 {/* 6. Video Volume Control */}
                 <tr>
                   <td className="py-3 font-medium text-content-primary">
-                    Video Volume Control
+                    {t("options.shortcuts.volume.name")}
                   </td>
                   <td className="py-3">
                     <kbd className="badge-kbd">
-                      {formatModifier(resolved.videoWheelControlConfig.volumeModifier)} + Mouse Wheel
+                      {t("options.triggers.mouseWheel", {
+                        modifier: formatModifier(
+                          resolved.videoWheelControlConfig.volumeModifier
+                        )
+                      })}
                     </kbd>
                   </td>
                   <td className="py-3 text-content-muted text-xs">
-                    Hover over video to adjust volume; click with modifier to mute
+                    {t("options.shortcuts.volume.desc")}
                   </td>
                 </tr>
 
                 {/* 7. Video Speed Control */}
                 <tr>
                   <td className="py-3 font-medium text-content-primary">
-                    Video Speed Control
+                    {t("options.shortcuts.speed.name")}
                   </td>
                   <td className="py-3">
                     <kbd className="badge-kbd">
-                      {formatModifier(resolved.videoWheelControlConfig.speedModifier)} + Mouse Wheel
+                      {t("options.triggers.mouseWheel", {
+                        modifier: formatModifier(
+                          resolved.videoWheelControlConfig.speedModifier
+                        )
+                      })}
                     </kbd>
                   </td>
                   <td className="py-3 text-content-muted text-xs">
-                    Hover over video to adjust playback speed smoothly; click for fullscreen
+                    {t("options.shortcuts.speed.desc")}
                   </td>
                 </tr>
 
                 {/* 8. Video Seek & Frame Stepper */}
                 <tr>
                   <td className="py-3 font-medium text-content-primary">
-                    Video Seeking &amp; Stepper
+                    {t("options.shortcuts.seek.name")}
                   </td>
                   <td className="py-3">
                     <kbd className="badge-kbd">
-                      {formatModifier(resolved.videoWheelControlConfig.seekModifier)} + Mouse Wheel
+                      {t("options.triggers.mouseWheel", {
+                        modifier: formatModifier(
+                          resolved.videoWheelControlConfig.seekModifier
+                        )
+                      })}
                     </kbd>
                   </td>
                   <td className="py-3 text-content-muted text-xs">
-                    Seek backward/forward; frame-by-frame stepper when paused
+                    {t("options.shortcuts.seek.desc")}
                   </td>
                 </tr>
 
                 {/* 9. Video Boost Speed */}
                 <tr>
                   <td className="py-3 font-medium text-content-primary">
-                    Video Speed Boost
+                    {t("options.shortcuts.boost.name")}
                   </td>
                   <td className="py-3">
-                    <kbd className="badge-kbd">Hold X</kbd>
+                    <kbd className="badge-kbd">{"X"}</kbd>
                   </td>
                   <td className="py-3 text-content-muted text-xs">
-                    Hold X key over video to temporarily boost speed to {resolved.videoWheelControlConfig.boostSpeed}x
+                    {t("options.shortcuts.boost.desc", {
+                      speed: resolved.videoWheelControlConfig.boostSpeed
+                    })}
                   </td>
                 </tr>
 
                 {/* 10. Mouse Pin-to-Zoom */}
                 <tr>
                   <td className="py-3 font-medium text-content-primary">
-                    Mouse Pin-to-Zoom
+                    {t("options.shortcuts.mouseZoom.name")}
                   </td>
                   <td className="py-3">
                     <kbd className="badge-kbd">
-                      {formatModifier(resolved.mouseZoomConfig.modifier)} + Mouse Wheel
+                      {t("options.triggers.mouseWheel", {
+                        modifier: formatModifier(
+                          resolved.mouseZoomConfig.modifier
+                        )
+                      })}
                     </kbd>
                   </td>
                   <td className="py-3 text-content-muted text-xs">
-                    Fluidly zoom page centered directly at cursor position
+                    {t("options.shortcuts.mouseZoom.desc")}
                   </td>
                 </tr>
 
                 {/* 11. Super Drag */}
                 <tr>
                   <td className="py-3 font-medium text-content-primary">
-                    Super Drag
+                    {t("options.shortcuts.superDrag.name")}
                   </td>
                   <td className="py-3">
-                    <kbd className="badge-kbd">Mouse Drag</kbd>
+                    <kbd className="badge-kbd">
+                      {t("options.triggers.mouseDrag")}
+                    </kbd>
                   </td>
                   <td className="py-3 text-content-muted text-xs">
-                    Drag text to search in new tab; drag link to open in background tab
+                    {t("options.shortcuts.superDrag.desc")}
                   </td>
                 </tr>
 
                 {/* 12. Quick Scroll */}
                 <tr>
                   <td className="py-3 font-medium text-content-primary">
-                    Quick Scroll
+                    {t("options.shortcuts.quickScroll.name")}
                   </td>
                   <td className="py-3">
-                    <kbd className="badge-kbd">Double Click Margin</kbd>
+                    <kbd className="badge-kbd">
+                      {t("options.triggers.doubleClickMargin")}
+                    </kbd>
                   </td>
                   <td className="py-3 text-content-muted text-xs">
-                    Double-click screen edge margins or click floating buttons to jump to top or bottom
+                    {t("options.shortcuts.quickScroll.desc")}
                   </td>
                 </tr>
 
                 {/* 13. Smooth Scrolling */}
                 <tr>
                   <td className="py-3 font-medium text-content-primary">
-                    Smooth Scrolling
+                    {t("options.shortcuts.smoothScroll.name")}
                   </td>
                   <td className="py-3">
-                    <kbd className="badge-kbd">Mouse Wheel</kbd>
+                    <kbd className="badge-kbd">
+                      {t("options.triggers.mouseWheel", { modifier: "🖱" })}
+                    </kbd>
                   </td>
                   <td className="py-3 text-content-muted text-xs">
-                    Inertial physics interpolation across all scrollable containers
+                    {t("options.shortcuts.smoothScroll.desc")}
                   </td>
                 </tr>
 
                 {/* 14. Clean Link & Markdown Copy */}
                 <tr>
                   <td className="py-3 font-medium text-content-primary">
-                    Clean Link Copy
+                    {t("options.shortcuts.cleanLink.name")}
                   </td>
                   <td className="py-3">
-                    <kbd className="badge-kbd">Right Click Link</kbd>
+                    <kbd className="badge-kbd">
+                      {t("options.triggers.rightClickLink")}
+                    </kbd>
                   </td>
                   <td className="py-3 text-content-muted text-xs">
-                    Strip tracking queries (utm_*, fbclid) and copy clean or markdown link
+                    {t("options.shortcuts.cleanLink.desc")}
                   </td>
                 </tr>
 
                 {/* 15. Quick Hub Trigger Zone */}
                 <tr>
                   <td className="py-3 font-medium text-content-primary">
-                    Quick Hub Trigger Zone
+                    {t("options.shortcuts.quickHubZone.name")}
                   </td>
                   <td className="py-3">
                     <kbd className="badge-kbd">
-                      Hover {formatModifier(resolved.quickHubConfig.corner)}
+                      {formatModifier(resolved.quickHubConfig.corner)}
                     </kbd>
                   </td>
                   <td className="py-3 text-content-muted text-xs">
-                    Hover screen trigger zone to expand in-page quick tools launcher
+                    {t("options.shortcuts.quickHubZone.desc")}
                   </td>
                 </tr>
               </tbody>
@@ -566,11 +602,11 @@ function OptionsPage() {
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <h2 className="text-base font-semibold text-content-primary">
-                  Extension Storage &amp; Data
+                  {t("options.storage.title")}
                 </h2>
               </div>
               <p className="text-xs text-content-muted leading-relaxed max-w-xl">
-                Permanently erase all data and settings saved by Browse Assist in your browser. This will wipe your custom configurations, shortcut preferences, Quick Hub order, and Color Picker history.
+                {t("options.storage.desc")}
               </p>
             </div>
 
@@ -580,7 +616,7 @@ function OptionsPage() {
                 onClick={() => setShowConfirmModal(true)}
                 className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-rose-500 bg-rose-500/10 hover:bg-rose-500/20 active:bg-rose-500/30 border border-rose-500/30 hover:border-rose-500/50 rounded-xl transition-all shadow-sm">
                 <Trash2 className="w-3.5 h-3.5 text-rose-500" />
-                <span>Clear All Data...</span>
+                <span>{t("options.storage.clearAll")}</span>
               </button>
             </div>
           </div>
@@ -590,7 +626,7 @@ function OptionsPage() {
             <div className="mt-4 flex items-center justify-between p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 text-xs animate-in fade-in duration-150">
               <div className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-emerald-500 shrink-0" />
-                <span>All extension data has been wiped and reset to factory defaults.</span>
+                <span>{t("options.storage.cleared")}</span>
               </div>
               <button
                 type="button"
@@ -604,7 +640,7 @@ function OptionsPage() {
 
         {/* Footer */}
         <footer className="mt-10 pt-6 border-t border-border-divider text-center text-xs text-content-faint">
-          Browse Assist • Manifest V3 • Built with Plasmo, React &amp; Tailwind CSS
+          {t("options.storage.footer")}
         </footer>
       </div>
 
@@ -622,28 +658,28 @@ function OptionsPage() {
               </div>
               <div>
                 <h3 className="text-base font-bold text-content-primary tracking-tight">
-                  Clear all extension data?
+                  {t("options.modal.title")}
                 </h3>
                 <p className="text-xs text-content-muted mt-1 leading-relaxed">
-                  This will permanently delete all data stored by Browse Assist across your browser profile.
+                  {t("options.modal.body")}
                 </p>
               </div>
             </div>
 
             <div className="p-3.5 rounded-xl bg-app-surface border border-border-subtle text-xs text-content-muted space-y-2">
               <div className="font-semibold text-content-primary">
-                The following will be deleted:
+                {t("options.modal.listHeader")}
               </div>
               <ul className="list-disc list-inside space-y-1 pl-1 text-content-muted">
-                <li>All active feature toggle states &amp; sub-configurations</li>
-                <li>Quick Hub ordering, pinned actions &amp; hidden modules</li>
-                <li>Color history in Eyedropper Color Picker</li>
-                <li>Theme preferences and popup navigation memory</li>
+                <li>{t("options.modal.item1")}</li>
+                <li>{t("options.modal.item2")}</li>
+                <li>{t("options.modal.item3")}</li>
+                <li>{t("options.modal.item4")}</li>
               </ul>
             </div>
 
             <div className="text-xs text-amber-500 font-medium">
-              ⚠️ This action cannot be undone. All settings will immediately revert to factory defaults.
+              {t("options.modal.warning")}
             </div>
 
             <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-border-divider">
@@ -652,7 +688,7 @@ function OptionsPage() {
                 disabled={isClearing}
                 onClick={() => setShowConfirmModal(false)}
                 className="px-4 py-2 text-xs font-semibold text-content-secondary bg-app-surface hover:bg-app-surface-hover hover:text-content-primary border border-border-subtle rounded-xl transition-all disabled:opacity-50">
-                Cancel
+                {t("common.cancel")}
               </button>
               <button
                 type="button"
@@ -660,11 +696,11 @@ function OptionsPage() {
                 onClick={handleClearAllData}
                 className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-500 active:bg-rose-700 rounded-xl transition-all shadow-md shadow-rose-900/30 disabled:opacity-50">
                 {isClearing ? (
-                  <span>Clearing data...</span>
+                  <span>{t("options.modal.clearing")}</span>
                 ) : (
                   <>
                     <Trash2 className="w-3.5 h-3.5" />
-                    <span>Yes, Delete All Data</span>
+                    <span>{t("options.modal.confirm")}</span>
                   </>
                 )}
               </button>

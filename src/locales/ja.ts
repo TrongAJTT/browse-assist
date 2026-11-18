@@ -2,22 +2,24 @@ import type { TranslationDict } from "./en"
 
 export const ja: TranslationDict = {
   common: {
+    appName: "Browse Assist",
     enabled: "有効",
     disabled: "無効",
-    on: "オン",
-    off: "オフ",
     reset: "リセット",
     clear: "クリア",
     cancel: "キャンセル",
-    save: "保存",
-    back: "戻る",
+    gotIt: "了解",
+    viewportScreen: "表示画面",
     unassigned: "未割り当て",
-    notConfigured: "未設定",
-    configure: "設定",
     launch: "起動",
     all: "すべて",
     none: "なし",
     customizeShortcuts: "ブラウザのショートカット設定で変更",
+    shortcutNotAssignedTip:
+      "ショートカット未設定。クリックしてブラウザ設定で割り当て",
+    customizeShortcutTip: "クリックしてブラウザのショートカットを変更",
+    backTip: "戻る (Backspace または `)",
+    toggleFeatureAria: "{{feature}} を切り替え",
     resetOrder: "順序をリセット",
     show: "表示",
     hide: "非表示",
@@ -61,6 +63,13 @@ export const ja: TranslationDict = {
       navigation: "スクロール",
       media: "メディア",
       tools: "ツール"
+    },
+    tooltips: {
+      preferencesAndTheme: "環境設定とテーマ",
+      about: "Browse Assist について",
+      supportDonate: "プロジェクトを支援",
+      jumpToVideoTab: "クリックしてこの動画タブへ移動",
+      exitPipWindow: "Picture-in-Picture ウィンドウを閉じる"
     }
   },
   preferences: {
@@ -83,7 +92,164 @@ export const ja: TranslationDict = {
     sessionTimeout: "セッション有効期限",
     customizeMenu: "メニューのカスタマイズ",
     customizeMenuDesc:
-      "ドラッグで並び替え、アイコンでポップアップ内の表示/非表示を切り替えます。"
+      "ドラッグで並び替え、アイコンでポップアップ内の表示/非表示を切り替えます。",
+    presets: "プリセット",
+    presetReading: "読書とナビゲーション",
+    presetReadingDesc: "スクロール、ドラッグ、閲覧",
+    presetDesigner: "デザイン・開発",
+    presetDesignerDesc: "カラー、要素検査と操作",
+    presetEssential: "必須機能のみ",
+    presetEssentialDesc: "最小限で集中",
+    other: "その他",
+    optionsPage: "拡張機能オプションページ",
+    optionsPageDesc: "すべての設定ダッシュボードとショートカットガイド"
+  },
+  donate: {
+    buyMeACoffeeDesc: "コーヒー1杯でプロジェクトの維持を支援",
+    githubSponsorsDesc: "GitHub 経由で毎月または単発でスポンサー",
+    vietqrDesc: "VietQR 経由の即時銀行振込 (ベトナム)",
+    authorDonateDesc: "作者への直接寄付"
+  },
+  dialogs: {
+    firefoxGuide: {
+      title: "Firefox ショートカット設定ガイド",
+      intro:
+        "ショートカットキーはブラウザの拡張機能設定から直接カスタマイズできます：",
+      step1Prefix: "Firefox で新しいタブを開き、次へ移動します：",
+      copyUrlTip: "クリックして URL をコピー",
+      step2Prefix: "アドオンマネージャー右上の",
+      step2Target: "歯車アイコン ⚙",
+      step2Suffix: "をクリックします。",
+      step3Prefix: "ドロップダウンメニューから",
+      step3Target: "「拡張機能のショートカットを管理」",
+      step3Suffix: "を選択します。",
+      step4Prefix: "次を見つけて",
+      step4Suffix: "各コマンドにお好みのショートカットキーを割り当ててください。"
+    }
+  },
+  options: {
+    title: "Browse Assist 設定",
+    subtitle: "ブラウジング便利ツールとショートカットを設定します",
+    openPopup: "ポップアップを開く",
+    openPopupTip: "拡張機能のポップアップを開く",
+    preferences: "環境設定",
+    preferencesTip: "ポップアップで環境設定を開く",
+    about: "情報",
+    aboutTip: "ポップアップで詳細情報を開く",
+    activeModules: "有効なモジュール",
+    configureInPopup: "ポップアップで {{feature}} を設定",
+    shortcutsTitle: "キーボード・マウスショートカット一覧",
+    shortcutsSubtitle:
+      "現在のブラウザホットキーとインタラクティブジェスチャー",
+    customizeShortcuts: "ショートカットを変更",
+    table: {
+      action: "アクション",
+      shortcut: "ショートカット / トリガー",
+      description: "説明"
+    },
+    triggers: {
+      mouseWheel: "{{modifier}} + マウスホイール",
+      mouseDrag: "マウスドラッグ",
+      doubleClickMargin: "余白をダブルクリック",
+      rightClickLink: "リンクを右クリック"
+    },
+    shortcuts: {
+      pip: {
+        name: "ピクチャーインピクチャー (PiP)",
+        desc: "再生中の動画をフローティング PiP ウィンドウに分離します"
+      },
+      allowRightClick: {
+        name: "右クリック許可",
+        desc: "現在のタブでコンテキストメニューとコピーの制限を解除します"
+      },
+      elementToys: {
+        name: "要素ツール (Element Toys)",
+        desc: "ページ要素の削除、編集、非表示、移動を有効にします"
+      },
+      colorPicker: {
+        name: "カラーピッカー",
+        desc: "画面スポイト拡大鏡を起動してカラーコードをコピーします"
+      },
+      quickHub: {
+        name: "Quick Hub ショートカット",
+        desc: "キーボードで画面上の Quick Hub メニューを切り替えます"
+      },
+      volume: {
+        name: "動画音量コントロール",
+        desc: "動画上でスクロールして音量調整、修飾キー+クリックでミュート"
+      },
+      speed: {
+        name: "動画再生速度コントロール",
+        desc: "動画上でスクロールして速度調整、クリックで全画面"
+      },
+      seek: {
+        name: "動画シークとコマ送り",
+        desc: "早送り/巻き戻し、一時停止中はコマ送り"
+      },
+      boost: {
+        name: "動画倍速ブースト",
+        desc: "動画上で X キーを押し続けると一時的に {{speed}}x で再生"
+      },
+      mouseZoom: {
+        name: "カーソル位置ズーム",
+        desc: "マウスカーソル位置を中心にページを滑らかに拡大/縮小"
+      },
+      superDrag: {
+        name: "スーパードラッグ",
+        desc: "テキストをドラッグして検索、リンクをドラッグして背景タブで開く"
+      },
+      quickScroll: {
+        name: "クイックスクロール",
+        desc: "画面端をダブルクリックまたはボタンで先頭/末尾へ移動"
+      },
+      smoothScroll: {
+        name: "滑らかスクロール",
+        desc: "すべてのスクロール領域で慣性物理補間を適用"
+      },
+      cleanLink: {
+        name: "クリーンリンクコピー",
+        desc: "追跡パラメータ (utm_*, fbclid) を除いてコピーまたは Markdown 化"
+      },
+      quickHubZone: {
+        name: "Quick Hub トリガーゾーン",
+        desc: "画面の隅にホバーしてクイックツールランチャーを展開"
+      }
+    },
+    storage: {
+      title: "拡張機能のストレージとデータ",
+      desc: "ブラウザに保存された Browse Assist のすべてのデータと設定（カスタム設定、ショートカット、Quick Hub の並び順、カラー履歴）を完全に消去します。",
+      clearAll: "すべてのデータを消去...",
+      cleared:
+        "すべての拡張機能データを消去し、初期状態にリセットしました。",
+      footer:
+        "Browse Assist • Manifest V3 • Plasmo, React & Tailwind CSS で構築"
+    },
+    modal: {
+      title: "すべての拡張機能データを消去しますか？",
+      body: "ブラウザプロファイルに保存されている Browse Assist の全データが完全に削除されます。",
+      listHeader: "以下が削除されます：",
+      item1: "すべての機能の有効/無効状態と詳細設定",
+      item2: "Quick Hub の並び順、固定アクション、非表示モジュール",
+      item3: "スポイトカラーピッカーの色履歴",
+      item4: "テーマ設定とポップアップ画面の記憶",
+      warning:
+        "⚠️ この操作は取り消せません。すべての設定が即座に初期値に戻ります。",
+      clearing: "データを消去中...",
+      confirm: "はい、すべて削除します"
+    }
+  },
+  content: {
+    copied: {
+      linkText: "リンクテキストをコピーしました",
+      cleanLink: "クリーンリンクをコピーしました",
+      markdown: "Markdown をコピーしました",
+      cleanPageUrl: "クリーンなページ URL をコピーしました",
+      pageMarkdown: "ページを Markdown でコピーしました",
+      quote: "引用をコピーしました",
+      text: "テキストをコピーしました",
+      imageLink: "画像リンクをコピーしました",
+      linkUrl: "リンク URL をコピーしました"
+    }
   },
   about: {
     title: "情報",
@@ -105,7 +271,7 @@ export const ja: TranslationDict = {
   },
   features: {
     allowRightClick: {
-      title: "Allow Right Click",
+      title: "右クリック許可",
       description:
         "右クリック、テキスト選択、コピーを禁止しているサイトで制限を解除します。",
       popupDesc:
@@ -115,7 +281,7 @@ export const ja: TranslationDict = {
       currentTab: "現在のタブ"
     },
     contextMenuActions: {
-      title: "Context Menu Actions",
+      title: "コンテキストメニュー操作",
       description:
         "追跡パラメータなしのクリーンなリンクや Markdown をコピーする右クリック操作。",
       activeCount: "{{count}}/6 有効",
@@ -152,7 +318,7 @@ export const ja: TranslationDict = {
       }
     },
     superDrag: {
-      title: "Super Drag",
+      title: "スーパードラッグ",
       description:
         "選択テキストをドラッグして検索、またはリンクをドラッグして新しいタブで開きます。",
       settings: {
@@ -197,10 +363,40 @@ export const ja: TranslationDict = {
           copy_image_link: "画像リンクをコピー",
           search_image: "画像を検索"
         }
+      },
+      logic: {
+        types: {
+          search: "検索",
+          image: "画像",
+          link: "リンク"
+        },
+        dropOpenBackground: "ドロップして {{type}} を背景で開く",
+        shortOpenBackground: "{{type}} (背景タブ)",
+        dropOpenActive: "ドロップして {{type}} を新しいタブで開く",
+        shortOpenActive: "{{type}} (新しいタブ)",
+        dropOpenWindow: "ドロップして {{type}} を新規ウィンドウで開く",
+        shortOpenWindow: "{{type}} (新規ウィンドウ)",
+        dropOpenIncognito: "ドロップして {{type}} をシークレットで開く",
+        shortOpenIncognito: "{{type}} (シークレット)",
+        dropCopyLinkText: "ドロップしてリンクテキストをコピー",
+        shortCopyLinkText: "テキストコピー",
+        dropCopyMarkdown: "ドロップして Markdown をコピー",
+        shortCopyMarkdown: "Markdown コピー",
+        dropSearchImage: "ドロップして画像を検索",
+        shortSearchImage: "画像検索",
+        dropCopyText: "ドロップしてテキストをコピー",
+        shortCopyText: "テキストコピー",
+        dropCopyImageLink: "ドロップして画像リンクをコピー",
+        shortCopyImageLink: "画像リンクコピー",
+        dropCopyLinkUrl: "ドロップしてリンク URL をコピー",
+        shortCopyLinkUrl: "URL コピー",
+        noAction: "操作なし",
+        releaseToCancel: "離してキャンセル",
+        exceededMax: "最大距離を超過 (離してキャンセル)"
       }
     },
     quickScroll: {
-      title: "Quick Scroll Buttons",
+      title: "クイックスクロールボタン",
       description:
         "ページの先頭・末尾へスムーズに移動できるスマートなフローティングボタン。",
       settings: {
@@ -234,7 +430,7 @@ export const ja: TranslationDict = {
       }
     },
     smoothScroll: {
-      title: "Smooth Scrolling",
+      title: "滑らかスクロール",
       description: "物理補間による滑らかで自然なページスクロール。",
       settings: {
         profiles: "プロファイル",
@@ -257,7 +453,7 @@ export const ja: TranslationDict = {
       }
     },
     mouseZoom: {
-      title: "Mouse Pin-to-Zoom",
+      title: "カーソル位置ズーム",
       description:
         "修飾キーを押しながらホイールを回してカーソル位置を中心に拡大/縮小します。",
       settings: {
@@ -275,10 +471,13 @@ export const ja: TranslationDict = {
         invertDirectionDesc: "下に回して拡大、上に回して縮小します。",
         showZoomToast: "ズーム通知を表示",
         showZoomToastDesc: "ページ右上に倍率バッジを浮かべて表示します。"
+      },
+      logic: {
+        pageZoom: "ページズーム"
       }
     },
     pictureInPicture: {
-      title: "Universal Picture-in-Picture",
+      title: "ピクチャーインピクチャー (PiP)",
       description:
         "カスタム可能なショートカットでフローティング動画ウィンドウを切り替えます。",
       settings: {
@@ -310,10 +509,14 @@ export const ja: TranslationDict = {
         notSupported: "このブラウザは PiP に対応していません",
         cannotEnter: "Picture-in-Picture を開始できません",
         noVideoFound: "ページ上に動画が見つかりません"
+      },
+      background: {
+        playing: "PiP で再生中: {{title}}",
+        untitledVideo: "動画"
       }
     },
     videoWheelControl: {
-      title: "Video Wheel Control",
+      title: "動画ホイール操作",
       description:
         "マウスホイールで動画の音量、再生速度、シークを滑らかに調整します。",
       settings: {
@@ -365,10 +568,21 @@ export const ja: TranslationDict = {
           "この機能は HTML5 メディア要素 (<video>) と直接やり取りします。",
         noticeBody2:
           "一部の動画プラットフォームでは、ループ・画質変更・自動再生時にサイト側の制御で速度やミュート状態がリセットされる場合があります。"
+      },
+      logic: {
+        muted: "ミュート",
+        fullscreen: "全画面",
+        exitFullscreen: "全画面を終了",
+        frameCopied: "フレームをコピーしました！",
+        captureFailed: "キャプチャ失敗",
+        clipboardDenied: "クリップボード拒否",
+        corsProtected: "CORS 保護されています",
+        frameStep: "フレーム {{sign}} ({{time}})",
+        boost: "⚡ {{rate}}x ブースト"
       }
     },
     colorPicker: {
-      title: "Color Picker",
+      title: "カラーピッカー",
       description:
         "画面上の任意のピクセルの色を取得し、複数形式で即座にコピーします。",
       settings: {
@@ -398,11 +612,18 @@ export const ja: TranslationDict = {
         pickedAndCopied: "色を取得してコピーしました",
         picked: "色を取得しました",
         couldNotOpen: "Color Picker を開けませんでした",
-        permissionRequired: "ユーザー操作が必要か許可されていません"
+        permissionRequired: "ユーザー操作が必要か許可されていません",
+        palette: {
+          pickedColor: "取得した色",
+          close: "閉じる",
+          copyHex: "HEX をコピー",
+          copyRgb: "RGB をコピー",
+          copyHsl: "HSL をコピー"
+        }
       }
     },
     elementToys: {
-      title: "Element Toys",
+      title: "要素ツール",
       description:
         "あらゆる Web ページ上の要素を検査、削除、テキスト編集、または再配置します。",
       settings: {
@@ -449,6 +670,50 @@ export const ja: TranslationDict = {
         tipUndoMiddle: "で操作を元に戻すか、バー上の",
         tipUndoSettings: "設定",
         tipUndoSuffix: "ボタンで詳細を変更できます。"
+      },
+      toolbar: {
+        title: "要素ツール",
+        zap: "削除",
+        zapTip: "削除: クリックして要素を DOM から消去",
+        edit: "編集",
+        editTip: "テキスト編集: クリックしてその場でテキスト編集",
+        move: "移動",
+        moveActiveTip: "移動ツール有効 (+/- で親要素範囲を調整)",
+        moveTip: "移動: クリックして移動モード (Flow / Free) を有効化",
+        moveLabel: "移動 ({{mode}})",
+        flow: "Flow",
+        flowTip: "Flow モード: DOM レイアウト内で並べ替え、他の要素を押し出します",
+        free: "Free",
+        freeTip: "Free モード: レイアウトを変えずに自由配置します",
+        hide: "非表示",
+        hideTip: "非表示: クリックしてレイアウトを崩さず隠します",
+        undo: "元に戻す",
+        undoTip: "直前の操作を元に戻す (Ctrl+Z)",
+        settings: "設定",
+        settingsTip: "要素ツールの設定を開く",
+        exit: "終了",
+        exitTip: "要素ツールを終了 (Esc)"
+      },
+      overlay: {
+        clickToZap: "クリックで削除",
+        clickToEdit: "クリックでテキスト編集",
+        dragBody: "本体ドラッグで{{type}} • 角ドラッグでサイズ変更",
+        clickToHide: "クリックで非表示"
+      },
+      logic: {
+        zapped: "要素を削除しました！",
+        hidden: "要素を非表示にしました",
+        resized: "サイズを変更しました",
+        textUpdated: "テキストを更新しました",
+        undone: "操作を元に戻しました",
+        undoneDetail: "{{action}} を取り消しました",
+        closed: "要素ツールを閉じました",
+        active: "要素ツール有効",
+        activeDetail: "上のツールバーから選択 • Esc で終了",
+        scope: "対象: <{{tag}}>",
+        scopeDetail: "階層 +{{depth}} (- で縮小)",
+        scrollUnfrozen: "ページスクロールを解除しました",
+        scrollUnfrozenDetail: "overflow: auto を復元しました"
       }
     },
     quickHub: {
@@ -495,11 +760,12 @@ export const ja: TranslationDict = {
         noToolsActive:
           "有効なツールがありません。Browse Assist ポップアップで有効にしてください。",
         triggerTooltip: "Quick Hub (クイックツール)",
+        triggerAria: "Quick Hub",
         cleanUrlCopied: "クリーン URL をコピーしました"
       }
     },
     imageHoverPreview: {
-      title: "Image Hover Preview",
+      title: "画像ホバープレビュー",
       description:
         "画像や画像リンクにマウスを合わせると原寸サイズでプレビュー表示します。",
       settings: {

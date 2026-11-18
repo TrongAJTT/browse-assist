@@ -373,7 +373,7 @@ function IndexPopup() {
           {/* Preferences / Settings Button */}
           <button
             type="button"
-            title="Preferences & Theme"
+            title={t("popup.tooltips.preferencesAndTheme")}
             onClick={() => setCurrentView("preferences")}
             className={`p-1.5 rounded-lg transition-all focus:outline-none ${
               currentView === "preferences"
@@ -386,7 +386,7 @@ function IndexPopup() {
           {/* About Button */}
           <button
             type="button"
-            title="About Browse Assist"
+            title={t("popup.tooltips.about")}
             onClick={() => setCurrentView("about")}
             className={`p-1.5 rounded-lg transition-all focus:outline-none ${
               currentView === "about"
@@ -400,7 +400,7 @@ function IndexPopup() {
           <div className="relative" ref={donateMenuRef}>
             <button
               type="button"
-              title="Support & Donate"
+              title={t("popup.tooltips.supportDonate")}
               onClick={() => setIsDonateOpen((prev) => !prev)}
               className={`p-1.5 rounded-lg transition-all focus:outline-none ${
                 isDonateOpen
@@ -443,7 +443,7 @@ function IndexPopup() {
         {activePiP && currentView === "main" && (
           <div
             onClick={handleFocusPiPTab}
-            title="Click to jump to this video tab"
+            title={t("popup.tooltips.jumpToVideoTab")}
             className="mb-2 py-1.5 px-2.5 rounded-lg bg-accent-subtle border border-accent/40 hover:border-accent transition-all cursor-pointer group flex items-center justify-between gap-2.5 shadow-lg shadow-black/20">
             <div className="flex items-center gap-2 min-w-0 flex-1">
               <div className="p-1 text-accent group-hover:scale-105 transition-transform shrink-0">
@@ -463,7 +463,7 @@ function IndexPopup() {
               <button
                 type="button"
                 onClick={handleClosePiP}
-                title="Exit Picture-in-Picture window"
+                title={t("popup.tooltips.exitPipWindow")}
                 className="flex items-center gap-1.5 text-[11px] font-semibold text-content-secondary bg-app-elevated border border-border-subtle px-2.5 py-1 rounded-lg transition-all duration-150 hover:bg-rose-500 hover:text-white hover:border-rose-500 hover:shadow-md hover:shadow-rose-500/25 hover:scale-[1.02] active:scale-95 focus:outline-none focus:ring-2 focus:ring-rose-500/50">
                 <X className="w-3.5 h-3.5 stroke-[2.5]" />
                 <span>{t("popup.pipExit")}</span>

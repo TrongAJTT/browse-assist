@@ -49,26 +49,24 @@ export const RADIAL_CENTER_STROKE = "rgba(56, 189, 248, 0.50)"
  */
 export interface SuperDragActionOption {
   id: SuperDragAction
-  label: string
   requiresIncognito?: boolean
 }
 
 const COMMON_OPEN_ACTIONS: SuperDragActionOption[] = [
-  { id: "open_bg_tab", label: "Background Tab" },
-  { id: "open_active_tab", label: "Active Tab" },
-  { id: "open_window_active", label: "New Window" },
-  { id: "open_incognito_active", label: "Incognito Window", requiresIncognito: true }
+  { id: "open_bg_tab" },
+  { id: "open_active_tab" },
+  { id: "open_window_active" },
+  { id: "open_incognito_active", requiresIncognito: true }
 ]
 
 const NONE_ACTION: SuperDragActionOption = {
-  id: "none",
-  label: "None (Do Nothing)"
+  id: "none"
 }
 
 export const SUPER_DRAG_ACTION_OPTIONS: SuperDragActionOption[] = [
   ...COMMON_OPEN_ACTIONS,
-  { id: "copy_to_clipboard", label: "Copy" },
-  { id: "copy_link_text", label: "Copy Link Text" },
+  { id: "copy_to_clipboard" },
+  { id: "copy_link_text" },
   NONE_ACTION
 ]
 
@@ -81,9 +79,9 @@ export function getSuperDragActionOptions(
   if (targetType === "link") {
     return [
       ...COMMON_OPEN_ACTIONS,
-      { id: "copy_to_clipboard", label: "Copy Link URL" },
-      { id: "copy_link_text", label: "Copy Link Text" },
-      { id: "copy_markdown", label: "Copy Markdown" },
+      { id: "copy_to_clipboard" },
+      { id: "copy_link_text" },
+      { id: "copy_markdown" },
       NONE_ACTION
     ]
   }
@@ -91,15 +89,15 @@ export function getSuperDragActionOptions(
   if (targetType === "image") {
     return [
       ...COMMON_OPEN_ACTIONS,
-      { id: "copy_to_clipboard", label: "Copy Image Link" },
-      { id: "search_image", label: "Search Image" },
+      { id: "copy_to_clipboard" },
+      { id: "search_image" },
       NONE_ACTION
     ]
   }
 
   return [
     ...COMMON_OPEN_ACTIONS,
-    { id: "copy_to_clipboard", label: "Copy" },
+    { id: "copy_to_clipboard" },
     NONE_ACTION
   ]
 }

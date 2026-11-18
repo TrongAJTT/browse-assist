@@ -5,6 +5,7 @@
  * Uses shared linkUtils as single source of truth.
  */
 
+import { t } from "~core/i18n"
 import {
   cleanUrl,
   copyToClipboard,
@@ -72,7 +73,7 @@ async function onMessage(
       const linkText = resolveLinkText(rawUrl)
       if (linkText) {
         const success = await copyToClipboard(linkText)
-        if (success) showCopiedFeedback("Copied Link Text", linkText)
+        if (success) showCopiedFeedback(t("content.copied.linkText"), linkText)
       }
       break
     }
@@ -81,7 +82,7 @@ async function onMessage(
       const cleaned = cleanUrl(rawUrl)
       if (cleaned) {
         const success = await copyToClipboard(cleaned)
-        if (success) showCopiedFeedback("Copied Clean Link", cleaned)
+        if (success) showCopiedFeedback(t("content.copied.cleanLink"), cleaned)
       }
       break
     }
@@ -91,7 +92,7 @@ async function onMessage(
       const cleanedUrl = cleanUrl(rawUrl)
       const markdown = `[${linkText}](${cleanedUrl})`
       const success = await copyToClipboard(markdown)
-      if (success) showCopiedFeedback("Copied Markdown", markdown)
+      if (success) showCopiedFeedback(t("content.copied.markdown"), markdown)
       break
     }
 
@@ -99,7 +100,8 @@ async function onMessage(
       const cleaned = cleanUrl(pageUrl)
       if (cleaned) {
         const success = await copyToClipboard(cleaned)
-        if (success) showCopiedFeedback("Copied Clean Page URL", cleaned)
+        if (success)
+          showCopiedFeedback(t("content.copied.cleanPageUrl"), cleaned)
       }
       break
     }
@@ -109,7 +111,8 @@ async function onMessage(
       const title = (document.title || cleaned).replace(/\[|\]/g, "")
       const markdown = `[${title}](${cleaned})`
       const success = await copyToClipboard(markdown)
-      if (success) showCopiedFeedback("Copied Page Markdown", markdown)
+      if (success)
+        showCopiedFeedback(t("content.copied.pageMarkdown"), markdown)
       break
     }
 
@@ -128,7 +131,7 @@ async function onMessage(
           .join("\n")
         const markdown = `${quoted}\n— [${title}](${cleaned})`
         const success = await copyToClipboard(markdown)
-        if (success) showCopiedFeedback("Copied Quote", selected)
+        if (success) showCopiedFeedback(t("content.copied.quote"), selected)
       }
       break
     }

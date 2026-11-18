@@ -1,4 +1,5 @@
 import type { UndoManager } from "../undoManager"
+import { t } from "~core/i18n"
 import { showContentToast } from "~core/toast"
 
 export class TextEditor {
@@ -99,7 +100,7 @@ export class TextEditor {
 
       if (showToast) {
         showContentToast({
-          message: "Text Updated",
+          message: t("features.elementToys.logic.textUpdated"),
           type: "success",
           duration: 1800
         })

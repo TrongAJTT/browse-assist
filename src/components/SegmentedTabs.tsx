@@ -1,5 +1,7 @@
 import type React from "react"
 
+import { useI18n } from "~core/useI18n"
+
 export interface SegmentedTabItem<T extends string = string> {
   id: T
   label: string
@@ -25,6 +27,8 @@ export function SegmentedTabs<T extends string = string>({
   onChange,
   className = ""
 }: SegmentedTabsProps<T>): React.ReactElement {
+  const { t } = useI18n()
+
   return (
     <div
       role="tablist"
@@ -40,7 +44,7 @@ export function SegmentedTabs<T extends string = string>({
             disabled={tab.disabled}
             aria-selected={isSelected}
             onClick={() => onChange(tab.id)}
-            title={`${tab.label}${tab.showOffDot ? " (Off)" : ""}`}
+            title={`${tab.label}${tab.showOffDot ? ` (${t("common.disabled")})` : ""}`}
             className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 text-xs font-semibold rounded-md transition-all ${
               tab.disabled
                 ? "opacity-40 cursor-not-allowed"
@@ -63,7 +67,7 @@ export function SegmentedTabs<T extends string = string>({
                     ? "bg-white/70"
                     : "bg-amber-400/80 ring-1 ring-amber-400/30"
                 }`}
-                title="Disabled"
+                title={t("common.disabled")}
               />
             )}
           </button>

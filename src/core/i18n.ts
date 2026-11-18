@@ -23,6 +23,14 @@ const LOCALE_TABLES: Record<SupportedLocale, TranslationDict> = {
   zh_TW
 }
 
+type Paths<T> = T extends string
+  ? never
+  : {
+      [K in keyof T & string]: T[K] extends string ? K : `${K}.${Paths<T[K]>}`
+    }[keyof T & string]
+
+export type TranslationKey = Paths<TranslationDict>
+
 const i18n = rosetta<TranslationDict>(LOCALE_TABLES)
 i18n.locale("en")
 
@@ -87,23 +95,32 @@ export function getCurrentLocale(): SupportedLocale {
 }
 
 /**
+ * Translates a dot-notation key for a specific locale without mutating global state,
+ * falling back to English if the key is missing.
+ */
+export function translateFor(
+  locale: SupportedLocale,
+  key: TranslationKey,
+  params?: Record<string, string | number>
+): string {
+  const translated = i18n.t(key, params, locale)
+  if (translated) return translated
+  if (locale !== "en") {
+    const fallback = i18n.t(key, params, "en")
+    if (fallback) return fallback
+  }
+  return key
+}
+
+/**
  * Translates a dot-notation key with optional interpolation parameters,
  * falling back to the English dictionary if a key is missing.
  */
 export function t(
-  key: string,
+  key: TranslationKey,
   params?: Record<string, string | number>
 ): string {
-  const translated = i18n.t(key, params)
-  if (translated) return translated
-  if (activeLocale !== "en") {
-    const prev = activeLocale
-    i18n.locale("en")
-    const fallback = i18n.t(key, params)
-    i18n.locale(prev)
-    if (fallback) return fallback
-  }
-  return key
+  return translateFor(activeLocale, key, params)
 }
 
 export { LOCALE_TABLES }

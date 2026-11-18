@@ -2,6 +2,8 @@ import { ChevronLeft } from "lucide-react"
 import { useEffect } from "react"
 import type React from "react"
 
+import { useI18n } from "~core/useI18n"
+
 import { Switch } from "./Switch"
 
 interface SubSettingsLayoutProps {
@@ -26,6 +28,8 @@ export const SubSettingsLayout: React.FC<SubSettingsLayoutProps> = ({
   rightActions,
   children
 }) => {
+  const { t } = useI18n()
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Don't trigger if user is actively typing in an input element
@@ -56,7 +60,7 @@ export const SubSettingsLayout: React.FC<SubSettingsLayoutProps> = ({
         <button
           type="button"
           onClick={onBack}
-          title="Back (Backspace or `)"
+          title={t("common.backTip")}
           className="flex items-center gap-1.5 px-1.5 py-1 -ml-1 text-xs font-semibold text-content-secondary hover:text-content-primary rounded-lg hover:bg-app-surface transition-all focus:outline-none focus:ring-2 focus:ring-border-focus">
           <ChevronLeft className="w-4 h-4 text-content-muted" />
           <span className="text-[13px] font-semibold tracking-tight text-content-primary">
@@ -72,7 +76,7 @@ export const SubSettingsLayout: React.FC<SubSettingsLayoutProps> = ({
             <Switch
               checked={enabled}
               onChange={onToggle}
-              ariaLabel={`Toggle ${title}`}
+              ariaLabel={t("common.toggleFeatureAria", { feature: title })}
             />
           )}
         </div>

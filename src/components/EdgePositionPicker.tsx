@@ -182,7 +182,7 @@ export const EdgePositionPicker: React.FC<EdgePositionPickerProps> = ({
           {/* Center Viewport Canvas & Watermark */}
           <div className="flex-1 relative flex items-center justify-center pointer-events-none overflow-hidden">
             <div className="text-[10px] font-mono tracking-wider text-content-faint/25 font-semibold uppercase">
-              Viewport Screen
+              {t("common.viewportScreen")}
             </div>
 
             {/* Dynamic Alignment Guides - ONLY visible during dragging */}
@@ -261,7 +261,7 @@ export const EdgePositionPicker: React.FC<EdgePositionPickerProps> = ({
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-1.5 text-xs text-content-secondary">
           <span className="font-semibold capitalize text-content-primary">
-            {currentEdge} Edge
+            {t(`common.${currentEdge}`)}
           </span>
           <span className="text-content-faint">·</span>
           <span className="font-mono text-accent font-medium">

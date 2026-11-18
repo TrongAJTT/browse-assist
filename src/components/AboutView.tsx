@@ -4,6 +4,7 @@ import type React from "react"
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
 import { AppIcon } from "~core/assets"
 import { APP_INFO } from "~core/constants"
+import type { TranslationKey } from "~core/i18n"
 import { useI18n } from "~core/useI18n"
 
 interface AboutViewProps {
@@ -112,7 +113,8 @@ export const AboutView: React.FC<AboutViewProps> = ({ onBack }) => {
                   </span>
                 </div>
                 <p className="text-[11px] text-content-muted leading-relaxed">
-                  {t(`about.permissions.${perm.key}`) || perm.description}
+                  {t(`about.permissions.${perm.key}` as TranslationKey) ||
+                    perm.description}
                 </p>
               </div>
             ))}

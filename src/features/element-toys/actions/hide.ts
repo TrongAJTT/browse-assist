@@ -1,6 +1,7 @@
 import { getElementDescriptor } from "../domUtils"
 import { unfreezeScrollLock } from "../scrollUnlock"
 import type { UndoManager } from "../undoManager"
+import { t } from "~core/i18n"
 import { showContentToast } from "~core/toast"
 import type { ElementToysConfig } from "~core/types"
 
@@ -31,7 +32,7 @@ export function executeHide(
 
   if (config.showToast) {
     showContentToast({
-      message: "Element Hidden",
+      message: t("features.elementToys.logic.hidden"),
       detail: `<${desc}>`,
       type: "info",
       duration: 1800

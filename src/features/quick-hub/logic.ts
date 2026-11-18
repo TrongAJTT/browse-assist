@@ -674,7 +674,10 @@ function createDOM(): void {
     currentConfig.hoverToReveal ? "qh-proximity qh-hidden" : "qh-persistent"
   }`
   triggerBtn.title = t("features.quickHub.logic.triggerTooltip")
-  triggerBtn.setAttribute("aria-label", "Quick Hub")
+  triggerBtn.setAttribute(
+    "aria-label",
+    t("features.quickHub.logic.triggerAria")
+  )
   triggerBtn.innerHTML = SPARKLES_ICON_SVG
   triggerBtn.addEventListener("click", (e) => {
     e.stopPropagation()

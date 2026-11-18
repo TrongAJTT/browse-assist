@@ -4,6 +4,8 @@
  * Supports 4 directions (up, down, left, right) configurable per target (text, link, image).
  */
 
+import { escapeHtml } from "~core/escapeHtml"
+import { t } from "~core/i18n"
 import { MESSAGE_TYPES, sendToBackground } from "~core/messaging"
 import {
   DEFAULT_SUPER_DRAG_CONFIG,
@@ -220,54 +222,82 @@ const ICONS = {
 function getActionDisplay(
   action: SuperDragAction,
   targetType: "text" | "link" | "image"
-): { label: string; icon: string; theme: "indigo" | "emerald" | "amber" | "sky" | "violet" } {
+): {
+  label: string
+  shortLabel: string
+  icon: string
+  theme: "indigo" | "emerald" | "amber" | "sky" | "violet"
+} {
   const typeLabel =
     targetType === "text"
-      ? "Search"
+      ? t("features.superDrag.logic.types.search")
       : targetType === "image"
-        ? "Image"
-        : "Link"
+        ? t("features.superDrag.logic.types.image")
+        : t("features.superDrag.logic.types.link")
 
   switch (action) {
     case "open_bg_tab":
       return {
-        label: `Drop to Open ${typeLabel} (Background)`,
+        label: t("features.superDrag.logic.dropOpenBackground", {
+          type: typeLabel
+        }),
+        shortLabel: t("features.superDrag.logic.shortOpenBackground", {
+          type: typeLabel
+        }),
         icon: ICONS.tabBackground,
         theme: "indigo"
       }
     case "open_active_tab":
       return {
-        label: `Drop to Open ${typeLabel} (New Tab)`,
+        label: t("features.superDrag.logic.dropOpenActive", {
+          type: typeLabel
+        }),
+        shortLabel: t("features.superDrag.logic.shortOpenActive", {
+          type: typeLabel
+        }),
         icon: ICONS.tabForeground,
         theme: "sky"
       }
     case "open_window_active":
       return {
-        label: `Drop to Open ${typeLabel} (New Window)`,
+        label: t("features.superDrag.logic.dropOpenWindow", {
+          type: typeLabel
+        }),
+        shortLabel: t("features.superDrag.logic.shortOpenWindow", {
+          type: typeLabel
+        }),
         icon: ICONS.windowActive,
         theme: "sky"
       }
     case "open_incognito_active":
       return {
-        label: `Drop to Open ${typeLabel} (Incognito)`,
+        label: t("features.superDrag.logic.dropOpenIncognito", {
+          type: typeLabel
+        }),
+        shortLabel: t("features.superDrag.logic.shortOpenIncognito", {
+          type: typeLabel
+        }),
         icon: ICONS.incognito,
         theme: "amber"
       }
     case "copy_link_text":
       return {
-        label: "Drop to Copy Link Text",
+        label: t("features.superDrag.logic.dropCopyLinkText"),
+        shortLabel: t("features.superDrag.logic.shortCopyLinkText"),
         icon: ICONS.copyText,
         theme: "sky"
       }
     case "copy_markdown":
       return {
-        label: "Drop to Copy Markdown",
+        label: t("features.superDrag.logic.dropCopyMarkdown"),
+        shortLabel: t("features.superDrag.logic.shortCopyMarkdown"),
         icon: ICONS.copyText,
         theme: "sky"
       }
     case "search_image":
       return {
-        label: "Drop to Search Image",
+        label: t("features.superDrag.logic.dropSearchImage"),
+        shortLabel: t("features.superDrag.logic.shortSearchImage"),
         icon: ICONS.search,
         theme: "indigo"
       }
@@ -275,17 +305,24 @@ function getActionDisplay(
       return {
         label:
           targetType === "text"
-            ? "Drop to Copy Text"
+            ? t("features.superDrag.logic.dropCopyText")
             : targetType === "image"
-              ? "Drop to Copy Image Link"
-              : "Drop to Copy Link URL",
+              ? t("features.superDrag.logic.dropCopyImageLink")
+              : t("features.superDrag.logic.dropCopyLinkUrl"),
+        shortLabel:
+          targetType === "text"
+            ? t("features.superDrag.logic.shortCopyText")
+            : targetType === "image"
+              ? t("features.superDrag.logic.shortCopyImageLink")
+              : t("features.superDrag.logic.shortCopyLinkUrl"),
         icon: ICONS.copy,
         theme: "emerald"
       }
     case "none":
     default:
       return {
-        label: "No action",
+        label: t("features.superDrag.logic.noAction"),
+        shortLabel: t("features.superDrag.logic.noAction"),
         icon: ICONS.none,
         theme: "indigo"
       }
@@ -435,10 +472,10 @@ function updateRadialIndicator(
       transition: all 0.15s ease;
     ">
       ${isExceeded
-      ? `<span style="color:#fca5a5;">Exceeded max distance (Release to cancel)</span>`
+      ? `<span style="color:#fca5a5;">${escapeHtml(t("features.superDrag.logic.exceededMax"))}</span>`
       : isDeadzone
-        ? `<span style="color:#fca5a5;">Release to cancel</span>`
-        : `<span>${activeDisplay?.label.replace("Drop to Open ", "").replace("Drop to ", "")}</span>`
+        ? `<span style="color:#fca5a5;">${escapeHtml(t("features.superDrag.logic.releaseToCancel"))}</span>`
+        : `<span>${escapeHtml(activeDisplay?.shortLabel ?? "")}</span>`
     }
     </div>
   `
@@ -715,7 +752,7 @@ async function onDragEnd(event: DragEvent): Promise<void> {
       const textToCopy = activeSession.extraText || activeSession.payload
       const success = await copyToClipboard(textToCopy)
       if (success) {
-        showCopiedFeedback("Copied Link Text", textToCopy)
+        showCopiedFeedback(t("content.copied.linkText"), textToCopy)
       }
     } else if (action === "copy_markdown") {
       const cleaned = cleanUrl(activeSession.payload)
@@ -723,7 +760,7 @@ async function onDragEnd(event: DragEvent): Promise<void> {
       const markdown = `[${title}](${cleaned})`
       const success = await copyToClipboard(markdown)
       if (success) {
-        showCopiedFeedback("Copied Markdown", markdown)
+        showCopiedFeedback(t("content.copied.markdown"), markdown)
       }
     } else if (action === "copy_to_clipboard") {
       const payload =
@@ -734,10 +771,10 @@ async function onDragEnd(event: DragEvent): Promise<void> {
       if (success) {
         const label =
           activeSession.type === "text"
-            ? "Copied Text"
+            ? t("content.copied.text")
             : activeSession.type === "image"
-              ? "Copied Image Link"
-              : "Copied Link URL"
+              ? t("content.copied.imageLink")
+              : t("content.copied.linkUrl")
         showCopiedFeedback(label, payload)
       }
     } else if (action !== "none") {

@@ -37,9 +37,7 @@ export const ShortcutBadge: React.FC<ShortcutBadgeProps> = ({
       <kbd
         onClick={interactive ? handleOpenShortcutsPage : undefined}
         title={
-          interactive
-            ? "Click to customize shortcut in browser settings"
-            : undefined
+          interactive ? t("common.customizeShortcutTip") : undefined
         }
         className={`badge-kbd ${
           interactive
@@ -55,7 +53,7 @@ export const ShortcutBadge: React.FC<ShortcutBadgeProps> = ({
     <button
       type="button"
       onClick={interactive ? handleOpenShortcutsPage : undefined}
-      title="Shortcut not assigned. Click to configure in browser settings"
+      title={t("common.shortcutNotAssignedTip")}
       className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-app-surface text-content-muted border border-border-subtle ${
         interactive
           ? "cursor-pointer hover:text-content-primary hover:border-accent/40 active:scale-95 transition-all"

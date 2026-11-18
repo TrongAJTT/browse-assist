@@ -1,8 +1,13 @@
-import { useEffect } from "react"
+import { useCallback, useEffect, useMemo } from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
-import { getCurrentLocale, setLocale, t } from "~core/i18n"
+import {
+  resolveLocale,
+  setLocale,
+  translateFor,
+  type TranslationKey
+} from "~core/i18n"
 import {
   DEFAULT_SETTINGS,
   STORAGE_KEYS,
@@ -12,10 +17,10 @@ import {
 
 /**
  * React hook for localized UI components.
- * Subscribes to settings.language in @plasmohq/storage and keeps rosetta in sync.
+ * Subscribes to settings.language in @plasmohq/storage and binds t() to the resolved locale.
  */
 export function useI18n(): {
-  t: typeof t
+  t: (key: TranslationKey, params?: Record<string, string | number>) => string
   locale: SupportedLocale
 } {
   const [settings] = useStorage<FeatureSettings>(
@@ -24,14 +29,22 @@ export function useI18n(): {
   )
 
   const language = settings?.language ?? "auto"
-  const locale = setLocale(language)
+  const locale = useMemo(() => setLocale(language), [language]) ?? resolveLocale(language)
+
+  const boundT = useCallback(
+    (key: TranslationKey, params?: Record<string, string | number>) =>
+      translateFor(locale, key, params),
+    [locale]
+  )
 
   useEffect(() => {
-    setLocale(language)
-  }, [language])
+    if (typeof document !== "undefined") {
+      document.documentElement.lang = locale.replace("_", "-")
+    }
+  }, [locale])
 
   return {
-    t,
-    locale: locale || getCurrentLocale()
+    t: boundT,
+    locale
   }
 }

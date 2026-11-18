@@ -2,22 +2,24 @@ import type { TranslationDict } from "./en"
 
 export const vi: TranslationDict = {
   common: {
+    appName: "Browse Assist",
     enabled: "Đang bật",
     disabled: "Đang tắt",
-    on: "Bật",
-    off: "Tắt",
     reset: "Đặt lại",
     clear: "Xóa",
     cancel: "Hủy",
-    save: "Lưu",
-    back: "Quay lại",
+    gotIt: "Đã hiểu",
+    viewportScreen: "Màn hình hiển thị",
     unassigned: "Chưa gán",
-    notConfigured: "Chưa thiết lập",
-    configure: "Cấu hình",
     launch: "Khởi chạy",
     all: "Tất cả",
     none: "Không",
     customizeShortcuts: "Tùy chỉnh trong cài đặt phím tắt trình duyệt",
+    shortcutNotAssignedTip:
+      "Chưa gán phím tắt. Nhấp để cài đặt trong trình duyệt",
+    customizeShortcutTip: "Nhấp để tùy chỉnh phím tắt trong cài đặt trình duyệt",
+    backTip: "Quay lại (Backspace hoặc `)",
+    toggleFeatureAria: "Bật/tắt {{feature}}",
     resetOrder: "Đặt lại thứ tự",
     show: "Hiện",
     hide: "Ẩn",
@@ -61,6 +63,13 @@ export const vi: TranslationDict = {
       navigation: "Cuộn trang",
       media: "Đa phương tiện",
       tools: "Công cụ"
+    },
+    tooltips: {
+      preferencesAndTheme: "Tùy chọn & Giao diện",
+      about: "Giới thiệu Browse Assist",
+      supportDonate: "Ủng hộ dự án",
+      jumpToVideoTab: "Nhấp để chuyển tới tab video này",
+      exitPipWindow: "Thoát cửa sổ Picture-in-Picture"
     }
   },
   preferences: {
@@ -83,7 +92,164 @@ export const vi: TranslationDict = {
     sessionTimeout: "Thời gian lưu phiên",
     customizeMenu: "Tùy chỉnh Menu",
     customizeMenuDesc:
-      "Kéo thả để sắp xếp thứ tự hiển thị hoặc ẩn/hiện các tính năng."
+      "Kéo thả để sắp xếp thứ tự hiển thị hoặc ẩn/hiện các tính năng.",
+    presets: "Mẫu sẵn",
+    presetReading: "Đọc & Điều hướng",
+    presetReadingDesc: "Cuộn, kéo & đọc",
+    presetDesigner: "Thiết kế & Lập trình",
+    presetDesignerDesc: "Màu sắc, kiểm tra & sửa",
+    presetEssential: "Cơ bản tối giản",
+    presetEssentialDesc: "Gọn nhẹ & tập trung",
+    other: "Khác",
+    optionsPage: "Trang Tùy chọn Mở rộng",
+    optionsPageDesc: "Bảng cài đặt đầy đủ & hướng dẫn phím tắt"
+  },
+  donate: {
+    buyMeACoffeeDesc: "Ủng hộ duy trì dự án bằng một ly cà phê",
+    githubSponsorsDesc: "Tài trợ qua GitHub theo tháng hoặc một lần",
+    vietqrDesc: "Chuyển khoản ngân hàng nhanh qua VietQR (Việt Nam)",
+    authorDonateDesc: "Ủng hộ trực tiếp cho tác giả"
+  },
+  dialogs: {
+    firefoxGuide: {
+      title: "Hướng dẫn cài đặt phím tắt Firefox",
+      intro:
+        "Phím tắt có thể được tùy chỉnh trực tiếp trong phần cài đặt tiện ích của trình duyệt:",
+      step1Prefix: "Mở tab mới trong Firefox và truy cập",
+      copyUrlTip: "Nhấp để sao chép URL",
+      step2Prefix: "Nhấp vào",
+      step2Target: "Biểu tượng bánh răng ⚙",
+      step2Suffix: "ở góc trên bên phải của trang Quản lý Tiện ích.",
+      step3Prefix: "Chọn",
+      step3Target: "'Quản lý phím tắt tiện ích'",
+      step3Suffix: "từ menu thả xuống.",
+      step4Prefix: "Tìm",
+      step4Suffix: "và gán phím tắt bạn muốn cho từng lệnh."
+    }
+  },
+  options: {
+    title: "Cài đặt Browse Assist",
+    subtitle: "Cấu hình bộ công cụ tiện ích duyệt web và phím tắt của bạn",
+    openPopup: "Mở Popup",
+    openPopupTip: "Mở popup tiện ích",
+    preferences: "Tùy chọn",
+    preferencesTip: "Mở trang tùy chọn trong popup",
+    about: "Giới thiệu",
+    aboutTip: "Mở thông tin giới thiệu trong popup",
+    activeModules: "Các mô-đun đang hoạt động",
+    configureInPopup: "Cấu hình {{feature}} trong popup",
+    shortcutsTitle: "Bảng tham chiếu Phím tắt & Thao tác chuột",
+    shortcutsSubtitle:
+      "Phím tắt trình duyệt theo thời gian thực và cử chỉ tương tác",
+    customizeShortcuts: "Tùy chỉnh phím tắt",
+    table: {
+      action: "Tác vụ",
+      shortcut: "Phím tắt / Kích hoạt",
+      description: "Mô tả"
+    },
+    triggers: {
+      mouseWheel: "{{modifier}} + Con lăn chuột",
+      mouseDrag: "Kéo chuột",
+      doubleClickMargin: "Nhấp đúp lề màn hình",
+      rightClickLink: "Chuột phải vào liên kết"
+    },
+    shortcuts: {
+      pip: {
+        name: "Hình trong hình (PiP)",
+        desc: "Tách video đang phát ra cửa sổ PiP nổi"
+      },
+      allowRightClick: {
+        name: "Cho phép chuột phải",
+        desc: "Bật/tắt mở khóa menu chuột phải và sao chép trên tab hiện tại"
+      },
+      elementToys: {
+        name: "Công cụ phần tử",
+        desc: "Kích hoạt chế độ trỏ-nhấp để xóa, sửa, ẩn hoặc di chuyển phần tử"
+      },
+      colorPicker: {
+        name: "Chấm màu",
+        desc: "Bật kính lúp chấm màu màn hình để kiểm tra và sao chép mã màu"
+      },
+      quickHub: {
+        name: "Phím tắt Quick Hub",
+        desc: "Bật/tắt bảng công cụ nổi Quick Hub bằng bàn phím"
+      },
+      volume: {
+        name: "Điều chỉnh âm lượng video",
+        desc: "Di chuột lên video để chỉnh âm lượng; giữ phím và nhấp để tắt tiếng"
+      },
+      speed: {
+        name: "Điều chỉnh tốc độ video",
+        desc: "Di chuột lên video để chỉnh tốc độ phát mượt mà; nhấp để toàn màn hình"
+      },
+      seek: {
+        name: "Tua video & Từng khung hình",
+        desc: "Tua tiến/lùi; tua từng khung hình khi video đang tạm dừng"
+      },
+      boost: {
+        name: "Tăng tốc video",
+        desc: "Giữ phím X trên video để tạm thời tăng tốc lên {{speed}}x"
+      },
+      mouseZoom: {
+        name: "Thu phóng theo con trỏ",
+        desc: "Thu phóng trang mượt mà lấy tâm ngay tại vị trí con trỏ chuột"
+      },
+      superDrag: {
+        name: "Siêu kéo thả",
+        desc: "Kéo văn bản để tìm kiếm trong tab mới; kéo liên kết để mở tab nền"
+      },
+      quickScroll: {
+        name: "Nút cuộn nhanh",
+        desc: "Nhấp đúp lề màn hình hoặc bấm nút nổi để nhảy lên đầu/cuối trang"
+      },
+      smoothScroll: {
+        name: "Cuộn mượt",
+        desc: "Nội suy vật lý có quán tính trên mọi vùng chứa có thanh cuộn"
+      },
+      cleanLink: {
+        name: "Sao chép liên kết sạch",
+        desc: "Loại bỏ tham số theo dõi (utm_*, fbclid) và sao chép link sạch/Markdown"
+      },
+      quickHubZone: {
+        name: "Vùng kích hoạt Quick Hub",
+        desc: "Đưa chuột vào vùng góc màn hình để mở bảng công cụ nhanh"
+      }
+    },
+    storage: {
+      title: "Bộ nhớ & Dữ liệu Tiện ích",
+      desc: "Xóa vĩnh viễn mọi dữ liệu và cài đặt của Browse Assist đã lưu trong trình duyệt. Thao tác này sẽ xóa cấu hình tùy chỉnh, phím tắt, thứ tự Quick Hub và lịch sử chấm màu.",
+      clearAll: "Xóa toàn bộ dữ liệu...",
+      cleared:
+        "Toàn bộ dữ liệu tiện ích đã được xóa và khôi phục về mặc định.",
+      footer:
+        "Browse Assist • Manifest V3 • Xây dựng với Plasmo, React & Tailwind CSS"
+    },
+    modal: {
+      title: "Xóa toàn bộ dữ liệu tiện ích?",
+      body: "Thao tác này sẽ xóa vĩnh viễn mọi dữ liệu của Browse Assist trên hồ sơ trình duyệt của bạn.",
+      listHeader: "Những mục sau sẽ bị xóa:",
+      item1: "Trạng thái bật/tắt của tất cả tính năng & cấu hình con",
+      item2: "Thứ tự Quick Hub, tác vụ ghim & mô-đun đang ẩn",
+      item3: "Lịch sử màu trong công cụ Chấm màu",
+      item4: "Tùy chọn giao diện và bộ nhớ điều hướng popup",
+      warning:
+        "⚠️ Không thể hoàn tác thao tác này. Mọi cài đặt sẽ quay về mặc định ngay lập tức.",
+      clearing: "Đang xóa dữ liệu...",
+      confirm: "Có, xóa toàn bộ dữ liệu"
+    }
+  },
+  content: {
+    copied: {
+      linkText: "Đã sao chép chữ liên kết",
+      cleanLink: "Đã sao chép liên kết sạch",
+      markdown: "Đã sao chép Markdown",
+      cleanPageUrl: "Đã sao chép URL trang sạch",
+      pageMarkdown: "Đã sao chép trang Markdown",
+      quote: "Đã sao chép trích dẫn",
+      text: "Đã sao chép văn bản",
+      imageLink: "Đã sao chép link ảnh",
+      linkUrl: "Đã sao chép URL liên kết"
+    }
   },
   about: {
     title: "Giới thiệu",
@@ -105,7 +271,7 @@ export const vi: TranslationDict = {
   },
   features: {
     allowRightClick: {
-      title: "Allow Right Click",
+      title: "Cho phép chuột phải",
       description:
         "Mở khóa chuột phải, bôi đen và sao chép trên các trang web hạn chế.",
       popupDesc:
@@ -115,7 +281,7 @@ export const vi: TranslationDict = {
       currentTab: "Tab hiện tại"
     },
     contextMenuActions: {
-      title: "Context Menu Actions",
+      title: "Tác vụ chuột phải",
       description:
         "Thêm các tác vụ chuột phải hữu ích như sao chép liên kết sạch hoặc Markdown.",
       activeCount: "{{count}}/6 Đang bật",
@@ -153,7 +319,7 @@ export const vi: TranslationDict = {
       }
     },
     superDrag: {
-      title: "Super Drag",
+      title: "Siêu kéo thả",
       description:
         "Kéo văn bản để tìm kiếm nhanh hoặc kéo liên kết để mở trong tab mới.",
       settings: {
@@ -198,10 +364,40 @@ export const vi: TranslationDict = {
           copy_image_link: "Sao chép link ảnh",
           search_image: "Tìm kiếm hình ảnh"
         }
+      },
+      logic: {
+        types: {
+          search: "Tìm kiếm",
+          image: "Hình ảnh",
+          link: "Liên kết"
+        },
+        dropOpenBackground: "Thả để mở {{type}} (Tab nền)",
+        shortOpenBackground: "{{type}} (Tab nền)",
+        dropOpenActive: "Thả để mở {{type}} (Tab mới)",
+        shortOpenActive: "{{type}} (Tab mới)",
+        dropOpenWindow: "Thả để mở {{type}} (Cửa sổ mới)",
+        shortOpenWindow: "{{type}} (Cửa sổ mới)",
+        dropOpenIncognito: "Thả để mở {{type}} (Ẩn danh)",
+        shortOpenIncognito: "{{type}} (Ẩn danh)",
+        dropCopyLinkText: "Thả để sao chép chữ liên kết",
+        shortCopyLinkText: "Sao chép chữ liên kết",
+        dropCopyMarkdown: "Thả để sao chép Markdown",
+        shortCopyMarkdown: "Sao chép Markdown",
+        dropSearchImage: "Thả để tìm kiếm hình ảnh",
+        shortSearchImage: "Tìm kiếm hình ảnh",
+        dropCopyText: "Thả để sao chép văn bản",
+        shortCopyText: "Sao chép văn bản",
+        dropCopyImageLink: "Thả để sao chép link ảnh",
+        shortCopyImageLink: "Sao chép link ảnh",
+        dropCopyLinkUrl: "Thả để sao chép URL liên kết",
+        shortCopyLinkUrl: "Sao chép URL liên kết",
+        noAction: "Không có hành động",
+        releaseToCancel: "Thả ra để hủy",
+        exceededMax: "Vượt quá khoảng cách tối đa (Thả để hủy)"
       }
     },
     quickScroll: {
-      title: "Quick Scroll Buttons",
+      title: "Nút cuộn nhanh",
       description:
         "Các nút nổi thông minh giúp cuộn mượt lên đầu hoặc xuống cuối trang.",
       settings: {
@@ -235,7 +431,7 @@ export const vi: TranslationDict = {
       }
     },
     smoothScroll: {
-      title: "Smooth Scrolling",
+      title: "Cuộn mượt",
       description:
         "Cuộn trang mượt mà, tự nhiên với thuật toán nội suy vật lý.",
       settings: {
@@ -259,7 +455,7 @@ export const vi: TranslationDict = {
       }
     },
     mouseZoom: {
-      title: "Mouse Pin-to-Zoom",
+      title: "Thu phóng theo con trỏ",
       description:
         "Giữ phím bổ trợ và cuộn chuột để phóng to/thu nhỏ ngay tại vị trí con trỏ.",
       settings: {
@@ -279,10 +475,13 @@ export const vi: TranslationDict = {
         showZoomToast: "Hiện nhãn phần trăm",
         showZoomToastDesc:
           "Hiển thị nhãn phần trăm thu phóng nổi ở góc trên bên phải trang."
+      },
+      logic: {
+        pageZoom: "Thu phóng trang"
       }
     },
     pictureInPicture: {
-      title: "Universal Picture-in-Picture",
+      title: "Hình trong hình (PiP)",
       description:
         "Bật/tắt cửa sổ video nổi bằng phím tắt hoặc nút di chuột trên video.",
       settings: {
@@ -315,10 +514,14 @@ export const vi: TranslationDict = {
         notSupported: "Trình duyệt này không hỗ trợ PiP",
         cannotEnter: "Không thể bật Picture-in-Picture",
         noVideoFound: "Không tìm thấy video trên trang"
+      },
+      background: {
+        playing: "Đang phát trong PiP: {{title}}",
+        untitledVideo: "Video"
       }
     },
     videoWheelControl: {
-      title: "Video Wheel Control",
+      title: "Điều khiển video bằng cuộn",
       description:
         "Điều chỉnh âm lượng, tốc độ phát và tua video bằng con lăn chuột.",
       settings: {
@@ -369,10 +572,21 @@ export const vi: TranslationDict = {
           "Tính năng này tương tác trực tiếp với thẻ media HTML5 (<video>).",
         noticeBody2:
           "Trên một số nền tảng web lớn, trình quản lý trạng thái riêng của trang có thể đặt lại tốc độ phát hoặc trạng thái tắt tiếng khi video lặp lại, đổi độ phân giải hoặc tự chuyển bài."
+      },
+      logic: {
+        muted: "Đã tắt tiếng",
+        fullscreen: "Toàn màn hình",
+        exitFullscreen: "Thoát toàn màn hình",
+        frameCopied: "Đã sao chép khung hình!",
+        captureFailed: "Chụp ảnh thất bại",
+        clipboardDenied: "Clipboard bị từ chối",
+        corsProtected: "Bị chặn bởi CORS",
+        frameStep: "Khung {{sign}} ({{time}})",
+        boost: "⚡ Tăng tốc {{rate}}x"
       }
     },
     colorPicker: {
-      title: "Color Picker",
+      title: "Chấm màu",
       description:
         "Chấm màu từng pixel trên màn hình và sao chép nhanh nhiều định dạng.",
       settings: {
@@ -404,11 +618,18 @@ export const vi: TranslationDict = {
         pickedAndCopied: "Đã chấm & sao chép màu",
         picked: "Đã chấm màu",
         couldNotOpen: "Không thể mở công cụ chấm màu",
-        permissionRequired: "Cần tương tác người dùng hoặc không được cấp phép"
+        permissionRequired: "Cần tương tác người dùng hoặc không được cấp phép",
+        palette: {
+          pickedColor: "Màu đã chấm",
+          close: "Đóng",
+          copyHex: "Sao chép HEX",
+          copyRgb: "Sao chép RGB",
+          copyHsl: "Sao chép HSL"
+        }
       }
     },
     elementToys: {
-      title: "Element Toys",
+      title: "Công cụ phần tử",
       description:
         "Kiểm tra, xóa, sửa chữ hoặc di chuyển phần tử trực tiếp trên trang web.",
       settings: {
@@ -457,10 +678,55 @@ export const vi: TranslationDict = {
         tipUndoMiddle: "để hoàn tác thao tác, hoặc nhấp nút",
         tipUndoSettings: "Cài đặt",
         tipUndoSuffix: "trên thanh công cụ để tùy chỉnh thêm."
+      },
+      toolbar: {
+        title: "Công cụ phần tử",
+        zap: "Xóa",
+        zapTip: "Xóa: Nhấp để loại bỏ phần tử khỏi DOM",
+        edit: "Sửa chữ",
+        editTip: "Sửa chữ: Nhấp vào văn bản bất kỳ để sửa trực tiếp",
+        move: "Di chuyển",
+        moveActiveTip: "Đang bật Di chuyển (Nhấn +/- để đổi vùng chọn cha)",
+        moveTip: "Di chuyển: Nhấp để bật chế độ Di chuyển (Flow / Free)",
+        moveLabel: "Di chuyển ({{mode}})",
+        flow: "Flow",
+        flowTip:
+          "Chế độ Flow: Sắp xếp lại trong bố cục DOM và đẩy các phần tử khác",
+        free: "Free",
+        freeTip: "Chế độ Free: Dịch chuyển tự do mà không làm thay đổi bố cục",
+        hide: "Ẩn",
+        hideTip: "Ẩn: Nhấp để ẩn phần tử mà không làm xô lệch trang",
+        undo: "Hoàn tác",
+        undoTip: "Hoàn tác thao tác cuối (Ctrl+Z)",
+        settings: "Cài đặt",
+        settingsTip: "Mở cài đặt Công cụ phần tử",
+        exit: "Thoát",
+        exitTip: "Thoát Công cụ phần tử (Esc)"
+      },
+      overlay: {
+        clickToZap: "Nhấp để xóa",
+        clickToEdit: "Nhấp để sửa chữ",
+        dragBody: "Kéo thân để {{type}} • Kéo góc để đổi kích thước",
+        clickToHide: "Nhấp để ẩn"
+      },
+      logic: {
+        zapped: "Đã xóa phần tử!",
+        hidden: "Đã ẩn phần tử",
+        resized: "Đã đổi kích thước phần tử",
+        textUpdated: "Đã cập nhật văn bản",
+        undone: "Đã hoàn tác",
+        undoneDetail: "Đã hoàn tác {{action}}",
+        closed: "Đã đóng Công cụ phần tử",
+        active: "Công cụ phần tử đang bật",
+        activeDetail: "Chọn công cụ trên thanh công cụ • Esc để thoát",
+        scope: "Phạm vi: <{{tag}}>",
+        scopeDetail: "Cấp +{{depth}} (Nhấn - để thu hẹp)",
+        scrollUnfrozen: "Đã mở khóa cuộn trang",
+        scrollUnfrozenDetail: "Đã khôi phục overflow: auto"
       }
     },
     quickHub: {
-      title: "Quick Hub",
+      title: "Trung tâm nhanh",
       description:
         "Bảng truy cập nhanh các công cụ ngay trên trang khi rê chuột vào cạnh.",
       settings: {
@@ -502,12 +768,13 @@ export const vi: TranslationDict = {
       logic: {
         noToolsActive:
           "Chưa có công cụ nào bật. Hãy bật tính năng trong popup Browse Assist.",
-        triggerTooltip: "Quick Hub (Công cụ nhanh)",
+        triggerTooltip: "Trung tâm nhanh (Công cụ tức thì)",
+        triggerAria: "Trung tâm nhanh",
         cleanUrlCopied: "Đã sao chép URL sạch"
       }
     },
     imageHoverPreview: {
-      title: "Image Hover Preview",
+      title: "Xem trước ảnh khi di chuột",
       description:
         "Di chuột lên ảnh thu nhỏ hoặc liên kết ảnh để xem trước kích thước lớn.",
       settings: {

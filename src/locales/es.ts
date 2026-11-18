@@ -2,22 +2,24 @@ import type { TranslationDict } from "./en"
 
 export const es: TranslationDict = {
   common: {
+    appName: "Browse Assist",
     enabled: "Activado",
     disabled: "Desactivado",
-    on: "Activado",
-    off: "Desactivado",
     reset: "Restablecer",
     clear: "Limpiar",
     cancel: "Cancelar",
-    save: "Guardar",
-    back: "Atrás",
+    gotIt: "Entendido",
+    viewportScreen: "Pantalla de vista",
     unassigned: "Sin asignar",
-    notConfigured: "No configurado",
-    configure: "Configurar",
     launch: "Lanzar",
     all: "Todo",
     none: "Ninguno",
     customizeShortcuts: "Personalizar en los atajos del navegador",
+    shortcutNotAssignedTip:
+      "Atajo sin asignar. Haz clic para configurar en el navegador",
+    customizeShortcutTip: "Haz clic para personalizar el atajo en el navegador",
+    backTip: "Atrás (Retroceso o `)",
+    toggleFeatureAria: "Alternar {{feature}}",
     resetOrder: "Restablecer orden",
     show: "Mostrar",
     hide: "Ocultar",
@@ -58,9 +60,16 @@ export const es: TranslationDict = {
     categories: {
       all: "Todo",
       interaction: "Ratón",
-      navigation: "Desplaz.",
+      navigation: "Desplazamiento",
       media: "Medios",
-      tools: "Herram."
+      tools: "Herramientas"
+    },
+    tooltips: {
+      preferencesAndTheme: "Preferencias y Tema",
+      about: "Acerca de Browse Assist",
+      supportDonate: "Apoyar y Donar",
+      jumpToVideoTab: "Haz clic para ir a esta pestaña de video",
+      exitPipWindow: "Salir de la ventana Picture-in-Picture"
     }
   },
   preferences: {
@@ -83,7 +92,164 @@ export const es: TranslationDict = {
     sessionTimeout: "Tiempo de sesión",
     customizeMenu: "Personalizar menú",
     customizeMenuDesc:
-      "Arrastra elementos para reordenarlos o alterna su visibilidad en el popup."
+      "Arrastra elementos para reordenarlos o alterna su visibilidad en el popup.",
+    presets: "Preajustes",
+    presetReading: "Lectura y Navegación",
+    presetReadingDesc: "Desplazar, arrastrar y leer",
+    presetDesigner: "Diseño y Desarrollo",
+    presetDesignerDesc: "Color, inspeccionar y edición",
+    presetEssential: "Solo lo esencial",
+    presetEssentialDesc: "Mínimo y enfocado",
+    other: "Otros",
+    optionsPage: "Página de Opciones",
+    optionsPageDesc: "Panel completo de ajustes y guía de atajos"
+  },
+  donate: {
+    buyMeACoffeeDesc: "Apoya el mantenimiento del proyecto con un café",
+    githubSponsorsDesc: "Patrocina en GitHub de forma mensual o puntual",
+    vietqrDesc: "Transferencia bancaria instantánea vía VietQR (Vietnam)",
+    authorDonateDesc: "Donación directa al autor"
+  },
+  dialogs: {
+    firefoxGuide: {
+      title: "Guía de atajos en Firefox",
+      intro:
+        "Los atajos de teclado se pueden personalizar directamente en la configuración de complementos de tu navegador:",
+      step1Prefix: "Abre una nueva pestaña en Firefox y ve a",
+      copyUrlTip: "Haz clic para copiar la URL",
+      step2Prefix: "Haz clic en el",
+      step2Target: "Icono de engranaje ⚙",
+      step2Suffix: "en la esquina superior derecha del Administrador de complementos.",
+      step3Prefix: "Selecciona",
+      step3Target: "«Administrar atajos de complementos»",
+      step3Suffix: "en el menú desplegable.",
+      step4Prefix: "Busca",
+      step4Suffix: "y asigna los atajos que prefieras para cada comando."
+    }
+  },
+  options: {
+    title: "Configuración de Browse Assist",
+    subtitle: "Configura tus herramientas de navegación y atajos",
+    openPopup: "Abrir Popup",
+    openPopupTip: "Abrir ventana emergente de la extensión",
+    preferences: "Preferencias",
+    preferencesTip: "Abrir preferencias en el popup",
+    about: "Acerca de",
+    aboutTip: "Abrir información de la extensión en el popup",
+    activeModules: "Módulos activos",
+    configureInPopup: "Configurar {{feature}} en el popup",
+    shortcutsTitle: "Referencia de atajos de teclado y ratón",
+    shortcutsSubtitle:
+      "Atajos en tiempo real y gestos interactivos",
+    customizeShortcuts: "Personalizar atajos",
+    table: {
+      action: "Acción",
+      shortcut: "Atajo / Disparador",
+      description: "Descripción"
+    },
+    triggers: {
+      mouseWheel: "{{modifier}} + Rueda del ratón",
+      mouseDrag: "Arrastrar con ratón",
+      doubleClickMargin: "Doble clic en el margen",
+      rightClickLink: "Clic derecho en enlace"
+    },
+    shortcuts: {
+      pip: {
+        name: "Imagen en Imagen (PiP)",
+        desc: "Separar el video actual en una ventana flotante PiP"
+      },
+      allowRightClick: {
+        name: "Permitir clic derecho",
+        desc: "Desbloquear el menú contextual y copia en la pestaña actual"
+      },
+      elementToys: {
+        name: "Herramientas de elementos",
+        desc: "Activar selección para eliminar, editar, ocultar o mover elementos"
+      },
+      colorPicker: {
+        name: "Selector de color",
+        desc: "Activar lupa cuentagotas para inspeccionar y copiar colores"
+      },
+      quickHub: {
+        name: "Atajo de Quick Hub",
+        desc: "Alternar el menú flotante Quick Hub mediante teclado"
+      },
+      volume: {
+        name: "Control de volumen de video",
+        desc: "Desplaza sobre el video para ajustar volumen; clic con modificador para silenciar"
+      },
+      speed: {
+        name: "Control de velocidad de video",
+        desc: "Desplaza sobre el video para ajustar velocidad; clic para pantalla completa"
+      },
+      seek: {
+        name: "Avance y fotograma a fotograma",
+        desc: "Avanzar o retroceder; paso fotograma a fotograma en pausa"
+      },
+      boost: {
+        name: "Aceleración de video",
+        desc: "Mantén la tecla X sobre el video para acelerar a {{speed}}x"
+      },
+      mouseZoom: {
+        name: "Zoom en el cursor",
+        desc: "Hacer zoom fluido centrado directamente en el cursor"
+      },
+      superDrag: {
+        name: "Súper Arrastre",
+        desc: "Arrastra texto para buscar; arrastra enlaces para abrir en segundo plano"
+      },
+      quickScroll: {
+        name: "Botones de desplazamiento rápido",
+        desc: "Doble clic en márgenes o botones flotantes para ir arriba/abajo"
+      },
+      smoothScroll: {
+        name: "Desplazamiento suave",
+        desc: "Interpolación física con inercia en contenedores desplazables"
+      },
+      cleanLink: {
+        name: "Copiar enlace limpio",
+        desc: "Eliminar parámetros de rastreo (utm_*, fbclid) y copiar limpio o Markdown"
+      },
+      quickHubZone: {
+        name: "Zona de activación Quick Hub",
+        desc: "Pasa el cursor por la esquina para abrir las herramientas rápidas"
+      }
+    },
+    storage: {
+      title: "Almacenamiento y Datos",
+      desc: "Borra permanentemente todos los datos y ajustes guardados por Browse Assist en tu navegador, incluyendo configuraciones, atajos, orden de Quick Hub e historial de colores.",
+      clearAll: "Borrar todos los datos...",
+      cleared:
+        "Todos los datos de la extensión se han borrado y restablecido.",
+      footer:
+        "Browse Assist • Manifest V3 • Creado con Plasmo, React y Tailwind CSS"
+    },
+    modal: {
+      title: "¿Borrar todos los datos de la extensión?",
+      body: "Esto eliminará permanentemente todos los datos almacenados por Browse Assist en tu perfil.",
+      listHeader: "Se eliminará lo siguiente:",
+      item1: "Estados y subconfiguraciones de todas las funciones",
+      item2: "Orden de Quick Hub, acciones fijadas y módulos ocultos",
+      item3: "Historial de colores en Selector de color",
+      item4: "Preferencias de tema y memoria de navegación",
+      warning:
+        "⚠️ Esta acción no se puede deshacer. Todos los ajustes volverán a sus valores predeterminados.",
+      clearing: "Borrando datos...",
+      confirm: "Sí, eliminar todo"
+    }
+  },
+  content: {
+    copied: {
+      linkText: "Texto del enlace copiado",
+      cleanLink: "Enlace limpio copiado",
+      markdown: "Markdown copiado",
+      cleanPageUrl: "URL limpia copiada",
+      pageMarkdown: "Página Markdown copiada",
+      quote: "Cita copiada",
+      text: "Texto copiado",
+      imageLink: "Enlace de imagen copiado",
+      linkUrl: "URL del enlace copiada"
+    }
   },
   about: {
     title: "Acerca de",
@@ -105,7 +271,7 @@ export const es: TranslationDict = {
   },
   features: {
     allowRightClick: {
-      title: "Allow Right Click",
+      title: "Permitir clic derecho",
       description:
         "Restaura el menú contextual, selección y copia en sitios web restringidos.",
       popupDesc:
@@ -115,7 +281,7 @@ export const es: TranslationDict = {
       currentTab: "Pestaña actual"
     },
     contextMenuActions: {
-      title: "Context Menu Actions",
+      title: "Acciones del menú contextual",
       description:
         "Acciones personalizadas de clic derecho para copiar enlaces limpios y formateados.",
       activeCount: "{{count}}/6 Activas",
@@ -152,7 +318,7 @@ export const es: TranslationDict = {
       }
     },
     superDrag: {
-      title: "Super Drag",
+      title: "Súper Arrastre",
       description:
         "Arrastra texto seleccionado para buscar o enlaces para abrirlos en nuevas pestañas.",
       settings: {
@@ -197,10 +363,40 @@ export const es: TranslationDict = {
           copy_image_link: "Copiar enlace de imagen",
           search_image: "Buscar imagen"
         }
+      },
+      logic: {
+        types: {
+          search: "Búsqueda",
+          image: "Imagen",
+          link: "Enlace"
+        },
+        dropOpenBackground: "Soltar: Abrir {{type}} (2.º plano)",
+        shortOpenBackground: "{{type}} (2.º plano)",
+        dropOpenActive: "Soltar: Abrir {{type}} (Nueva pestaña)",
+        shortOpenActive: "{{type}} (Nueva pestaña)",
+        dropOpenWindow: "Soltar: Abrir {{type}} (Nueva ventana)",
+        shortOpenWindow: "{{type}} (Nueva ventana)",
+        dropOpenIncognito: "Soltar: Abrir {{type}} (Incógnito)",
+        shortOpenIncognito: "{{type}} (Incógnito)",
+        dropCopyLinkText: "Soltar: Copiar texto del enlace",
+        shortCopyLinkText: "Copiar texto",
+        dropCopyMarkdown: "Soltar: Copiar Markdown",
+        shortCopyMarkdown: "Copiar Markdown",
+        dropSearchImage: "Soltar: Buscar imagen",
+        shortSearchImage: "Buscar imagen",
+        dropCopyText: "Soltar: Copiar texto",
+        shortCopyText: "Copiar texto",
+        dropCopyImageLink: "Soltar: Copiar enlace de imagen",
+        shortCopyImageLink: "Copiar enlace de imagen",
+        dropCopyLinkUrl: "Soltar: Copiar URL del enlace",
+        shortCopyLinkUrl: "Copiar URL",
+        noAction: "Sin acción",
+        releaseToCancel: "Suelta para cancelar",
+        exceededMax: "Distancia máxima superada (Suelta para cancelar)"
       }
     },
     quickScroll: {
-      title: "Quick Scroll Buttons",
+      title: "Botones de desplazamiento rápido",
       description:
         "Botones flotantes inteligentes para ir suavemente arriba o abajo.",
       settings: {
@@ -234,7 +430,7 @@ export const es: TranslationDict = {
       }
     },
     smoothScroll: {
-      title: "Smooth Scrolling",
+      title: "Desplazamiento suave",
       description: "Desplazamiento fluido con física interpolada.",
       settings: {
         profiles: "Perfiles",
@@ -257,7 +453,7 @@ export const es: TranslationDict = {
       }
     },
     mouseZoom: {
-      title: "Mouse Pin-to-Zoom",
+      title: "Zoom en el cursor",
       description:
         "Mantén una tecla modificadora y gira la rueda para hacer zoom en el cursor.",
       settings: {
@@ -278,10 +474,13 @@ export const es: TranslationDict = {
         showZoomToast: "Mostrar aviso de zoom",
         showZoomToastDesc:
           "Muestra una insignia flotante con el porcentaje arriba a la derecha."
+      },
+      logic: {
+        pageZoom: "Zoom de página"
       }
     },
     pictureInPicture: {
-      title: "Universal Picture-in-Picture",
+      title: "Imagen en Imagen (PiP)",
       description:
         "Alterna ventana de video flotante mediante atajo personalizable.",
       settings: {
@@ -314,10 +513,14 @@ export const es: TranslationDict = {
         notSupported: "PiP no es compatible en este navegador",
         cannotEnter: "No se pudo iniciar Picture-in-Picture",
         noVideoFound: "No se encontró ningún video en la página"
+      },
+      background: {
+        playing: "Reproduciendo en PiP: {{title}}",
+        untitledVideo: "Video"
       }
     },
     videoWheelControl: {
-      title: "Video Wheel Control",
+      title: "Control de video con rueda",
       description:
         "Ajusta volumen, velocidad y avance del video suavemente con la rueda del ratón.",
       settings: {
@@ -370,10 +573,21 @@ export const es: TranslationDict = {
           "Esta función interactúa directamente con el elemento HTML5 (<video>).",
         noticeBody2:
           "En plataformas avanzadas, los gestores propios pueden restablecer la velocidad o el silencio al repetir o cambiar resolución."
+      },
+      logic: {
+        muted: "Silenciado",
+        fullscreen: "Pantalla completa",
+        exitFullscreen: "Salir de pantalla completa",
+        frameCopied: "¡Fotograma copiado!",
+        captureFailed: "Error al capturar",
+        clipboardDenied: "Portapapeles denegado",
+        corsProtected: "Protegido por CORS",
+        frameStep: "Fotograma {{sign}} ({{time}})",
+        boost: "⚡ Aceleración {{rate}}x"
       }
     },
     colorPicker: {
-      title: "Color Picker",
+      title: "Selector de color",
       description:
         "Captura cualquier color de la pantalla con copia instantánea en varios formatos.",
       settings: {
@@ -405,11 +619,18 @@ export const es: TranslationDict = {
         pickedAndCopied: "Color capturado y copiado",
         picked: "Color capturado",
         couldNotOpen: "No se pudo abrir Color Picker",
-        permissionRequired: "Se requiere interacción del usuario o permiso"
+        permissionRequired: "Se requiere interacción del usuario o permiso",
+        palette: {
+          pickedColor: "Color capturado",
+          close: "Cerrar",
+          copyHex: "Copiar HEX",
+          copyRgb: "Copiar RGB",
+          copyHsl: "Copiar HSL"
+        }
       }
     },
     elementToys: {
-      title: "Element Toys",
+      title: "Herramientas de elementos",
       description:
         "Inspecciona, elimina, edita texto o mueve elementos en cualquier página web.",
       settings: {
@@ -458,6 +679,50 @@ export const es: TranslationDict = {
         tipUndoMiddle: "para deshacer cualquier acción, o haz clic en",
         tipUndoSettings: "Ajustes",
         tipUndoSuffix: "en la barra para configurar opciones."
+      },
+      toolbar: {
+        title: "Herramientas de elementos",
+        zap: "Eliminar",
+        zapTip: "Eliminar: Haz clic para borrar el elemento del DOM",
+        edit: "Editar",
+        editTip: "Editar texto: Haz clic en cualquier texto para editarlo",
+        move: "Mover",
+        moveActiveTip: "Modo Mover activo (+/- para ajustar el alcance)",
+        moveTip: "Mover: Haz clic para activar el modo Mover (Flow / Free)",
+        moveLabel: "Mover ({{mode}})",
+        flow: "Flow",
+        flowTip: "Modo Flow: Reordena en el DOM y desplaza otros elementos",
+        free: "Free",
+        freeTip: "Modo Free: Transformación libre sin alterar el diseño",
+        hide: "Ocultar",
+        hideTip: "Ocultar: Haz clic para ocultar sin mover el diseño",
+        undo: "Deshacer",
+        undoTip: "Deshacer última acción (Ctrl+Z)",
+        settings: "Ajustes",
+        settingsTip: "Abrir ajustes de Element Toys",
+        exit: "Salir",
+        exitTip: "Salir de Element Toys (Esc)"
+      },
+      overlay: {
+        clickToZap: "Clic para eliminar",
+        clickToEdit: "Clic para editar texto",
+        dragBody: "Arrastra para {{type}} • Arrastra esquinas para redimensionar",
+        clickToHide: "Clic para ocultar"
+      },
+      logic: {
+        zapped: "¡Elemento eliminado!",
+        hidden: "Elemento oculto",
+        resized: "Elemento redimensionado",
+        textUpdated: "Texto actualizado",
+        undone: "Acción deshecha",
+        undoneDetail: "Revertido: {{action}}",
+        closed: "Element Toys cerrado",
+        active: "Element Toys activo",
+        activeDetail: "Elige herramientas arriba • Esc para salir",
+        scope: "Alcance: <{{tag}}>",
+        scopeDetail: "Nivel +{{depth}} (Pulsa - para reducir)",
+        scrollUnfrozen: "Scroll desbloqueado",
+        scrollUnfrozenDetail: "overflow: auto restaurado"
       }
     },
     quickHub: {
@@ -504,11 +769,12 @@ export const es: TranslationDict = {
         noToolsActive:
           "Sin herramientas activas. Actívalas en el popup de Browse Assist.",
         triggerTooltip: "Quick Hub (Herramientas rápidas)",
+        triggerAria: "Quick Hub",
         cleanUrlCopied: "URL limpia copiada"
       }
     },
     imageHoverPreview: {
-      title: "Image Hover Preview",
+      title: "Vista previa de imagen al pasar",
       description:
         "Pasa el cursor sobre imágenes o enlaces de imagen para previsualizarlas en tamaño completo.",
       settings: {
