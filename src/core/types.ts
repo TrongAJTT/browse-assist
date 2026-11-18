@@ -548,6 +548,19 @@ export const DEFAULT_IMAGE_HOVER_PREVIEW_CONFIG: ImageHoverPreviewConfig = {
   maxSizePercent: 65
 }
 
+export type SupportedLocale =
+  | "en"
+  | "vi"
+  | "de"
+  | "es"
+  | "fr"
+  | "ja"
+  | "ko"
+  | "zh_CN"
+  | "zh_TW"
+
+export type LanguageCode = "auto" | SupportedLocale
+
 /**
  * Appearance theme options: "dark" | "light" | "system".
  */
@@ -563,6 +576,7 @@ export type ViewMode = "list" | "grid"
  */
 export interface FeatureSettings {
   theme: ThemeMode
+  language?: LanguageCode
   viewMode?: ViewMode
   allowRightClick: boolean
   contextMenuActions: boolean
@@ -686,6 +700,7 @@ export const DEFAULT_POPUP_NAVIGATION_CONFIG: PopupNavigationConfig = {
  */
 export const DEFAULT_SETTINGS: FeatureSettings = {
   theme: "system",
+  language: "auto",
   viewMode: "list",
   allowRightClick: true,
   contextMenuActions: true,
