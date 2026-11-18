@@ -58,6 +58,10 @@ import {
   deactivate as deactivateQuickHub,
   toggleQuickHubMenu
 } from "~features/quick-hub/logic"
+import {
+  activate as activateImageHoverPreview,
+  deactivate as deactivateImageHoverPreview
+} from "~features/image-hover-preview/logic"
 
 export const config: PlasmoCSConfig = {
   matches: ["http://*/*", "https://*/*"],
@@ -138,6 +142,13 @@ function applySettings(nextSettings: FeatureSettings): void {
     activateQuickHub(nextSettings.quickHubConfig)
   } else {
     deactivateQuickHub()
+  }
+
+  // Image Hover Preview
+  if (nextSettings.imageHoverPreview) {
+    activateImageHoverPreview(nextSettings.imageHoverPreviewConfig)
+  } else {
+    deactivateImageHoverPreview()
   }
 }
 

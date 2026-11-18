@@ -59,6 +59,8 @@ import { VideoWheelControlSettingsView } from "~features/video-wheel-control/Set
 import { VideoWheelControlToggle } from "~features/video-wheel-control/Toggle"
 import { QuickHubSettingsView } from "~features/quick-hub/SettingsView"
 import { QuickHubToggle } from "~features/quick-hub/Toggle"
+import { ImageHoverPreviewSettingsView } from "~features/image-hover-preview/SettingsView"
+import { ImageHoverPreviewToggle } from "~features/image-hover-preview/Toggle"
 import { QuickScrollSettingsView } from "~features/quick-scroll/SettingsView"
 import { QuickScrollToggle } from "~features/quick-scroll/Toggle"
 import { SmoothScrollSettingsView } from "~features/smooth-scroll/SettingsView"
@@ -257,6 +259,11 @@ function IndexPopup() {
     quickHub: (
       <QuickHubToggle
         onConfigure={() => setCurrentView("quick-hub-settings")}
+      />
+    ),
+    imageHoverPreview: (
+      <ImageHoverPreviewToggle
+        onConfigure={() => setCurrentView("image-hover-preview-settings")}
       />
     )
   }
@@ -578,6 +585,8 @@ function IndexPopup() {
           <ElementToysSettingsView onBack={() => setCurrentView("main")} />
         ) : currentView === "quick-hub-settings" ? (
           <QuickHubSettingsView onBack={() => setCurrentView("main")} />
+        ) : currentView === "image-hover-preview-settings" ? (
+          <ImageHoverPreviewSettingsView onBack={() => setCurrentView("main")} />
         ) : currentView === "preferences" ? (
           <PreferencesSettingsView onBack={() => setCurrentView("main")} />
         ) : (

@@ -13,6 +13,7 @@ export type FeatureKey =
   | "colorPicker"
   | "elementToys"
   | "quickHub"
+  | "imageHoverPreview"
 
 /**
  * Views and sub-settings routes supported inside the extension popup.
@@ -29,6 +30,7 @@ export type ActiveView =
   | "color-picker-settings"
   | "element-toys-settings"
   | "quick-hub-settings"
+  | "image-hover-preview-settings"
   | "preferences"
   | "about"
 
@@ -57,6 +59,8 @@ export function getFeatureSettingsView(key: FeatureKey): ActiveView | null {
       return "element-toys-settings"
     case "quickHub":
       return "quick-hub-settings"
+    case "imageHoverPreview":
+      return "image-hover-preview-settings"
     default:
       return null
   }
@@ -526,6 +530,24 @@ export const DEFAULT_QUICK_HUB_CONFIG: QuickHubConfig = {
   hiddenActions: []
 }
 
+export type ImageHoverPreviewModifier = "shift" | "alt" | "ctrl"
+
+export interface ImageHoverPreviewConfig {
+  triggerModifier: ImageHoverPreviewModifier
+  delayMs: number
+  previewImageLinks: boolean
+  showDimensions: boolean
+  maxSizePercent: number
+}
+
+export const DEFAULT_IMAGE_HOVER_PREVIEW_CONFIG: ImageHoverPreviewConfig = {
+  triggerModifier: "shift",
+  delayMs: 250,
+  previewImageLinks: true,
+  showDimensions: true,
+  maxSizePercent: 65
+}
+
 /**
  * Appearance theme options: "dark" | "light" | "system".
  */
@@ -553,6 +575,7 @@ export interface FeatureSettings {
   colorPicker: boolean
   elementToys: boolean
   quickHub: boolean
+  imageHoverPreview: boolean
   featureLayout: FeatureLayoutConfig
   popupNavigation: PopupNavigationConfig
   contextMenuActionsConfig: ContextMenuActionsConfig
@@ -565,6 +588,7 @@ export interface FeatureSettings {
   colorPickerConfig: ColorPickerConfig
   elementToysConfig: ElementToysConfig
   quickHubConfig: QuickHubConfig
+  imageHoverPreviewConfig: ImageHoverPreviewConfig
 }
 
 /**
@@ -587,7 +611,8 @@ export const DEFAULT_FEATURE_LAYOUT_CONFIG: FeatureLayoutConfig = {
     "mouseZoom",
     "colorPicker",
     "elementToys",
-    "quickHub"
+    "quickHub",
+    "imageHoverPreview"
   ],
   hidden: []
 }
@@ -673,6 +698,7 @@ export const DEFAULT_SETTINGS: FeatureSettings = {
   colorPicker: true,
   elementToys: true,
   quickHub: true,
+  imageHoverPreview: true,
   featureLayout: DEFAULT_FEATURE_LAYOUT_CONFIG,
   popupNavigation: DEFAULT_POPUP_NAVIGATION_CONFIG,
   contextMenuActionsConfig: DEFAULT_CONTEXT_MENU_ACTIONS_CONFIG,
@@ -687,7 +713,8 @@ export const DEFAULT_SETTINGS: FeatureSettings = {
   quickScrollConfig: DEFAULT_QUICK_SCROLL_CONFIG,
   colorPickerConfig: DEFAULT_COLOR_PICKER_CONFIG,
   elementToysConfig: DEFAULT_ELEMENT_TOYS_CONFIG,
-  quickHubConfig: DEFAULT_QUICK_HUB_CONFIG
+  quickHubConfig: DEFAULT_QUICK_HUB_CONFIG,
+  imageHoverPreviewConfig: DEFAULT_IMAGE_HOVER_PREVIEW_CONFIG
 }
 
 /**
@@ -797,6 +824,14 @@ export const FEATURES_LIST: FeatureMeta[] = [
     description:
       "On-screen quick utility hub with smart corner hover activation.",
     icon: "✨",
+    hasSettings: true
+  },
+  {
+    key: "imageHoverPreview",
+    title: "Image Hover Preview",
+    description:
+      "Hover over images or image links to preview them in full size.",
+    icon: "🖼️",
     hasSettings: true
   }
 ]

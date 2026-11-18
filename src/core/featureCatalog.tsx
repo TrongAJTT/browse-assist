@@ -1,5 +1,6 @@
 import {
   Compass,
+  Image as ImageIcon,
   Link2,
   MousePointer2,
   MousePointerClick,
@@ -164,6 +165,17 @@ export const FEATURE_CATALOG: Record<FeatureKey, FeatureCatalogItem> = {
     icon: Sparkles,
     colorClass: "text-amber-400",
     bgClass: "bg-amber-500/10 border-amber-500/30",
+    hasSettings: true
+  },
+  imageHoverPreview: {
+    key: "imageHoverPreview",
+    title: "Image Hover Preview",
+    description:
+      "Hover over images or image links to preview them in full size.",
+    category: "tools",
+    icon: ImageIcon,
+    colorClass: "text-sky-400",
+    bgClass: "bg-sky-500/10 border-sky-500/30",
     hasSettings: true
   }
 }
