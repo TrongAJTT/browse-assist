@@ -490,19 +490,35 @@ export type QuickHubActionId =
   | "pip"
   | "colorPicker"
   | "elementToys"
+  | "allowRightClick"
   | "scrollTop"
   | "scrollBottom"
   | "resetZoom"
   | "cleanUrl"
+  | "copyMarkdown"
+  | "videoScreenshot"
 
 export const DEFAULT_QUICK_HUB_ACTION_ORDER: QuickHubActionId[] = [
   "pip",
   "colorPicker",
   "elementToys",
+  "allowRightClick",
   "scrollTop",
   "scrollBottom",
   "resetZoom",
-  "cleanUrl"
+  "cleanUrl",
+  "copyMarkdown",
+  "videoScreenshot"
+]
+
+/**
+ * Niche Quick Hub actions hidden by default to keep the menu focused and uncluttered.
+ * Users can enable them anytime in Quick Hub settings.
+ */
+export const DEFAULT_QUICK_HUB_HIDDEN_ACTIONS: QuickHubActionId[] = [
+  "allowRightClick",
+  "copyMarkdown",
+  "videoScreenshot"
 ]
 
 /**
@@ -527,7 +543,7 @@ export const DEFAULT_QUICK_HUB_CONFIG: QuickHubConfig = {
   buttonOpacity: 1,
   corner: "top-right",
   actionOrder: [...DEFAULT_QUICK_HUB_ACTION_ORDER],
-  hiddenActions: []
+  hiddenActions: [...DEFAULT_QUICK_HUB_HIDDEN_ACTIONS]
 }
 
 export type ImageHoverPreviewModifier = "shift" | "alt" | "ctrl"
@@ -675,7 +691,7 @@ export function normalizeQuickHubActionOrder(order?: QuickHubActionId[]): QuickH
 }
 
 export function normalizeQuickHubHiddenActions(hidden?: QuickHubActionId[]): QuickHubActionId[] {
-  if (!hidden) return []
+  if (!hidden) return [...DEFAULT_QUICK_HUB_HIDDEN_ACTIONS]
   return Array.from(new Set(hidden))
 }
 

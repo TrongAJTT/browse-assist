@@ -772,7 +772,13 @@ export const ko: TranslationDict = {
           resetZoomTitle: "페이지 확대/축소 초기화",
           resetZoomDesc: "화면 배율 100%로 복원",
           cleanUrlTitle: "깔끔한 URL 복사",
-          cleanUrlDesc: "추적 매개변수(utm_*, fbclid) 없이 링크 복사"
+          cleanUrlDesc: "추적 매개변수(utm_*, fbclid) 없이 링크 복사",
+          allowRightClickTitle: "우클릭 허용",
+          allowRightClickDesc: "이 탭에서 우클릭 및 복사 제한 해제 전환",
+          copyMarkdownTitle: "페이지를 Markdown으로 복사",
+          copyMarkdownDesc: "[제목](URL) 형식으로 깔끔한 페이지 링크 복사",
+          videoScreenshotTitle: "동영상 프레임 캡처",
+          videoScreenshotDesc: "활성 동영상의 PNG 스크린샷을 클립보드에 복사"
         }
       },
       logic: {
@@ -780,7 +786,9 @@ export const ko: TranslationDict = {
           "활성화된 도구가 없습니다. Browse Assist 팝업에서 기능을 켜세요.",
         triggerTooltip: "빠른 허브 (빠른 도구)",
         triggerAria: "빠른 허브",
-        cleanUrlCopied: "깔끔한 URL 복사됨"
+        cleanUrlCopied: "깔끔한 URL 복사됨",
+        markdownCopied: "페이지 Markdown 복사됨",
+        noVideoFound: "이 페이지에서 활성 동영상을 찾을 수 없습니다"
       }
     },
     imageHoverPreview: {

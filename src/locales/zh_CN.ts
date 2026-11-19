@@ -734,14 +734,22 @@ export const zh_CN: TranslationDict = {
           resetZoomTitle: "重置页面缩放",
           resetZoomDesc: "恢复 100% 视口缩放比例",
           cleanUrlTitle: "复制纯净 URL",
-          cleanUrlDesc: "复制移除追踪参数 (utm_*, fbclid) 后的链接"
+          cleanUrlDesc: "复制移除追踪参数 (utm_*, fbclid) 后的链接",
+          allowRightClickTitle: "允许右键",
+          allowRightClickDesc: "在当前标签页切换解除右键与复制限制",
+          copyMarkdownTitle: "复制页面 Markdown",
+          copyMarkdownDesc: "以 [标题](URL) 格式复制纯净页面链接",
+          videoScreenshotTitle: "截取视频画面",
+          videoScreenshotDesc: "将当前视频的 PNG 截图复制到剪贴板"
         }
       },
       logic: {
         noToolsActive: "暂无可用工具，请在 Browse Assist 弹窗中启用功能。",
         triggerTooltip: "快捷中心 (快捷工具)",
         triggerAria: "快捷中心",
-        cleanUrlCopied: "已复制纯净 URL"
+        cleanUrlCopied: "已复制纯净 URL",
+        markdownCopied: "已复制页面 Markdown",
+        noVideoFound: "当前页面未找到可截取的视频"
       }
     },
     imageHoverPreview: {

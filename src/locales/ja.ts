@@ -783,7 +783,13 @@ export const ja: TranslationDict = {
           resetZoomTitle: "ページズームをリセット",
           resetZoomDesc: "表示倍率を 100% に戻す",
           cleanUrlTitle: "クリーン URL をコピー",
-          cleanUrlDesc: "追跡パラメータ (utm_*, fbclid) を除いてコピー"
+          cleanUrlDesc: "追跡パラメータ (utm_*, fbclid) を除いてコピー",
+          allowRightClickTitle: "右クリック許可",
+          allowRightClickDesc: "このタブで右クリックとコピーの制限を解除",
+          copyMarkdownTitle: "ページを Markdown でコピー",
+          copyMarkdownDesc: "[タイトル](URL) 形式でクリーンなリンクをコピー",
+          videoScreenshotTitle: "動画フレームをキャプチャ",
+          videoScreenshotDesc: "再生中の動画の PNG スクリーンショットをコピー"
         }
       },
       logic: {
@@ -791,7 +797,9 @@ export const ja: TranslationDict = {
           "有効なツールがありません。Browse Assist ポップアップで有効にしてください。",
         triggerTooltip: "クイックハブ (クイックツール)",
         triggerAria: "クイックハブ",
-        cleanUrlCopied: "クリーン URL をコピーしました"
+        cleanUrlCopied: "クリーン URL をコピーしました",
+        markdownCopied: "ページの Markdown をコピーしました",
+        noVideoFound: "このページに再生可能な動画が見つかりません"
       }
     },
     imageHoverPreview: {

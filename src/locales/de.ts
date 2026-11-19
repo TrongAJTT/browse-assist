@@ -795,7 +795,13 @@ export const de: TranslationDict = {
           resetZoomTitle: "Seitenzoom zurücksetzen",
           resetZoomDesc: "100% Ansichtszoom wiederherstellen",
           cleanUrlTitle: "Saubere URL kopieren",
-          cleanUrlDesc: "Link ohne Tracking-Parameter (utm_*, fbclid) kopieren"
+          cleanUrlDesc: "Link ohne Tracking-Parameter (utm_*, fbclid) kopieren",
+          allowRightClickTitle: "Rechtsklick erlauben",
+          allowRightClickDesc: "Rechtsklick- & Kopier-Sperre in diesem Tab umschalten",
+          copyMarkdownTitle: "Seite als Markdown kopieren",
+          copyMarkdownDesc: "Sauberen Seitenlink im Format [Titel](URL) kopieren",
+          videoScreenshotTitle: "Videobild aufnehmen",
+          videoScreenshotDesc: "PNG-Screenshot des aktiven Videos in die Zwischenablage kopieren"
         }
       },
       logic: {
@@ -803,7 +809,9 @@ export const de: TranslationDict = {
           "Keine Werkzeuge aktiv. Funktionen im Browse-Assist-Popup aktivieren.",
         triggerTooltip: "Schnellmenü (Schnellwerkzeuge)",
         triggerAria: "Schnellmenü",
-        cleanUrlCopied: "Saubere URL kopiert"
+        cleanUrlCopied: "Saubere URL kopiert",
+        markdownCopied: "Seiten-Markdown kopiert",
+        noVideoFound: "Kein aktives Video auf dieser Seite gefunden"
       }
     },
     imageHoverPreview: {

@@ -1,10 +1,13 @@
 import {
   ArrowDown,
   ArrowUp,
+  Camera,
   Circle,
   Droplets,
   Eye,
+  FileCode2,
   Link2,
+  MousePointerClick,
   PictureInPicture2,
   Pill,
   Pipette,
@@ -252,6 +255,76 @@ function getQuickHubActionsMeta(
             isDisabled: true,
             reason: t("features.quickHub.settings.hiddenInMenu", {
               feature: t("features.contextMenuActions.title")
+            })
+          }
+        }
+        return { isDisabled: false }
+      }
+    },
+    allowRightClick: {
+      id: "allowRightClick",
+      title: t("features.quickHub.settings.actions.allowRightClickTitle"),
+      description: t("features.quickHub.settings.actions.allowRightClickDesc"),
+      icon: MousePointerClick,
+      colorClass: "text-emerald-400",
+      getSourceState: (s) => {
+        if (s.featureLayout?.hidden?.includes("allowRightClick")) {
+          return {
+            isDisabled: true,
+            reason: t("features.quickHub.settings.hiddenInMenu", {
+              feature: t("features.allowRightClick.title")
+            })
+          }
+        }
+        return { isDisabled: false }
+      }
+    },
+    copyMarkdown: {
+      id: "copyMarkdown",
+      title: t("features.quickHub.settings.actions.copyMarkdownTitle"),
+      description: t("features.quickHub.settings.actions.copyMarkdownDesc"),
+      icon: FileCode2,
+      colorClass: "text-sky-400",
+      getSourceState: (s) => {
+        if (!s.contextMenuActions) {
+          return {
+            isDisabled: true,
+            reason: t("features.quickHub.settings.disabledInSettings", {
+              feature: t("features.contextMenuActions.title")
+            })
+          }
+        }
+        if (s.featureLayout?.hidden?.includes("contextMenuActions")) {
+          return {
+            isDisabled: true,
+            reason: t("features.quickHub.settings.hiddenInMenu", {
+              feature: t("features.contextMenuActions.title")
+            })
+          }
+        }
+        return { isDisabled: false }
+      }
+    },
+    videoScreenshot: {
+      id: "videoScreenshot",
+      title: t("features.quickHub.settings.actions.videoScreenshotTitle"),
+      description: t("features.quickHub.settings.actions.videoScreenshotDesc"),
+      icon: Camera,
+      colorClass: "text-rose-400",
+      getSourceState: (s) => {
+        if (!s.videoWheelControl) {
+          return {
+            isDisabled: true,
+            reason: t("features.quickHub.settings.disabledInSettings", {
+              feature: t("features.videoWheelControl.title")
+            })
+          }
+        }
+        if (s.featureLayout?.hidden?.includes("videoWheelControl")) {
+          return {
+            isDisabled: true,
+            reason: t("features.quickHub.settings.hiddenInMenu", {
+              feature: t("features.videoWheelControl.title")
             })
           }
         }
@@ -526,19 +599,7 @@ export const QuickHubSettingsView: React.FC<QuickHubSettingsViewProps> = ({
           </div>
         </div>
 
-        {/* Section 2: Customize Menu Actions (Shared SortableVisibilityList) */}
-        <div className="pt-3 border-t border-border-divider">
-          <SortableVisibilityList<QuickHubActionId>
-            title={t("features.quickHub.settings.customizeMenu")}
-            description={t("features.quickHub.settings.customizeMenuDesc")}
-            items={listItems}
-            onOrderChange={handleOrderChange}
-            onToggleVisibility={handleToggleActionVisibility}
-            onResetOrder={handleResetActionOrder}
-          />
-        </div>
-
-        {/* Section 3: Proximity & Behavior */}
+        {/* Section 2: Proximity & Behavior */}
         <div className="space-y-2 pt-3 border-t border-border-divider">
           <span className="section-header">
             {t("features.quickHub.settings.behaviorProximity")}
@@ -554,17 +615,26 @@ export const QuickHubSettingsView: React.FC<QuickHubSettingsViewProps> = ({
           </div>
         </div>
 
-        {/* Section 4: Keyboard Shortcut (Secondary Method) */}
+        {/* Section 3: Keyboard Shortcut (Secondary Method) */}
         <div className="space-y-2 pt-3 border-t border-border-divider">
-          <span className="section-header">
-            {t("features.quickHub.settings.keyboardShortcut")}
-          </span>
           <FeatureShortcutRow
             title={t("features.quickHub.settings.globalHotkey")}
             description={t("features.quickHub.settings.globalHotkeyDesc")}
             shortcut={shortcut}
             iconColorClass="text-amber-400"
             onConfigureShortcuts={handleOpenShortcutsPage}
+          />
+        </div>
+
+        {/* Section 4: Customize Menu Actions (Shared SortableVisibilityList) */}
+        <div className="pt-3 border-t border-border-divider">
+          <SortableVisibilityList<QuickHubActionId>
+            title={t("features.quickHub.settings.customizeMenu")}
+            description={t("features.quickHub.settings.customizeMenuDesc")}
+            items={listItems}
+            onOrderChange={handleOrderChange}
+            onToggleVisibility={handleToggleActionVisibility}
+            onResetOrder={handleResetActionOrder}
           />
         </div>
       </div>

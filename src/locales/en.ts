@@ -791,7 +791,13 @@ export const en = {
           resetZoomTitle: "Reset Page Zoom",
           resetZoomDesc: "Restore 100% viewport zoom",
           cleanUrlTitle: "Copy Clean URL",
-          cleanUrlDesc: "Copy link without tracking queries (utm_*, fbclid)"
+          cleanUrlDesc: "Copy link without tracking queries (utm_*, fbclid)",
+          allowRightClickTitle: "Allow Right Click",
+          allowRightClickDesc: "Toggle unblocking right-click & copy on this tab",
+          copyMarkdownTitle: "Copy Page as Markdown",
+          copyMarkdownDesc: "Copy clean page link in [Title](URL) format",
+          videoScreenshotTitle: "Capture Video Frame",
+          videoScreenshotDesc: "Copy a crisp PNG screenshot of the active video"
         }
       },
       logic: {
@@ -799,7 +805,9 @@ export const en = {
           "No tools active. Enable features in Browse Assist popup.",
         triggerTooltip: "Quick Hub (Instant Tools)",
         triggerAria: "Quick Hub",
-        cleanUrlCopied: "Clean URL Copied"
+        cleanUrlCopied: "Clean URL Copied",
+        markdownCopied: "Page Markdown Copied",
+        noVideoFound: "No active video found on this page"
       }
     },
     imageHoverPreview: {

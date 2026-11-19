@@ -792,7 +792,13 @@ export const vi: TranslationDict = {
           resetZoomTitle: "Đặt lại thu phóng trang",
           resetZoomDesc: "Khôi phục tỷ lệ hiển thị 100%",
           cleanUrlTitle: "Sao chép URL sạch",
-          cleanUrlDesc: "Sao chép liên kết đã bỏ tham số theo dõi (utm_*, fbclid)"
+          cleanUrlDesc: "Sao chép liên kết đã bỏ tham số theo dõi (utm_*, fbclid)",
+          allowRightClickTitle: "Cho phép chuột phải",
+          allowRightClickDesc: "Bật/tắt mở khóa chuột phải & sao chép trên tab này",
+          copyMarkdownTitle: "Sao chép trang Markdown",
+          copyMarkdownDesc: "Sao chép liên kết sạch dạng [Tiêu đề](URL)",
+          videoScreenshotTitle: "Chụp khung hình video",
+          videoScreenshotDesc: "Sao chép ảnh PNG từ video đang phát vào bảng nhớ tạm"
         }
       },
       logic: {
@@ -800,7 +806,9 @@ export const vi: TranslationDict = {
           "Chưa có công cụ nào bật. Hãy bật tính năng trong popup Browse Assist.",
         triggerTooltip: "Trung tâm nhanh (Công cụ tức thì)",
         triggerAria: "Trung tâm nhanh",
-        cleanUrlCopied: "Đã sao chép URL sạch"
+        cleanUrlCopied: "Đã sao chép URL sạch",
+        markdownCopied: "Đã sao chép trang Markdown",
+        noVideoFound: "Không tìm thấy video đang phát trên trang này"
       }
     },
     imageHoverPreview: {

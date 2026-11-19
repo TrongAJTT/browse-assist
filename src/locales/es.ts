@@ -792,7 +792,13 @@ export const es: TranslationDict = {
           resetZoomTitle: "Restablecer zoom",
           resetZoomDesc: "Restaurar zoom al 100%",
           cleanUrlTitle: "Copiar URL limpia",
-          cleanUrlDesc: "Copiar enlace sin parámetros de rastreo (utm_*, fbclid)"
+          cleanUrlDesc: "Copiar enlace sin parámetros de rastreo (utm_*, fbclid)",
+          allowRightClickTitle: "Permitir clic derecho",
+          allowRightClickDesc: "Desbloquear clic derecho y copiado en esta pestaña",
+          copyMarkdownTitle: "Copiar página en Markdown",
+          copyMarkdownDesc: "Copiar enlace limpio en formato [Título](URL)",
+          videoScreenshotTitle: "Capturar fotograma de video",
+          videoScreenshotDesc: "Copiar captura PNG del video activo al portapapeles"
         }
       },
       logic: {
@@ -800,7 +806,9 @@ export const es: TranslationDict = {
           "Sin herramientas activas. Actívalas en el popup de Browse Assist.",
         triggerTooltip: "Centro rápido (Herramientas rápidas)",
         triggerAria: "Centro rápido",
-        cleanUrlCopied: "URL limpia copiada"
+        cleanUrlCopied: "URL limpia copiada",
+        markdownCopied: "Markdown de la página copiado",
+        noVideoFound: "No se encontró ningún video activo en esta página"
       }
     },
     imageHoverPreview: {

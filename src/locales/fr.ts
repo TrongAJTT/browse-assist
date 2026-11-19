@@ -792,7 +792,13 @@ export const fr: TranslationDict = {
           resetZoomTitle: "Réinitialiser le zoom",
           resetZoomDesc: "Rétablir le zoom de la page à 100%",
           cleanUrlTitle: "Copier l'URL propre",
-          cleanUrlDesc: "Copier le lien sans traceurs (utm_*, fbclid)"
+          cleanUrlDesc: "Copier le lien sans traceurs (utm_*, fbclid)",
+          allowRightClickTitle: "Autoriser le clic droit",
+          allowRightClickDesc: "Débloquer le clic droit et la copie sur cet onglet",
+          copyMarkdownTitle: "Copier la page en Markdown",
+          copyMarkdownDesc: "Copier le lien propre au format [Titre](URL)",
+          videoScreenshotTitle: "Capturer une image vidéo",
+          videoScreenshotDesc: "Copier une capture PNG de la vidéo active dans le presse-papiers"
         }
       },
       logic: {
@@ -800,7 +806,9 @@ export const fr: TranslationDict = {
           "Aucun outil actif. Activez des fonctions dans le popup Browse Assist.",
         triggerTooltip: "Menu rapide (Outils rapides)",
         triggerAria: "Menu rapide",
-        cleanUrlCopied: "URL propre copiée"
+        cleanUrlCopied: "URL propre copiée",
+        markdownCopied: "Page Markdown copiée",
+        noVideoFound: "Aucune vidéo active trouvée sur cette page"
       }
     },
     imageHoverPreview: {

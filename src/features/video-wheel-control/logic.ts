@@ -277,6 +277,38 @@ async function captureVideoFrame(video: HTMLVideoElement): Promise<void> {
 }
 
 /**
+ * Finds the best active or largest visible video on the page and captures a PNG frame to clipboard.
+ * Exposed for Quick Hub and other content-script launchers.
+ */
+export async function captureActiveVideoFrame(): Promise<boolean> {
+  const videos = Array.from(document.querySelectorAll("video")).filter((v) => {
+    const rect = v.getBoundingClientRect()
+    return (
+      rect.width >= 100 &&
+      rect.height >= 60 &&
+      v.readyState >= 2 &&
+      (v.videoWidth > 0 || rect.width > 0)
+    )
+  })
+
+  if (videos.length === 0) {
+    return false
+  }
+
+  // Prefer actively playing video, otherwise largest visible video
+  const playing = videos.filter((v) => !v.paused && !v.ended)
+  const pool = playing.length > 0 ? playing : videos
+  pool.sort((a, b) => {
+    const ra = a.getBoundingClientRect()
+    const rb = b.getBoundingClientRect()
+    return rb.width * rb.height - ra.width * ra.height
+  })
+
+  await captureVideoFrame(pool[0])
+  return true
+}
+
+/**
  * Wheel Decision Handler registered into WheelDispatcher at priority 100.
  */
 function onWheelDecision(event: WheelEvent): boolean {
