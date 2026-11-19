@@ -265,6 +265,7 @@ export const vi: TranslationDict = {
     },
     fabMenu: {
       movePosition: "Di chuyển vị trí",
+      openSettings: "Mở cài đặt",
       hideOnTab: "Ẩn trên tab này",
       disableFeature: "Tắt {{feature}}",
       disablePipHoverButton: "Tắt nút PiP khi di chuột",

@@ -257,6 +257,7 @@ export const zh_TW: TranslationDict = {
     },
     fabMenu: {
       movePosition: "移動位置",
+      openSettings: "開啟設定",
       hideOnTab: "在目前分頁隱藏",
       disableFeature: "停用{{feature}}",
       disablePipHoverButton: "停用 PiP 懸浮按鈕",

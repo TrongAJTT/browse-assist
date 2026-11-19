@@ -261,6 +261,7 @@ export const ko: TranslationDict = {
     },
     fabMenu: {
       movePosition: "위치 이동",
+      openSettings: "설정 열기",
       hideOnTab: "이 탭에서 숨기기",
       disableFeature: "{{feature}} 끄기",
       disablePipHoverButton: "PiP 호버 버튼 끄기",

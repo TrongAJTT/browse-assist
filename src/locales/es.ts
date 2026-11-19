@@ -265,6 +265,7 @@ export const es: TranslationDict = {
     },
     fabMenu: {
       movePosition: "Mover posición",
+      openSettings: "Abrir ajustes",
       hideOnTab: "Ocultar en esta pestaña",
       disableFeature: "Desactivar {{feature}}",
       disablePipHoverButton: "Desactivar botón flotante de PiP",

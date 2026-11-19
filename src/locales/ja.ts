@@ -265,6 +265,7 @@ export const ja: TranslationDict = {
     },
     fabMenu: {
       movePosition: "位置を移動",
+      openSettings: "設定を開く",
       hideOnTab: "このタブで非表示",
       disableFeature: "{{feature}}を無効化",
       disablePipHoverButton: "PiP ホバーボタンを無効化",

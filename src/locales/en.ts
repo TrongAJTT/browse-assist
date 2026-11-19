@@ -268,6 +268,7 @@ export const en = {
     },
     fabMenu: {
       movePosition: "Move position",
+      openSettings: "Open settings",
       hideOnTab: "Hide on this tab",
       disableFeature: "Disable {{feature}}",
       disablePipHoverButton: "Disable PiP hover button",

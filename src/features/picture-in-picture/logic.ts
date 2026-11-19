@@ -12,6 +12,7 @@ import {
 } from "~core/fab"
 import { t } from "~core/i18n"
 import { MESSAGE_TYPES, sendToBackground } from "~core/messaging"
+import { openExtensionPopup } from "~core/popupHelper"
 import { updateStoredSettings } from "~core/storage"
 import { removeContentToast, showContentToast } from "~core/toast"
 import {
@@ -173,6 +174,14 @@ function ensureHoverButton(): HTMLButtonElement {
         label: t("content.fabMenu.movePosition"),
         iconSvg: FAB_MENU_ICONS.move,
         onSelect: startMove
+      },
+      {
+        id: "settings",
+        label: t("content.fabMenu.openSettings"),
+        iconSvg: FAB_MENU_ICONS.settings,
+        onSelect: () => {
+          void openExtensionPopup("picture-in-picture-settings")
+        }
       },
       {
         id: "hide-tab",

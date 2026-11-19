@@ -15,6 +15,7 @@ import {
 } from "~core/fab"
 import { t } from "~core/i18n"
 import { cleanUrl, copyToClipboard, showCopiedFeedback } from "~core/linkUtils"
+import { openExtensionPopup } from "~core/popupHelper"
 import {
   getStoredSettings,
   subscribeToSettings,
@@ -755,6 +756,14 @@ function createDOM(): void {
         label: t("content.fabMenu.movePosition"),
         iconSvg: FAB_MENU_ICONS.move,
         onSelect: startMove
+      },
+      {
+        id: "settings",
+        label: t("content.fabMenu.openSettings"),
+        iconSvg: FAB_MENU_ICONS.settings,
+        onSelect: () => {
+          void openExtensionPopup("quick-hub-settings")
+        }
       },
       {
         id: "hide-tab",
