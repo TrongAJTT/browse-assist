@@ -270,6 +270,7 @@ export const fr: TranslationDict = {
       disableFeature: "Désactiver {{feature}}",
       disablePipHoverButton: "Désactiver le bouton PiP au survol",
       dragHint: "Déplacez vers un bord et cliquez • Échap pour annuler",
+      quickDragHint: "Glissez vers un bord et relâchez le clic droit • Échap pour annuler",
       positionSaved: "Position enregistrée",
       hiddenOnTab: "{{feature}} masqué sur cet onglet"
     }

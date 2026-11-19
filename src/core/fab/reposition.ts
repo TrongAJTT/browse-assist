@@ -17,6 +17,10 @@ export interface FabRepositionOptions {
   onPreview: (placement: EdgePlacement) => void
   onCommit: (placement: EdgePlacement) => void | Promise<void>
   onEnd?: () => void
+  /** Mouse button whose release commits placement: 0 (left click, default) or 2 (right-button hold-drag). */
+  commitButton?: 0 | 2
+  /** Optional custom hint text shown in the top pill. */
+  hintText?: string
 }
 
 const REPOSITION_HOST_ID = "__browse_assist_fab_reposition_overlay__"
@@ -124,7 +128,7 @@ export function startFabReposition(options: FabRepositionOptions): void {
   const dot = document.createElement("span")
   dot.className = "reposition-dot"
   const hintText = document.createElement("span")
-  hintText.textContent = t("content.fabMenu.dragHint")
+  hintText.textContent = options.hintText ?? t("content.fabMenu.dragHint")
   hint.appendChild(dot)
   hint.appendChild(hintText)
 
@@ -175,9 +179,11 @@ export function startFabReposition(options: FabRepositionOptions): void {
     updateFromPointer(e.clientX, e.clientY)
   }
 
+  const commitButton = options.commitButton ?? 0
+
   const handleCommitPointer = (e: PointerEvent) => {
     if (isFinished) return
-    if (e.button !== 0) return
+    if (e.button !== commitButton) return
     e.preventDefault()
     e.stopPropagation()
     updateFromPointer(e.clientX, e.clientY)
@@ -209,7 +215,11 @@ export function startFabReposition(options: FabRepositionOptions): void {
   const handleContextMenu = (e: MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    cancel()
+    // Only right-click cancels when in left-click reposition mode;
+    // in right-button hold-drag mode (commitButton === 2), suppress the browser menu without cancelling.
+    if (commitButton === 0) {
+      cancel()
+    }
   }
 
   activeHost = host

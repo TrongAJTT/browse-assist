@@ -7,6 +7,10 @@ export {
   type FabMenuItem
 } from "./contextMenu"
 export {
+  bindFabRightClick,
+  type FabRightClickOptions
+} from "./interaction"
+export {
   computeEdgePlacementFromPoint,
   type Point2D,
   type RectBounds

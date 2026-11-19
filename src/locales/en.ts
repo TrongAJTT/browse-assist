@@ -272,6 +272,7 @@ export const en = {
       disableFeature: "Disable {{feature}}",
       disablePipHoverButton: "Disable PiP hover button",
       dragHint: "Move cursor to an edge & click to place • Esc to cancel",
+      quickDragHint: "Drag to an edge & release right-click to place • Esc to cancel",
       positionSaved: "Position saved",
       hiddenOnTab: "{{feature}} hidden on this tab"
     }

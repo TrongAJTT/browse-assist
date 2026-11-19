@@ -269,6 +269,7 @@ export const vi: TranslationDict = {
       disableFeature: "Tắt {{feature}}",
       disablePipHoverButton: "Tắt nút PiP khi di chuột",
       dragHint: "Di chuyển chuột tới cạnh & nhấp để đặt • Esc để hủy",
+      quickDragHint: "Kéo tới cạnh & thả chuột phải để đặt • Esc để hủy",
       positionSaved: "Đã lưu vị trí",
       hiddenOnTab: "Đã ẩn {{feature}} trên tab này"
     }

@@ -265,6 +265,7 @@ export const ko: TranslationDict = {
       disableFeature: "{{feature}} 끄기",
       disablePipHoverButton: "PiP 호버 버튼 끄기",
       dragHint: "가장자리로 이동 후 클릭하여 배치 • Esc로 취소",
+      quickDragHint: "가장자리로 드래그 후 우클릭을 놓아 배치 • Esc로 취소",
       positionSaved: "위치가 저장되었습니다",
       hiddenOnTab: "이 탭에서 {{feature}} 숨김"
     }

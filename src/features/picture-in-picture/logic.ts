@@ -5,11 +5,10 @@
  */
 
 import {
+  bindFabRightClick,
   dismissFabOnTab,
   FAB_MENU_ICONS,
-  isFabDismissedOnTab,
-  openFabContextMenu,
-  startFabReposition
+  isFabDismissedOnTab
 } from "~core/fab"
 import { t } from "~core/i18n"
 import { MESSAGE_TYPES, sendToBackground } from "~core/messaging"
@@ -113,115 +112,106 @@ function ensureHoverButton(): HTMLButtonElement {
     hideHoverButtonNow()
   })
 
-  btn.addEventListener("contextmenu", (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    e.stopImmediatePropagation()
+  let lockedVideoForInteraction: HTMLVideoElement | null = null
 
-    const targetVideo = hoveredVideoElement
-    if (!targetVideo) return
-
-    isFabInteractionLocked = true
-    if (hoverHideTimeout) {
-      clearTimeout(hoverHideTimeout)
-      hoverHideTimeout = null
-    }
-    btn.style.opacity = "1"
-    btn.style.transform = "scale(1)"
-
-    const currentPlacement = normalizeEdgePlacement(
-      currentConfig.placement ?? currentConfig.buttonPosition,
-      DEFAULT_PICTURE_IN_PICTURE_CONFIG.placement
-    )
-
-    let startedReposition = false
-
-    openFabContextMenu({
-      x: e.clientX,
-      y: e.clientY,
-      onClose: () => {
-        if (!startedReposition) {
+  bindFabRightClick(btn, {
+    allowedEdges: ["left", "right", "top", "bottom"],
+    getInitialPlacement: () =>
+      normalizeEdgePlacement(
+        currentConfig.placement ?? currentConfig.buttonPosition,
+        DEFAULT_PICTURE_IN_PICTURE_CONFIG.placement
+      ),
+    getBounds: () => {
+      const targetVideo = lockedVideoForInteraction ?? hoveredVideoElement
+      if (!targetVideo) return null
+      const r = targetVideo.getBoundingClientRect()
+      return {
+        left: r.left,
+        top: r.top,
+        width: r.width,
+        height: r.height
+      }
+    },
+    onInteractionStart: () => {
+      lockedVideoForInteraction = hoveredVideoElement
+      isFabInteractionLocked = true
+      if (hoverHideTimeout) {
+        clearTimeout(hoverHideTimeout)
+        hoverHideTimeout = null
+      }
+      btn.style.opacity = "1"
+      btn.style.transform = "scale(1)"
+    },
+    onPreview: (placement) => {
+      currentConfig = { ...currentConfig, placement }
+      const targetVideo = lockedVideoForInteraction ?? hoveredVideoElement
+      if (targetVideo) {
+        showHoverButtonForVideo(targetVideo)
+      }
+    },
+    onCommit: async (placement) => {
+      currentConfig = { ...currentConfig, placement }
+      const targetVideo = lockedVideoForInteraction ?? hoveredVideoElement
+      if (targetVideo) {
+        showHoverButtonForVideo(targetVideo)
+      }
+      await updateStoredSettings((cur) => ({
+        ...cur,
+        pictureInPictureConfig: {
+          ...cur.pictureInPictureConfig,
+          placement
+        }
+      }))
+    },
+    onInteractionEnd: () => {
+      isFabInteractionLocked = false
+      lockedVideoForInteraction = null
+    },
+    getMenuItems: ({ startMove }) => [
+      {
+        id: "move",
+        label: t("content.fabMenu.movePosition"),
+        iconSvg: FAB_MENU_ICONS.move,
+        onSelect: startMove
+      },
+      {
+        id: "hide-tab",
+        label: t("content.fabMenu.hideOnTab"),
+        iconSvg: FAB_MENU_ICONS.eyeOff,
+        onSelect: () => {
           isFabInteractionLocked = false
+          lockedVideoForInteraction = null
+          dismissFabOnTab("pipHover")
+          hideHoverButtonNow()
+          showContentToast({
+            message: t("content.fabMenu.hiddenOnTab", {
+              feature: t("features.pictureInPicture.title")
+            }),
+            type: "info",
+            duration: 1800
+          })
         }
       },
-      items: [
-        {
-          id: "move",
-          label: t("content.fabMenu.movePosition"),
-          iconSvg: FAB_MENU_ICONS.move,
-          onSelect: () => {
-            startedReposition = true
-            isFabInteractionLocked = true
-            startFabReposition({
-              initialPlacement: currentPlacement,
-              allowedEdges: ["left", "right", "top", "bottom"],
-              getBounds: () => {
-                const r = targetVideo.getBoundingClientRect()
-                return {
-                  left: r.left,
-                  top: r.top,
-                  width: r.width,
-                  height: r.height
-                }
-              },
-              onPreview: (placement) => {
-                currentConfig = { ...currentConfig, placement }
-                showHoverButtonForVideo(targetVideo)
-              },
-              onCommit: async (placement) => {
-                currentConfig = { ...currentConfig, placement }
-                showHoverButtonForVideo(targetVideo)
-                await updateStoredSettings((cur) => ({
-                  ...cur,
-                  pictureInPictureConfig: {
-                    ...cur.pictureInPictureConfig,
-                    placement
-                  }
-                }))
-              },
-              onEnd: () => {
-                isFabInteractionLocked = false
-              }
-            })
-          }
-        },
-        {
-          id: "hide-tab",
-          label: t("content.fabMenu.hideOnTab"),
-          iconSvg: FAB_MENU_ICONS.eyeOff,
-          onSelect: () => {
-            isFabInteractionLocked = false
-            dismissFabOnTab("pipHover")
-            hideHoverButtonNow()
-            showContentToast({
-              message: t("content.fabMenu.hiddenOnTab", {
-                feature: t("features.pictureInPicture.title")
-              }),
-              type: "info",
-              duration: 1800
-            })
-          }
-        },
-        {
-          id: "disable-hover",
-          label: t("content.fabMenu.disablePipHoverButton"),
-          iconSvg: FAB_MENU_ICONS.power,
-          danger: true,
-          dividerBefore: true,
-          onSelect: () => {
-            isFabInteractionLocked = false
-            hideHoverButtonNow()
-            void updateStoredSettings((cur) => ({
-              ...cur,
-              pictureInPictureConfig: {
-                ...cur.pictureInPictureConfig,
-                hoverButton: false
-              }
-            }))
-          }
+      {
+        id: "disable-hover",
+        label: t("content.fabMenu.disablePipHoverButton"),
+        iconSvg: FAB_MENU_ICONS.power,
+        danger: true,
+        dividerBefore: true,
+        onSelect: () => {
+          isFabInteractionLocked = false
+          lockedVideoForInteraction = null
+          hideHoverButtonNow()
+          void updateStoredSettings((cur) => ({
+            ...cur,
+            pictureInPictureConfig: {
+              ...cur.pictureInPictureConfig,
+              hoverButton: false
+            }
+          }))
         }
-      ]
-    })
+      }
+    ]
   })
 
   btn.addEventListener("click", async (e) => {

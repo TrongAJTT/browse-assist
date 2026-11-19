@@ -261,6 +261,7 @@ export const zh_CN: TranslationDict = {
       disableFeature: "关闭{{feature}}",
       disablePipHoverButton: "关闭 PiP 悬浮按钮",
       dragHint: "移动至边缘并点击放置 • 按 Esc 取消",
+      quickDragHint: "拖至边缘并松开右键放置 • 按 Esc 取消",
       positionSaved: "位置已保存",
       hiddenOnTab: "已在当前标签页隐藏{{feature}}"
     }

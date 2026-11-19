@@ -269,6 +269,7 @@ export const ja: TranslationDict = {
       disableFeature: "{{feature}}を無効化",
       disablePipHoverButton: "PiP ホバーボタンを無効化",
       dragHint: "端にカーソルを合わせてクリックで配置 • Esc でキャンセル",
+      quickDragHint: "端へドラッグして右クリックを離すと配置 • Esc でキャンセル",
       positionSaved: "位置を保存しました",
       hiddenOnTab: "このタブで{{feature}}を非表示にしました"
     }

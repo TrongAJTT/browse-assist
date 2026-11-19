@@ -269,6 +269,7 @@ export const es: TranslationDict = {
       disableFeature: "Desactivar {{feature}}",
       disablePipHoverButton: "Desactivar botón flotante de PiP",
       dragHint: "Mueve el cursor a un borde y haz clic • Esc para cancelar",
+      quickDragHint: "Arrastra a un borde y suelta el clic derecho • Esc para cancelar",
       positionSaved: "Posición guardada",
       hiddenOnTab: "{{feature}} oculto en esta pestaña"
     }
