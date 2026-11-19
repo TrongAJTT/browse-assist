@@ -13,6 +13,7 @@ import {
 import { t } from "~core/i18n"
 import { MESSAGE_TYPES, sendToBackground } from "~core/messaging"
 import { openExtensionPopup } from "~core/popupHelper"
+import { createShadowHost } from "~core/shadowHost"
 import { updateStoredSettings } from "~core/storage"
 import { removeContentToast, showContentToast } from "~core/toast"
 import {
@@ -34,6 +35,7 @@ const PIP_ICON_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none
 const PIP_BUTTON_ID = "__browse_assist_pip_hover_btn__"
 
 // Hover PiP Button state
+let hoverButtonHost: HTMLDivElement | null = null
 let hoverButtonElement: HTMLButtonElement | null = null
 let hoveredVideoElement: HTMLVideoElement | null = null
 let hoverHideTimeout: ReturnType<typeof setTimeout> | null = null
@@ -41,16 +43,26 @@ let isPointerOverHoverButton = false
 let isFabInteractionLocked = false
 
 /**
- * Creates and mounts the floating PiP button element into the DOM.
+ * Creates and mounts the floating PiP button element into an isolated Shadow DOM host.
  */
 function ensureHoverButton(): HTMLButtonElement {
-  if (hoverButtonElement && document.documentElement.contains(hoverButtonElement)) {
+  if (
+    hoverButtonHost &&
+    document.documentElement.contains(hoverButtonHost) &&
+    hoverButtonElement
+  ) {
     return hoverButtonElement
   }
 
-  if (hoverButtonElement && hoverButtonElement.parentNode) {
-    hoverButtonElement.parentNode.removeChild(hoverButtonElement)
+  if (hoverButtonHost && hoverButtonHost.parentNode) {
+    hoverButtonHost.parentNode.removeChild(hoverButtonHost)
   }
+
+  const { host, shadow } = createShadowHost(
+    "browse-assist-pip-hover-host",
+    2147483645
+  )
+  hoverButtonHost = host
 
   const btn = document.createElement("button")
   btn.id = PIP_BUTTON_ID
@@ -248,7 +260,7 @@ function ensureHoverButton(): HTMLButtonElement {
     hideHoverButtonNow()
   })
 
-  document.documentElement.appendChild(btn)
+  shadow.appendChild(btn)
   hoverButtonElement = btn
   return btn
 }
@@ -631,10 +643,11 @@ export function deactivate(): void {
   chrome.runtime.onMessage.removeListener(onRuntimeMessage)
 
   hideHoverButtonNow()
-  if (hoverButtonElement && hoverButtonElement.parentNode) {
-    hoverButtonElement.parentNode.removeChild(hoverButtonElement)
-    hoverButtonElement = null
+  if (hoverButtonHost && hoverButtonHost.parentNode) {
+    hoverButtonHost.parentNode.removeChild(hoverButtonHost)
   }
+  hoverButtonHost = null
+  hoverButtonElement = null
   if (hoverHideTimeout) {
     clearTimeout(hoverHideTimeout)
     hoverHideTimeout = null

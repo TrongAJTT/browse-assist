@@ -1,5 +1,6 @@
 import { VIDEO_WHEEL_CONSTANTS } from "~core/constants"
 import { t } from "~core/i18n"
+import { createShadowHost } from "~core/shadowHost"
 import {
   DEFAULT_VIDEO_WHEEL_CONTROL_CONFIG,
   type VideoWheelControlConfig,
@@ -21,6 +22,7 @@ let currentConfig: VideoWheelControlConfig = {
 }
 
 const OSD_ELEMENT_ID = "browse-assist-video-wheel-osd"
+let osdHost: HTMLDivElement | null = null
 let osdElement: HTMLElement | null = null
 let osdHideTimeout: NodeJS.Timeout | null = null
 
@@ -83,9 +85,19 @@ function formatTime(seconds: number): string {
  * Ensures the floating glassmorphic OSD badge element is created.
  */
 function ensureOsdElement(): HTMLElement {
-  if (osdElement && osdElement.parentNode) {
+  if (osdHost && document.documentElement.contains(osdHost) && osdElement) {
     return osdElement
   }
+
+  if (osdHost && osdHost.parentNode) {
+    osdHost.parentNode.removeChild(osdHost)
+  }
+
+  const { host, shadow } = createShadowHost(
+    "browse-assist-vwc-osd-host",
+    2147483646
+  )
+  osdHost = host
 
   const el = document.createElement("div")
   el.id = OSD_ELEMENT_ID
@@ -113,7 +125,7 @@ function ensureOsdElement(): HTMLElement {
     transform: scale(0.94);
     transition: opacity 0.12s ease-out, transform 0.12s ease-out;
   `
-  document.documentElement.appendChild(el)
+  shadow.appendChild(el)
   osdElement = el
   return el
 }
@@ -691,10 +703,11 @@ export function deactivate(): void {
     osdHideTimeout = null
   }
 
-  if (osdElement && osdElement.parentNode) {
-    osdElement.parentNode.removeChild(osdElement)
-    osdElement = null
+  if (osdHost && osdHost.parentNode) {
+    osdHost.parentNode.removeChild(osdHost)
   }
+  osdHost = null
+  osdElement = null
 
   clearLastKnownHoveredVideo()
 }

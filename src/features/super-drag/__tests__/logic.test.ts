@@ -170,7 +170,10 @@ describe("super-drag content logic", () => {
     link.dispatchEvent(createDragEvent("dragstart", 100, 100))
     window.dispatchEvent(createDragEvent("dragover", 180, 100))
 
-    const badgeEl = document.getElementById("browse-assist-drag-indicator")
+    const host = document.getElementById("browse-assist-super-drag-host")
+    const badgeEl = host?.shadowRoot?.getElementById(
+      "browse-assist-drag-indicator"
+    )
     expect(badgeEl).not.toBeNull()
     expect(badgeEl!.style.opacity).toBe("0.7")
 
@@ -185,7 +188,9 @@ describe("super-drag content logic", () => {
     link.dispatchEvent(createDragEvent("dragstart", 200, 200))
     window.dispatchEvent(createDragEvent("dragover", 280, 200))
 
-    const radialEl = document.getElementById("browse-assist-radial-indicator")
+    const radialEl = host?.shadowRoot?.getElementById(
+      "browse-assist-radial-indicator"
+    )
     expect(radialEl).not.toBeNull()
     expect(radialEl!.style.opacity).toBe("0.55")
   })

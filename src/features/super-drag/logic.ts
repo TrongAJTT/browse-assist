@@ -7,6 +7,7 @@
 import { escapeHtml } from "~core/escapeHtml"
 import { t } from "~core/i18n"
 import { MESSAGE_TYPES, sendToBackground } from "~core/messaging"
+import { createShadowHost } from "~core/shadowHost"
 import {
   DEFAULT_SUPER_DRAG_CONFIG,
   type SuperDragAction,
@@ -61,12 +62,33 @@ interface DragSession {
 }
 
 let activeSession: DragSession | null = null
+let superDragHost: HTMLDivElement | null = null
+let superDragShadow: ShadowRoot | null = null
 let indicatorElement: HTMLDivElement | null = null
 let indicatorTimeoutId: number | null = null
 
 let radialElement: HTMLDivElement | null = null
 let radialTimeoutId: number | null = null
 let currentRadialDirection: DragDirection | null = null
+
+function ensureSuperDragShadow(): ShadowRoot {
+  if (
+    superDragHost &&
+    superDragShadow &&
+    document.documentElement.contains(superDragHost)
+  ) {
+    return superDragShadow
+  }
+  if (superDragHost && superDragHost.parentNode) {
+    superDragHost.parentNode.removeChild(superDragHost)
+  }
+  const { host, shadow } = createShadowHost("browse-assist-super-drag-host")
+  superDragHost = host
+  superDragShadow = shadow
+  indicatorElement = null
+  radialElement = null
+  return shadow
+}
 
 /**
  * Creates SVG path for an annular sector (pie slice/donut wedge).
@@ -142,10 +164,8 @@ const RADIAL_PATHS: Record<DragDirection, string> = {
  * Gets or lazily creates the floating indicator badge element.
  */
 function getOrCreateIndicator(): HTMLDivElement {
-  if (
-    !indicatorElement ||
-    !document.documentElement.contains(indicatorElement)
-  ) {
+  const shadow = ensureSuperDragShadow()
+  if (!indicatorElement || !shadow.contains(indicatorElement)) {
     indicatorElement = document.createElement("div")
     indicatorElement.id = "browse-assist-drag-indicator"
     indicatorElement.style.cssText = `
@@ -172,7 +192,7 @@ function getOrCreateIndicator(): HTMLDivElement {
       transition: opacity 0.15s ease-out, transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease;
       white-space: nowrap;
     `
-    document.documentElement.appendChild(indicatorElement)
+    shadow.appendChild(indicatorElement)
   }
   return indicatorElement
 }
@@ -181,7 +201,8 @@ function getOrCreateIndicator(): HTMLDivElement {
  * Gets or lazily creates the Circular Segment Selection (Radial Pie) indicator element.
  */
 function getOrCreateRadialIndicator(): HTMLDivElement {
-  if (!radialElement || !document.documentElement.contains(radialElement)) {
+  const shadow = ensureSuperDragShadow()
+  if (!radialElement || !shadow.contains(radialElement)) {
     radialElement = document.createElement("div")
     radialElement.id = "browse-assist-radial-indicator"
     radialElement.style.cssText = `
@@ -196,7 +217,7 @@ function getOrCreateRadialIndicator(): HTMLDivElement {
       transition: opacity 0.16s ease-out, transform 0.16s cubic-bezier(0.16, 1, 0.3, 1);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     `
-    document.documentElement.appendChild(radialElement)
+    shadow.appendChild(radialElement)
   }
   return radialElement
 }
@@ -832,19 +853,18 @@ export function deactivate(): void {
   window.removeEventListener("dragover", onDragOver, true)
   window.removeEventListener("dragend", onDragEnd, true)
 
-  if (indicatorElement && indicatorElement.parentNode) {
-    indicatorElement.parentNode.removeChild(indicatorElement)
-    indicatorElement = null
+  if (superDragHost && superDragHost.parentNode) {
+    superDragHost.parentNode.removeChild(superDragHost)
   }
+  superDragHost = null
+  superDragShadow = null
+  indicatorElement = null
   if (indicatorTimeoutId !== null) {
     window.clearTimeout(indicatorTimeoutId)
     indicatorTimeoutId = null
   }
 
-  if (radialElement && radialElement.parentNode) {
-    radialElement.parentNode.removeChild(radialElement)
-    radialElement = null
-  }
+  radialElement = null
   if (radialTimeoutId !== null) {
     window.clearTimeout(radialTimeoutId)
     radialTimeoutId = null
