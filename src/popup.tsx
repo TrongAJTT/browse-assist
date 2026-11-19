@@ -76,6 +76,10 @@ const sessionStorage = new Storage({ area: "local" })
 
 function IndexPopup() {
   const { t } = useI18n()
+
+  useEffect(() => {
+    document.title = t("common.appName")
+  }, [t])
   const urlParams =
     typeof window !== "undefined"
       ? new URLSearchParams(window.location.search)

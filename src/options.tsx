@@ -38,6 +38,10 @@ import "~style.css"
 
 function OptionsPage() {
   const { t } = useI18n()
+
+  useEffect(() => {
+    document.title = t("options.title")
+  }, [t])
   const [settings, setSettings] = useStorage<FeatureSettings>(
     STORAGE_KEYS.SETTINGS,
     DEFAULT_SETTINGS
