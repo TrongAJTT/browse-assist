@@ -409,7 +409,7 @@ export const DEFAULT_QUICK_SCROLL_CONFIG: QuickScrollConfig = {
   opacity: 1,
   autoHide: true,
   enableReturnMemory: false,
-  hideOnNativeButton: false,
+  hideOnNativeButton: true,
   position: "bottom-right"
 }
 
