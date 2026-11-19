@@ -146,6 +146,7 @@ export interface SuperDragConfig {
   openImages: boolean // Dragging an image opens URL or copies image link
   showIndicator: boolean // Display live floating indicator during drag
   indicatorStyle: DragIndicatorStyle // Indicator style: "none", "badge", or "radial"
+  indicatorOpacity?: number // Opacity of the drag indicator (0.35 - 1)
   textActions: DirectionalActions
   linkActions: DirectionalActions
   imageActions: DirectionalActions
@@ -157,6 +158,7 @@ export const DEFAULT_SUPER_DRAG_CONFIG: SuperDragConfig = {
   openImages: false,
   showIndicator: true,
   indicatorStyle: "badge",
+  indicatorOpacity: 1,
   textActions: { ...DEFAULT_DIRECTIONAL_ACTIONS },
   linkActions: { ...DEFAULT_DIRECTIONAL_ACTIONS },
   imageActions: { ...DEFAULT_DIRECTIONAL_ACTIONS }

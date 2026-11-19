@@ -353,6 +353,8 @@ export const zh_TW: TranslationDict = {
         displayFeedback: "顯示與回饋",
         dragIndicator: "拖曳視覺指示器",
         dragIndicatorDesc: "選擇拖曳元素時顯示的視覺回饋樣式。",
+        indicatorOpacity: "指示器不透明度",
+        indicatorOpacityDesc: "調整拖曳時顯示的指示器透明度。",
         indicatorStyles: {
           none: "停用",
           badge: "懸浮徽章",

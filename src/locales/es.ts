@@ -374,6 +374,9 @@ export const es: TranslationDict = {
         dragIndicator: "Indicador visual de arrastre",
         dragIndicatorDesc:
           "Elige el estilo de respuesta visual al arrastrar elementos.",
+        indicatorOpacity: "Opacidad del indicador",
+        indicatorOpacityDesc:
+          "Ajusta la transparencia del indicador de arrastre al arrastrar.",
         indicatorStyles: {
           none: "Desactivado",
           badge: "Insignia flotante",

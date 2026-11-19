@@ -375,6 +375,9 @@ export const fr: TranslationDict = {
         dragIndicator: "Indicateur visuel de glissement",
         dragIndicatorDesc:
           "Choisissez le style de retour visuel affiché pendant le glissement.",
+        indicatorOpacity: "Opacité de l'indicateur",
+        indicatorOpacityDesc:
+          "Ajustez la transparence de l'indicateur affiché pendant le glissement.",
         indicatorStyles: {
           none: "Désactivé",
           badge: "Badge flottant",

@@ -156,7 +156,7 @@ function getOrCreateIndicator(): HTMLDivElement {
       gap: 8px;
       padding: 7px 14px;
       border-radius: 9999px;
-      background: rgba(15, 23, 42, 0.94);
+      background: #0f172a;
       color: #f8fafc;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       font-size: 12px;
@@ -366,7 +366,11 @@ function updateBadgeIndicator(
 
   el.style.left = `${clientX}px`
   el.style.top = `${clientY - 20}px`
-  el.style.opacity = "1"
+  el.style.opacity = String(
+    currentConfig.indicatorOpacity ??
+      DEFAULT_SUPER_DRAG_CONFIG.indicatorOpacity ??
+      1
+  )
   el.style.transform = "translate3d(-50%, -100%, 0) scale(1)"
 }
 
@@ -461,7 +465,7 @@ function updateRadialIndicator(
       transform: translateX(-50%);
       padding: 5px 12px;
       border-radius: 9999px;
-      background: rgba(15, 23, 42, 0.96);
+      background: #0f172a;
       color: #f8fafc;
       font-size: 11px;
       font-weight: 600;
@@ -482,7 +486,11 @@ function updateRadialIndicator(
 
   el.style.left = `${safeX}px`
   el.style.top = `${safeY}px`
-  el.style.opacity = "1"
+  el.style.opacity = String(
+    currentConfig.indicatorOpacity ??
+      DEFAULT_SUPER_DRAG_CONFIG.indicatorOpacity ??
+      1
+  )
   el.style.transform = "translate3d(-50%, -50%, 0) scale(1)"
 }
 

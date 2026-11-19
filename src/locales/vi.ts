@@ -375,6 +375,9 @@ export const vi: TranslationDict = {
         dragIndicator: "Chỉ báo trực quan khi kéo",
         dragIndicatorDesc:
           "Chọn kiểu hiển thị phản hồi trực quan trong lúc kéo phần tử.",
+        indicatorOpacity: "Độ mờ chỉ báo",
+        indicatorOpacityDesc:
+          "Điều chỉnh độ trong suốt của chỉ báo hiển thị khi kéo.",
         indicatorStyles: {
           none: "Tắt",
           badge: "Nhãn nổi",

@@ -375,6 +375,9 @@ export const en = {
         dragIndicator: "Drag Visual Indicator",
         dragIndicatorDesc:
           "Choose the visual feedback style displayed while dragging elements.",
+        indicatorOpacity: "Indicator Opacity",
+        indicatorOpacityDesc:
+          "Adjust the transparency of the drag indicator while dragging.",
         indicatorStyles: {
           none: "Disabled",
           badge: "Floating Badge",

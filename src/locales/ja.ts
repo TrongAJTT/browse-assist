@@ -374,6 +374,9 @@ export const ja: TranslationDict = {
         dragIndicator: "ドラッグ視覚インジケーター",
         dragIndicatorDesc:
           "ドラッグ中に表示される視覚フィードバックのスタイルを選択します。",
+        indicatorOpacity: "インジケーターの不透明度",
+        indicatorOpacityDesc:
+          "ドラッグ中に表示されるインジケーターの透明度を調整します。",
         indicatorStyles: {
           none: "無効",
           badge: "フローティングバッジ",

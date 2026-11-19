@@ -23,14 +23,16 @@ export const RADIAL_GAP_DEGREES = 2.5
 
 /**
  * Radial Pie Menu Opacity & Visual Styling Tokens
+ * Base surfaces are fully opaque so the user's `indicatorOpacity` setting
+ * controls overall transparency cleanly from 35% to 100%.
  */
-export const RADIAL_OPACITY_IDLE = 0.65
-export const RADIAL_OPACITY_ACTIVE = 0.90
+export const RADIAL_OPACITY_IDLE = 1
+export const RADIAL_OPACITY_ACTIVE = 1
 
 export const RADIAL_BG_IDLE = `rgba(30, 41, 59, ${RADIAL_OPACITY_IDLE})`
 export const RADIAL_BG_ACTIVE = `rgba(56, 189, 248, ${RADIAL_OPACITY_ACTIVE})`
 
-export const RADIAL_STROKE_IDLE = "rgba(148, 163, 184, 0.28)"
+export const RADIAL_STROKE_IDLE = "rgba(148, 163, 184, 0.35)"
 export const RADIAL_STROKE_ACTIVE = "#ffffff"
 
 export const RADIAL_STROKE_WIDTH_IDLE = 1.2
@@ -38,11 +40,11 @@ export const RADIAL_STROKE_WIDTH_ACTIVE = 2.0
 
 export const RADIAL_GLOW_ACTIVE = "drop-shadow(0 0 10px rgba(56, 189, 248, 0.80))"
 
-export const RADIAL_DEADZONE_BG = "rgba(239, 68, 68, 0.18)"
-export const RADIAL_DEADZONE_STROKE = "rgba(239, 68, 68, 0.70)"
+export const RADIAL_DEADZONE_BG = "#2b161d"
+export const RADIAL_DEADZONE_STROKE = "rgba(239, 68, 68, 0.75)"
 
-export const RADIAL_CENTER_BG = "rgba(15, 23, 42, 0.94)"
-export const RADIAL_CENTER_STROKE = "rgba(56, 189, 248, 0.50)"
+export const RADIAL_CENTER_BG = "#0f172a"
+export const RADIAL_CENTER_STROKE = "rgba(56, 189, 248, 0.55)"
 
 /**
  * Super Drag Available Action Options for Settings Dropdown

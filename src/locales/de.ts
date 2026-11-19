@@ -375,6 +375,9 @@ export const de: TranslationDict = {
         dragIndicator: "Visueller Ziehindikator",
         dragIndicatorDesc:
           "Visuelles Feedback beim Ziehen von Elementen auswählen.",
+        indicatorOpacity: "Indikator-Deckkraft",
+        indicatorOpacityDesc:
+          "Transparenz des Ziehindikators während des Ziehens anpassen.",
         indicatorStyles: {
           none: "Deaktiviert",
           badge: "Schwebendes Abzeichen",

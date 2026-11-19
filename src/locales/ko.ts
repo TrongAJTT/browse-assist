@@ -367,6 +367,9 @@ export const ko: TranslationDict = {
         dragIndicator: "드래그 시각 표시기",
         dragIndicatorDesc:
           "요소를 드래그하는 동안 표시할 시각적 피드백 스타일을 선택합니다.",
+        indicatorOpacity: "인디케이터 불투명도",
+        indicatorOpacityDesc:
+          "드래그하는 동안 표시되는 인디케이터의 투명도를 조절합니다.",
         indicatorStyles: {
           none: "사용 안 함",
           badge: "플로팅 배지",
