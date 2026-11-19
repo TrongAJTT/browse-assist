@@ -1,0 +1,23 @@
+{
+  "extName": {
+    "message": "Browse Assist"
+  },
+  "extDescription": {
+    "message": "A lightweight, modular collection of quality-of-life tools designed to boost productivity and elevate your browsing flow."
+  },
+  "cmdPiP": {
+    "message": "Toggle Picture-in-Picture for current playing video"
+  },
+  "cmdAllowRightClick": {
+    "message": "Toggle Allow Right Click on current tab"
+  },
+  "cmdColorPicker": {
+    "message": "Pick color from screen"
+  },
+  "cmdElementToys": {
+    "message": "Activate Element Toys to inspect and manipulate page elements"
+  },
+  "cmdQuickHub": {
+    "message": "Toggle Quick Hub on-screen menu"
+  }
+}

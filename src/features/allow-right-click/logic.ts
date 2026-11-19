@@ -4,6 +4,7 @@
  * on websites that attempt to disable or restrict them via JavaScript or CSS.
  */
 
+import { t } from "~core/i18n"
 import { showContentToast } from "~core/toast"
 
 let isActive = false
@@ -25,12 +26,13 @@ const RESTRICTED_EVENTS = [
  * Capture-phase event handler to stop malicious web scripts from blocking user actions.
  */
 function handleRestrictedEvent(event: Event): void {
-  // Only stop propagation for contextmenu, selectstart, copy, cut, dragstart unconditionally
+  // Only stop propagation for contextmenu, selectstart, copy, cut, paste, dragstart unconditionally
   if (
     event.type === "contextmenu" ||
     event.type === "selectstart" ||
     event.type === "copy" ||
     event.type === "cut" ||
+    event.type === "paste" ||
     event.type === "dragstart"
   ) {
     event.stopPropagation()
@@ -81,6 +83,7 @@ function clearInlineHandlers(): void {
     document.ondragstart = null
     document.oncopy = null
     document.oncut = null
+    document.onpaste = null
 
     if (document.body) {
       document.body.oncontextmenu = null
@@ -88,6 +91,7 @@ function clearInlineHandlers(): void {
       document.body.ondragstart = null
       document.body.oncopy = null
       document.body.oncut = null
+      document.body.onpaste = null
     }
   } catch {
     // Ignore restricted cross-origin frames or read-only documents
@@ -141,8 +145,8 @@ export function toggleRightClick(showFeedback = true): boolean {
     deactivate()
     if (showFeedback) {
       showContentToast({
-        message: "Right Click Disabled",
-        detail: "Current Tab",
+        message: t("features.allowRightClick.toastDisabled"),
+        detail: t("features.allowRightClick.currentTab"),
         type: "info",
         iconSvg: RIGHT_CLICK_ICON_SVG,
         position: "bottom-right",
@@ -153,8 +157,8 @@ export function toggleRightClick(showFeedback = true): boolean {
     activate()
     if (showFeedback) {
       showContentToast({
-        message: "Right Click Enabled",
-        detail: "Current Tab",
+        message: t("features.allowRightClick.toastEnabled"),
+        detail: t("features.allowRightClick.currentTab"),
         type: "success",
         iconSvg: RIGHT_CLICK_ICON_SVG,
         position: "bottom-right",

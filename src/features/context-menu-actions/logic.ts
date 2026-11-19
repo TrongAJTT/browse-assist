@@ -5,6 +5,7 @@
  * Uses shared linkUtils as single source of truth.
  */
 
+import { t } from "~core/i18n"
 import {
   cleanUrl,
   copyToClipboard,
@@ -55,18 +56,24 @@ function resolveLinkText(linkUrl: string): string {
  * Handles incoming messages from background service worker.
  */
 async function onMessage(
-  message: { action?: string; linkUrl?: string },
+  message: {
+    action?: string
+    linkUrl?: string
+    pageUrl?: string
+    selectionText?: string
+  },
   _sender: chrome.runtime.MessageSender,
   _sendResponse: (response?: unknown) => void
 ): Promise<void> {
   const rawUrl = message?.linkUrl || ""
+  const pageUrl = message?.pageUrl || window.location.href
 
   switch (message?.action) {
     case "browse_assist_copy_link_text": {
       const linkText = resolveLinkText(rawUrl)
       if (linkText) {
         const success = await copyToClipboard(linkText)
-        if (success) showCopiedFeedback("Copied Link Text", linkText)
+        if (success) showCopiedFeedback(t("content.copied.linkText"), linkText)
       }
       break
     }
@@ -75,17 +82,57 @@ async function onMessage(
       const cleaned = cleanUrl(rawUrl)
       if (cleaned) {
         const success = await copyToClipboard(cleaned)
-        if (success) showCopiedFeedback("Copied Clean Link", cleaned)
+        if (success) showCopiedFeedback(t("content.copied.cleanLink"), cleaned)
       }
       break
     }
 
     case "browse_assist_markdown_link_copy": {
-      const linkText = resolveLinkText(rawUrl)
+      const linkText = resolveLinkText(rawUrl).replace(/\[|\]/g, "")
       const cleanedUrl = cleanUrl(rawUrl)
       const markdown = `[${linkText}](${cleanedUrl})`
       const success = await copyToClipboard(markdown)
-      if (success) showCopiedFeedback("Copied Markdown", markdown)
+      if (success) showCopiedFeedback(t("content.copied.markdown"), markdown)
+      break
+    }
+
+    case "browse_assist_copy_clean_page_url": {
+      const cleaned = cleanUrl(pageUrl)
+      if (cleaned) {
+        const success = await copyToClipboard(cleaned)
+        if (success)
+          showCopiedFeedback(t("content.copied.cleanPageUrl"), cleaned)
+      }
+      break
+    }
+
+    case "browse_assist_copy_page_markdown": {
+      const cleaned = cleanUrl(pageUrl)
+      const title = (document.title || cleaned).replace(/\[|\]/g, "")
+      const markdown = `[${title}](${cleaned})`
+      const success = await copyToClipboard(markdown)
+      if (success)
+        showCopiedFeedback(t("content.copied.pageMarkdown"), markdown)
+      break
+    }
+
+    case "browse_assist_copy_selection_quote": {
+      const selected = (
+        message?.selectionText ||
+        window.getSelection()?.toString() ||
+        ""
+      ).trim()
+      if (selected) {
+        const cleaned = cleanUrl(pageUrl)
+        const title = (document.title || cleaned).replace(/\[|\]/g, "")
+        const quoted = selected
+          .split(/\r?\n/)
+          .map((line) => `> ${line}`)
+          .join("\n")
+        const markdown = `${quoted}\n— [${title}](${cleaned})`
+        const success = await copyToClipboard(markdown)
+        if (success) showCopiedFeedback(t("content.copied.quote"), selected)
+      }
       break
     }
   }
@@ -111,6 +158,7 @@ export function activate(): void {
 export function deactivate(): void {
   if (!isActive || typeof window === "undefined") return
   isActive = false
+  lastContextMenuTarget = null
 
   window.removeEventListener("contextmenu", onContextMenu, true)
 

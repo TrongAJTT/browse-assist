@@ -4,7 +4,10 @@
  * Supports 4 directions (up, down, left, right) configurable per target (text, link, image).
  */
 
+import { escapeHtml } from "~core/escapeHtml"
+import { t } from "~core/i18n"
 import { MESSAGE_TYPES, sendToBackground } from "~core/messaging"
+import { createShadowHost } from "~core/shadowHost"
 import {
   DEFAULT_SUPER_DRAG_CONFIG,
   type SuperDragAction,
@@ -19,7 +22,7 @@ import {
 import {
   MAX_DRAG_DISTANCE,
   MIN_DRAG_DISTANCE,
-  RADIAL_BG_ACTIVE,
+  RADIAL_BG_DISABLED,
   RADIAL_BG_IDLE,
   RADIAL_CENTER,
   RADIAL_CENTER_BG,
@@ -27,13 +30,15 @@ import {
   RADIAL_DEADZONE_BG,
   RADIAL_DEADZONE_STROKE,
   RADIAL_GAP_DEGREES,
-  RADIAL_GLOW_ACTIVE,
   RADIAL_INNER_RADIUS,
   RADIAL_OUTER_RADIUS,
-  RADIAL_STROKE_ACTIVE,
+  RADIAL_SECTOR_INNER_RADIUS,
+  RADIAL_STROKE_DISABLED,
   RADIAL_STROKE_IDLE,
   RADIAL_STROKE_WIDTH_ACTIVE,
-  RADIAL_STROKE_WIDTH_IDLE
+  RADIAL_STROKE_WIDTH_IDLE,
+  RADIAL_THEME_PALETTE,
+  type RadialTheme
 } from "./constants"
 
 export {
@@ -59,12 +64,33 @@ interface DragSession {
 }
 
 let activeSession: DragSession | null = null
+let superDragHost: HTMLDivElement | null = null
+let superDragShadow: ShadowRoot | null = null
 let indicatorElement: HTMLDivElement | null = null
 let indicatorTimeoutId: number | null = null
 
 let radialElement: HTMLDivElement | null = null
 let radialTimeoutId: number | null = null
 let currentRadialDirection: DragDirection | null = null
+
+function ensureSuperDragShadow(): ShadowRoot {
+  if (
+    superDragHost &&
+    superDragShadow &&
+    document.documentElement.contains(superDragHost)
+  ) {
+    return superDragShadow
+  }
+  if (superDragHost && superDragHost.parentNode) {
+    superDragHost.parentNode.removeChild(superDragHost)
+  }
+  const { host, shadow } = createShadowHost("browse-assist-super-drag-host")
+  superDragHost = host
+  superDragShadow = shadow
+  indicatorElement = null
+  radialElement = null
+  return shadow
+}
 
 /**
  * Creates SVG path for an annular sector (pie slice/donut wedge).
@@ -101,7 +127,7 @@ const RADIAL_PATHS: Record<DragDirection, string> = {
   up: createAnnularSectorPath(
     RADIAL_CENTER,
     RADIAL_CENTER,
-    RADIAL_INNER_RADIUS,
+    RADIAL_SECTOR_INNER_RADIUS,
     RADIAL_OUTER_RADIUS,
     -135,
     -45,
@@ -110,7 +136,7 @@ const RADIAL_PATHS: Record<DragDirection, string> = {
   right: createAnnularSectorPath(
     RADIAL_CENTER,
     RADIAL_CENTER,
-    RADIAL_INNER_RADIUS,
+    RADIAL_SECTOR_INNER_RADIUS,
     RADIAL_OUTER_RADIUS,
     -45,
     45,
@@ -119,7 +145,7 @@ const RADIAL_PATHS: Record<DragDirection, string> = {
   down: createAnnularSectorPath(
     RADIAL_CENTER,
     RADIAL_CENTER,
-    RADIAL_INNER_RADIUS,
+    RADIAL_SECTOR_INNER_RADIUS,
     RADIAL_OUTER_RADIUS,
     45,
     135,
@@ -128,7 +154,7 @@ const RADIAL_PATHS: Record<DragDirection, string> = {
   left: createAnnularSectorPath(
     RADIAL_CENTER,
     RADIAL_CENTER,
-    RADIAL_INNER_RADIUS,
+    RADIAL_SECTOR_INNER_RADIUS,
     RADIAL_OUTER_RADIUS,
     135,
     225,
@@ -136,14 +162,52 @@ const RADIAL_PATHS: Record<DragDirection, string> = {
   )
 }
 
+const RADIAL_ICON_CENTERS: Record<DragDirection, { x: number; y: number }> = {
+  up: { x: RADIAL_CENTER, y: RADIAL_CENTER - 75 },
+  right: { x: RADIAL_CENTER + 75, y: RADIAL_CENTER },
+  down: { x: RADIAL_CENTER, y: RADIAL_CENTER + 75 },
+  left: { x: RADIAL_CENTER - 75, y: RADIAL_CENTER }
+}
+
+/**
+ * Returns crisp 24x24 Lucide-style SVG path markup for a Super Drag action
+ * rendered inside a radial sector.
+ */
+function getRadialActionGlyph(
+  action: SuperDragAction,
+  targetType: "text" | "link" | "image"
+): string {
+  switch (action) {
+    case "open_bg_tab":
+      return `<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>`
+    case "open_active_tab":
+      return targetType === "text"
+        ? `<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>`
+        : `<rect width="18" height="14" x="3" y="5" rx="2"/><path d="M3 10h18"/><path d="M10 5v5"/>`
+    case "open_window_active":
+      return `<rect width="20" height="16" x="2" y="4" rx="2"/><path d="M10 4v4"/><path d="M2 8h20"/>`
+    case "open_incognito_active":
+      return `<path d="M2 12a5 5 0 0 0 5 5 8 8 0 0 1 5 2 8 8 0 0 1 5-2 5 5 0 0 0 5-5"/><path d="M3 7h18"/><circle cx="7" cy="14" r="2"/><circle cx="17" cy="14" r="2"/>`
+    case "copy_to_clipboard":
+      return `<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>`
+    case "copy_link_text":
+      return `<polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/>`
+    case "copy_markdown":
+      return `<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>`
+    case "search_image":
+      return `<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>`
+    case "none":
+    default:
+      return `<line x1="6" y1="12" x2="18" y2="12"/>`
+  }
+}
+
 /**
  * Gets or lazily creates the floating indicator badge element.
  */
 function getOrCreateIndicator(): HTMLDivElement {
-  if (
-    !indicatorElement ||
-    !document.documentElement.contains(indicatorElement)
-  ) {
+  const shadow = ensureSuperDragShadow()
+  if (!indicatorElement || !shadow.contains(indicatorElement)) {
     indicatorElement = document.createElement("div")
     indicatorElement.id = "browse-assist-drag-indicator"
     indicatorElement.style.cssText = `
@@ -154,7 +218,7 @@ function getOrCreateIndicator(): HTMLDivElement {
       gap: 8px;
       padding: 7px 14px;
       border-radius: 9999px;
-      background: rgba(15, 23, 42, 0.94);
+      background: #0f172a;
       color: #f8fafc;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       font-size: 12px;
@@ -170,7 +234,7 @@ function getOrCreateIndicator(): HTMLDivElement {
       transition: opacity 0.15s ease-out, transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease;
       white-space: nowrap;
     `
-    document.documentElement.appendChild(indicatorElement)
+    shadow.appendChild(indicatorElement)
   }
   return indicatorElement
 }
@@ -179,7 +243,8 @@ function getOrCreateIndicator(): HTMLDivElement {
  * Gets or lazily creates the Circular Segment Selection (Radial Pie) indicator element.
  */
 function getOrCreateRadialIndicator(): HTMLDivElement {
-  if (!radialElement || !document.documentElement.contains(radialElement)) {
+  const shadow = ensureSuperDragShadow()
+  if (!radialElement || !shadow.contains(radialElement)) {
     radialElement = document.createElement("div")
     radialElement.id = "browse-assist-radial-indicator"
     radialElement.style.cssText = `
@@ -194,7 +259,7 @@ function getOrCreateRadialIndicator(): HTMLDivElement {
       transition: opacity 0.16s ease-out, transform 0.16s cubic-bezier(0.16, 1, 0.3, 1);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     `
-    document.documentElement.appendChild(radialElement)
+    shadow.appendChild(radialElement)
   }
   return radialElement
 }
@@ -210,6 +275,7 @@ const ICONS = {
   incognito: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12a5 5 0 0 0 5 5 8 8 0 0 1 5 2 8 8 0 0 1 5-2 5 5 0 0 0 5-5"/><path d="M3 7h18"/><circle cx="7" cy="14" r="2"/><circle cx="17" cy="14" r="2"/></svg>`,
   copy: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`,
   copyText: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>`,
+  search: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>`,
   none: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg>`
 }
 
@@ -219,60 +285,107 @@ const ICONS = {
 function getActionDisplay(
   action: SuperDragAction,
   targetType: "text" | "link" | "image"
-): { label: string; icon: string; theme: "indigo" | "emerald" | "amber" | "sky" | "violet" } {
+): {
+  label: string
+  shortLabel: string
+  icon: string
+  theme: "indigo" | "emerald" | "amber" | "sky" | "violet"
+} {
   const typeLabel =
     targetType === "text"
-      ? "Search"
+      ? t("features.superDrag.logic.types.search")
       : targetType === "image"
-        ? "Image"
-        : "Link"
+        ? t("features.superDrag.logic.types.image")
+        : t("features.superDrag.logic.types.link")
 
   switch (action) {
     case "open_bg_tab":
       return {
-        label: `Drop to Open ${typeLabel} (Background)`,
+        label: t("features.superDrag.logic.dropOpenBackground", {
+          type: typeLabel
+        }),
+        shortLabel: t("features.superDrag.logic.shortOpenBackground", {
+          type: typeLabel
+        }),
         icon: ICONS.tabBackground,
         theme: "indigo"
       }
     case "open_active_tab":
       return {
-        label: `Drop to Open ${typeLabel} (New Tab)`,
+        label: t("features.superDrag.logic.dropOpenActive", {
+          type: typeLabel
+        }),
+        shortLabel: t("features.superDrag.logic.shortOpenActive", {
+          type: typeLabel
+        }),
         icon: ICONS.tabForeground,
         theme: "sky"
       }
     case "open_window_active":
       return {
-        label: `Drop to Open ${typeLabel} (New Window)`,
+        label: t("features.superDrag.logic.dropOpenWindow", {
+          type: typeLabel
+        }),
+        shortLabel: t("features.superDrag.logic.shortOpenWindow", {
+          type: typeLabel
+        }),
         icon: ICONS.windowActive,
         theme: "sky"
       }
     case "open_incognito_active":
       return {
-        label: `Drop to Open ${typeLabel} (Incognito)`,
+        label: t("features.superDrag.logic.dropOpenIncognito", {
+          type: typeLabel
+        }),
+        shortLabel: t("features.superDrag.logic.shortOpenIncognito", {
+          type: typeLabel
+        }),
         icon: ICONS.incognito,
         theme: "amber"
       }
     case "copy_link_text":
       return {
-        label: "Drop to Copy Link Text",
+        label: t("features.superDrag.logic.dropCopyLinkText"),
+        shortLabel: t("features.superDrag.logic.shortCopyLinkText"),
         icon: ICONS.copyText,
         theme: "sky"
+      }
+    case "copy_markdown":
+      return {
+        label: t("features.superDrag.logic.dropCopyMarkdown"),
+        shortLabel: t("features.superDrag.logic.shortCopyMarkdown"),
+        icon: ICONS.copyText,
+        theme: "sky"
+      }
+    case "search_image":
+      return {
+        label: t("features.superDrag.logic.dropSearchImage"),
+        shortLabel: t("features.superDrag.logic.shortSearchImage"),
+        icon: ICONS.search,
+        theme: "indigo"
       }
     case "copy_to_clipboard":
       return {
         label:
           targetType === "text"
-            ? "Drop to Copy Text"
+            ? t("features.superDrag.logic.dropCopyText")
             : targetType === "image"
-              ? "Drop to Copy Image Link"
-              : "Drop to Copy Link URL",
+              ? t("features.superDrag.logic.dropCopyImageLink")
+              : t("features.superDrag.logic.dropCopyLinkUrl"),
+        shortLabel:
+          targetType === "text"
+            ? t("features.superDrag.logic.shortCopyText")
+            : targetType === "image"
+              ? t("features.superDrag.logic.shortCopyImageLink")
+              : t("features.superDrag.logic.shortCopyLinkUrl"),
         icon: ICONS.copy,
         theme: "emerald"
       }
     case "none":
     default:
       return {
-        label: "No action",
+        label: t("features.superDrag.logic.noAction"),
+        shortLabel: t("features.superDrag.logic.noAction"),
         icon: ICONS.none,
         theme: "indigo"
       }
@@ -316,7 +429,11 @@ function updateBadgeIndicator(
 
   el.style.left = `${clientX}px`
   el.style.top = `${clientY - 20}px`
-  el.style.opacity = "1"
+  el.style.opacity = String(
+    currentConfig.indicatorOpacity ??
+      DEFAULT_SUPER_DRAG_CONFIG.indicatorOpacity ??
+      1
+  )
   el.style.transform = "translate3d(-50%, -100%, 0) scale(1)"
 }
 
@@ -345,94 +462,143 @@ function updateRadialIndicator(
   currentRadialDirection = activeDirection
 
   const isDeadzone = activeDirection === null && !isExceeded
-  const activeAction = activeDirection ? getTargetAction(targetType, activeDirection) : "none"
-  const activeDisplay = activeDirection ? getActionDisplay(activeAction, targetType) : null
+  const activeAction = activeDirection
+    ? getTargetAction(targetType, activeDirection)
+    : "none"
+  const activeDisplay = activeDirection
+    ? getActionDisplay(activeAction, targetType)
+    : null
+  const activeTheme: RadialTheme =
+    !activeDirection || activeAction === "none"
+      ? "muted"
+      : activeDisplay?.theme ?? "indigo"
+  const activePalette = RADIAL_THEME_PALETTE[activeTheme]
 
-  // Target icon for center hub (centered at 110, 110)
-  const centerTargetIcon =
-    targetType === "text"
-      ? `<text x="110" y="117" text-anchor="middle" font-size="20" font-weight="700" fill="#94a3b8">T</text>`
-      : targetType === "link"
-        ? `<path d="M101 110 a4 4 0 0 1 4 -4 h6 a4 4 0 0 1 4 4 M119 110 a4 4 0 0 1 -4 4 h-6 a4 4 0 0 1 -4 -4" stroke="#94a3b8" stroke-width="2.2" fill="none"/>`
-        : `<rect x="99" y="101" width="22" height="18" rx="3" stroke="#94a3b8" stroke-width="2" fill="none"/>`
+  // Crisp 24x24 Lucide-style target icon for center hub (centered at 110, 110)
+  const centerGlyph =
+    isDeadzone || isExceeded
+      ? `<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>`
+      : targetType === "text"
+        ? `<polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/>`
+        : targetType === "link"
+          ? `<path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" y1="12" x2="16" y2="12"/>`
+          : `<rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>`
+
+  const centerIconColor =
+    isDeadzone || isExceeded ? "#f87171" : activePalette.iconColor
 
   const renderSector = (dir: DragDirection) => {
+    const dirAction = getTargetAction(targetType, dir)
+    const isDisabled = dirAction === "none"
     const isHovered = activeDirection === dir
-    const fill = isHovered ? RADIAL_BG_ACTIVE : RADIAL_BG_IDLE
-    const stroke = isHovered ? RADIAL_STROKE_ACTIVE : RADIAL_STROKE_IDLE
-    const strokeWidth = isHovered ? RADIAL_STROKE_WIDTH_ACTIVE : RADIAL_STROKE_WIDTH_IDLE
-    const filter = isHovered ? `filter="${RADIAL_GLOW_ACTIVE}"` : ""
+    const dirDisplay = getActionDisplay(dirAction, targetType)
+    const dirTheme: RadialTheme = isDisabled ? "muted" : dirDisplay.theme
+    const palette = RADIAL_THEME_PALETTE[dirTheme]
 
-    return `<path d="${RADIAL_PATHS[dir]}" fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}" ${filter} style="transition: fill 0.12s ease, stroke 0.12s ease; cursor: pointer;"/>`
+    const fill = isHovered
+      ? palette.fill
+      : isDisabled
+        ? RADIAL_BG_DISABLED
+        : RADIAL_BG_IDLE
+    const stroke = isHovered
+      ? palette.stroke
+      : isDisabled
+        ? RADIAL_STROKE_DISABLED
+        : RADIAL_STROKE_IDLE
+    const strokeWidth = isHovered
+      ? RADIAL_STROKE_WIDTH_ACTIVE
+      : RADIAL_STROKE_WIDTH_IDLE
+    const filter =
+      isHovered && palette.glow !== "none" ? `filter="${palette.glow}"` : ""
+
+    const { x, y } = RADIAL_ICON_CENTERS[dir]
+    const iconColor = isHovered
+      ? "#ffffff"
+      : isDisabled
+        ? "rgba(148, 163, 184, 0.35)"
+        : "rgba(226, 232, 240, 0.85)"
+    const iconStrokeWidth = isHovered ? "2.4" : "2.1"
+
+    return `
+      <g>
+        <path d="${RADIAL_PATHS[dir]}" fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}" stroke-linejoin="round" ${filter} style="transition: fill 0.12s ease, stroke 0.12s ease;"/>
+        <g transform="translate(${x - 9}, ${y - 9}) scale(0.75)" fill="none" stroke="${iconColor}" stroke-width="${iconStrokeWidth}" stroke-linecap="round" stroke-linejoin="round">
+          ${getRadialActionGlyph(dirAction, targetType)}
+        </g>
+      </g>
+    `
   }
 
-  // Directional arrows
-  const arrowColor = (dir: DragDirection) =>
-    activeDirection === dir ? "#ffffff" : "rgba(203, 213, 225, 0.7)"
-  const arrowStroke = (dir: DragDirection) =>
-    activeDirection === dir ? "2.6" : "2"
+  const centerStroke =
+    isDeadzone || isExceeded
+      ? RADIAL_DEADZONE_STROKE
+      : activeDirection && activeAction !== "none"
+        ? activePalette.pillBorder
+        : RADIAL_CENTER_STROKE
+
+  const pillBorder =
+    isDeadzone || isExceeded
+      ? "rgba(248, 113, 113, 0.5)"
+      : activePalette.pillBorder
 
   el.innerHTML = `
-    <svg width="220" height="220" viewBox="0 0 220 220" style="overflow:visible; filter: drop-shadow(0 12px 24px rgba(0,0,0,0.45));">
-      <!-- 4 Annular Wedges -->
+    <svg width="220" height="220" viewBox="0 0 220 220" style="overflow:visible; filter: drop-shadow(0 14px 28px rgba(0,0,0,0.5));">
+      <!-- 4 Action Sectors -->
       ${renderSector("up")}
       ${renderSector("right")}
       ${renderSector("down")}
       ${renderSector("left")}
 
-      <!-- Arrow Glyph: Up (centered at 110, 36) -->
-      <path d="M103 42 L110 34 L117 42 M110 34 L110 47" stroke="${arrowColor("up")}" stroke-width="${arrowStroke("up")}" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-      <!-- Arrow Glyph: Right (centered at 184, 110) -->
-      <path d="M178 103 L186 110 L178 117 M186 110 L173 110" stroke="${arrowColor("right")}" stroke-width="${arrowStroke("right")}" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-      <!-- Arrow Glyph: Down (centered at 110, 184) -->
-      <path d="M103 178 L110 186 L117 178 M110 186 L110 173" stroke="${arrowColor("down")}" stroke-width="${arrowStroke("down")}" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-      <!-- Arrow Glyph: Left (centered at 36, 110) -->
-      <path d="M42 103 L34 110 L42 117 M34 110 L47 110" stroke="${arrowColor("left")}" stroke-width="${arrowStroke("left")}" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-
-      <!-- Center Hole (Deadzone / Cancel Hub - Radius equals MIN_DRAG_DISTANCE) -->
-      <circle cx="${RADIAL_CENTER}" cy="${RADIAL_CENTER}" r="${RADIAL_INNER_RADIUS}"
+      <!-- Center Hub (Deadzone / Cancel Hub) -->
+      <circle cx="${RADIAL_CENTER}" cy="${RADIAL_CENTER}" r="${RADIAL_INNER_RADIUS - 3}"
         fill="${isDeadzone || isExceeded ? RADIAL_DEADZONE_BG : RADIAL_CENTER_BG}"
-        stroke="${isDeadzone || isExceeded ? RADIAL_DEADZONE_STROKE : RADIAL_CENTER_STROKE}"
-        stroke-width="${isDeadzone || isExceeded ? "1.5" : "1.2"}"
-        stroke-dasharray="${isDeadzone || isExceeded ? "3 3" : "none"}"
+        stroke="${centerStroke}"
+        stroke-width="${isDeadzone || isExceeded ? "1.6" : "1.4"}"
+        stroke-dasharray="${isDeadzone || isExceeded ? "4 3" : "none"}"
         style="transition: all 0.15s ease;"
       />
-      ${isDeadzone || isExceeded
-      ? `<path d="M102 102 L118 118 M118 102 L102 118" stroke="rgba(248, 113, 113, 0.85)" stroke-width="2.5" stroke-linecap="round"/>`
-      : centerTargetIcon
-    }
+      <g transform="translate(100, 100) scale(0.8333)" fill="none" stroke="${centerIconColor}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        ${centerGlyph}
+      </g>
     </svg>
 
     <!-- Floating Action Pill Tooltip -->
     <div style="
       position: absolute;
-      bottom: -32px;
+      bottom: -34px;
       left: 50%;
       transform: translateX(-50%);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
       padding: 5px 12px;
       border-radius: 9999px;
-      background: rgba(15, 23, 42, 0.96);
+      background: #0f172a;
       color: #f8fafc;
-      font-size: 11px;
+      font-size: 11.5px;
       font-weight: 600;
+      letter-spacing: 0.01em;
       white-space: nowrap;
-      border: 1px solid ${isDeadzone || isExceeded ? "rgba(239, 68, 68, 0.4)" : "rgba(56, 189, 248, 0.4)"};
-      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.4);
-      backdrop-filter: blur(8px);
+      border: 1px solid ${pillBorder};
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.48);
       transition: all 0.15s ease;
     ">
       ${isExceeded
-      ? `<span style="color:#fca5a5;">Exceeded max distance (Release to cancel)</span>`
+      ? `<span style="color:#fca5a5;">${escapeHtml(t("features.superDrag.logic.exceededMax"))}</span>`
       : isDeadzone
-        ? `<span style="color:#fca5a5;">Release to cancel</span>`
-        : `<span>${activeDisplay?.label.replace("Drop to Open ", "").replace("Drop to ", "")}</span>`
+        ? `<span style="color:#fca5a5;">${escapeHtml(t("features.superDrag.logic.releaseToCancel"))}</span>`
+        : `<span style="display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;flex-shrink:0;">${activeDisplay?.icon ?? ""}</span><span>${escapeHtml(activeDisplay?.shortLabel ?? "")}</span>`
     }
     </div>
   `
 
   el.style.left = `${safeX}px`
   el.style.top = `${safeY}px`
-  el.style.opacity = "1"
+  el.style.opacity = String(
+    currentConfig.indicatorOpacity ??
+      DEFAULT_SUPER_DRAG_CONFIG.indicatorOpacity ??
+      1
+  )
   el.style.transform = "translate3d(-50%, -50%, 0) scale(1)"
 }
 
@@ -702,7 +868,15 @@ async function onDragEnd(event: DragEvent): Promise<void> {
       const textToCopy = activeSession.extraText || activeSession.payload
       const success = await copyToClipboard(textToCopy)
       if (success) {
-        showCopiedFeedback("Copied Link Text", textToCopy)
+        showCopiedFeedback(t("content.copied.linkText"), textToCopy)
+      }
+    } else if (action === "copy_markdown") {
+      const cleaned = cleanUrl(activeSession.payload)
+      const title = (activeSession.extraText || cleaned).replace(/\[|\]/g, "")
+      const markdown = `[${title}](${cleaned})`
+      const success = await copyToClipboard(markdown)
+      if (success) {
+        showCopiedFeedback(t("content.copied.markdown"), markdown)
       }
     } else if (action === "copy_to_clipboard") {
       const payload =
@@ -713,10 +887,10 @@ async function onDragEnd(event: DragEvent): Promise<void> {
       if (success) {
         const label =
           activeSession.type === "text"
-            ? "Copied Text"
+            ? t("content.copied.text")
             : activeSession.type === "image"
-              ? "Copied Image Link"
-              : "Copied Link URL"
+              ? t("content.copied.imageLink")
+              : t("content.copied.linkUrl")
         showCopiedFeedback(label, payload)
       }
     } else if (action !== "none") {
@@ -766,19 +940,18 @@ export function deactivate(): void {
   window.removeEventListener("dragover", onDragOver, true)
   window.removeEventListener("dragend", onDragEnd, true)
 
-  if (indicatorElement && indicatorElement.parentNode) {
-    indicatorElement.parentNode.removeChild(indicatorElement)
-    indicatorElement = null
+  if (superDragHost && superDragHost.parentNode) {
+    superDragHost.parentNode.removeChild(superDragHost)
   }
+  superDragHost = null
+  superDragShadow = null
+  indicatorElement = null
   if (indicatorTimeoutId !== null) {
     window.clearTimeout(indicatorTimeoutId)
     indicatorTimeoutId = null
   }
 
-  if (radialElement && radialElement.parentNode) {
-    radialElement.parentNode.removeChild(radialElement)
-    radialElement = null
-  }
+  radialElement = null
   if (radialTimeoutId !== null) {
     window.clearTimeout(radialTimeoutId)
     radialTimeoutId = null

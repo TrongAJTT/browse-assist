@@ -1,9 +1,13 @@
+import { t } from "~core/i18n"
+import { createShadowHost } from "~core/shadowHost"
+import type { ElementToysConfig, ElementToysMode } from "~core/types"
+
 import { MODE_COLORS, ELEMENT_TOYS_CONTAINER_ID } from "./constants"
 import { getElementDescriptor, isInternalElement } from "./domUtils"
 import type { FlowDropTarget, ResizeHandle } from "./types"
-import type { ElementToysConfig, ElementToysMode } from "~core/types"
 
 export class OverlayView {
+  private host: HTMLDivElement | null = null
   private container: HTMLDivElement | null = null
   private highlightBox: HTMLDivElement | null = null
   private tagBadge: HTMLDivElement | null = null
@@ -12,7 +16,9 @@ export class OverlayView {
 
   public get isMounted(): boolean {
     return (
-      this.container !== null && document.documentElement.contains(this.container)
+      this.host !== null &&
+      this.container !== null &&
+      document.documentElement.contains(this.host)
     )
   }
 
@@ -20,19 +26,25 @@ export class OverlayView {
     toolbarEl: HTMLDivElement,
     onResizeStart?: (handle: ResizeHandle, e: PointerEvent) => void
   ): void {
-    if (this.container && document.documentElement.contains(this.container)) {
+    if (
+      this.host &&
+      this.container &&
+      document.documentElement.contains(this.host)
+    ) {
       if (!this.container.contains(toolbarEl)) {
         this.container.appendChild(toolbarEl)
       }
       return
     }
 
-    if (this.container && this.container.parentNode) {
-      this.container.parentNode.removeChild(this.container)
+    if (this.host && this.host.parentNode) {
+      this.host.parentNode.removeChild(this.host)
     }
 
+    const { host, shadow } = createShadowHost(ELEMENT_TOYS_CONTAINER_ID)
+    this.host = host
+
     this.container = document.createElement("div")
-    this.container.id = ELEMENT_TOYS_CONTAINER_ID
     this.container.setAttribute("data-browse-assist-internal", "true")
     this.container.style.cssText = `
       position: fixed;
@@ -186,7 +198,7 @@ export class OverlayView {
 
     this.container.appendChild(this.highlightBox)
     this.container.appendChild(toolbarEl)
-    document.documentElement.appendChild(this.container)
+    shadow.appendChild(this.container)
   }
 
   public setVisible(visible: boolean): void {
@@ -316,14 +328,19 @@ export class OverlayView {
       parts.push(`${Math.round(rect.width)} × ${Math.round(rect.height)}px`)
     }
 
-    let actionHint = "Click to zap"
+    let actionHint = t("features.elementToys.overlay.clickToZap")
     if (mode === "edit") {
-      actionHint = "Click to edit text"
+      actionHint = t("features.elementToys.overlay.clickToEdit")
     } else if (mode === "move") {
-      const typeLabel = config.moveType === "relative" ? "Flow Reorder" : "Free Move"
-      actionHint = `Drag body for ${typeLabel} • Drag corners to resize`
+      const typeLabel =
+        config.moveType === "relative"
+          ? t("features.elementToys.toolbar.flow")
+          : t("features.elementToys.toolbar.free")
+      actionHint = t("features.elementToys.overlay.dragBody", {
+        type: typeLabel
+      })
     } else if (mode === "hide") {
-      actionHint = "Click to hide"
+      actionHint = t("features.elementToys.overlay.clickToHide")
     }
 
     const prefix = parts.length > 0 ? `${parts.join(" • ")} — ` : ""
@@ -331,9 +348,10 @@ export class OverlayView {
   }
 
   public destroy(): void {
-    if (this.container && this.container.parentNode) {
-      this.container.parentNode.removeChild(this.container)
+    if (this.host && this.host.parentNode) {
+      this.host.parentNode.removeChild(this.host)
     }
+    this.host = null
     this.container = null
     this.highlightBox = null
     this.tagBadge = null

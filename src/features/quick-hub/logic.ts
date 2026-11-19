@@ -6,8 +6,24 @@
  */
 
 import { isColorPickerSupported } from "~core/browserDetect"
+import {
+  bindFabRightClick,
+  dismissFabOnTab,
+  FAB_MENU_ICONS,
+  isFabContextMenuOpen,
+  isFabRepositioning
+} from "~core/fab"
+import { t } from "~core/i18n"
 import { cleanUrl, copyToClipboard, showCopiedFeedback } from "~core/linkUtils"
-import { getStoredSettings, subscribeToSettings } from "~core/storage"
+import { openExtensionPopup } from "~core/popupHelper"
+import {
+  getStoredSettings,
+  subscribeToSettings,
+  updateFeatureSetting,
+  updateStoredSettings
+} from "~core/storage"
+import { detectPageTheme, observePageTheme } from "~core/themeDetect"
+import { showContentToast } from "~core/toast"
 import {
   DEFAULT_QUICK_HUB_CONFIG,
   normalizeEdgePlacement,
@@ -18,10 +34,15 @@ import {
   type QuickHubActionId,
   type QuickHubConfig
 } from "~core/types"
+import {
+  isRightClickActive,
+  toggleRightClick
+} from "~features/allow-right-click/logic"
 import { pickColor } from "~features/color-picker/logic"
 import { startZapping as startElementToys } from "~features/element-toys/logic"
 import { resetZoom as resetMouseZoom } from "~features/mouse-zoom/logic"
 import { togglePictureInPicture } from "~features/picture-in-picture/logic"
+import { captureActiveVideoFrame } from "~features/video-wheel-control/logic"
 
 let isActive = false
 let currentConfig: QuickHubConfig = { ...DEFAULT_QUICK_HUB_CONFIG }
@@ -38,6 +59,8 @@ let styleElement: HTMLStyleElement | null = null
 // State
 let isMenuOpen = false
 let hideTimeout: number | null = null
+let themeObserver: MutationObserver | null = null
+let detectedTheme: "dark" | "light" = "dark"
 const PROXIMITY_RADIUS = 80 // px distance from corner to reveal
 
 // SVG Icons
@@ -49,6 +72,9 @@ const ARROW_UP_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none
 const ARROW_DOWN_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`
 const ZOOM_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>`
 const LINK_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`
+const RIGHT_CLICK_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 9 5 12 1.8-5.2L21 14Z"/><path d="M7.2 2.2 8 5.1"/><path d="m5.1 8-2.9-.8"/><path d="M14 4.1 12 6"/><path d="m6 12-1.9 2"/></svg>`
+const MARKDOWN_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="m10 13-2 2 2 2"/><path d="m14 17 2-2-2-2"/></svg>`
+const CAMERA_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>`
 
 function getPlacementCss(placement: EdgePlacement): {
   btnCss: string
@@ -122,12 +148,24 @@ function getPlacementCss(placement: EdgePlacement): {
   }
 }
 
-function getShadowStyles(config: QuickHubConfig): string {
+function getShadowStyles(
+  config: QuickHubConfig,
+  pageTheme: "dark" | "light" = "dark"
+): string {
   const placement = normalizeEdgePlacement(
     config.placement ?? config.corner,
     DEFAULT_QUICK_HUB_CONFIG.placement
   )
   const { btnCss, menuCss } = getPlacementCss(placement)
+  const isDark = pageTheme === "dark"
+  const opacity = config.buttonOpacity ?? 1
+  const shape = config.buttonShape ?? "rounded"
+  const shapeCss =
+    shape === "circle"
+      ? "width: 36px; height: 36px; border-radius: 9999px;"
+      : shape === "pill"
+        ? "width: 44px; height: 32px; border-radius: 9999px;"
+        : "width: 36px; height: 36px; border-radius: 10px;"
 
   return `
     :host {
@@ -146,15 +184,17 @@ function getShadowStyles(config: QuickHubConfig): string {
     .qh-trigger {
       position: fixed;
       ${btnCss}
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      background: rgba(18, 18, 24, 0.82);
+      ${shapeCss}
+      background: ${isDark ? "rgba(18, 18, 24, 0.84)" : "rgba(255, 255, 255, 0.88)"};
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05);
-      color: #fbbf24;
+      border: 1px solid ${isDark ? "rgba(255, 255, 255, 0.16)" : "rgba(15, 23, 42, 0.14)"};
+      box-shadow: ${
+        isDark
+          ? "0 4px 18px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05)"
+          : "0 4px 16px rgba(15, 23, 42, 0.12), 0 1px 3px rgba(15, 23, 42, 0.08)"
+      };
+      color: ${isDark ? "#fbbf24" : "#d97706"};
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -170,9 +210,14 @@ function getShadowStyles(config: QuickHubConfig): string {
     }
 
     .qh-trigger:hover {
-      background: rgba(28, 28, 38, 0.95);
-      border-color: rgba(251, 191, 36, 0.5);
-      box-shadow: 0 6px 22px rgba(0, 0, 0, 0.5), 0 0 12px rgba(251, 191, 36, 0.25);
+      background: ${isDark ? "rgba(28, 28, 38, 0.95)" : "rgba(255, 255, 255, 0.98)"};
+      border-color: rgba(251, 191, 36, 0.55);
+      box-shadow: ${
+        isDark
+          ? "0 6px 22px rgba(0, 0, 0, 0.5), 0 0 12px rgba(251, 191, 36, 0.25)"
+          : "0 6px 20px rgba(15, 23, 42, 0.16), 0 0 10px rgba(245, 158, 11, 0.22)"
+      };
+      opacity: 1 !important;
       transform: scale(1.06);
     }
 
@@ -183,7 +228,7 @@ function getShadowStyles(config: QuickHubConfig): string {
     .qh-trigger.qh-open {
       background: rgba(251, 191, 36, 0.15);
       border-color: #fbbf24;
-      color: #fbbf24;
+      color: #f59e0b;
       box-shadow: 0 0 16px rgba(251, 191, 36, 0.35);
       opacity: 1 !important;
       pointer-events: auto !important;
@@ -198,14 +243,14 @@ function getShadowStyles(config: QuickHubConfig): string {
     }
 
     .qh-trigger.qh-proximity.qh-visible {
-      opacity: 1;
+      opacity: ${opacity};
       pointer-events: auto;
       transform: scale(1);
     }
 
-    /* Persistent mode (hoverToReveal === false): 30% opacity when idle, 100% on hover/open */
+    /* Persistent mode (hoverToReveal === false): idle opacity * 0.3, 100% on hover/open */
     .qh-trigger.qh-persistent {
-      opacity: 0.3;
+      opacity: ${Number((opacity * 0.35).toFixed(2))};
       pointer-events: auto;
       transform: scale(1);
     }
@@ -213,21 +258,32 @@ function getShadowStyles(config: QuickHubConfig): string {
     .qh-menu {
       position: fixed;
       ${menuCss}
-      width: 250px;
-      max-width: calc(100vw - 32px);
-      background: rgba(18, 18, 24, 0.94);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      border-radius: 14px;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.06);
-      padding: 6px;
+      min-width: 204px;
+      max-width: min(260px, calc(100vw - 32px));
+      padding: 5px;
+      border-radius: 12px;
+      backdrop-filter: blur(18px) saturate(160%);
+      -webkit-backdrop-filter: blur(18px) saturate(160%);
+      ${
+        isDark
+          ? `
+        background: rgba(15, 23, 42, 0.94);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        color: #f1f5f9;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 0, 0, 0.25);
+      `
+          : `
+        background: rgba(255, 255, 255, 0.96);
+        border: 1px solid rgba(15, 23, 42, 0.12);
+        color: #0f172a;
+        box-shadow: 0 12px 32px rgba(15, 23, 42, 0.16), 0 0 0 1px rgba(15, 23, 42, 0.04);
+      `
+      }
       z-index: 2147483647;
       opacity: 0;
       pointer-events: none;
-      transform: scale(0.92);
-      transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1),
-                  transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+      transform: scale(0.95);
+      transition: opacity 0.14s ease-out, transform 0.14s ease-out;
     }
 
     .qh-menu.qh-menu-open {
@@ -239,7 +295,7 @@ function getShadowStyles(config: QuickHubConfig): string {
     .qh-items-list {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 1px;
     }
 
     .qh-item {
@@ -247,78 +303,98 @@ function getShadowStyles(config: QuickHubConfig): string {
       align-items: center;
       justify-content: space-between;
       width: 100%;
-      padding: 7px 9px;
+      padding: 7px 10px;
       border: none;
       background: transparent;
       border-radius: 8px;
-      color: #cbd5e1;
+      color: inherit;
+      font-family: inherit;
       font-size: 12px;
+      line-height: 1.35;
       font-weight: 500;
       cursor: pointer;
       text-align: left;
-      transition: background 0.14s ease, color 0.14s ease, transform 0.14s ease;
+      transition: background 0.12s ease, color 0.12s ease;
       outline: none;
     }
 
-    .qh-item:hover {
-      background: rgba(255, 255, 255, 0.08);
-      color: #f8fafc;
-      transform: translateX(2px);
+    .qh-item:hover,
+    .qh-item:focus-visible {
+      background: ${isDark ? "rgba(99, 102, 241, 0.22)" : "rgba(79, 70, 229, 0.1)"};
+      color: ${isDark ? "#c7d2fe" : "#4338ca"};
     }
 
     .qh-item:active {
-      transform: scale(0.98) translateX(2px);
+      transform: scale(0.99);
     }
 
     .qh-item-content {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 9px;
+      min-width: 0;
     }
 
     .qh-icon-box {
-      width: 26px;
-      height: 26px;
-      border-radius: 6px;
-      display: flex;
+      width: 16px;
+      height: 16px;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      shrink: 0;
+      flex-shrink: 0;
     }
 
     .qh-icon-pip {
-      background: rgba(99, 102, 241, 0.15);
-      color: #818cf8;
+      color: ${isDark ? "#818cf8" : "#4f46e5"};
     }
 
     .qh-icon-color {
-      background: rgba(244, 114, 182, 0.15);
-      color: #f472b6;
+      color: ${isDark ? "#f472b6" : "#db2777"};
     }
 
     .qh-icon-zap {
-      background: rgba(251, 191, 36, 0.15);
-      color: #fbbf24;
+      color: ${isDark ? "#fbbf24" : "#d97706"};
     }
 
     .qh-icon-scroll {
-      background: rgba(129, 140, 248, 0.15);
-      color: #a5b4fc;
+      color: ${isDark ? "#a5b4fc" : "#4f46e5"};
     }
 
     .qh-icon-zoom {
-      background: rgba(167, 139, 250, 0.15);
-      color: #c084fc;
+      color: ${isDark ? "#c084fc" : "#9333ea"};
     }
 
     .qh-icon-link {
-      background: rgba(34, 211, 238, 0.15);
-      color: #22d3ee;
+      color: ${isDark ? "#22d3ee" : "#0891b2"};
+    }
+
+    .qh-icon-rightclick {
+      color: ${isDark ? "#34d399" : "#059669"};
+    }
+
+    .qh-icon-markdown {
+      color: ${isDark ? "#38bdf8" : "#0284c7"};
+    }
+
+    .qh-icon-camera {
+      color: ${isDark ? "#fb7185" : "#e11d48"};
+    }
+
+    .qh-status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 9999px;
+      background: #10b981;
+      box-shadow: 0 0 6px rgba(16, 185, 129, 0.7);
+      flex-shrink: 0;
     }
 
     .qh-item-name {
-      font-size: 11.5px;
+      font-size: 12px;
       font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .qh-empty-msg {
@@ -348,7 +424,7 @@ const ACTION_RENDERERS: Record<
     btn.innerHTML = `
       <div class="qh-item-content">
         <div class="qh-icon-box qh-icon-pip">${PIP_ICON_SVG}</div>
-        <span class="qh-item-name">Watch Video in PiP</span>
+        <span class="qh-item-name">${t("features.quickHub.settings.actions.pipTitle")}</span>
       </div>
     `
     btn.addEventListener("click", () => {
@@ -372,7 +448,7 @@ const ACTION_RENDERERS: Record<
     btn.innerHTML = `
       <div class="qh-item-content">
         <div class="qh-icon-box qh-icon-color">${EYEDROPPER_ICON_SVG}</div>
-        <span class="qh-item-name">Pick Color from Screen</span>
+        <span class="qh-item-name">${t("features.quickHub.settings.actions.colorPickerTitle")}</span>
       </div>
     `
     btn.addEventListener("click", () => {
@@ -395,7 +471,7 @@ const ACTION_RENDERERS: Record<
     btn.innerHTML = `
       <div class="qh-item-content">
         <div class="qh-icon-box qh-icon-zap">${ZAP_ICON_SVG}</div>
-        <span class="qh-item-name">Element Toys</span>
+        <span class="qh-item-name">${t("features.quickHub.settings.actions.elementToysTitle")}</span>
       </div>
     `
     btn.addEventListener("click", () => {
@@ -418,7 +494,7 @@ const ACTION_RENDERERS: Record<
     btn.innerHTML = `
       <div class="qh-item-content">
         <div class="qh-icon-box qh-icon-scroll">${ARROW_UP_SVG}</div>
-        <span class="qh-item-name">Scroll to Top</span>
+        <span class="qh-item-name">${t("features.quickHub.settings.actions.scrollTopTitle")}</span>
       </div>
     `
     btn.addEventListener("click", () => {
@@ -442,7 +518,7 @@ const ACTION_RENDERERS: Record<
     btn.innerHTML = `
       <div class="qh-item-content">
         <div class="qh-icon-box qh-icon-scroll">${ARROW_DOWN_SVG}</div>
-        <span class="qh-item-name">Scroll to Bottom</span>
+        <span class="qh-item-name">${t("features.quickHub.settings.actions.scrollBottomTitle")}</span>
       </div>
     `
     btn.addEventListener("click", () => {
@@ -469,7 +545,7 @@ const ACTION_RENDERERS: Record<
     btn.innerHTML = `
       <div class="qh-item-content">
         <div class="qh-icon-box qh-icon-zoom">${ZOOM_SVG}</div>
-        <span class="qh-item-name">Reset Page Zoom</span>
+        <span class="qh-item-name">${t("features.quickHub.settings.actions.resetZoomTitle")}</span>
       </div>
     `
     btn.addEventListener("click", () => {
@@ -492,16 +568,97 @@ const ACTION_RENDERERS: Record<
     btn.innerHTML = `
       <div class="qh-item-content">
         <div class="qh-icon-box qh-icon-link">${LINK_SVG}</div>
-        <span class="qh-item-name">Copy Clean URL</span>
+        <span class="qh-item-name">${t("features.quickHub.settings.actions.cleanUrlTitle")}</span>
+      </div>
+    `
+    btn.addEventListener("click", async () => {
+      const rawUrl = window.location.href
+      const cleaned = cleanUrl(rawUrl)
+      const ok = await copyToClipboard(cleaned)
+      closeMenu()
+      if (ok) {
+        showCopiedFeedback(t("features.quickHub.logic.cleanUrlCopied"), cleaned)
+      }
+    })
+    list.appendChild(btn)
+    return true
+  },
+  allowRightClick: (list, settings) => {
+    if (settings.featureLayout?.hidden?.includes("allowRightClick")) {
+      return false
+    }
+    const active = isRightClickActive()
+    const btn = document.createElement("button")
+    btn.type = "button"
+    btn.className = "qh-item"
+    btn.innerHTML = `
+      <div class="qh-item-content">
+        <div class="qh-icon-box qh-icon-rightclick">${RIGHT_CLICK_SVG}</div>
+        <span class="qh-item-name">${t("features.quickHub.settings.actions.allowRightClickTitle")}</span>
+      </div>
+      ${active ? `<span class="qh-status-dot"></span>` : ""}
+    `
+    btn.addEventListener("click", () => {
+      closeMenu()
+      toggleRightClick(true)
+    })
+    list.appendChild(btn)
+    return true
+  },
+  copyMarkdown: (list, settings) => {
+    if (
+      !settings.contextMenuActions ||
+      settings.featureLayout?.hidden?.includes("contextMenuActions")
+    ) {
+      return false
+    }
+    const btn = document.createElement("button")
+    btn.type = "button"
+    btn.className = "qh-item"
+    btn.innerHTML = `
+      <div class="qh-item-content">
+        <div class="qh-icon-box qh-icon-markdown">${MARKDOWN_SVG}</div>
+        <span class="qh-item-name">${t("features.quickHub.settings.actions.copyMarkdownTitle")}</span>
+      </div>
+    `
+    btn.addEventListener("click", async () => {
+      const cleaned = cleanUrl(window.location.href)
+      const title = (document.title || cleaned).replace(/[[\]]/g, "\\$&")
+      const markdown = `[${title}](${cleaned})`
+      const ok = await copyToClipboard(markdown)
+      closeMenu()
+      if (ok) {
+        showCopiedFeedback(t("features.quickHub.logic.markdownCopied"), markdown)
+      }
+    })
+    list.appendChild(btn)
+    return true
+  },
+  videoScreenshot: (list, settings) => {
+    if (
+      !settings.videoWheelControl ||
+      settings.featureLayout?.hidden?.includes("videoWheelControl")
+    ) {
+      return false
+    }
+    const btn = document.createElement("button")
+    btn.type = "button"
+    btn.className = "qh-item"
+    btn.innerHTML = `
+      <div class="qh-item-content">
+        <div class="qh-icon-box qh-icon-camera">${CAMERA_SVG}</div>
+        <span class="qh-item-name">${t("features.quickHub.settings.actions.videoScreenshotTitle")}</span>
       </div>
     `
     btn.addEventListener("click", async () => {
       closeMenu()
-      const rawUrl = window.location.href
-      const cleaned = cleanUrl(rawUrl)
-      const ok = await copyToClipboard(cleaned)
-      if (ok) {
-        showCopiedFeedback("Clean URL Copied", cleaned)
+      const captured = await captureActiveVideoFrame()
+      if (!captured) {
+        showContentToast({
+          message: t("features.quickHub.logic.noVideoFound"),
+          type: "warning",
+          duration: 1800
+        })
       }
     })
     list.appendChild(btn)
@@ -537,7 +694,7 @@ function renderMenuContent(): void {
   if (renderedCount === 0) {
     const empty = document.createElement("div")
     empty.className = "qh-empty-msg"
-    empty.textContent = "No tools active. Enable features in Browse Assist popup."
+    empty.textContent = t("features.quickHub.logic.noToolsActive")
     list.appendChild(empty)
   }
 
@@ -580,7 +737,15 @@ export function toggleQuickHubMenu(): void {
  * Checks proximity between mouse coordinate and floating trigger button.
  */
 function handleMouseMove(e: MouseEvent): void {
-  if (!currentConfig.hoverToReveal || isMenuOpen || !triggerBtn) return
+  if (
+    !currentConfig.hoverToReveal ||
+    isMenuOpen ||
+    isFabContextMenuOpen() ||
+    isFabRepositioning() ||
+    !triggerBtn
+  ) {
+    return
+  }
 
   const rect = triggerBtn.getBoundingClientRect()
   const btnCenterX = rect.left + rect.width / 2
@@ -641,8 +806,9 @@ function createDOM(): void {
 
   shadowRoot = hostElement.attachShadow({ mode: "closed" })
 
+  detectedTheme = detectPageTheme(cachedSettings?.theme ?? "system")
   styleElement = document.createElement("style")
-  styleElement.textContent = getShadowStyles(currentConfig)
+  styleElement.textContent = getShadowStyles(currentConfig, detectedTheme)
 
   // Floating trigger button
   triggerBtn = document.createElement("button")
@@ -650,12 +816,105 @@ function createDOM(): void {
   triggerBtn.className = `qh-trigger ${
     currentConfig.hoverToReveal ? "qh-proximity qh-hidden" : "qh-persistent"
   }`
-  triggerBtn.title = "Quick Hub (Instant Tools)"
-  triggerBtn.setAttribute("aria-label", "Quick Hub")
+  triggerBtn.title = t("features.quickHub.logic.triggerTooltip")
+  triggerBtn.setAttribute(
+    "aria-label",
+    t("features.quickHub.logic.triggerAria")
+  )
   triggerBtn.innerHTML = SPARKLES_ICON_SVG
   triggerBtn.addEventListener("click", (e) => {
     e.stopPropagation()
     toggleQuickHubMenu()
+  })
+  bindFabRightClick(triggerBtn, {
+    allowedEdges: ["left", "right", "top", "bottom"],
+    getInitialPlacement: () =>
+      normalizeEdgePlacement(
+        currentConfig.placement ?? currentConfig.corner,
+        DEFAULT_QUICK_HUB_CONFIG.placement
+      ),
+    getBounds: () => ({
+      left: 0,
+      top: 0,
+      width: window.innerWidth,
+      height: window.innerHeight
+    }),
+    getTheme: () => detectedTheme,
+    onInteractionStart: () => {
+      closeMenu()
+      if (hideTimeout) {
+        clearTimeout(hideTimeout)
+        hideTimeout = null
+      }
+      if (currentConfig.hoverToReveal && triggerBtn) {
+        triggerBtn.classList.remove("qh-hidden")
+        triggerBtn.classList.add("qh-visible")
+      }
+    },
+    onPreview: (placement) => {
+      currentConfig = { ...currentConfig, placement }
+      if (styleElement) {
+        styleElement.textContent = getShadowStyles(currentConfig, detectedTheme)
+      }
+    },
+    onCommit: async (placement) => {
+      currentConfig = { ...currentConfig, placement }
+      updateStyles()
+      await updateStoredSettings((cur) => ({
+        ...cur,
+        quickHubConfig: {
+          ...cur.quickHubConfig,
+          placement
+        }
+      }))
+    },
+    onInteractionEnd: () => {
+      updateStyles()
+    },
+    getMenuItems: ({ startMove }) => [
+      {
+        id: "move",
+        label: t("content.fabMenu.movePosition"),
+        iconSvg: FAB_MENU_ICONS.move,
+        onSelect: startMove
+      },
+      {
+        id: "settings",
+        label: t("content.fabMenu.openSettings"),
+        iconSvg: FAB_MENU_ICONS.settings,
+        onSelect: () => {
+          void openExtensionPopup("quick-hub-settings")
+        }
+      },
+      {
+        id: "hide-tab",
+        label: t("content.fabMenu.hideOnTab"),
+        iconSvg: FAB_MENU_ICONS.eyeOff,
+        onSelect: () => {
+          dismissFabOnTab("quickHub")
+          deactivate()
+          showContentToast({
+            message: t("content.fabMenu.hiddenOnTab", {
+              feature: t("features.quickHub.title")
+            }),
+            type: "info",
+            duration: 1800
+          })
+        }
+      },
+      {
+        id: "disable",
+        label: t("content.fabMenu.disableFeature", {
+          feature: t("features.quickHub.title")
+        }),
+        iconSvg: FAB_MENU_ICONS.power,
+        danger: true,
+        dividerBefore: true,
+        onSelect: () => {
+          void updateFeatureSetting("quickHub", false)
+        }
+      }
+    ]
   })
 
   // Popup Menu
@@ -670,8 +929,9 @@ function createDOM(): void {
 }
 
 function updateStyles(): void {
+  detectedTheme = detectPageTheme(cachedSettings?.theme ?? "system")
   if (styleElement) {
-    styleElement.textContent = getShadowStyles(currentConfig)
+    styleElement.textContent = getShadowStyles(currentConfig, detectedTheme)
   }
   if (triggerBtn) {
     if (currentConfig.hoverToReveal) {
@@ -737,6 +997,7 @@ export function activate(config?: QuickHubConfig): void {
   window.addEventListener("pointermove", handleMouseMove, { passive: true })
   window.addEventListener("pointerdown", handleDocumentPointerDown, { capture: true })
   window.addEventListener("keydown", handleDocumentKeyDown, { capture: true })
+  themeObserver = observePageTheme(() => updateStyles())
 }
 
 /**
@@ -747,6 +1008,11 @@ export function deactivate(): void {
   isActive = false
 
   closeMenu()
+
+  if (themeObserver) {
+    themeObserver.disconnect()
+    themeObserver = null
+  }
 
   if (settingsUnsubscribe) {
     settingsUnsubscribe()

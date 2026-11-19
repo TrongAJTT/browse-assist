@@ -5,6 +5,18 @@
  */
 
 import {
+  bindFabRightClick,
+  dismissFabOnTab,
+  FAB_MENU_ICONS,
+  isFabContextMenuOpen,
+  isFabRepositioning
+} from "~core/fab"
+import { t } from "~core/i18n"
+import { openExtensionPopup } from "~core/popupHelper"
+import { updateFeatureSetting, updateStoredSettings } from "~core/storage"
+import { detectPageTheme } from "~core/themeDetect"
+import { showContentToast } from "~core/toast"
+import {
   DEFAULT_QUICK_SCROLL_CONFIG,
   normalizeEdgePlacement,
   type QuickScrollConfig,
@@ -60,107 +72,6 @@ const DOWN_ARROW_SVG = `
   </svg>
 `
 
-/**
- * Parses RGB / RGBA color string and returns luminance (0 - 255), or null if transparent.
- */
-function parseRgbLuminance(colorStr: string): number | null {
-  if (
-    !colorStr ||
-    colorStr === "transparent" ||
-    colorStr === "rgba(0, 0, 0, 0)"
-  ) {
-    return null
-  }
-  const match = colorStr.match(
-    /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/
-  )
-  if (!match) return null
-
-  const r = parseInt(match[1], 10)
-  const g = parseInt(match[2], 10)
-  const b = parseInt(match[3], 10)
-  const a = match[4] !== undefined ? parseFloat(match[4]) : 1
-
-  if (a < 0.1) return null // Virtually transparent
-
-  // Standard perception-weighted formula
-  return 0.299 * r + 0.587 * g + 0.114 * b
-}
-
-/**
- * Inspects page background color and dark mode attributes.
- * Falls back to extension / OS theme if page background is ambiguous.
- */
-function detectPageTheme(): "dark" | "light" {
-  try {
-    const htmlEl = document.documentElement
-    const bodyEl = document.body
-
-    // 1. Check known explicit dark attributes on <html> or <body>
-    const htmlClass = htmlEl?.className?.toLowerCase?.() || ""
-    const bodyClass = bodyEl?.className?.toLowerCase?.() || ""
-    const dataTheme =
-      htmlEl?.getAttribute("data-theme") ||
-      htmlEl?.getAttribute("data-color-mode") ||
-      bodyEl?.getAttribute("data-theme") ||
-      bodyEl?.getAttribute("data-color-mode")
-
-    if (
-      dataTheme === "dark" ||
-      htmlClass.includes("dark") ||
-      bodyClass.includes("dark")
-    ) {
-      return "dark"
-    }
-    if (
-      dataTheme === "light" ||
-      htmlClass.includes("light") ||
-      bodyClass.includes("light")
-    ) {
-      return "light"
-    }
-
-    // 2. Check meta color-scheme
-    const metaTheme = document
-      .querySelector('meta[name="color-scheme"]')
-      ?.getAttribute("content")
-    if (metaTheme) {
-      if (metaTheme.includes("dark") && !metaTheme.includes("light"))
-        return "dark"
-      if (metaTheme.includes("light") && !metaTheme.includes("dark"))
-        return "light"
-    }
-
-    // 3. Inspect computed background colors
-    if (bodyEl) {
-      const bodyBg = window.getComputedStyle(bodyEl).backgroundColor
-      const bodyLum = parseRgbLuminance(bodyBg)
-      if (bodyLum !== null) {
-        return bodyLum < 130 ? "dark" : "light"
-      }
-    }
-
-    if (htmlEl) {
-      const htmlBg = window.getComputedStyle(htmlEl).backgroundColor
-      const htmlLum = parseRgbLuminance(htmlBg)
-      if (htmlLum !== null) {
-        return htmlLum < 130 ? "dark" : "light"
-      }
-    }
-  } catch (err) {
-    // Fail silently on security/frame boundaries
-  }
-
-  // 4. Fallback to extension theme setting
-  if (extensionTheme === "dark") return "dark"
-  if (extensionTheme === "light") return "light"
-
-  // 5. Final fallback to OS system preference
-  const prefersDark =
-    window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? true
-  return prefersDark ? "dark" : "light"
-}
-
 function getStyles(theme: "dark" | "light"): string {
   const isDark = theme === "dark"
 
@@ -180,6 +91,7 @@ function getStyles(theme: "dark" | "light"): string {
       padding: 5px;
       z-index: 2147483645;
       pointer-events: auto;
+      opacity: var(--qs-opacity, 1);
       transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       user-select: none;
       -webkit-user-select: none;
@@ -270,6 +182,60 @@ function getStyles(theme: "dark" | "light"): string {
       transform: scale(0.95);
     }
 
+    /* Rounded Square Shape */
+    .qs-container[data-shape="rounded"] .qs-button {
+      border-radius: 10px;
+    }
+
+    /* Unified Vertical Capsule Shape */
+    .qs-container[data-shape="capsule"] {
+      gap: 0;
+      padding: 0;
+      border-radius: 9999px;
+      overflow: hidden;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      ${
+        isDark
+          ? `
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        background: rgba(15, 23, 42, 0.76);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.2);
+      `
+          : `
+        border: 1px solid rgba(0, 0, 0, 0.12);
+        background: rgba(255, 255, 255, 0.88);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08);
+      `
+      }
+    }
+
+    .qs-container[data-shape="capsule"] .qs-button {
+      width: 38px;
+      height: 34px;
+      border: none;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+
+    .qs-container[data-shape="capsule"] .qs-button + .qs-button:not(.qs-hidden) {
+      border-top: 1px solid ${isDark ? "rgba(255, 255, 255, 0.12)" : "rgba(0, 0, 0, 0.08)"};
+    }
+
+    .qs-container[data-shape="capsule"] .qs-button:hover {
+      transform: none;
+      box-shadow: none;
+      background: ${isDark ? "#6366f1" : "#4f46e5"};
+      color: #ffffff;
+    }
+
+    .qs-container[data-shape="capsule"] .qs-button:active {
+      transform: scale(0.96);
+    }
+
     .qs-hidden {
       display: none !important;
     }
@@ -277,7 +243,7 @@ function getStyles(theme: "dark" | "light"): string {
 }
 
 function updateThemeStyles(): void {
-  const newTheme = detectPageTheme()
+  const newTheme = detectPageTheme(extensionTheme)
   if (newTheme !== detectedTheme || !styleElement) {
     detectedTheme = newTheme
     if (styleElement) {
@@ -288,6 +254,14 @@ function updateThemeStyles(): void {
 
 function applyPlacementStyle(): void {
   if (!containerElement) return
+  containerElement.setAttribute(
+    "data-shape",
+    currentConfig.buttonShape ?? DEFAULT_QUICK_SCROLL_CONFIG.buttonShape ?? "circle"
+  )
+  containerElement.style.setProperty(
+    "--qs-opacity",
+    String(currentConfig.opacity ?? DEFAULT_QUICK_SCROLL_CONFIG.opacity ?? 1)
+  )
   const placement = normalizeEdgePlacement(
     currentConfig.placement ?? currentConfig.position,
     DEFAULT_QUICK_SCROLL_CONFIG.placement
@@ -310,27 +284,111 @@ function createShadowDOM(): void {
 
   shadowRoot = hostElement.attachShadow({ mode: "closed" })
 
-  detectedTheme = detectPageTheme()
+  detectedTheme = detectPageTheme(extensionTheme)
   styleElement = document.createElement("style")
   styleElement.textContent = getStyles(detectedTheme)
 
   containerElement = document.createElement("div")
   containerElement.className = "qs-container"
   applyPlacementStyle()
+  bindFabRightClick(containerElement, {
+    allowedEdges: ["left", "right"],
+    getInitialPlacement: () =>
+      normalizeEdgePlacement(
+        currentConfig.placement ?? currentConfig.position,
+        DEFAULT_QUICK_SCROLL_CONFIG.placement
+      ),
+    getBounds: () => ({
+      left: 0,
+      top: 0,
+      width: window.innerWidth,
+      height: window.innerHeight
+    }),
+    getTheme: () => detectedTheme,
+    onInteractionStart: () => {
+      if (hideTimer) {
+        clearTimeout(hideTimer)
+        hideTimer = null
+      }
+      containerElement?.classList.remove("qs-dimmed")
+    },
+    onPreview: (placement) => {
+      currentConfig = { ...currentConfig, placement }
+      applyPlacementStyle()
+    },
+    onCommit: async (placement) => {
+      currentConfig = { ...currentConfig, placement }
+      applyPlacementStyle()
+      await updateStoredSettings((cur) => ({
+        ...cur,
+        quickScrollConfig: {
+          ...cur.quickScrollConfig,
+          placement
+        }
+      }))
+    },
+    onInteractionEnd: () => {
+      updateButtonsVisibility()
+    },
+    getMenuItems: ({ startMove }) => [
+      {
+        id: "move",
+        label: t("content.fabMenu.movePosition"),
+        iconSvg: FAB_MENU_ICONS.move,
+        onSelect: startMove
+      },
+      {
+        id: "settings",
+        label: t("content.fabMenu.openSettings"),
+        iconSvg: FAB_MENU_ICONS.settings,
+        onSelect: () => {
+          void openExtensionPopup("quick-scroll-settings")
+        }
+      },
+      {
+        id: "hide-tab",
+        label: t("content.fabMenu.hideOnTab"),
+        iconSvg: FAB_MENU_ICONS.eyeOff,
+        onSelect: () => {
+          dismissFabOnTab("quickScroll")
+          deactivate()
+          showContentToast({
+            message: t("content.fabMenu.hiddenOnTab", {
+              feature: t("features.quickScroll.title")
+            }),
+            type: "info",
+            duration: 1800
+          })
+        }
+      },
+      {
+        id: "disable",
+        label: t("content.fabMenu.disableFeature", {
+          feature: t("features.quickScroll.title")
+        }),
+        iconSvg: FAB_MENU_ICONS.power,
+        danger: true,
+        dividerBefore: true,
+        onSelect: () => {
+          void updateFeatureSetting("quickScroll", false)
+        }
+      }
+    ]
+  })
 
   // Button Scroll to Top
   btnTop = document.createElement("button")
   btnTop.className = "qs-button qs-hidden"
-  btnTop.setAttribute("aria-label", "Scroll to top")
-  btnTop.title = "Scroll to top"
+  btnTop.setAttribute("aria-label", t("features.quickScroll.logic.scrollToTop"))
+  btnTop.title = t("features.quickScroll.logic.scrollToTop")
   btnTop.innerHTML = UP_ARROW_SVG
   btnTop.addEventListener("click", handleScrollTopClick)
 
   // Button Scroll to Bottom
   btnBottom = document.createElement("button")
   btnBottom.className = "qs-button qs-hidden"
-  btnBottom.setAttribute("aria-label", "Scroll to bottom")
-  btnBottom.title = "Scroll to bottom"
+  btnBottom.setAttribute("aria-label", t("features.quickScroll.logic.scrollToBottom"))
+  btnBottom.title = t("features.quickScroll.logic.scrollToBottom")
   btnBottom.innerHTML = DOWN_ARROW_SVG
   btnBottom.addEventListener("click", handleScrollBottomClick)
 
@@ -382,7 +440,7 @@ function handleScrollTopClick(e: MouseEvent): void {
     }
 
     if (btnTop) {
-      btnTop.title = "Return to previous position"
+      btnTop.title = t("features.quickScroll.logic.returnToPrevious")
       btnTop.innerHTML = RETURN_SVG
     }
 
@@ -430,7 +488,7 @@ function handleScrollBottomClick(e: MouseEvent): void {
     }
 
     if (btnBottom) {
-      btnBottom.title = "Return to previous position"
+      btnBottom.title = t("features.quickScroll.logic.returnToPrevious")
       btnBottom.innerHTML = RETURN_SVG
     }
 
@@ -453,17 +511,69 @@ function resetReturnMemory(): void {
     memoryTimer = null
   }
   if (btnTop) {
-    btnTop.title = "Scroll to top"
+    btnTop.title = t("features.quickScroll.logic.scrollToTop")
     btnTop.innerHTML = UP_ARROW_SVG
   }
   if (btnBottom) {
-    btnBottom.title = "Scroll to bottom"
+    btnBottom.title = t("features.quickScroll.logic.scrollToBottom")
     btnBottom.innerHTML = DOWN_ARROW_SVG
   }
 }
 
+const NATIVE_SCROLL_BTN_SELECTOR = [
+  '[id*="back-to-top" i]',
+  '[id*="scroll-top" i]',
+  '[id*="scrolltop" i]',
+  '[id*="to-top" i]',
+  '[id*="gotop" i]',
+  '[class*="back-to-top" i]',
+  '[class*="scroll-top" i]',
+  '[class*="scrolltop" i]',
+  '[class*="to-top" i]',
+  '[class*="gotop" i]',
+  '[aria-label*="back to top" i]',
+  '[aria-label*="scroll to top" i]',
+  '[title*="back to top" i]',
+  '[title*="scroll to top" i]'
+].join(", ")
+
+/**
+ * Heuristic check for an existing visible fixed/sticky scroll-to-top button on the page.
+ */
+function hasNativeScrollButton(): boolean {
+  try {
+    const candidates = document.querySelectorAll(NATIVE_SCROLL_BTN_SELECTOR)
+    for (const el of Array.from(candidates)) {
+      if (el.id === "browse-assist-quick-scroll-host") continue
+      const style = window.getComputedStyle(el)
+      if (
+        style.display === "none" ||
+        style.visibility === "hidden" ||
+        parseFloat(style.opacity || "1") === 0
+      ) {
+        continue
+      }
+      if (style.position !== "fixed" && style.position !== "sticky") {
+        continue
+      }
+      const rect = el.getBoundingClientRect()
+      if (rect.width > 0 && rect.height > 0 && rect.width <= 120 && rect.height <= 120) {
+        return true
+      }
+    }
+  } catch {
+    // Ignore selector errors on malformed DOMs
+  }
+  return false
+}
+
 function updateButtonsVisibility(): void {
   if (!containerElement || !btnTop || !btnBottom) return
+
+  if (currentConfig.hideOnNativeButton && hasNativeScrollButton()) {
+    containerElement.classList.add("qs-hidden")
+    return
+  }
 
   const scrollY = window.scrollY || document.documentElement.scrollTop || 0
   const viewportHeight =
@@ -530,9 +640,15 @@ function updateButtonsVisibility(): void {
 
     if (hideTimer) clearTimeout(hideTimer)
     hideTimer = window.setTimeout(() => {
-      containerElement?.classList.add("qs-dimmed")
+      if (!isFabContextMenuOpen() && !isFabRepositioning()) {
+        containerElement?.classList.add("qs-dimmed")
+      }
     }, 2400)
   } else {
+    if (hideTimer) {
+      clearTimeout(hideTimer)
+      hideTimer = null
+    }
     containerElement.classList.remove("qs-dimmed")
   }
 }
@@ -617,4 +733,7 @@ export function deactivate(): void {
   btnTop = null
   btnBottom = null
   styleElement = null
+  returnMemory = null
+  isSmoothScrolling = false
+  isTicking = false
 }

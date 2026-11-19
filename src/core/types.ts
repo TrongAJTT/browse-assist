@@ -13,6 +13,7 @@ export type FeatureKey =
   | "colorPicker"
   | "elementToys"
   | "quickHub"
+  | "imageHoverPreview"
 
 /**
  * Views and sub-settings routes supported inside the extension popup.
@@ -29,6 +30,7 @@ export type ActiveView =
   | "color-picker-settings"
   | "element-toys-settings"
   | "quick-hub-settings"
+  | "image-hover-preview-settings"
   | "preferences"
   | "about"
 
@@ -57,6 +59,8 @@ export function getFeatureSettingsView(key: FeatureKey): ActiveView | null {
       return "element-toys-settings"
     case "quickHub":
       return "quick-hub-settings"
+    case "imageHoverPreview":
+      return "image-hover-preview-settings"
     default:
       return null
   }
@@ -66,6 +70,9 @@ export type ContextMenuActionId =
   | "copyLinkText"
   | "cleanLinkCopy"
   | "markdownLinkCopy"
+  | "copyCleanPageUrl"
+  | "copyPageMarkdown"
+  | "copySelectionQuote"
 
 /**
  * Context Menu Actions sub-configuration with custom ordering and toggle states.
@@ -74,6 +81,9 @@ export interface ContextMenuActionsConfig {
   copyLinkText: boolean // Copy plain anchor text
   cleanLinkCopy: boolean // Copy URL stripped of tracking parameters
   markdownLinkCopy: boolean // Copy formatted as [Anchor Text](Clean URL)
+  copyCleanPageUrl?: boolean // Copy current page URL stripped of tracking parameters
+  copyPageMarkdown?: boolean // Copy current page as [Title](Clean URL)
+  copySelectionQuote?: boolean // Copy selected text as Markdown blockquote with source
   order: ContextMenuActionId[] // Display and menu registration order
 }
 
@@ -81,7 +91,17 @@ export const DEFAULT_CONTEXT_MENU_ACTIONS_CONFIG: ContextMenuActionsConfig = {
   copyLinkText: true,
   cleanLinkCopy: true,
   markdownLinkCopy: true,
-  order: ["copyLinkText", "cleanLinkCopy", "markdownLinkCopy"]
+  copyCleanPageUrl: true,
+  copyPageMarkdown: false,
+  copySelectionQuote: true,
+  order: [
+    "copyLinkText",
+    "cleanLinkCopy",
+    "markdownLinkCopy",
+    "copyCleanPageUrl",
+    "copyPageMarkdown",
+    "copySelectionQuote"
+  ]
 }
 
 /**
@@ -94,6 +114,8 @@ export type SuperDragAction =
   | "open_incognito_active"
   | "copy_to_clipboard"
   | "copy_link_text"
+  | "copy_markdown"
+  | "search_image"
   | "none"
 
 export interface DirectionalActions {
@@ -124,6 +146,7 @@ export interface SuperDragConfig {
   openImages: boolean // Dragging an image opens URL or copies image link
   showIndicator: boolean // Display live floating indicator during drag
   indicatorStyle: DragIndicatorStyle // Indicator style: "none", "badge", or "radial"
+  indicatorOpacity?: number // Opacity of the drag indicator (0.35 - 1)
   textActions: DirectionalActions
   linkActions: DirectionalActions
   imageActions: DirectionalActions
@@ -135,6 +158,7 @@ export const DEFAULT_SUPER_DRAG_CONFIG: SuperDragConfig = {
   openImages: false,
   showIndicator: true,
   indicatorStyle: "badge",
+  indicatorOpacity: 1,
   textActions: { ...DEFAULT_DIRECTIONAL_ACTIONS },
   linkActions: { ...DEFAULT_DIRECTIONAL_ACTIONS },
   imageActions: { ...DEFAULT_DIRECTIONAL_ACTIONS }
@@ -150,6 +174,8 @@ export interface SmoothScrollConfig {
   stepSize: number // Wheel multiplier (e.g. 1.0)
   smoothness: number // Easing factor (e.g. 0.18)
   interceptionMode?: "smart" | "aggressive" // 'smart' (bubble + respect apps) vs 'aggressive' (capture phase)
+  ignoreTouchpad?: boolean // Bypass interpolation for precision trackpad small-delta wheel events
+  keyboardScroll?: boolean // Smoothly interpolate Arrow/Page/Space key scrolling
 }
 
 export const SMOOTH_SCROLL_PRESETS: Record<
@@ -269,6 +295,8 @@ export interface PictureInPictureConfig {
   showBadge: boolean // Show "PiP" badge on extension icon when video is in PiP
   showToast: boolean // Show floating feedback notification on toggle
   hoverButton: boolean // Show a sleek floating PiP button when hovering over playing videos
+  hoverButtonOpacity?: number // Idle opacity of the floating PiP hover button (0.35 - 1)
+  autoPauseOnExit?: boolean // Pause video automatically when exiting PiP window
   placement: EdgePlacement // Edge position inside the video frame
   buttonPosition?: PipButtonPosition // Legacy fallback
 }
@@ -277,6 +305,8 @@ export const DEFAULT_PICTURE_IN_PICTURE_CONFIG: PictureInPictureConfig = {
   showBadge: true,
   showToast: true,
   hoverButton: true,
+  hoverButtonOpacity: 1,
+  autoPauseOnExit: false,
   placement: { edge: "right", offsetPercent: 0 },
   buttonPosition: "top-right"
 }
@@ -319,6 +349,7 @@ export interface VideoWheelControlConfig {
 
   enableScreenshot: boolean // Capture video frame to clipboard via Ctrl+Shift+Click or button
   showOsd: boolean // Display on-screen volume / speed / seek indicator HUD
+  osdOpacity?: number // Transparency of the floating OSD badge (0.35 - 1)
 }
 
 export const DEFAULT_VIDEO_WHEEL_CONTROL_CONFIG: VideoWheelControlConfig = {
@@ -344,7 +375,8 @@ export const DEFAULT_VIDEO_WHEEL_CONTROL_CONFIG: VideoWheelControlConfig = {
   boostSpeed: 2.0,
 
   enableScreenshot: true,
-  showOsd: true
+  showOsd: true,
+  osdOpacity: 1
 }
 
 /**
@@ -359,19 +391,27 @@ export type QuickScrollPosition =
   | "bottom-right"
 export type QuickScrollButtonsMode = "both" | "top-only"
 
+export type QuickScrollButtonShape = "circle" | "capsule" | "rounded"
+
 export interface QuickScrollConfig {
   placement: EdgePlacement
   buttonsMode: QuickScrollButtonsMode
+  buttonShape?: QuickScrollButtonShape // Floating button visual shape
+  opacity?: number // Idle/default opacity (0.35 - 1)
   autoHide: boolean // Dim buttons when user stops scrolling
   enableReturnMemory: boolean // Remember previous scroll position and allow return for both top and bottom
+  hideOnNativeButton?: boolean // Hide when page already has a fixed scroll-to-top button
   position?: QuickScrollPosition // Legacy fallback
 }
 
 export const DEFAULT_QUICK_SCROLL_CONFIG: QuickScrollConfig = {
   placement: { edge: "right", offsetPercent: 100 },
   buttonsMode: "both",
+  buttonShape: "circle",
+  opacity: 1,
   autoHide: true,
   enableReturnMemory: false,
+  hideOnNativeButton: true,
   position: "bottom-right"
 }
 
@@ -391,12 +431,14 @@ export interface ColorPickerConfig {
   defaultFormat: ColorFormat // Default format copied on pick
   autoCopy: boolean // Automatically copy default format to clipboard immediately upon picking
   showToast: boolean // Show notification toast upon picking
+  showPaletteModal?: boolean // Show floating palette modal with HEX/RGB/HSL after picking
 }
 
 export const DEFAULT_COLOR_PICKER_CONFIG: ColorPickerConfig = {
   defaultFormat: "hex",
   autoCopy: true,
-  showToast: true
+  showToast: true,
+  showPaletteModal: true
 }
 
 /**
@@ -450,27 +492,47 @@ export type QuickHubActionId =
   | "pip"
   | "colorPicker"
   | "elementToys"
+  | "allowRightClick"
   | "scrollTop"
   | "scrollBottom"
   | "resetZoom"
   | "cleanUrl"
+  | "copyMarkdown"
+  | "videoScreenshot"
 
 export const DEFAULT_QUICK_HUB_ACTION_ORDER: QuickHubActionId[] = [
   "pip",
   "colorPicker",
   "elementToys",
+  "allowRightClick",
   "scrollTop",
   "scrollBottom",
   "resetZoom",
-  "cleanUrl"
+  "cleanUrl",
+  "copyMarkdown",
+  "videoScreenshot"
+]
+
+/**
+ * Niche Quick Hub actions hidden by default to keep the menu focused and uncluttered.
+ * Users can enable them anytime in Quick Hub settings.
+ */
+export const DEFAULT_QUICK_HUB_HIDDEN_ACTIONS: QuickHubActionId[] = [
+  "allowRightClick",
+  "copyMarkdown",
+  "videoScreenshot"
 ]
 
 /**
  * Quick Hub configuration.
  */
+export type QuickHubButtonShape = "circle" | "rounded" | "pill"
+
 export interface QuickHubConfig {
   placement: EdgePlacement
   hoverToReveal: boolean
+  buttonShape?: QuickHubButtonShape
+  buttonOpacity?: number
   corner?: QuickHubCorner // Legacy fallback
   actionOrder?: QuickHubActionId[]
   hiddenActions?: QuickHubActionId[]
@@ -479,10 +541,43 @@ export interface QuickHubConfig {
 export const DEFAULT_QUICK_HUB_CONFIG: QuickHubConfig = {
   placement: { edge: "right", offsetPercent: 0 },
   hoverToReveal: true,
+  buttonShape: "rounded",
+  buttonOpacity: 1,
   corner: "top-right",
   actionOrder: [...DEFAULT_QUICK_HUB_ACTION_ORDER],
-  hiddenActions: []
+  hiddenActions: [...DEFAULT_QUICK_HUB_HIDDEN_ACTIONS]
 }
+
+export type ImageHoverPreviewModifier = "shift" | "alt" | "ctrl"
+
+export interface ImageHoverPreviewConfig {
+  triggerModifier: ImageHoverPreviewModifier
+  delayMs: number
+  previewImageLinks: boolean
+  showDimensions: boolean
+  maxSizePercent: number
+}
+
+export const DEFAULT_IMAGE_HOVER_PREVIEW_CONFIG: ImageHoverPreviewConfig = {
+  triggerModifier: "shift",
+  delayMs: 250,
+  previewImageLinks: true,
+  showDimensions: true,
+  maxSizePercent: 65
+}
+
+export type SupportedLocale =
+  | "en"
+  | "vi"
+  | "de"
+  | "es"
+  | "fr"
+  | "ja"
+  | "ko"
+  | "zh_CN"
+  | "zh_TW"
+
+export type LanguageCode = "auto" | SupportedLocale
 
 /**
  * Appearance theme options: "dark" | "light" | "system".
@@ -499,6 +594,7 @@ export type ViewMode = "list" | "grid"
  */
 export interface FeatureSettings {
   theme: ThemeMode
+  language?: LanguageCode
   viewMode?: ViewMode
   allowRightClick: boolean
   contextMenuActions: boolean
@@ -511,6 +607,7 @@ export interface FeatureSettings {
   colorPicker: boolean
   elementToys: boolean
   quickHub: boolean
+  imageHoverPreview: boolean
   featureLayout: FeatureLayoutConfig
   popupNavigation: PopupNavigationConfig
   contextMenuActionsConfig: ContextMenuActionsConfig
@@ -523,6 +620,7 @@ export interface FeatureSettings {
   colorPickerConfig: ColorPickerConfig
   elementToysConfig: ElementToysConfig
   quickHubConfig: QuickHubConfig
+  imageHoverPreviewConfig: ImageHoverPreviewConfig
 }
 
 /**
@@ -545,7 +643,8 @@ export const DEFAULT_FEATURE_LAYOUT_CONFIG: FeatureLayoutConfig = {
     "mouseZoom",
     "colorPicker",
     "elementToys",
-    "quickHub"
+    "quickHub",
+    "imageHoverPreview"
   ],
   hidden: []
 }
@@ -594,7 +693,7 @@ export function normalizeQuickHubActionOrder(order?: QuickHubActionId[]): QuickH
 }
 
 export function normalizeQuickHubHiddenActions(hidden?: QuickHubActionId[]): QuickHubActionId[] {
-  if (!hidden) return []
+  if (!hidden) return [...DEFAULT_QUICK_HUB_HIDDEN_ACTIONS]
   return Array.from(new Set(hidden))
 }
 
@@ -604,11 +703,13 @@ export function normalizeQuickHubHiddenActions(hidden?: QuickHubActionId[]): Qui
 export interface PopupNavigationConfig {
   rememberLastView: boolean
   sessionTimeoutMinutes: number
+  showSearchAndFilter?: boolean
 }
 
 export const DEFAULT_POPUP_NAVIGATION_CONFIG: PopupNavigationConfig = {
   rememberLastView: true,
-  sessionTimeoutMinutes: 10
+  sessionTimeoutMinutes: 10,
+  showSearchAndFilter: false
 }
 
 /**
@@ -617,6 +718,7 @@ export const DEFAULT_POPUP_NAVIGATION_CONFIG: PopupNavigationConfig = {
  */
 export const DEFAULT_SETTINGS: FeatureSettings = {
   theme: "system",
+  language: "auto",
   viewMode: "list",
   allowRightClick: true,
   contextMenuActions: true,
@@ -629,6 +731,7 @@ export const DEFAULT_SETTINGS: FeatureSettings = {
   colorPicker: true,
   elementToys: true,
   quickHub: true,
+  imageHoverPreview: true,
   featureLayout: DEFAULT_FEATURE_LAYOUT_CONFIG,
   popupNavigation: DEFAULT_POPUP_NAVIGATION_CONFIG,
   contextMenuActionsConfig: DEFAULT_CONTEXT_MENU_ACTIONS_CONFIG,
@@ -643,7 +746,8 @@ export const DEFAULT_SETTINGS: FeatureSettings = {
   quickScrollConfig: DEFAULT_QUICK_SCROLL_CONFIG,
   colorPickerConfig: DEFAULT_COLOR_PICKER_CONFIG,
   elementToysConfig: DEFAULT_ELEMENT_TOYS_CONFIG,
-  quickHubConfig: DEFAULT_QUICK_HUB_CONFIG
+  quickHubConfig: DEFAULT_QUICK_HUB_CONFIG,
+  imageHoverPreviewConfig: DEFAULT_IMAGE_HOVER_PREVIEW_CONFIG
 }
 
 /**
@@ -753,6 +857,14 @@ export const FEATURES_LIST: FeatureMeta[] = [
     description:
       "On-screen quick utility hub with smart corner hover activation.",
     icon: "✨",
+    hasSettings: true
+  },
+  {
+    key: "imageHoverPreview",
+    title: "Image Hover Preview",
+    description:
+      "Hover over images or image links to preview them in full size.",
+    icon: "🖼️",
     hasSettings: true
   }
 ]

@@ -1,3 +1,4 @@
+import { t } from "~core/i18n"
 import { showContentToast } from "~core/toast"
 
 /**
@@ -24,8 +25,8 @@ export function unfreezeScrollLock(showToast = true): void {
 
     if (unfrozen && showToast) {
       showContentToast({
-        message: "Page Scroll Unfrozen",
-        detail: "overflow: auto restored",
+        message: t("features.elementToys.logic.scrollUnfrozen"),
+        detail: t("features.elementToys.logic.scrollUnfrozenDetail"),
         type: "info",
         duration: 2000
       })

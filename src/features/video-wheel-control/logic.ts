@@ -1,4 +1,6 @@
 import { VIDEO_WHEEL_CONSTANTS } from "~core/constants"
+import { t } from "~core/i18n"
+import { createShadowHost } from "~core/shadowHost"
 import {
   DEFAULT_VIDEO_WHEEL_CONTROL_CONFIG,
   type VideoWheelControlConfig,
@@ -20,6 +22,7 @@ let currentConfig: VideoWheelControlConfig = {
 }
 
 const OSD_ELEMENT_ID = "browse-assist-video-wheel-osd"
+let osdHost: HTMLDivElement | null = null
 let osdElement: HTMLElement | null = null
 let osdHideTimeout: NodeJS.Timeout | null = null
 
@@ -32,9 +35,9 @@ function isModifierActive(
 ): boolean {
   switch (modifier) {
     case "ctrl+shift":
-      return event.ctrlKey && event.shiftKey
+      return event.ctrlKey && event.shiftKey && !event.altKey
     case "ctrl+alt":
-      return event.ctrlKey && event.altKey
+      return event.ctrlKey && event.altKey && !event.shiftKey
     case "alt+shift":
       return event.altKey && event.shiftKey && !event.ctrlKey
     case "alt":
@@ -82,9 +85,19 @@ function formatTime(seconds: number): string {
  * Ensures the floating glassmorphic OSD badge element is created.
  */
 function ensureOsdElement(): HTMLElement {
-  if (osdElement && osdElement.parentNode) {
+  if (osdHost && document.documentElement.contains(osdHost) && osdElement) {
     return osdElement
   }
+
+  if (osdHost && osdHost.parentNode) {
+    osdHost.parentNode.removeChild(osdHost)
+  }
+
+  const { host, shadow } = createShadowHost(
+    "browse-assist-vwc-osd-host",
+    2147483646
+  )
+  osdHost = host
 
   const el = document.createElement("div")
   el.id = OSD_ELEMENT_ID
@@ -112,7 +125,7 @@ function ensureOsdElement(): HTMLElement {
     transform: scale(0.94);
     transition: opacity 0.12s ease-out, transform 0.12s ease-out;
   `
-  document.documentElement.appendChild(el)
+  shadow.appendChild(el)
   osdElement = el
   return el
 }
@@ -202,7 +215,7 @@ function showOsd(
 
   osd.style.display = "flex"
   requestAnimationFrame(() => {
-    osd.style.opacity = "1"
+    osd.style.opacity = String(currentConfig.osdOpacity ?? 1)
     osd.style.transform = "scale(1)"
   })
 
@@ -237,22 +250,74 @@ async function captureVideoFrame(video: HTMLVideoElement): Promise<void> {
 
     canvas.toBlob(async (blob) => {
       if (!blob) {
-        showOsd(video, "screenshot", "Failed to capture", 0)
+        showOsd(
+          video,
+          "screenshot",
+          t("features.videoWheelControl.logic.captureFailed"),
+          0
+        )
         return
       }
       try {
         await navigator.clipboard.write([
           new ClipboardItem({ "image/png": blob })
         ])
-        showOsd(video, "screenshot", "Frame Copied!", 1)
+        showOsd(
+          video,
+          "screenshot",
+          t("features.videoWheelControl.logic.frameCopied"),
+          1
+        )
       } catch {
-        showOsd(video, "screenshot", "Clipboard Denied", 0)
+        showOsd(
+          video,
+          "screenshot",
+          t("features.videoWheelControl.logic.clipboardDenied"),
+          0
+        )
       }
     }, "image/png")
   } catch {
     // Cross-origin tainted canvas
-    showOsd(video, "screenshot", "CORS Protected", 0)
+    showOsd(
+      video,
+      "screenshot",
+      t("features.videoWheelControl.logic.corsProtected"),
+      0
+    )
   }
+}
+
+/**
+ * Finds the best active or largest visible video on the page and captures a PNG frame to clipboard.
+ * Exposed for Quick Hub and other content-script launchers.
+ */
+export async function captureActiveVideoFrame(): Promise<boolean> {
+  const videos = Array.from(document.querySelectorAll("video")).filter((v) => {
+    const rect = v.getBoundingClientRect()
+    return (
+      rect.width >= 100 &&
+      rect.height >= 60 &&
+      v.readyState >= 2 &&
+      (v.videoWidth > 0 || rect.width > 0)
+    )
+  })
+
+  if (videos.length === 0) {
+    return false
+  }
+
+  // Prefer actively playing video, otherwise largest visible video
+  const playing = videos.filter((v) => !v.paused && !v.ended)
+  const pool = playing.length > 0 ? playing : videos
+  pool.sort((a, b) => {
+    const ra = a.getBoundingClientRect()
+    const rb = b.getBoundingClientRect()
+    return rb.width * rb.height - ra.width * ra.height
+  })
+
+  await captureVideoFrame(pool[0])
+  return true
 }
 
 /**
@@ -294,7 +359,10 @@ function onWheelDecision(event: WheelEvent): boolean {
       showOsd(
         video,
         "frame",
-        `Frame ${sign} (${formatTime(targetTime)})`,
+        t("features.videoWheelControl.logic.frameStep", {
+          sign,
+          time: formatTime(targetTime)
+        }),
         progress
       )
       return true
@@ -435,12 +503,22 @@ function handleLeftClick(event: MouseEvent): void {
       } else if (video.requestFullscreen) {
         video.requestFullscreen().catch(() => {})
       }
-      showOsd(video, "fullscreen", "Fullscreen", 1)
+      showOsd(
+        video,
+        "fullscreen",
+        t("features.videoWheelControl.logic.fullscreen"),
+        1
+      )
     } else {
       if (document.exitFullscreen) {
         document.exitFullscreen().catch(() => {})
       }
-      showOsd(video, "fullscreen", "Exit Fullscreen", 0)
+      showOsd(
+        video,
+        "fullscreen",
+        t("features.videoWheelControl.logic.exitFullscreen"),
+        0
+      )
     }
     return
   }
@@ -448,7 +526,7 @@ function handleLeftClick(event: MouseEvent): void {
   if (wantsMute) {
     video.muted = !video.muted
     if (video.muted) {
-      showOsd(video, "mute", "Muted", 0)
+      showOsd(video, "mute", t("features.videoWheelControl.logic.muted"), 0)
     } else {
       const percent = Math.round(video.volume * 100)
       showOsd(video, "volume", `${percent}%`, video.volume)
@@ -495,9 +573,10 @@ function onClick(event: MouseEvent): void {
       currentConfig.enableScreenshot && event.shiftKey && event.altKey
 
     if (
-      (currentConfig.clickToMute && isVolumeModifier) ||
-      (currentConfig.clickToFullscreen && isSpeedModifier) ||
-      isScreenshotModifier
+      ((currentConfig.clickToMute && isVolumeModifier) ||
+        (currentConfig.clickToFullscreen && isSpeedModifier) ||
+        isScreenshotModifier) &&
+      findVideoUnderCursor(event) !== null
     ) {
       event.preventDefault()
       event.stopPropagation()
@@ -506,11 +585,24 @@ function onClick(event: MouseEvent): void {
   }
 }
 
+function restoreBoost(): void {
+  if (!isBoostKeyDown) return
+  isBoostKeyDown = false
+  if (boostedVideo && document.contains(boostedVideo)) {
+    const restoreRate = originalPlaybackRate || 1.0
+    boostedVideo.playbackRate = restoreRate
+    showOsd(boostedVideo, "speed", `${restoreRate}x`, restoreRate / 4.0)
+  }
+  boostedVideo = null
+  originalPlaybackRate = null
+}
+
 /**
  * Handles KeyDown for Hold-to-Boost (Hold 'X' key over video)
  */
 function onKeyDown(event: KeyboardEvent): void {
   if (!isActive || !currentConfig.enableHoldToBoost || isBoostKeyDown) return
+  if (event.repeat || event.ctrlKey || event.altKey || event.metaKey) return
   if (event.key.toLowerCase() !== "x") return
 
   // Don't boost if user is typing in an input / textarea / contenteditable
@@ -533,7 +625,12 @@ function onKeyDown(event: KeyboardEvent): void {
 
   const boostRate = currentConfig.boostSpeed || 2.0
   video.playbackRate = boostRate
-  showOsd(video, "boost", `⚡ ${boostRate}x Boost`, 1)
+  showOsd(
+    video,
+    "boost",
+    t("features.videoWheelControl.logic.boost", { rate: boostRate }),
+    1
+  )
 }
 
 /**
@@ -542,15 +639,7 @@ function onKeyDown(event: KeyboardEvent): void {
 function onKeyUp(event: KeyboardEvent): void {
   if (!isActive || !isBoostKeyDown) return
   if (event.key.toLowerCase() !== "x") return
-
-  isBoostKeyDown = false
-  if (boostedVideo && document.contains(boostedVideo)) {
-    const restoreRate = originalPlaybackRate || 1.0
-    boostedVideo.playbackRate = restoreRate
-    showOsd(boostedVideo, "speed", `${restoreRate}x`, restoreRate / 4.0)
-  }
-  boostedVideo = null
-  originalPlaybackRate = null
+  restoreBoost()
 }
 
 /**
@@ -585,6 +674,7 @@ export function activate(config?: VideoWheelControlConfig): void {
   window.addEventListener("click", onClick, { capture: true })
   window.addEventListener("keydown", onKeyDown)
   window.addEventListener("keyup", onKeyUp)
+  window.addEventListener("blur", restoreBoost)
 }
 
 /**
@@ -599,6 +689,7 @@ export function deactivate(): void {
   window.removeEventListener("click", onClick, { capture: true })
   window.removeEventListener("keydown", onKeyDown)
   window.removeEventListener("keyup", onKeyUp)
+  window.removeEventListener("blur", restoreBoost)
 
   if (isBoostKeyDown && boostedVideo && originalPlaybackRate !== null) {
     boostedVideo.playbackRate = originalPlaybackRate
@@ -612,10 +703,11 @@ export function deactivate(): void {
     osdHideTimeout = null
   }
 
-  if (osdElement && osdElement.parentNode) {
-    osdElement.parentNode.removeChild(osdElement)
-    osdElement = null
+  if (osdHost && osdHost.parentNode) {
+    osdHost.parentNode.removeChild(osdHost)
   }
+  osdHost = null
+  osdElement = null
 
   clearLastKnownHoveredVideo()
 }

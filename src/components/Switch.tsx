@@ -1,5 +1,7 @@
 import type React from "react"
 
+import { useI18n } from "~core/useI18n"
+
 export interface SwitchProps {
   checked: boolean
   onChange: (checked: boolean) => void
@@ -24,6 +26,7 @@ export const Switch: React.FC<SwitchProps> = ({
   ariaLabel,
   className = ""
 }) => {
+  const { t } = useI18n()
   const isMd = size === "md"
 
   return (
@@ -49,7 +52,9 @@ export const Switch: React.FC<SwitchProps> = ({
             ? "bg-accent-hover shadow-accent-glow shadow-sm"
             : "bg-border-subtle"
       } ${className}`}>
-      <span className="sr-only">{ariaLabel || "Toggle switch"}</span>
+      <span className="sr-only">
+        {ariaLabel || t("common.toggleFeatureAria", { feature: "" }).trim()}
+      </span>
       <span
         className={`pointer-events-none inline-block transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
           isMd

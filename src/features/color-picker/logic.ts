@@ -4,6 +4,9 @@
  * adds to persistent color history, and displays a floating color palette modal.
  */
 
+import { escapeHtml } from "~core/escapeHtml"
+import { t } from "~core/i18n"
+import { copyToClipboard } from "~core/linkUtils"
 import { MESSAGE_TYPES } from "~core/messaging"
 import { extensionStorage } from "~core/storage"
 import { showContentToast } from "~core/toast"
@@ -29,30 +32,6 @@ const EYE_DROPPER_ICON_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fi
 const COPY_ICON_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`
 const CHECK_ICON_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`
 const CLOSE_ICON_SVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`
-
-/**
- * Copies plain text to clipboard.
- */
-async function copyToClipboard(text: string): Promise<boolean> {
-  try {
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(text)
-      return true
-    }
-    const textarea = document.createElement("textarea")
-    textarea.value = text
-    textarea.style.position = "fixed"
-    textarea.style.opacity = "0"
-    textarea.style.pointerEvents = "none"
-    document.body.appendChild(textarea)
-    textarea.select()
-    const success = document.execCommand("copy")
-    document.body.removeChild(textarea)
-    return success
-  } catch {
-    return false
-  }
-}
 
 /**
  * Saves a new color into persistent color history (capped at 20 items).
@@ -249,10 +228,10 @@ function showPaletteModal(color: ColorHistoryItem): void {
         <div class="swatch" style="background-color: ${color.hex}"></div>
         <div class="title-text">
           <span class="title">${color.hex}</span>
-          <span class="subtitle">Picked Color</span>
+          <span class="subtitle">${escapeHtml(t("features.colorPicker.logic.palette.pickedColor"))}</span>
         </div>
       </div>
-      <button class="close-btn" id="btn-close" title="Close">${CLOSE_ICON_SVG}</button>
+      <button class="close-btn" id="btn-close" title="${escapeHtml(t("features.colorPicker.logic.palette.close"))}">${CLOSE_ICON_SVG}</button>
     </div>
 
     <div class="values-list">
@@ -260,21 +239,21 @@ function showPaletteModal(color: ColorHistoryItem): void {
       <div class="value-row">
         <span class="format-label">HEX</span>
         <span class="format-value">${color.hex}</span>
-        <button class="copy-btn" data-val="${color.hex}" title="Copy HEX">${COPY_ICON_SVG}</button>
+        <button class="copy-btn" data-val="${color.hex}" title="${escapeHtml(t("features.colorPicker.logic.palette.copyHex"))}">${COPY_ICON_SVG}</button>
       </div>
 
       <!-- RGB -->
       <div class="value-row">
         <span class="format-label">RGB</span>
         <span class="format-value">${color.rgb}</span>
-        <button class="copy-btn" data-val="${color.rgb}" title="Copy RGB">${COPY_ICON_SVG}</button>
+        <button class="copy-btn" data-val="${color.rgb}" title="${escapeHtml(t("features.colorPicker.logic.palette.copyRgb"))}">${COPY_ICON_SVG}</button>
       </div>
 
       <!-- HSL -->
       <div class="value-row">
         <span class="format-label">HSL</span>
         <span class="format-value">${color.hsl}</span>
-        <button class="copy-btn" data-val="${color.hsl}" title="Copy HSL">${COPY_ICON_SVG}</button>
+        <button class="copy-btn" data-val="${color.hsl}" title="${escapeHtml(t("features.colorPicker.logic.palette.copyHsl"))}">${COPY_ICON_SVG}</button>
       </div>
     </div>
   `
@@ -302,7 +281,7 @@ function showPaletteModal(color: ColorHistoryItem): void {
 
       if (currentConfig.showToast) {
         showContentToast({
-          message: "Copied Color",
+          message: t("features.colorPicker.logic.copiedColor"),
           detail: val,
           type: "success",
           iconSvg: EYE_DROPPER_ICON_SVG,
@@ -326,7 +305,7 @@ export async function pickColor(): Promise<void> {
   if (typeof window === "undefined" || !("EyeDropper" in window)) {
     if (currentConfig.showToast) {
       showContentToast({
-        message: "EyeDropper not supported on this page/browser",
+        message: t("features.colorPicker.logic.notSupported"),
         type: "error",
         duration: 2500
       })
@@ -359,16 +338,18 @@ export async function pickColor(): Promise<void> {
         await copyToClipboard(copyVal)
       }
 
-      // 3. Show feedback toast
-      if (currentConfig.showToast) {
+      const shouldShowPalette = currentConfig.showPaletteModal ?? true
+
+      // 3. Show feedback toast (only when Floating Palette is disabled to avoid overlapping feedback)
+      if (currentConfig.showToast && !shouldShowPalette) {
         const copyVal = getColorValueByFormat(
           colorItem,
           currentConfig.defaultFormat
         )
         showContentToast({
           message: currentConfig.autoCopy
-            ? "Color Picked & Copied"
-            : "Color Picked",
+            ? t("features.colorPicker.logic.pickedAndCopied")
+            : t("features.colorPicker.logic.picked"),
           detail: copyVal,
           type: "success",
           iconSvg: EYE_DROPPER_ICON_SVG,
@@ -377,8 +358,10 @@ export async function pickColor(): Promise<void> {
         })
       }
 
-      // 4. Show floating palette modal with all formats
-      showPaletteModal(colorItem)
+      // 4. Show floating palette modal with all formats if enabled
+      if (shouldShowPalette) {
+        showPaletteModal(colorItem)
+      }
     }
   } catch (err: unknown) {
     const error = err as { name?: string; message?: string }
@@ -387,8 +370,9 @@ export async function pickColor(): Promise<void> {
       console.warn("Browse Assist Color Picker error:", err)
       if (currentConfig.showToast) {
         showContentToast({
-          message: "Could not open Color Picker",
-          detail: error?.message || "User interaction required or not permitted",
+          message: t("features.colorPicker.logic.couldNotOpen"),
+          detail:
+            error?.message || t("features.colorPicker.logic.permissionRequired"),
           type: "error",
           duration: 2500
         })

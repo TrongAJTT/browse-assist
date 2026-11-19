@@ -4,14 +4,13 @@ import type React from "react"
 import { useStorage } from "@plasmohq/storage/hook"
 
 import { ToggleSwitch } from "~components/ToggleSwitch"
-import { FEATURE_CATALOG } from "~core/featureCatalog"
+import { getLocalizedFeatureMeta } from "~core/featureCatalog"
+import { useI18n } from "~core/useI18n"
 import {
   DEFAULT_SETTINGS,
   STORAGE_KEYS,
   type FeatureSettings
 } from "~core/types"
-
-const meta = FEATURE_CATALOG.contextMenuActions
 
 interface ContextMenuActionsToggleProps {
   onConfigure?: () => void
@@ -23,6 +22,8 @@ interface ContextMenuActionsToggleProps {
 export const ContextMenuActionsToggle: React.FC<ContextMenuActionsToggleProps> = ({
   onConfigure
 }) => {
+  const { t } = useI18n()
+  const meta = getLocalizedFeatureMeta("contextMenuActions")
   const [settings, setSettings] = useStorage<FeatureSettings>(
     STORAGE_KEYS.SETTINGS,
     DEFAULT_SETTINGS
@@ -44,10 +45,15 @@ export const ContextMenuActionsToggle: React.FC<ContextMenuActionsToggleProps> =
   const activeCount = [
     config.copyLinkText,
     config.cleanLinkCopy,
-    config.markdownLinkCopy
+    config.markdownLinkCopy,
+    config.copyCleanPageUrl ?? true,
+    config.copyPageMarkdown ?? false,
+    config.copySelectionQuote ?? true
   ].filter(Boolean).length
 
-  const badgeText = `${activeCount}/3 Active`
+  const badgeText = t("features.contextMenuActions.activeCount", {
+    count: activeCount
+  })
 
   return (
     <ToggleSwitch

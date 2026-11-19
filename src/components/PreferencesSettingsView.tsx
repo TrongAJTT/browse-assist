@@ -2,12 +2,14 @@ import {
   ChevronDown,
   Compass,
   ExternalLink,
+  Globe,
   History,
   Laptop,
   LayoutGrid,
   List,
   Moon,
   Palette,
+  Search,
   Sliders,
   Sparkles,
   Sun,
@@ -17,7 +19,10 @@ import React, { useEffect, useMemo, useRef, useState } from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
 
-import { SegmentedTabs, type SegmentedTabItem } from "~components/SegmentedTabs"
+import {
+  SelectDropdown,
+  type SelectDropdownOption
+} from "~components/SelectDropdown"
 import { Slider } from "~components/Slider"
 import {
   SortableVisibilityList,
@@ -26,15 +31,21 @@ import {
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
 import { Switch } from "~components/Switch"
 import { isColorPickerSupported } from "~core/browserDetect"
-import { FEATURE_CATALOG } from "~core/featureCatalog"
+import {
+  FEATURE_CATALOG,
+  getLocalizedFeatureMeta
+} from "~core/featureCatalog"
+import { useI18n } from "~core/useI18n"
 import {
   DEFAULT_FEATURE_LAYOUT_CONFIG,
+  DEFAULT_POPUP_NAVIGATION_CONFIG,
   DEFAULT_SETTINGS,
   STORAGE_KEYS,
   normalizeFeatureHidden,
   normalizeFeatureOrder,
   type FeatureKey,
   type FeatureSettings,
+  type LanguageCode,
   type ThemeMode,
   type ViewMode
 } from "~core/types"
@@ -43,37 +54,6 @@ interface PreferencesSettingsViewProps {
   onBack: () => void
 }
 
-const THEME_OPTIONS: SegmentedTabItem<ThemeMode>[] = [
-  {
-    id: "dark",
-    label: "Dark",
-    icon: <Moon className="w-3.5 h-3.5" />
-  },
-  {
-    id: "light",
-    label: "Light",
-    icon: <Sun className="w-3.5 h-3.5" />
-  },
-  {
-    id: "system",
-    label: "System",
-    icon: <Laptop className="w-3.5 h-3.5" />
-  }
-]
-
-const VIEW_MODE_OPTIONS: SegmentedTabItem<ViewMode>[] = [
-  {
-    id: "list",
-    label: "List",
-    icon: <List className="w-3.5 h-3.5" />
-  },
-  {
-    id: "grid",
-    label: "Grid",
-    icon: <LayoutGrid className="w-3.5 h-3.5" />
-  }
-]
-
 /**
  * Preferences / General Settings view.
  * Configures appearance theme mode, menu order/visibility, and popup navigation memory.
@@ -81,6 +61,44 @@ const VIEW_MODE_OPTIONS: SegmentedTabItem<ViewMode>[] = [
 export const PreferencesSettingsView: React.FC<
   PreferencesSettingsViewProps
 > = ({ onBack }) => {
+  const { t, locale } = useI18n()
+
+  const themeOptions: SelectDropdownOption<ThemeMode>[] = useMemo(
+    () => [
+      {
+        id: "dark",
+        label: t("preferences.themeDark"),
+        icon: <Moon className="w-3.5 h-3.5" />
+      },
+      {
+        id: "light",
+        label: t("preferences.themeLight"),
+        icon: <Sun className="w-3.5 h-3.5" />
+      },
+      {
+        id: "system",
+        label: t("preferences.themeSystem"),
+        icon: <Laptop className="w-3.5 h-3.5" />
+      }
+    ],
+    [t]
+  )
+
+  const viewModeOptions: SelectDropdownOption<ViewMode>[] = useMemo(
+    () => [
+      {
+        id: "list",
+        label: t("preferences.viewModeList"),
+        icon: <List className="w-3.5 h-3.5" />
+      },
+      {
+        id: "grid",
+        label: t("preferences.viewModeGrid"),
+        icon: <LayoutGrid className="w-3.5 h-3.5" />
+      }
+    ],
+    [t]
+  )
   const [settings, setSettings] = useStorage<FeatureSettings>(
     STORAGE_KEYS.SETTINGS,
     DEFAULT_SETTINGS
@@ -230,10 +248,12 @@ export const PreferencesSettingsView: React.FC<
   }
 
   const listItems: SortableVisibilityItem<FeatureKey>[] = useMemo(() => {
+    void locale
     return order
       .map((key): SortableVisibilityItem<FeatureKey> | null => {
-        const item = FEATURE_CATALOG[key]
-        if (!item) return null
+        const base = FEATURE_CATALOG[key]
+        if (!base) return null
+        const item = getLocalizedFeatureMeta(key)
         return {
           id: key,
           title: item.title,
@@ -246,7 +266,7 @@ export const PreferencesSettingsView: React.FC<
       .filter(
         (item): item is SortableVisibilityItem<FeatureKey> => item !== null
       )
-  }, [order, hiddenSet])
+  }, [order, hiddenSet, locale])
 
   const handleToggleRememberLastView = (enabled: boolean) => {
     setSettings((prev) => ({
@@ -268,58 +288,107 @@ export const PreferencesSettingsView: React.FC<
     }))
   }
 
+  const languageOptions: SelectDropdownOption<LanguageCode>[] = [
+    { id: "auto", label: t("preferences.languageAuto") },
+    { id: "en", label: "English" },
+    { id: "vi", label: "Tiếng Việt" },
+    { id: "de", label: "Deutsch" },
+    { id: "es", label: "Español" },
+    { id: "fr", label: "Français" },
+    { id: "ja", label: "日本語" },
+    { id: "ko", label: "한국어" },
+    { id: "zh_CN", label: "简体中文" },
+    { id: "zh_TW", label: "繁體中文" }
+  ]
+
+  const currentLanguage: LanguageCode =
+    settings?.language ?? DEFAULT_SETTINGS.language ?? "auto"
+
+  const handleSelectLanguage = (language: LanguageCode) => {
+    setSettings((prev) => ({
+      ...(prev ?? DEFAULT_SETTINGS),
+      language
+    }))
+  }
+
   return (
-    <SubSettingsLayout title="Preferences" onBack={onBack}>
+    <SubSettingsLayout title={t("preferences.title")} onBack={onBack}>
       <div className="space-y-6">
         {/* Appearance Section */}
         <div className="space-y-2.5">
-          <span className="section-header">Appearance</span>
+          <span className="section-header">{t("preferences.appearance")}</span>
 
-          <div className="space-y-2.5">
-            <div>
-              <div className="flex items-center gap-1.5">
-                <Palette className="w-4 h-4 text-accent" />
-                <span className="text-xs font-semibold text-content-primary">
-                  Theme Mode
-                </span>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-3 py-0.5">
+              <div className="flex items-start gap-2.5 flex-1 min-w-0">
+                <Palette className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                <div className="flex flex-col min-w-0">
+                  <span className="text-xs font-semibold text-content-primary">
+                    {t("preferences.themeMode")}
+                  </span>
+                  <p className="text-[11px] text-content-muted mt-0.5 leading-snug">
+                    {t("preferences.themeModeDesc")}
+                  </p>
+                </div>
               </div>
-              <p className="text-[11px] text-content-muted mt-0.5 leading-snug">
-                Choose light, dark, or automatically synchronize with your
-                operating system display settings.
-              </p>
+
+              <SelectDropdown<ThemeMode>
+                value={currentTheme}
+                options={themeOptions}
+                onChange={handleSelectTheme}
+                ariaLabel={t("preferences.themeMode")}
+              />
             </div>
 
-            <SegmentedTabs<ThemeMode>
-              items={THEME_OPTIONS}
-              value={currentTheme}
-              onChange={handleSelectTheme}
-            />
-
-            <div className="pt-2">
-              <div className="flex items-center gap-1.5">
-                <LayoutGrid className="w-4 h-4 text-accent" />
-                <span className="text-xs font-semibold text-content-primary">
-                  View Mode
-                </span>
+            <div className="flex items-center justify-between gap-3 py-0.5">
+              <div className="flex items-start gap-2.5 flex-1 min-w-0">
+                <LayoutGrid className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                <div className="flex flex-col min-w-0">
+                  <span className="text-xs font-semibold text-content-primary">
+                    {t("preferences.viewMode")}
+                  </span>
+                  <p className="text-[11px] text-content-muted mt-0.5 leading-snug">
+                    {t("preferences.viewModeDesc")}
+                  </p>
+                </div>
               </div>
-              <p className="text-[11px] text-content-muted mt-0.5 leading-snug">
-                Choose between detailed list view with descriptions or a compact grid layout.
-              </p>
+
+              <SelectDropdown<ViewMode>
+                value={currentViewMode}
+                options={viewModeOptions}
+                onChange={handleSelectViewMode}
+                ariaLabel={t("preferences.viewMode")}
+              />
             </div>
 
-            <SegmentedTabs<ViewMode>
-              items={VIEW_MODE_OPTIONS}
-              value={currentViewMode}
-              onChange={handleSelectViewMode}
-            />
+            <div className="flex items-center justify-between gap-3 py-0.5">
+              <div className="flex items-start gap-2.5 flex-1 min-w-0">
+                <Globe className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                <div className="flex flex-col min-w-0">
+                  <span className="text-xs font-semibold text-content-primary">
+                    {t("preferences.language")}
+                  </span>
+                  <p className="text-[11px] text-content-muted mt-0.5 leading-snug">
+                    {t("preferences.languageDesc")}
+                  </p>
+                </div>
+              </div>
+
+              <SelectDropdown<LanguageCode>
+                value={currentLanguage}
+                options={languageOptions}
+                onChange={handleSelectLanguage}
+                ariaLabel={t("preferences.language")}
+              />
+            </div>
           </div>
         </div>
 
         {/* Customize Menu Section */}
         <div className="pt-3 border-t border-border-divider">
           <SortableVisibilityList<FeatureKey>
-            title="Customize Menu"
-            description="Drag items to reorder them in the popup list, or toggle visibility to hide features you don't use."
+            title={t("preferences.customizeMenu")}
+            description={t("preferences.customizeMenuDesc")}
             items={listItems}
             onOrderChange={(newOrder) => {
               setSettings((prev) => ({
@@ -339,7 +408,7 @@ export const PreferencesSettingsView: React.FC<
                   onClick={() => setIsPresetMenuOpen((prev) => !prev)}
                   className="flex items-center gap-1 text-[11px] font-medium text-accent hover:text-accent-hover transition-colors">
                   <Sparkles className="w-3 h-3" />
-                  <span>Presets</span>
+                  <span>{t("preferences.presets")}</span>
                   <ChevronDown
                     className={`w-3 h-3 transition-transform duration-150 ${
                       isPresetMenuOpen ? "rotate-180" : ""
@@ -356,10 +425,10 @@ export const PreferencesSettingsView: React.FC<
                       <Compass className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
                       <div className="flex flex-col min-w-0">
                         <span className="text-xs font-medium">
-                          Reading & Navigation
+                          {t("preferences.presetReading")}
                         </span>
                         <span className="text-[10px] text-content-muted">
-                          Scroll, drag & read
+                          {t("preferences.presetReadingDesc")}
                         </span>
                       </div>
                     </button>
@@ -371,10 +440,10 @@ export const PreferencesSettingsView: React.FC<
                       <Palette className="w-3.5 h-3.5 text-pink-400 shrink-0" />
                       <div className="flex flex-col min-w-0">
                         <span className="text-xs font-medium">
-                          Designer & Dev
+                          {t("preferences.presetDesigner")}
                         </span>
                         <span className="text-[10px] text-content-muted">
-                          Color, inspect & toys
+                          {t("preferences.presetDesignerDesc")}
                         </span>
                       </div>
                     </button>
@@ -386,10 +455,10 @@ export const PreferencesSettingsView: React.FC<
                       <Zap className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                       <div className="flex flex-col min-w-0">
                         <span className="text-xs font-medium">
-                          Essentials Only
+                          {t("preferences.presetEssential")}
                         </span>
                         <span className="text-[10px] text-content-muted">
-                          Minimal & focused
+                          {t("preferences.presetEssentialDesc")}
                         </span>
                       </div>
                     </button>
@@ -402,26 +471,53 @@ export const PreferencesSettingsView: React.FC<
 
         {/* Navigation & Popup Memory Section */}
         <div className="space-y-2.5 pt-3 border-t border-border-divider">
-          <span className="section-header">Navigation</span>
+          <span className="section-header">{t("preferences.navigation")}</span>
 
           <div className="space-y-2">
+            <div className="flex items-center justify-between gap-3 py-1">
+              <div className="flex items-start gap-2.5 flex-1 min-w-0">
+                <Search className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                <div className="flex flex-col min-w-0">
+                  <span className="text-xs font-semibold text-content-primary">
+                    {t("preferences.searchAndFilter")}
+                  </span>
+                  <p className="text-[11px] text-content-muted mt-0.5 leading-snug">
+                    {t("preferences.searchAndFilterDesc")}
+                  </p>
+                </div>
+              </div>
+              <Switch
+                checked={Boolean(currentNav.showSearchAndFilter)}
+                onChange={(enabled) => {
+                  setSettings((prev) => ({
+                    ...(prev ?? DEFAULT_SETTINGS),
+                    popupNavigation: {
+                      ...(prev?.popupNavigation ??
+                        DEFAULT_POPUP_NAVIGATION_CONFIG),
+                      showSearchAndFilter: enabled
+                    }
+                  }))
+                }}
+                ariaLabel={t("preferences.searchAndFilter")}
+              />
+            </div>
+
             <div className="flex items-center justify-between gap-3 py-1">
               <div className="flex items-start gap-2.5 flex-1 min-w-0">
                 <History className="w-4 h-4 text-accent shrink-0 mt-0.5" />
                 <div className="flex flex-col min-w-0">
                   <span className="text-xs font-semibold text-content-primary">
-                    Remember Last View
+                    {t("preferences.rememberLastView")}
                   </span>
                   <p className="text-[11px] text-content-muted mt-0.5 leading-snug">
-                    Reopen the popup on the settings page you were previously
-                    browsing.
+                    {t("preferences.rememberLastViewDesc")}
                   </p>
                 </div>
               </div>
               <Switch
                 checked={currentNav.rememberLastView}
                 onChange={handleToggleRememberLastView}
-                ariaLabel="Remember last active view"
+                ariaLabel={t("preferences.rememberLastView")}
               />
             </div>
 
@@ -429,17 +525,19 @@ export const PreferencesSettingsView: React.FC<
               <div className="pt-1 pb-1 pl-3">
                 <div className="pl-3 border-l-2 border-border-subtle">
                   <Slider
-                    label="Session Timeout"
+                    label={t("preferences.sessionTimeout")}
                     value={currentNav.sessionTimeoutMinutes}
-                    valueDisplay={`${currentNav.sessionTimeoutMinutes} min`}
+                    valueDisplay={t("preferences.minutesShort", {
+                      count: currentNav.sessionTimeoutMinutes
+                    })}
                     min={1}
                     max={60}
                     step={1}
                     onChange={handleUpdateTimeout}
                     ticks={[
-                      { label: "1 min" },
-                      { label: "10 min (Default)" },
-                      { label: "60 min" }
+                      { label: t("preferences.tickOneMin") },
+                      { label: t("preferences.tickTenMinDefault") },
+                      { label: t("preferences.tickSixtyMin") }
                     ]}
                   />
                 </div>
@@ -450,7 +548,7 @@ export const PreferencesSettingsView: React.FC<
 
         {/* Other Section */}
         <div className="space-y-2.5 pt-3 border-t border-border-divider">
-          <span className="section-header">Other</span>
+          <span className="section-header">{t("preferences.other")}</span>
 
           <button
             type="button"
@@ -468,10 +566,10 @@ export const PreferencesSettingsView: React.FC<
               </div>
               <div className="flex flex-col text-left min-w-0">
                 <span className="text-xs font-semibold text-content-primary">
-                  Extension Options Page
+                  {t("preferences.optionsPage")}
                 </span>
                 <span className="text-[10px] text-content-muted truncate">
-                  Full settings dashboard &amp; shortcut guide
+                  {t("preferences.optionsPageDesc")}
                 </span>
               </div>
             </div>

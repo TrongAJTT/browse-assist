@@ -84,6 +84,25 @@ async function executeSuperDragAction(
 ): Promise<void> {
   if (action === "none") return
 
+  if (
+    targetType === "text" &&
+    (action === "open_bg_tab" || action === "open_active_tab") &&
+    chrome.search?.query
+  ) {
+    try {
+      await chrome.search.query({
+        text: rawPayload,
+        disposition: "NEW_TAB"
+      })
+      if (action === "open_bg_tab" && senderTab?.id) {
+        await chrome.tabs.update(senderTab.id, { active: true }).catch(() => {})
+      }
+      return
+    } catch {
+      // Fallback to Google search URL below if search.query fails
+    }
+  }
+
   const url = resolveUrl(targetType, rawPayload)
 
   switch (action) {
@@ -109,6 +128,15 @@ async function executeSuperDragAction(
     case "open_incognito_active":
       await handleNewWindow(url, { incognito: true, focused: true })
       break
+    case "search_image": {
+      const lensUrl = `https://lens.google.com/uploadbyurl?url=${encodeURIComponent(url)}`
+      let targetIndex: number | undefined
+      if (senderTab && typeof senderTab.index === "number") {
+        targetIndex = senderTab.index + 1
+      }
+      chrome.tabs.create({ url: lensUrl, active: true, index: targetIndex })
+      break
+    }
     default:
       chrome.tabs.create({ url, active: false })
       break

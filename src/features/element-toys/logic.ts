@@ -8,6 +8,8 @@
  *   - Move Resize: Interactive corner handles allowing direct element resizing with undo.
  */
 
+import { t } from "~core/i18n"
+
 import { executeHide } from "./actions/hide"
 import { MoveController } from "./actions/move"
 import { ResizeController } from "./actions/resize"
@@ -128,9 +130,21 @@ function undoLastAction(): void {
   if (!action) return
 
   if (currentConfig.showToast) {
+    const actionLabel =
+      action.type === "zap"
+        ? t("features.elementToys.toolbar.zap")
+        : action.type === "edit"
+          ? t("features.elementToys.toolbar.edit")
+          : action.type === "move"
+            ? t("features.elementToys.toolbar.move")
+            : action.type === "hide"
+              ? t("features.elementToys.toolbar.hide")
+              : t("features.elementToys.logic.resized")
     showContentToast({
-      message: "Action Undone",
-      detail: `Reverted ${action.type}`,
+      message: t("features.elementToys.logic.undone"),
+      detail: t("features.elementToys.logic.undoneDetail", {
+        action: actionLabel
+      }),
       type: "info",
       duration: 1800
     })
@@ -320,8 +334,12 @@ function onKeyDown(e: KeyboardEvent): void {
 
         if (currentConfig.showToast) {
           showContentToast({
-            message: `Scope: <${getElementDescriptor(parent)}>`,
-            detail: `Level +${scopeManager.depth} (Press - to shrink)`,
+            message: t("features.elementToys.logic.scope", {
+              tag: getElementDescriptor(parent)
+            }),
+            detail: t("features.elementToys.logic.scopeDetail", {
+              depth: scopeManager.depth
+            }),
             type: "info",
             duration: 1100
           })
@@ -362,7 +380,7 @@ function onKeyDown(e: KeyboardEvent): void {
 
     if (currentConfig.showToast) {
       showContentToast({
-        message: "Element Toys Closed",
+        message: t("features.elementToys.logic.closed"),
         type: "info",
         duration: 1500
       })
@@ -383,6 +401,13 @@ function onContextMenu(e: MouseEvent): void {
     renderToolbar()
   } else {
     stopZapping(false)
+    if (currentConfig.showToast) {
+      showContentToast({
+        message: t("features.elementToys.logic.closed"),
+        type: "info",
+        duration: 1500
+      })
+    }
   }
 }
 
@@ -412,8 +437,8 @@ export function startZapping(): void {
 
   if (currentConfig.showToast) {
     showContentToast({
-      message: "Element Toys Active",
-      detail: "Select tools from top toolbar • Esc to exit",
+      message: t("features.elementToys.logic.active"),
+      detail: t("features.elementToys.logic.activeDetail"),
       type: "info",
       iconSvg: SVG_ICONS.logo,
       duration: 2500
@@ -461,5 +486,6 @@ export function activate(config?: ElementToysConfig): void {
 export function deactivate(): void {
   isActive = false
   stopZapping(false)
+  undoManager.clear()
   overlayView.destroy()
 }

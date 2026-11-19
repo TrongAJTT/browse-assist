@@ -19,17 +19,32 @@ export const TRACKING_PARAMS = new Set([
   "utm_reader",
   "utm_referrer",
 
-  // Social & Ad tracking
+  // Social & Ad click identifiers
   "fbclid",
   "gclid",
   "gclsrc",
   "dclid",
   "msclkid",
+  "ttclid",
+  "twclid",
+  "yclid",
   "zanpid",
   "igshid",
   "mc_eid",
   "mc_cid",
-  "si", // YouTube share identifier
+  "mkt_tok",
+  "_hsenc",
+  "_hsmi",
+  "hsctatracking",
+  "vero_id",
+  "li_fat_id",
+  "oly_enc_id",
+  "oly_anon_id",
+  "rb_clickid",
+  "wickedid",
+  "epik",
+  "si", // YouTube / Spotify share identifier
+  "spm", // AliExpress / Alibaba / Shopee tracking
   "_ga",
   "_gl",
   "sc_channel",
@@ -37,36 +52,213 @@ export const TRACKING_PARAMS = new Set([
   "sc_geo",
   "sc_country",
 
-  // Generic referral/affiliate noise
+  // Generic referral & Google search click noise
   "ref",
   "ref_src",
   "ref_url",
-  "source",
-  "feature",
   "ved",
   "ei",
   "sei"
 ])
 
+const GOOGLE_SEARCH_KEEP_PARAMS = new Set([
+  "q",
+  "tbm",
+  "udm",
+  "tbs",
+  "start",
+  "hl",
+  "lr",
+  "num",
+  "safe"
+])
+
+const YOUTUBE_STRIP_PARAMS = new Set([
+  "si",
+  "pp",
+  "feature",
+  "ab_channel",
+  "kw"
+])
+
+const AMAZON_STRIP_PARAMS = new Set([
+  "ref",
+  "ref_",
+  "qid",
+  "sr",
+  "dib",
+  "dib_tag",
+  "sprefix",
+  "crid",
+  "keywords",
+  "psc",
+  "th",
+  "tag",
+  "linkcode",
+  "camp",
+  "creative",
+  "ascsubtag"
+])
+
+const ECOMMERCE_STRIP_PARAMS = new Set([
+  "sp_atk",
+  "xptdk",
+  "spm",
+  "clicktrackinfo",
+  "itm",
+  "algo_pvid",
+  "algo_exp_id",
+  "pdp_npi",
+  "curpageloguid",
+  "pdp_ext_f",
+  "aff_fcid",
+  "aff_fsk",
+  "aff_platform",
+  "aff_trace_key"
+])
+
+const SOCIAL_STRIP_PARAMS = new Set([
+  "mibextid",
+  "rdid",
+  "share_url",
+  "__tn__",
+  "is_from_webapp",
+  "sender_device",
+  "rdt",
+  "rcm",
+  "trk",
+  "trackingid",
+  "lipi",
+  "licu"
+])
+
 /**
- * Removes tracking parameters from a URL while keeping functional query params intact.
+ * Unwraps common redirector URLs (Google, Facebook, Reddit) to extract the target destination.
+ */
+function unwrapRedirectUrl(parsed: URL): URL {
+  const host = parsed.hostname.toLowerCase()
+  const path = parsed.pathname.toLowerCase()
+
+  // Google redirect: https://www.google.com/url?q=https://... or ?url=https://...
+  if (/(^|\.)google\.[a-z.]+$/.test(host) && path === "/url") {
+    const target = parsed.searchParams.get("q") || parsed.searchParams.get("url")
+    if (target && /^https?:\/\//i.test(target)) {
+      try {
+        return new URL(target)
+      } catch {
+        return parsed
+      }
+    }
+  }
+
+  // Facebook / Instagram outbound redirect: l.facebook.com/l.php?u=...
+  if (
+    (host === "l.facebook.com" ||
+      host === "lm.facebook.com" ||
+      host === "l.instagram.com") &&
+    parsed.searchParams.has("u")
+  ) {
+    const target = parsed.searchParams.get("u")
+    if (target && /^https?:\/\//i.test(target)) {
+      try {
+        return new URL(target)
+      } catch {
+        return parsed
+      }
+    }
+  }
+
+  // Reddit outbound redirect: out.reddit.com/?url=...
+  if (host === "out.reddit.com" && parsed.searchParams.has("url")) {
+    const target = parsed.searchParams.get("url")
+    if (target && /^https?:\/\//i.test(target)) {
+      try {
+        return new URL(target)
+      } catch {
+        return parsed
+      }
+    }
+  }
+
+  return parsed
+}
+
+/**
+ * Removes tracking parameters and platform-specific session noise from a URL
+ * while keeping functional query params and hash anchors intact.
  * If the input is not a valid URL (e.g. javascript: or tel:), returns the raw input unchanged.
  */
 export function cleanUrl(rawUrl: string): string {
   if (!rawUrl) return ""
 
   try {
-    const parsed = new URL(rawUrl)
+    const parsed = unwrapRedirectUrl(new URL(rawUrl))
+    const host = parsed.hostname.toLowerCase()
+    const path = parsed.pathname.toLowerCase()
 
-    // Delete known tracking search params
+    // 1. Google Search: whitelist only meaningful query parameters
+    if (/(^|\.)google\.[a-z.]+$/.test(host) && path === "/search") {
+      const keysToDelete: string[] = []
+      parsed.searchParams.forEach((_value, key) => {
+        if (!GOOGLE_SEARCH_KEEP_PARAMS.has(key.toLowerCase())) {
+          keysToDelete.push(key)
+        }
+      })
+      keysToDelete.forEach((key) => parsed.searchParams.delete(key))
+      return parsed.toString()
+    }
+
+    const isYouTube =
+      host === "youtu.be" ||
+      host === "youtube.com" ||
+      host.endsWith(".youtube.com")
+    const isAmazon = /(^|\.)amazon\.[a-z.]+$/.test(host)
+    const isTwitterX =
+      host === "x.com" ||
+      host.endsWith(".x.com") ||
+      host === "twitter.com" ||
+      host.endsWith(".twitter.com")
+    const isSocial =
+      isTwitterX ||
+      host.endsWith("facebook.com") ||
+      host.endsWith("fb.com") ||
+      host.endsWith("tiktok.com") ||
+      host.endsWith("linkedin.com") ||
+      host.endsWith("reddit.com")
+    const isEcommerce =
+      host.includes("shopee.") ||
+      host.includes("lazada.") ||
+      host.includes("aliexpress.") ||
+      host.includes("tiki.vn")
+
+    // Amazon path cleanup: strip trailing /ref=... segment
+    if (isAmazon && /\/ref=[^/]*$/i.test(parsed.pathname)) {
+      parsed.pathname = parsed.pathname.replace(/\/ref=[^/]*$/i, "")
+    }
+
+    // 2. Delete global & domain-specific tracking params
     const keysToDelete: string[] = []
     parsed.searchParams.forEach((_value, key) => {
       const lowerKey = key.toLowerCase()
-      if (
+      const isGlobalTracking =
         TRACKING_PARAMS.has(lowerKey) ||
         lowerKey.startsWith("utm_") ||
-        lowerKey.startsWith("mc_")
-      ) {
+        lowerKey.startsWith("mc_") ||
+        lowerKey.startsWith("sc_")
+
+      const isDomainTracking =
+        (isYouTube && YOUTUBE_STRIP_PARAMS.has(lowerKey)) ||
+        (isAmazon &&
+          (AMAZON_STRIP_PARAMS.has(lowerKey) ||
+            lowerKey.startsWith("pd_rd_") ||
+            lowerKey.startsWith("pf_rd_"))) ||
+        (isEcommerce && ECOMMERCE_STRIP_PARAMS.has(lowerKey)) ||
+        (isSocial &&
+          (SOCIAL_STRIP_PARAMS.has(lowerKey) ||
+            lowerKey.startsWith("__cft__"))) ||
+        (isTwitterX && (lowerKey === "s" || lowerKey === "t"))
+
+      if (isGlobalTracking || isDomainTracking) {
         keysToDelete.push(key)
       }
     })

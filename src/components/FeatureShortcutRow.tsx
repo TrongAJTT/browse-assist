@@ -1,6 +1,8 @@
 import { ExternalLink, Keyboard } from "lucide-react"
 import type React from "react"
 
+import { useI18n } from "~core/useI18n"
+
 import { ShortcutBadge } from "./ShortcutBadge"
 
 interface FeatureShortcutRowProps {
@@ -22,9 +24,13 @@ export const FeatureShortcutRow: React.FC<FeatureShortcutRowProps> = ({
   iconColorClass = "text-pink-400",
   onConfigureShortcuts
 }) => {
+  const { t } = useI18n()
+
   return (
     <div className="space-y-2">
-      <span className="section-header">Keyboard Shortcut</span>
+      <span className="section-header">
+        {t("features.quickHub.settings.keyboardShortcut")}
+      </span>
       <div className="flex items-center justify-between gap-3 py-1">
         <div className="flex items-center gap-2.5">
           <div className={`p-1 ${iconColorClass}`}>
@@ -45,7 +51,7 @@ export const FeatureShortcutRow: React.FC<FeatureShortcutRowProps> = ({
           <button
             type="button"
             onClick={onConfigureShortcuts}
-            title="Customize in browser shortcut settings"
+            title={t("common.customizeShortcuts")}
             className="p-1 text-content-muted hover:text-accent transition-colors">
             <ExternalLink className="w-3.5 h-3.5" />
           </button>

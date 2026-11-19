@@ -1,11 +1,13 @@
 import packageJson from "../../package.json"
+import type { TranslationKey } from "./i18n"
 
 export interface DonateOption {
   id: string
   label: string
+  labelKey?: TranslationKey
   url: string
-  description?: string
-  iconName: "coffee" | "github" | "heart"
+  descriptionKey: TranslationKey
+  iconName: "coffee" | "github" | "heart" | "qr"
 }
 
 export const DONATE_OPTIONS: DonateOption[] = [
@@ -13,31 +15,40 @@ export const DONATE_OPTIONS: DonateOption[] = [
     id: "buy-me-a-coffee",
     label: "Buy Me a Coffee",
     url: "https://buymeacoffee.com/trongajtt",
-    description: "Support project maintenance with a coffee",
+    descriptionKey: "donate.buyMeACoffeeDesc",
     iconName: "coffee"
   },
   {
     id: "github-sponsors",
     label: "GitHub Sponsors",
     url: "https://github.com/sponsors/TrongAJTT",
-    description: "Sponsor via GitHub on a monthly or one-off basis",
+    descriptionKey: "donate.githubSponsorsDesc",
     iconName: "github"
+  },
+  {
+    id: "vietqr",
+    label: "VietQR (VN Bank)",
+    url: "https://www.trongajtt.com/donate?vietqr=1",
+    descriptionKey: "donate.vietqrDesc",
+    iconName: "qr"
   },
   {
     id: "author-donate",
     label: "Author Donation Page",
+    labelKey: "donate.authorDonateLabel",
     url: "https://www.trongajtt.com/sponsor",
-    description: "Direct donation to the author",
+    descriptionKey: "donate.authorDonateDesc",
     iconName: "heart"
   }
 ]
 
 export const APP_INFO = {
-  name: packageJson.displayName || "Browse Assist",
+  name: "Browse Assist",
   version: packageJson.version,
   slogan:
     (packageJson as { slogan?: string }).slogan || "PowerToys for Web Browsing",
-  description: packageJson.description,
+  description:
+    "A lightweight, modular collection of quality-of-life tools designed to boost productivity and elevate your browsing flow.",
   author: packageJson.author?.split("<")[0]?.trim() || "TrongAJTT",
   authorUrl: "https://github.com/TrongAJTT",
   homePageUrl:

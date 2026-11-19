@@ -4,7 +4,11 @@ import {
   GitBranch,
   Heart,
   HelpCircle,
+  LayoutGrid,
+  List,
   PictureInPicture2,
+  QrCode,
+  Search,
   Settings as SettingsIcon,
   X
 } from "lucide-react"
@@ -18,11 +22,18 @@ import { GlobalDialogHost } from "~components/GlobalDialogHost"
 import { PreferencesSettingsView } from "~components/PreferencesSettingsView"
 import { AppIcon } from "~core/assets"
 import { isColorPickerSupported } from "~core/browserDetect"
-import { APP_INFO, DONATE_OPTIONS } from "~core/constants"
+import { DONATE_OPTIONS } from "~core/constants"
+import {
+  FEATURE_CATALOG,
+  FEATURE_CATEGORIES,
+  getLocalizedFeatureMeta,
+  type FeatureCategory
+} from "~core/featureCatalog"
 import {
   MESSAGE_TYPES,
   sendToBackground
 } from "~core/messaging"
+import { useI18n } from "~core/useI18n"
 import { ViewModeContext } from "~core/viewModeContext"
 import {
   DEFAULT_FEATURE_LAYOUT_CONFIG,
@@ -50,6 +61,8 @@ import { VideoWheelControlSettingsView } from "~features/video-wheel-control/Set
 import { VideoWheelControlToggle } from "~features/video-wheel-control/Toggle"
 import { QuickHubSettingsView } from "~features/quick-hub/SettingsView"
 import { QuickHubToggle } from "~features/quick-hub/Toggle"
+import { ImageHoverPreviewSettingsView } from "~features/image-hover-preview/SettingsView"
+import { ImageHoverPreviewToggle } from "~features/image-hover-preview/Toggle"
 import { QuickScrollSettingsView } from "~features/quick-scroll/SettingsView"
 import { QuickScrollToggle } from "~features/quick-scroll/Toggle"
 import { SmoothScrollSettingsView } from "~features/smooth-scroll/SettingsView"
@@ -62,6 +75,11 @@ import "~style.css"
 const sessionStorage = new Storage({ area: "local" })
 
 function IndexPopup() {
+  const { t } = useI18n()
+
+  useEffect(() => {
+    document.title = t("common.appName")
+  }, [t])
   const urlParams =
     typeof window !== "undefined"
       ? new URLSearchParams(window.location.search)
@@ -74,10 +92,14 @@ function IndexPopup() {
   )
   const [isTabReady, setIsTabReady] = useState(false)
   const [isDonateOpen, setIsDonateOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [selectedCategory, setSelectedCategory] = useState<
+    FeatureCategory | "all"
+  >("all")
   const donateMenuRef = useRef<HTMLDivElement>(null)
   const isInitialMount = useRef(true)
 
-  const [settings] = useStorage<FeatureSettings>(
+  const [settings, setSettings] = useStorage<FeatureSettings>(
     STORAGE_KEYS.SETTINGS,
     DEFAULT_SETTINGS
   )
@@ -161,6 +183,38 @@ function IndexPopup() {
     )
   }, [settings?.featureLayout])
 
+  const showSearchAndFilter = Boolean(popupNav.showSearchAndFilter)
+
+  const filteredFeatures = useMemo(() => {
+    if (!showSearchAndFilter) {
+      return orderedFeatures
+    }
+    const query = searchQuery.trim().toLowerCase()
+    return orderedFeatures.filter((key) => {
+      const base = FEATURE_CATALOG[key]
+      if (!base) return false
+      if (selectedCategory !== "all" && base.category !== selectedCategory) {
+        return false
+      }
+      if (!query) return true
+      const meta = getLocalizedFeatureMeta(key)
+      return (
+        meta.title.toLowerCase().includes(query) ||
+        meta.description.toLowerCase().includes(query)
+      )
+    })
+  }, [orderedFeatures, searchQuery, selectedCategory, showSearchAndFilter])
+
+  const activeViewMode = settings?.viewMode ?? DEFAULT_SETTINGS.viewMode ?? "list"
+
+  const handleToggleViewMode = () => {
+    const nextMode = activeViewMode === "grid" ? "list" : "grid"
+    setSettings((prev) => ({
+      ...(prev ?? DEFAULT_SETTINGS),
+      viewMode: nextMode
+    }))
+  }
+
   const featureToggleMap: Record<FeatureKey, React.ReactNode> = {
     allowRightClick: (
       <AllowRightClickToggle onReady={() => setIsTabReady(true)} />
@@ -213,6 +267,11 @@ function IndexPopup() {
     quickHub: (
       <QuickHubToggle
         onConfigure={() => setCurrentView("quick-hub-settings")}
+      />
+    ),
+    imageHoverPreview: (
+      <ImageHoverPreviewToggle
+        onConfigure={() => setCurrentView("image-hover-preview-settings")}
       />
     )
   }
@@ -268,6 +327,8 @@ function IndexPopup() {
         return <Coffee className="w-3.5 h-3.5 text-amber-400" />
       case "github":
         return <GitBranch className="w-3.5 h-3.5 text-slate-200" />
+      case "qr":
+        return <QrCode className="w-3.5 h-3.5 text-emerald-400" />
       default:
         return <Heart className="w-3.5 h-3.5 text-rose-400" />
     }
@@ -303,10 +364,10 @@ function IndexPopup() {
           <AppIcon className="w-8 h-8 rounded-md shadow-md shadow-accent-glow" />
           <div>
             <h1 className="text-sm font-bold tracking-tight text-content-primary leading-none">
-              {APP_INFO.name}
+              {t("common.appName")}
             </h1>
             <p className="text-[11px] text-content-muted font-normal mt-1">
-              {APP_INFO.slogan}
+              {t("common.appSlogan")}
             </p>
           </div>
         </div>
@@ -316,7 +377,7 @@ function IndexPopup() {
           {/* Preferences / Settings Button */}
           <button
             type="button"
-            title="Preferences & Theme"
+            title={t("popup.tooltips.preferencesAndTheme")}
             onClick={() => setCurrentView("preferences")}
             className={`p-1.5 rounded-lg transition-all focus:outline-none ${
               currentView === "preferences"
@@ -329,7 +390,7 @@ function IndexPopup() {
           {/* About Button */}
           <button
             type="button"
-            title="About Browse Assist"
+            title={t("popup.tooltips.about")}
             onClick={() => setCurrentView("about")}
             className={`p-1.5 rounded-lg transition-all focus:outline-none ${
               currentView === "about"
@@ -343,7 +404,7 @@ function IndexPopup() {
           <div className="relative" ref={donateMenuRef}>
             <button
               type="button"
-              title="Support & Donate"
+              title={t("popup.tooltips.supportDonate")}
               onClick={() => setIsDonateOpen((prev) => !prev)}
               className={`p-1.5 rounded-lg transition-all focus:outline-none ${
                 isDonateOpen
@@ -357,7 +418,7 @@ function IndexPopup() {
             {isDonateOpen && (
               <div className="absolute right-0 mt-2 w-48 rounded-xl bg-app-elevated border border-border-subtle shadow-xl shadow-black/40 py-1.5 z-30 animate-in fade-in zoom-in-95 duration-100">
                 <div className="px-3 py-1 text-[10px] font-semibold text-content-muted tracking-wider uppercase border-b border-border-divider mb-1">
-                  Support the Project
+                  {t("popup.supportTitle")}
                 </div>
                 {DONATE_OPTIONS.map((option) => (
                   <a
@@ -365,11 +426,14 @@ function IndexPopup() {
                     href={option.url}
                     target="_blank"
                     rel="noopener noreferrer"
+                    title={t(option.descriptionKey)}
                     onClick={() => setIsDonateOpen(false)}
                     className="flex items-center justify-between px-3 py-2 text-xs text-content-secondary hover:text-content-primary hover:bg-app-surface transition-colors">
                     <div className="flex items-center gap-2">
                       {getDonateIcon(option.iconName)}
-                      <span className="font-medium">{option.label}</span>
+                      <span className="font-medium">
+                        {option.labelKey ? t(option.labelKey) : option.label}
+                      </span>
                     </div>
                     <ExternalLink className="w-3 h-3 text-content-muted" />
                   </a>
@@ -386,7 +450,7 @@ function IndexPopup() {
         {activePiP && currentView === "main" && (
           <div
             onClick={handleFocusPiPTab}
-            title="Click to jump to this video tab"
+            title={t("popup.tooltips.jumpToVideoTab")}
             className="mb-2 py-1.5 px-2.5 rounded-lg bg-accent-subtle border border-accent/40 hover:border-accent transition-all cursor-pointer group flex items-center justify-between gap-2.5 shadow-lg shadow-black/20">
             <div className="flex items-center gap-2 min-w-0 flex-1">
               <div className="p-1 text-accent group-hover:scale-105 transition-transform shrink-0">
@@ -394,7 +458,7 @@ function IndexPopup() {
               </div>
               <div className="flex flex-col min-w-0">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-accent leading-none">
-                  Video in PiP Mode
+                  {t("popup.pipBannerTitle")}
                 </span>
                 <span className="text-xs font-semibold text-content-primary truncate mt-0.5 group-hover:text-accent transition-colors">
                   {activePiP.title}
@@ -406,10 +470,10 @@ function IndexPopup() {
               <button
                 type="button"
                 onClick={handleClosePiP}
-                title="Exit Picture-in-Picture window"
+                title={t("popup.tooltips.exitPipWindow")}
                 className="flex items-center gap-1.5 text-[11px] font-semibold text-content-secondary bg-app-elevated border border-border-subtle px-2.5 py-1 rounded-lg transition-all duration-150 hover:bg-rose-500 hover:text-white hover:border-rose-500 hover:shadow-md hover:shadow-rose-500/25 hover:scale-[1.02] active:scale-95 focus:outline-none focus:ring-2 focus:ring-rose-500/50">
                 <X className="w-3.5 h-3.5 stroke-[2.5]" />
-                <span>Exit PiP</span>
+                <span>{t("popup.pipExit")}</span>
               </button>
             </div>
           </div>
@@ -417,19 +481,97 @@ function IndexPopup() {
 
         {currentView === "main" ? (
           <div>
-            <ViewModeContext.Provider
-              value={settings?.viewMode ?? DEFAULT_SETTINGS.viewMode ?? "list"}>
-              {/* PowerToys-style Utilities List with Dividers or Compact Grid */}
-              <main
-                className={
-                  (settings?.viewMode ?? DEFAULT_SETTINGS.viewMode) === "grid"
-                    ? "grid grid-cols-2 gap-2.5 py-1"
-                    : "divide-y divide-border-divider"
-                }>
-                {orderedFeatures.map((key) => (
-                  <Fragment key={key}>{featureToggleMap[key]}</Fragment>
-                ))}
-              </main>
+            {/* Search & Category Filter Bar (Optional, off by default) */}
+            {showSearchAndFilter && (
+              <div className="mb-2.5 space-y-2">
+              <div className="flex items-center gap-1.5">
+                <div className="relative flex-1">
+                  <Search className="w-3.5 h-3.5 text-content-muted absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder={t("popup.searchPlaceholder")}
+                    className="w-full h-7 pl-8 pr-7 text-xs rounded-lg bg-app-surface border border-border-subtle text-content-primary placeholder:text-content-muted focus:outline-none focus:border-accent/60 transition-colors"
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery("")}
+                      title={t("common.clear")}
+                      className="absolute right-1.5 top-1/2 -translate-y-1/2 p-0.5 rounded text-content-muted hover:text-content-primary transition-colors">
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleToggleViewMode}
+                  title={
+                    activeViewMode === "grid"
+                      ? t("popup.switchToList")
+                      : t("popup.switchToGrid")
+                  }
+                  className="h-7 w-7 shrink-0 flex items-center justify-center rounded-lg bg-app-surface border border-border-subtle text-content-muted hover:text-content-primary hover:border-accent/40 active:scale-95 transition-all">
+                  {activeViewMode === "grid" ? (
+                    <List className="w-3.5 h-3.5" />
+                  ) : (
+                    <LayoutGrid className="w-3.5 h-3.5" />
+                  )}
+                </button>
+              </div>
+
+              <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
+                {FEATURE_CATEGORIES.map((cat) => {
+                  const isActive = selectedCategory === cat.id
+                  return (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => setSelectedCategory(cat.id)}
+                      className={`px-2 py-0.5 rounded-md text-[11px] font-medium whitespace-nowrap transition-all ${
+                        isActive
+                          ? "bg-accent-subtle text-accent border border-accent/30"
+                          : "text-content-muted hover:text-content-primary hover:bg-app-surface border border-transparent"
+                      }`}>
+                      {t(`popup.categories.${cat.id}`)}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+            )}
+
+            <ViewModeContext.Provider value={activeViewMode}>
+              {filteredFeatures.length === 0 ? (
+                <div className="py-10 text-center space-y-2">
+                  <p className="text-xs text-content-muted">
+                    {t("popup.noResults")}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery("")
+                      setSelectedCategory("all")
+                    }}
+                    className="text-[11px] font-medium text-accent hover:underline">
+                    {t("popup.resetFilters")}
+                  </button>
+                </div>
+              ) : (
+                /* PowerToys-style Utilities List with Dividers or Compact Tile Grid */
+                <main
+                  className={
+                    activeViewMode === "grid"
+                      ? "grid grid-cols-2 gap-2 py-0.5"
+                      : "divide-y divide-border-divider"
+                  }>
+                  {filteredFeatures.map((key) => (
+                    <Fragment key={key}>{featureToggleMap[key]}</Fragment>
+                  ))}
+                </main>
+              )}
             </ViewModeContext.Provider>
           </div>
         ) : currentView === "context-menu-actions-settings" ? (
@@ -454,6 +596,8 @@ function IndexPopup() {
           <ElementToysSettingsView onBack={() => setCurrentView("main")} />
         ) : currentView === "quick-hub-settings" ? (
           <QuickHubSettingsView onBack={() => setCurrentView("main")} />
+        ) : currentView === "image-hover-preview-settings" ? (
+          <ImageHoverPreviewSettingsView onBack={() => setCurrentView("main")} />
         ) : currentView === "preferences" ? (
           <PreferencesSettingsView onBack={() => setCurrentView("main")} />
         ) : (

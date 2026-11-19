@@ -4,6 +4,8 @@
  * custom SVG icons, positioning, dark/light responsiveness, and animated dismissals.
  */
 
+import { createShadowHost } from "./shadowHost"
+
 export type ToastType = "info" | "success" | "warning" | "error"
 export type ToastPosition =
   | "top-right"
@@ -27,6 +29,7 @@ export interface ShowToastOptions {
 }
 
 // Global references for the active content toast
+let activeToastHost: HTMLDivElement | null = null
 let activeToastElement: HTMLDivElement | null = null
 let dismissTimeoutId: number | null = null
 
@@ -160,11 +163,18 @@ export function showContentToast(options: ShowToastOptions): void {
     duration = 1800
   } = options
 
-  // Ensure singleton element attached
+  // Ensure singleton element attached inside an isolated Shadow DOM host
   if (
-    !activeToastElement ||
-    !document.documentElement.contains(activeToastElement)
+    !activeToastHost ||
+    !document.documentElement.contains(activeToastHost) ||
+    !activeToastElement
   ) {
+    if (activeToastHost && activeToastHost.parentNode) {
+      activeToastHost.parentNode.removeChild(activeToastHost)
+    }
+    const { host, shadow } = createShadowHost("browse-assist-toast-host")
+    activeToastHost = host
+
     activeToastElement = document.createElement("div")
     activeToastElement.id = "browse-assist-toast"
     activeToastElement.style.cssText = `
@@ -191,7 +201,7 @@ export function showContentToast(options: ShowToastOptions): void {
       white-space: nowrap;
       transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
     `
-    document.documentElement.appendChild(activeToastElement)
+    shadow.appendChild(activeToastElement)
   }
 
   const colors = TYPE_COLORS[type] || TYPE_COLORS.info
@@ -248,10 +258,11 @@ export function removeContentToast(): void {
     window.clearTimeout(dismissTimeoutId)
     dismissTimeoutId = null
   }
-  if (activeToastElement && activeToastElement.parentNode) {
-    activeToastElement.parentNode.removeChild(activeToastElement)
-    activeToastElement = null
+  if (activeToastHost && activeToastHost.parentNode) {
+    activeToastHost.parentNode.removeChild(activeToastHost)
   }
+  activeToastHost = null
+  activeToastElement = null
 }
 
 function escapeHtml(str: string): string {

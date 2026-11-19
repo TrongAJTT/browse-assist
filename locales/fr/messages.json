@@ -1,0 +1,23 @@
+{
+  "extName": {
+    "message": "Browse Assist"
+  },
+  "extDescription": {
+    "message": "Une collection légère et modulaire d'outils pratiques conçue pour booster votre productivité et fluidifier votre navigation."
+  },
+  "cmdPiP": {
+    "message": "Activer/désactiver l'Incrustation vidéo (PiP) pour la vidéo en cours"
+  },
+  "cmdAllowRightClick": {
+    "message": "Activer/désactiver le clic droit sur l'onglet actuel"
+  },
+  "cmdColorPicker": {
+    "message": "Capturer une couleur à l'écran"
+  },
+  "cmdElementToys": {
+    "message": "Activer Outils d'éléments pour inspecter et manipuler les éléments de la page"
+  },
+  "cmdQuickHub": {
+    "message": "Afficher/masquer le Menu rapide à l'écran"
+  }
+}

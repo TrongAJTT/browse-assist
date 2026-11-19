@@ -6,10 +6,12 @@
 
   ### *The Open-Source "PowerToys" for Web Browsing*
 
+  [![Version](https://img.shields.io/badge/Version-1.1.0-6366f1.svg)](package.json)
   [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
   [![Manifest V3](https://img.shields.io/badge/Manifest-V3-success.svg)](https://developer.chrome.com/docs/extensions/mv3/intro/)
   [![Framework](https://img.shields.io/badge/Framework-Plasmo-purple.svg)](https://docs.plasmo.com/)
   [![TypeScript](https://img.shields.io/badge/TypeScript-Strict-3178C6.svg)](https://www.typescriptlang.org/)
+  [![i18n](https://img.shields.io/badge/Languages-9_Locales-0ea5e9.svg)](docs/i18n.md)
   [![Privacy](https://img.shields.io/badge/Privacy-100%25_Local--First-brightgreen.svg)](#-privacy--permission-transparency)
 
   <p align="center">
@@ -30,7 +32,7 @@
 ---
 
 <div align="center">
-  <img src="assets/my-assets/marquee_promo_tile_1400x560.png" width="100%" alt="Browse Assist Banner" />
+  <img src="https://cdn.trongajtt.com/apps/browse-assist/marquee_promo_tile_1400x560.webp" width="100%" alt="Browse Assist Banner" />
 </div>
 
 ---
@@ -39,10 +41,10 @@
 
 Traditional extension suites often inject bloated multi-megabyte frameworks into every tab, draining battery and tracking user telemetry. **Browse Assist** takes the opposite approach inspired by the **Microsoft PowerToys** philosophy:
 
-1. **⚡ Native-Speed & Zero Bloat**: Content scripts remain dormant until invoked by hotkeys or gestures. Package size is **< 450 KB**.
-2. **🛡️ 100% Local-First & Zero Telemetry**: Zero remote servers, zero analytics SDKs, and zero tracking cookies. All user preferences persist strictly inside your browser's sandboxed `chrome.storage.local`.
-3. **🧩 Modular Customization**: Turn off any tool you don't need. Reorder popup cards with drag-and-drop, toggle between Grid and List views, or customize on-screen trigger docks.
-4. **🔒 Isolated UI (Shadow DOM)**: In-page overlays (Quick Hub, Quick Scroll, Element Toys) render within closed Shadow DOMs (`mode: "closed"`), preventing any CSS conflicts with host websites.
+1. **⚡ Native-Speed & Zero Bloat**: Content scripts remain dormant until invoked by hotkeys or gestures. Lightweight Manifest V3 bundle (**< 450 KB**).
+2. **🛡️ 100% Local-First & Zero Telemetry**: Zero remote servers, zero analytics SDKs, and zero tracking cookies. All user preferences persist strictly inside your browser's sandboxed `chrome.storage.sync` / `chrome.storage.local`.
+3. **🧩 Modular Customization**: Turn off any tool you don't need. Reorder popup cards and Quick Hub actions, customize FAB edge placement via right-click or hold-drag, switch between Grid and List views, and choose from **9 languages** (`en`, `vi`, `de`, `es`, `fr`, `ja`, `ko`, `zh_CN`, `zh_TW`).
+4. **🔒 Isolated UI (Shadow DOM)**: In-page overlays, toolbars, indicators, and toasts render inside isolated Shadow DOM hosts (`src/core/shadowHost.ts`), preventing CSS conflicts with host websites.
 
 ---
 
@@ -50,34 +52,35 @@ Traditional extension suites often inject bloated multi-megabyte frameworks into
 
 | # | Feature | Trigger / Shortcut | Description |
 |---|:---|:---:|:---|
-| 1 | **Allow Right Click** | `Alt + R` | Restores context menus, text selection, and copy operations on restrictive websites that block them. |
-| 2 | **Context Menu Actions** | Right-click menu | Smart utilities: **Clean Link on Copy** (strips `utm_*`, `fbclid` trackers), **Copy Link Text**, and **Markdown Link Copy** (`[Title](URL)`). |
-| 3 | **Super Drag** | Mouse drag | Highlight text and drag in 4 configurable directions to search in a new tab; drag hyperlinks to open them in background tabs. |
-| 4 | **Smooth Scrolling** | Mouse wheel | Interpolates wheel physics via `requestAnimationFrame`. Presets: *Balanced*, *Ultra*, *Snappy*, and *Custom*. |
-| 5 | **Universal PiP** | `Alt + P` | Forces any playing HTML5 video into floating Picture-in-Picture mode, even on sites that block native PiP. |
-| 6 | **Video Wheel Control** | `Shift` / `Alt` + Wheel | Hover over video players to adjust volume and playback speed with a smooth On-Screen Display (OSD) HUD. |
-| 7 | **On-Screen Quick Hub** | Dock / Shortcut | Floating radial/grid launcher for fast access to your favorite utilities and page controls anywhere on screen. |
-| 8 | **Quick Scroll Buttons** | Edge double-click | Floating circular buttons with smart auto-dim on idle to jump swiftly to the top or bottom of long pages. |
-| 9 | **Color Picker** | Popup / Quick Hub | Magnifier eyedropper zooming into cursor pixels to copy HEX, RGB, or HSL color codes (Chromium engines). |
-| 10 | **Element Toys** | `Alt + Shift + Z` | Point-and-click targeting mode: **Zap** (DOM removal with scroll unfreeze), **Edit** (live text), **Move** (reposition elements), and **Hide**. |
+| 1 | **Allow Right Click** | `Alt + R` / Quick Hub | Restores context menus, text selection, and copy operations on restrictive websites that block them. |
+| 2 | **Context Menu Actions** | Right-click menu | Smart utilities: **Clean Link on Copy** (2-layer URL cleaner with redirect unwrapping & tracker stripping), **Copy Link Text**, **Markdown Link Copy**, **Copy Clean Page URL**, **Copy Page Markdown**, and **Copy Selection as Quote**. |
+| 3 | **Super Drag** | Mouse drag | Drag selected text, links, or images in 4 configurable directions with a redesigned **Circular Radial Indicator** (per-action icons & semantic colors), **Badge Indicator**, and adjustable opacity. |
+| 4 | **Smooth Scrolling** | Mouse wheel | Interpolates wheel physics via `requestAnimationFrame`. Presets: *Balanced*, *Ultra*, *Snappy*, and *Custom*, with optional touchpad bypass & keyboard smoothing. |
+| 5 | **Universal PiP** | `Alt + P` / Hover Button | Forces any playing HTML5 video into floating Picture-in-Picture mode, with a repositionable floating hover button, customizable opacity, and optional auto-pause on exit. |
+| 6 | **Video Wheel Control** | Modifier + Wheel | Hover over video players to adjust **Volume** (with Boost), **Playback Speed**, **Timeline Seeking**, **Fullscreen**, and **Video Screenshot** with a sleek OSD HUD. |
+| 7 | **Quick Hub** | Floating Dock / Shortcut | Adaptive Light/Dark glassmorphism launcher for instant access to PiP, Color Picker, Element Toys, Scroll Top/Bottom, Reset Zoom, Clean URL, Allow Right Click, Markdown Copy, and Video Screenshot. |
+| 8 | **Quick Scroll Buttons** | Floating Dock / Edge double-click | Floating smart buttons with auto-dim on idle, reading spot memory, opacity control, right-click FAB menu, and auto-hide when native scroll buttons exist. |
+| 9 | **Color Picker** | `Alt + Shift + C` / Quick Hub | Magnifier eyedropper zooming into cursor pixels to copy HEX, RGB, or HSL color codes with recent color history (Chromium engines). |
+| 10 | **Element Toys** | `Alt + Shift + Z` / Quick Hub | Point-and-click targeting mode: **Zap** (DOM removal with scroll unfreeze), **Edit** (live text), **Move** (Flow/Free reposition & resize), and **Hide**. |
 | 11 | **Mouse Pin-to-Zoom** | `Alt` + Wheel | Smoothly zooms in/out of exact page areas centered directly under the cursor. |
+| 12 | **Image Hover Preview** | Hover on images / links | Preview `<img>` elements and image links in full size on hover, with optional modifier key, delay, and dimensions badge. |
 
 ---
 
 ## 📸 Screenshots
 
 <div align="center">
-  <img src="assets/my-assets/screenshot_1_1200x800.png" width="48%" alt="Popup Dashboard" />
-  <img src="assets/my-assets/screenshot_2_1200x800.png" width="48%" alt="Super Drag & Quick Actions" />
+  <img src="https://cdn.trongajtt.com/apps/browse-assist/screenshot_1_1280x800.webp" width="48%" alt="Supercharge Your Web Browsing - Popup Dashboard" />
+  <img src="https://cdn.trongajtt.com/apps/browse-assist/screenshot_2_1280x800.webp" width="48%" alt="Super Drag & Quick Actions - Circular Radial Indicator" />
 </div>
 
 <div align="center" style="margin-top: 10px;">
-  <img src="assets/my-assets/screenshot_3_1200x800.png" width="48%" alt="Smart Video & PiP Controls" />
-  <img src="assets/my-assets/screenshot_4_1200x800.png" width="48%" alt="Quick Scroll Floating Buttons" />
+  <img src="https://cdn.trongajtt.com/apps/browse-assist/screenshot_3_1280x800.webp" width="48%" alt="Smart Video & PiP Controls" />
+  <img src="https://cdn.trongajtt.com/apps/browse-assist/screenshot_4_1280x800.webp" width="48%" alt="Quick Scroll Buttons" />
 </div>
 
 <div align="center" style="margin-top: 10px;">
-  <img src="assets/my-assets/screenshot_5_1200x800.png" width="60%" alt="Customizable Quick Hub" />
+  <img src="https://cdn.trongajtt.com/apps/browse-assist/screenshot_5_1280x800.webp" width="60%" alt="Customizable Quick Hub" />
 </div>
 
 ---
@@ -87,8 +90,10 @@ Traditional extension suites often inject bloated multi-megabyte frameworks into
 - **Core Framework**: [Plasmo Framework](https://docs.plasmo.com/) (Manifest V3)
 - **Language**: TypeScript (Strict mode enabled)
 - **UI & Styling**: React 18 + Tailwind CSS + Lucide Icons
+- **Internationalization**: Rosetta (`rosetta`) across 9 locales
 - **Storage Layer**: `@plasmohq/storage` with live cross-context synchronization (`useStorage` & `watch`)
-- **Isolation Pattern**: Closed Shadow DOM (`attachShadow({ mode: "closed" })`) for zero-bleed UI injection
+- **Isolation Pattern**: Shadow DOM hosts (`src/core/shadowHost.ts`, `src/core/fab/`) for zero-bleed UI injection
+- **Testing**: Vitest + JSDOM
 - **Package Manager**: PNPM
 
 ### Project Structure
@@ -96,9 +101,12 @@ Traditional extension suites often inject bloated multi-megabyte frameworks into
 ```text
 src/
 ├── components/                  # Shared UI components (Switch, Slider, Modal, Views)
-├── core/                        # Storage schemas, type registry, and messaging broker
+├── core/                        # Storage schemas, type registry, i18n, FAB system, and utilities
+│   ├── fab/                     # Shared floating action button context menu & repositioning
 │   ├── storage.ts
 │   ├── messaging.ts
+│   ├── shadowHost.ts
+│   ├── linkUtils.ts
 │   └── types.ts
 ├── features/                    # Modular feature implementations (Feature-First)
 │   ├── <feature-name>/
@@ -106,8 +114,10 @@ src/
 │   │   ├── background.ts        # (Optional) Service worker handlers & context menus
 │   │   ├── Toggle.tsx           # Switch UI & quick config
 │   │   └── SettingsView.tsx     # Dedicated sub-settings view
+├── locales/                     # Translations for 9 supported languages
 ├── background.ts                # Service worker entry point
 ├── content.ts                   # Content script orchestrator
+├── options.tsx                  # Extension options & preferences page
 ├── popup.tsx                    # Extension popup UI
 └── style.css                    # Tailwind tokens & dark/light theme variables
 ```
@@ -180,9 +190,12 @@ pnpm dev:firefox
 
 ### Code Verification
 
-Ensure strict type safety and code style compliance:
+Ensure unit tests, linting, and strict type safety pass:
 
 ```bash
+# Unit & integration tests
+pnpm test
+
 # Linting checks
 pnpm lint
 
@@ -213,9 +226,24 @@ Production zip archives will be output to `build/<target>-prod.zip`.
 
 - [Detailed Features Catalog](docs/features-catalog.md)
 - [Architecture & Design Principles](docs/architecture.md)
-- [Website Wireframe & Visuals Specification](docs/internal/web/HOMEPAGE_LAYOUT.md)
-- [Privacy Policy](docs/internal/POLICY.md)
-- [Terms of Service](docs/internal/TERMS.md)
+- [Internationalization (i18n) Guide](docs/i18n.md)
+
+---
+
+## 💖 Support & Donate
+
+Browse Assist is free, open-source, and contains zero ads or tracking. If it saves you time or improves your daily browsing workflow, you can support ongoing development in any of the following ways:
+
+- ⭐ **Star the repository** on GitHub or share it with friends
+- 🐛 **Report bugs or suggest features** via [GitHub Issues](https://github.com/TrongAJTT/browse-assist/issues)
+- ☕ **Donate / Sponsor**:
+
+<p>
+  <a href="https://buymeacoffee.com/trongajtt"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black" alt="Buy Me a Coffee" /></a>
+  <a href="https://github.com/sponsors/TrongAJTT"><img src="https://img.shields.io/badge/GitHub%20Sponsors-ea4aaa?style=for-the-badge&logo=github-sponsors&logoColor=white" alt="GitHub Sponsors" /></a>
+  <a href="https://www.trongajtt.com/donate?vietqr=1"><img src="https://img.shields.io/badge/VietQR_(VN_Bank)-0068ff?style=for-the-badge&logoColor=white" alt="VietQR (VN Bank)" /></a>
+  <a href="https://www.trongajtt.com/sponsor"><img src="https://img.shields.io/badge/Author%20Sponsor%20Page-6366f1?style=for-the-badge&logoColor=white" alt="Author Donation Page" /></a>
+</p>
 
 ---
 

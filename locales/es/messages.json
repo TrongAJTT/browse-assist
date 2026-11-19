@@ -1,0 +1,23 @@
+{
+  "extName": {
+    "message": "Browse Assist"
+  },
+  "extDescription": {
+    "message": "Una colección ligera y modular de herramientas prácticas para mejorar tu productividad y fluidez al navegar."
+  },
+  "cmdPiP": {
+    "message": "Alternar Imagen en Imagen (PiP) para el video en reproducción"
+  },
+  "cmdAllowRightClick": {
+    "message": "Alternar Permitir clic derecho en la pestaña actual"
+  },
+  "cmdColorPicker": {
+    "message": "Seleccionar color de la pantalla"
+  },
+  "cmdElementToys": {
+    "message": "Activar Herramientas de elementos para inspeccionar y manipular elementos de la página"
+  },
+  "cmdQuickHub": {
+    "message": "Alternar el Centro rápido en pantalla"
+  }
+}

@@ -4,7 +4,17 @@
  * and dispatching status updates to the background service worker.
  */
 
+import {
+  bindFabRightClick,
+  dismissFabOnTab,
+  FAB_MENU_ICONS,
+  isFabDismissedOnTab
+} from "~core/fab"
+import { t } from "~core/i18n"
 import { MESSAGE_TYPES, sendToBackground } from "~core/messaging"
+import { openExtensionPopup } from "~core/popupHelper"
+import { createShadowHost } from "~core/shadowHost"
+import { updateStoredSettings } from "~core/storage"
 import { removeContentToast, showContentToast } from "~core/toast"
 import {
   DEFAULT_PICTURE_IN_PICTURE_CONFIG,
@@ -25,28 +35,40 @@ const PIP_ICON_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none
 const PIP_BUTTON_ID = "__browse_assist_pip_hover_btn__"
 
 // Hover PiP Button state
+let hoverButtonHost: HTMLDivElement | null = null
 let hoverButtonElement: HTMLButtonElement | null = null
 let hoveredVideoElement: HTMLVideoElement | null = null
 let hoverHideTimeout: ReturnType<typeof setTimeout> | null = null
 let isPointerOverHoverButton = false
+let isFabInteractionLocked = false
 
 /**
- * Creates and mounts the floating PiP button element into the DOM.
+ * Creates and mounts the floating PiP button element into an isolated Shadow DOM host.
  */
 function ensureHoverButton(): HTMLButtonElement {
-  if (hoverButtonElement && document.documentElement.contains(hoverButtonElement)) {
+  if (
+    hoverButtonHost &&
+    document.documentElement.contains(hoverButtonHost) &&
+    hoverButtonElement
+  ) {
     return hoverButtonElement
   }
 
-  if (hoverButtonElement && hoverButtonElement.parentNode) {
-    hoverButtonElement.parentNode.removeChild(hoverButtonElement)
+  if (hoverButtonHost && hoverButtonHost.parentNode) {
+    hoverButtonHost.parentNode.removeChild(hoverButtonHost)
   }
+
+  const { host, shadow } = createShadowHost(
+    "browse-assist-pip-hover-host",
+    2147483645
+  )
+  hoverButtonHost = host
 
   const btn = document.createElement("button")
   btn.id = PIP_BUTTON_ID
   btn.setAttribute("data-browse-assist-internal", "true")
   btn.type = "button"
-  btn.title = "Watch in Picture-in-Picture"
+  btn.title = t("features.pictureInPicture.logic.watchInPip")
   btn.style.cssText = `
     position: fixed;
     top: 0;
@@ -94,11 +116,123 @@ function ensureHoverButton(): HTMLButtonElement {
 
   btn.addEventListener("mouseleave", () => {
     isPointerOverHoverButton = false
-    btn.style.opacity = "0.65"
+    if (isFabInteractionLocked) return
+    const idleOpacity = String(currentConfig.hoverButtonOpacity ?? 1)
+    btn.style.opacity = idleOpacity
     btn.style.background = "rgba(18, 18, 22, 0.85)"
     btn.style.borderColor = "rgba(255, 255, 255, 0.2)"
     btn.style.transform = "scale(1)"
     hideHoverButtonNow()
+  })
+
+  let lockedVideoForInteraction: HTMLVideoElement | null = null
+
+  bindFabRightClick(btn, {
+    allowedEdges: ["left", "right", "top", "bottom"],
+    getInitialPlacement: () =>
+      normalizeEdgePlacement(
+        currentConfig.placement ?? currentConfig.buttonPosition,
+        DEFAULT_PICTURE_IN_PICTURE_CONFIG.placement
+      ),
+    getBounds: () => {
+      const targetVideo = lockedVideoForInteraction ?? hoveredVideoElement
+      if (!targetVideo) return null
+      const r = targetVideo.getBoundingClientRect()
+      return {
+        left: r.left,
+        top: r.top,
+        width: r.width,
+        height: r.height
+      }
+    },
+    onInteractionStart: () => {
+      lockedVideoForInteraction = hoveredVideoElement
+      isFabInteractionLocked = true
+      if (hoverHideTimeout) {
+        clearTimeout(hoverHideTimeout)
+        hoverHideTimeout = null
+      }
+      btn.style.opacity = "1"
+      btn.style.transform = "scale(1)"
+    },
+    onPreview: (placement) => {
+      currentConfig = { ...currentConfig, placement }
+      const targetVideo = lockedVideoForInteraction ?? hoveredVideoElement
+      if (targetVideo) {
+        showHoverButtonForVideo(targetVideo)
+      }
+    },
+    onCommit: async (placement) => {
+      currentConfig = { ...currentConfig, placement }
+      const targetVideo = lockedVideoForInteraction ?? hoveredVideoElement
+      if (targetVideo) {
+        showHoverButtonForVideo(targetVideo)
+      }
+      await updateStoredSettings((cur) => ({
+        ...cur,
+        pictureInPictureConfig: {
+          ...cur.pictureInPictureConfig,
+          placement
+        }
+      }))
+    },
+    onInteractionEnd: () => {
+      isFabInteractionLocked = false
+      lockedVideoForInteraction = null
+    },
+    getMenuItems: ({ startMove }) => [
+      {
+        id: "move",
+        label: t("content.fabMenu.movePosition"),
+        iconSvg: FAB_MENU_ICONS.move,
+        onSelect: startMove
+      },
+      {
+        id: "settings",
+        label: t("content.fabMenu.openSettings"),
+        iconSvg: FAB_MENU_ICONS.settings,
+        onSelect: () => {
+          void openExtensionPopup("picture-in-picture-settings")
+        }
+      },
+      {
+        id: "hide-tab",
+        label: t("content.fabMenu.hideOnTab"),
+        iconSvg: FAB_MENU_ICONS.eyeOff,
+        onSelect: () => {
+          isFabInteractionLocked = false
+          lockedVideoForInteraction = null
+          dismissFabOnTab("pipHover")
+          hideHoverButtonNow()
+          showContentToast({
+            message: t("content.fabMenu.hiddenOnTab", {
+              feature: t("features.pictureInPicture.title")
+            }),
+            type: "info",
+            duration: 1800
+          })
+        }
+      },
+      {
+        id: "disable-hover",
+        label: t("content.fabMenu.disablePipHoverButton"),
+        iconSvg: FAB_MENU_ICONS.power,
+        danger: true,
+        dividerBefore: true,
+        onSelect: () => {
+          isFabInteractionLocked = false
+          lockedVideoForInteraction = null
+          hideHoverButtonNow()
+          void updateStoredSettings((cur) => ({
+            ...cur,
+            pictureInPictureConfig: {
+              ...cur.pictureInPictureConfig,
+              hoverButton: false
+            }
+          }))
+        }
+      }
+    ]
   })
 
   btn.addEventListener("click", async (e) => {
@@ -111,20 +245,22 @@ function ensureHoverButton(): HTMLButtonElement {
         prepareVideoForPiP(hoveredVideoElement)
         if (document.pictureInPictureElement === hoveredVideoElement) {
           await document.exitPictureInPicture()
-          showToast("Exited Picture-in-Picture")
+          showToast(t("features.pictureInPicture.logic.exitedPip"))
+        } else if (typeof hoveredVideoElement.requestPictureInPicture !== "function") {
+          showToast(t("features.pictureInPicture.logic.notSupported"), true)
         } else {
           await hoveredVideoElement.requestPictureInPicture()
-          showToast("Entered Picture-in-Picture")
+          showToast(t("features.pictureInPicture.logic.enteredPip"))
         }
       } catch (err) {
         console.error("[Browse Assist] Failed to toggle PiP on hover:", err)
-        showToast("Cannot enter Picture-in-Picture", true)
+        showToast(t("features.pictureInPicture.logic.cannotEnter"), true)
       }
     }
     hideHoverButtonNow()
   })
 
-  document.documentElement.appendChild(btn)
+  shadow.appendChild(btn)
   hoverButtonElement = btn
   return btn
 }
@@ -133,7 +269,9 @@ function ensureHoverButton(): HTMLButtonElement {
  * Positions and shows the floating PiP hover button inside the video corner.
  */
 function showHoverButtonForVideo(video: HTMLVideoElement): void {
-  if (!currentConfig.hoverButton || !isActive) return
+  if (!currentConfig.hoverButton || !isActive || isFabDismissedOnTab("pipHover")) {
+    return
+  }
 
   // Do not show button if this video is already in PiP
   if (document.pictureInPictureElement === video) {
@@ -207,16 +345,17 @@ function showHoverButtonForVideo(video: HTMLVideoElement): void {
   btn.style.left = `${targetX}px`
   btn.style.display = "flex"
 
-  // Trigger smooth instant reveal (dimmed by 35% to 0.65 by default, 1.0 on hover)
+  // Trigger smooth instant reveal
   requestAnimationFrame(() => {
-    btn.style.opacity = isPointerOverHoverButton ? "1" : "0.65"
+    const idleOpacity = String(currentConfig.hoverButtonOpacity ?? 1)
+    btn.style.opacity = isPointerOverHoverButton ? "1" : idleOpacity
     btn.style.transform = "scale(1)"
   })
 
   // Auto-hide after 2.5s of no pointer motion
   if (hoverHideTimeout) clearTimeout(hoverHideTimeout)
   hoverHideTimeout = setTimeout(() => {
-    if (!isPointerOverHoverButton) {
+    if (!isPointerOverHoverButton && !isFabInteractionLocked) {
       btn.style.opacity = "0"
       btn.style.transform = "scale(0.92)"
     }
@@ -240,7 +379,14 @@ function hideHoverButtonNow(): void {
  * Utilizes the shared multi-layer penetration video detector.
  */
 function onWindowPointerMove(e: PointerEvent): void {
-  if (!isActive || !currentConfig.hoverButton) return
+  if (
+    !isActive ||
+    !currentConfig.hoverButton ||
+    isFabDismissedOnTab("pipHover") ||
+    isFabInteractionLocked
+  ) {
+    return
+  }
 
   // If pointer is directly interacting with our hover button, keep it
   if (isPointerOverHoverButton) return
@@ -340,7 +486,7 @@ export async function togglePictureInPicture(): Promise<void> {
   if (document.pictureInPictureElement) {
     try {
       await document.exitPictureInPicture()
-      showToast("Exited Picture-in-Picture")
+      showToast(t("features.pictureInPicture.logic.exitedPip"))
     } catch (err) {
       console.error("[Browse Assist] Failed to exit PiP:", err)
     }
@@ -350,17 +496,22 @@ export async function togglePictureInPicture(): Promise<void> {
   // 2. Otherwise, find candidate video
   const video = findBestCandidateVideo()
   if (!video) {
-    showToast("No video found on page", true)
+    showToast(t("features.pictureInPicture.logic.noVideoFound"), true)
+    return
+  }
+
+  if (typeof video.requestPictureInPicture !== "function") {
+    showToast(t("features.pictureInPicture.logic.notSupported"), true)
     return
   }
 
   try {
     prepareVideoForPiP(video)
     await video.requestPictureInPicture()
-    showToast("Entered Picture-in-Picture")
+    showToast(t("features.pictureInPicture.logic.enteredPip"))
   } catch (err) {
     console.error("[Browse Assist] Failed to request PiP:", err)
-    showToast("Cannot enter Picture-in-Picture", true)
+    showToast(t("features.pictureInPicture.logic.cannotEnter"), true)
   }
 }
 
@@ -382,11 +533,37 @@ function onEnterPiP(): void {
   hideHoverButtonNow()
 }
 
+let isPointerListenerAttached = false
+
+function syncPointerListener(): void {
+  if (typeof window === "undefined") return
+  const shouldAttach = isActive && Boolean(currentConfig.hoverButton)
+  if (shouldAttach && !isPointerListenerAttached) {
+    window.addEventListener("pointermove", onWindowPointerMove, {
+      passive: true,
+      capture: true
+    })
+    isPointerListenerAttached = true
+  } else if (!shouldAttach && isPointerListenerAttached) {
+    window.removeEventListener("pointermove", onWindowPointerMove, {
+      capture: true
+    })
+    isPointerListenerAttached = false
+  }
+}
+
 /**
  * Global leavepictureinpicture event listener.
  */
-function onLeavePiP(): void {
+function onLeavePiP(event: Event): void {
   notifyPiPStatus(false)
+  if (
+    currentConfig.autoPauseOnExit &&
+    event.target instanceof HTMLVideoElement &&
+    !event.target.paused
+  ) {
+    event.target.pause()
+  }
 }
 
 /**
@@ -421,6 +598,7 @@ export function updatePictureInPictureConfig(
 ): void {
   if (!config) return
   currentConfig = { ...currentConfig, ...config }
+  syncPointerListener()
 
   if (!currentConfig.hoverButton) {
     hideHoverButtonNow()
@@ -442,7 +620,7 @@ export function activate(config?: PictureInPictureConfig): void {
 
   document.addEventListener("enterpictureinpicture", onEnterPiP, true)
   document.addEventListener("leavepictureinpicture", onLeavePiP, true)
-  window.addEventListener("pointermove", onWindowPointerMove, { passive: true, capture: true })
+  syncPointerListener()
   chrome.runtime.onMessage.addListener(onRuntimeMessage)
 }
 
@@ -461,14 +639,15 @@ export function deactivate(): void {
 
   document.removeEventListener("enterpictureinpicture", onEnterPiP, true)
   document.removeEventListener("leavepictureinpicture", onLeavePiP, true)
-  window.removeEventListener("pointermove", onWindowPointerMove, { capture: true })
+  syncPointerListener()
   chrome.runtime.onMessage.removeListener(onRuntimeMessage)
 
   hideHoverButtonNow()
-  if (hoverButtonElement && hoverButtonElement.parentNode) {
-    hoverButtonElement.parentNode.removeChild(hoverButtonElement)
-    hoverButtonElement = null
+  if (hoverButtonHost && hoverButtonHost.parentNode) {
+    hoverButtonHost.parentNode.removeChild(hoverButtonHost)
   }
+  hoverButtonHost = null
+  hoverButtonElement = null
   if (hoverHideTimeout) {
     clearTimeout(hoverHideTimeout)
     hoverHideTimeout = null

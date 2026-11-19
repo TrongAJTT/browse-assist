@@ -2,6 +2,7 @@ import { Keyboard } from "lucide-react"
 import type React from "react"
 
 import { openBrowserShortcutsPage } from "~core/shortcutsHelper"
+import { useI18n } from "~core/useI18n"
 
 interface ShortcutBadgeProps {
   /** The shortcut key combination string (e.g. "Alt+R", "Alt+P") or empty string if unassigned */
@@ -22,6 +23,7 @@ export const ShortcutBadge: React.FC<ShortcutBadgeProps> = ({
   className = "",
   interactive = true
 }) => {
+  const { t } = useI18n()
   const isAssigned = Boolean(shortcut && shortcut.trim().length > 0)
 
   const handleOpenShortcutsPage = (e: React.MouseEvent) => {
@@ -35,9 +37,7 @@ export const ShortcutBadge: React.FC<ShortcutBadgeProps> = ({
       <kbd
         onClick={interactive ? handleOpenShortcutsPage : undefined}
         title={
-          interactive
-            ? "Click to customize shortcut in browser settings"
-            : undefined
+          interactive ? t("common.customizeShortcutTip") : undefined
         }
         className={`badge-kbd ${
           interactive
@@ -53,14 +53,14 @@ export const ShortcutBadge: React.FC<ShortcutBadgeProps> = ({
     <button
       type="button"
       onClick={interactive ? handleOpenShortcutsPage : undefined}
-      title="Shortcut conflict or unassigned. Click to configure in browser settings"
-      className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/25 ${
+      title={t("common.shortcutNotAssignedTip")}
+      className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-app-surface text-content-muted border border-border-subtle ${
         interactive
-          ? "cursor-pointer hover:bg-amber-500/20 hover:border-amber-500/40 active:scale-95 transition-all"
+          ? "cursor-pointer hover:text-content-primary hover:border-accent/40 active:scale-95 transition-all"
           : ""
       } ${className}`}>
-      <Keyboard className="w-2.5 h-2.5" />
-      <span>Unassigned</span>
+      <Keyboard className="w-2.5 h-2.5 opacity-75" />
+      <span>{t("common.unassigned")}</span>
     </button>
   )
 }

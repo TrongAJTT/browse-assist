@@ -1,5 +1,6 @@
 import type { ResizeHandle } from "../types"
 import type { UndoManager } from "../undoManager"
+import { t } from "~core/i18n"
 import { showContentToast } from "~core/toast"
 
 export class ResizeController {
@@ -90,7 +91,7 @@ export class ResizeController {
 
       if (showToast) {
         showContentToast({
-          message: "Element Resized",
+          message: t("features.elementToys.logic.resized"),
           detail: `${newWidth} × ${newHeight}`,
           type: "success",
           duration: 1800

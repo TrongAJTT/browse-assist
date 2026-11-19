@@ -1,0 +1,23 @@
+{
+  "extName": {
+    "message": "Browse Assist"
+  },
+  "extDescription": {
+    "message": "輕量、模組化的瀏覽器效率工具集，全面提升網頁瀏覽體驗。"
+  },
+  "cmdPiP": {
+    "message": "為目前播放影片切換子母畫面 (PiP) 模式"
+  },
+  "cmdAllowRightClick": {
+    "message": "在目前分頁切換允許右鍵"
+  },
+  "cmdColorPicker": {
+    "message": "從螢幕取色"
+  },
+  "cmdElementToys": {
+    "message": "啟用元素工具以檢查並編輯頁面元素"
+  },
+  "cmdQuickHub": {
+    "message": "切換螢幕上的快捷中心選單"
+  }
+}

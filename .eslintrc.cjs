@@ -19,7 +19,7 @@ module.exports = {
       version: "detect"
     }
   },
-  plugins: ["@typescript-eslint", "react", "react-hooks"],
+  plugins: ["@typescript-eslint", "react", "react-hooks", "i18next"],
   extends: [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
@@ -37,8 +37,62 @@ module.exports = {
         argsIgnorePattern: "^_",
         varsIgnorePattern: "^_"
       }
+    ],
+    "i18next/no-literal-string": [
+      "error",
+      {
+        mode: "jsx-only",
+        "jsx-attributes": {
+          include: [
+            "title",
+            "aria-label",
+            "ariaLabel",
+            "placeholder",
+            "alt",
+            "label",
+            "description"
+          ]
+        },
+        words: {
+          exclude: [
+            "^[0-9%+.×xX/*\\-:\\s]+$",
+            "Browse Assist",
+            "PiP",
+            "HEX",
+            "RGB",
+            "HSL",
+            "Ctrl \\+ Z",
+            "about:addons",
+            "Shift",
+            "Alt",
+            "Ctrl",
+            "Flow",
+            "Free",
+            "X",
+            "<video>",
+            "v\\d+",
+            "^v$",
+            "^•$",
+            "^·$",
+            "^±$",
+            "^s$",
+            "^\\(N/A\\)$"
+          ]
+        },
+        callees: {
+          exclude: ["t", "translateFor", "includes", "renderDirectionNode"]
+        }
+      }
     ]
   },
+  overrides: [
+    {
+      files: ["**/__tests__/**", "src/locales/**"],
+      rules: {
+        "i18next/no-literal-string": "off"
+      }
+    }
+  ],
   ignorePatterns: [
     "build/",
     "dist/",

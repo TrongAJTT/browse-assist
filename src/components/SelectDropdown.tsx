@@ -1,0 +1,181 @@
+import { Check, ChevronDown } from "lucide-react"
+import React, { useEffect, useRef, useState } from "react"
+
+export interface SelectDropdownOption<T extends string> {
+  id: T
+  label: string
+  icon?: React.ReactNode
+}
+
+/**
+ * Shared opacity preset options reusable across feature settings.
+ */
+export const OPACITY_DROPDOWN_OPTIONS: SelectDropdownOption<string>[] = [
+  { id: "1", label: "100%" },
+  { id: "0.85", label: "85%" },
+  { id: "0.7", label: "70%" },
+  { id: "0.5", label: "50%" },
+  { id: "0.35", label: "35%" }
+]
+
+export type SelectDropdownPlacement = "auto" | "top" | "bottom"
+
+interface SelectDropdownProps<T extends string> {
+  value: T
+  options: SelectDropdownOption<T>[]
+  onChange: (value: T) => void
+  disabled?: boolean
+  placement?: SelectDropdownPlacement
+  ariaLabel?: string
+  className?: string
+}
+
+/**
+ * Finds the nearest vertically scrollable ancestor, or falls back to viewport bounds.
+ */
+function getScrollBounds(el: HTMLElement): { top: number; bottom: number } {
+  let node = el.parentElement
+  while (node) {
+    const overflowY = window.getComputedStyle(node).overflowY
+    if (
+      (overflowY === "auto" || overflowY === "scroll") &&
+      node.scrollHeight > node.clientHeight
+    ) {
+      const rect = node.getBoundingClientRect()
+      return { top: rect.top, bottom: rect.bottom }
+    }
+    node = node.parentElement
+  }
+  return { top: 0, bottom: window.innerHeight }
+}
+
+/**
+ * Reusable compact trailing dropdown menu adhering to Browse Assist Design Tokens.
+ * Automatically flips upward when near the bottom of its scroll container or viewport.
+ */
+export function SelectDropdown<T extends string>({
+  value,
+  options,
+  onChange,
+  disabled = false,
+  placement = "auto",
+  ariaLabel,
+  className = ""
+}: SelectDropdownProps<T>) {
+  const [isOpen, setIsOpen] = useState(false)
+  const [openUpward, setOpenUpward] = useState(placement === "top")
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  const selectedOption =
+    options.find((opt) => opt.id === value) ?? options[0]
+
+  useEffect(() => {
+    if (!isOpen) return
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
+        setIsOpen(false)
+      }
+    }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsOpen(false)
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+    document.addEventListener("keydown", handleKeyDown)
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+      document.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [isOpen])
+
+  return (
+    <div ref={containerRef} className={`relative shrink-0 ${className}`}>
+      <button
+        type="button"
+        disabled={disabled}
+        aria-label={ariaLabel}
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+        onClick={() => {
+          if (disabled) return
+          if (!isOpen) {
+            if (placement === "top") {
+              setOpenUpward(true)
+            } else if (placement === "bottom") {
+              setOpenUpward(false)
+            } else if (containerRef.current) {
+              const rect = containerRef.current.getBoundingClientRect()
+              const bounds = getScrollBounds(containerRef.current)
+              const estimatedHeight = options.length * 32 + 12
+              const spaceBelow = bounds.bottom - rect.bottom
+              const spaceAbove = rect.top - bounds.top
+              setOpenUpward(spaceBelow < estimatedHeight && spaceAbove > spaceBelow)
+            }
+          }
+          setIsOpen((prev) => !prev)
+        }}
+        className={`inline-flex items-center justify-between gap-2 min-w-[104px] px-2.5 py-1.5 rounded-lg text-xs font-medium bg-app-surface border transition-all focus:outline-none ${
+          disabled
+            ? "opacity-50 cursor-not-allowed border-border-subtle text-content-muted"
+            : isOpen
+              ? "border-accent text-content-primary ring-1 ring-accent-glow"
+              : "border-border-subtle text-content-primary hover:border-accent/40"
+        }`}>
+        <span className="flex items-center gap-1.5 truncate">
+          {selectedOption?.icon && (
+            <span className="shrink-0 text-content-muted">
+              {selectedOption.icon}
+            </span>
+          )}
+          <span className="truncate">{selectedOption?.label}</span>
+        </span>
+        <ChevronDown
+          className={`w-3.5 h-3.5 text-content-muted shrink-0 transition-transform duration-150 ${
+            isOpen ? "rotate-180 text-accent" : ""
+          }`}
+        />
+      </button>
+
+      {isOpen && (
+        <div
+          role="listbox"
+          className={`absolute right-0 min-w-[136px] rounded-xl bg-app-elevated border border-border-subtle shadow-xl shadow-black/40 py-1 z-30 animate-in fade-in zoom-in-95 duration-100 ${
+            openUpward ? "bottom-full mb-1.5" : "top-full mt-1.5"
+          }`}>
+          {options.map((opt) => {
+            const isSelected = opt.id === value
+            return (
+              <button
+                key={opt.id}
+                type="button"
+                role="option"
+                aria-selected={isSelected}
+                onClick={() => {
+                  onChange(opt.id)
+                  setIsOpen(false)
+                }}
+                className={`w-full flex items-center justify-between gap-2 px-3 py-1.5 text-xs transition-colors ${
+                  isSelected
+                    ? "bg-accent-subtle text-accent font-semibold"
+                    : "text-content-secondary hover:text-content-primary hover:bg-app-surface"
+                }`}>
+                <span className="flex items-center gap-2 truncate">
+                  {opt.icon && <span className="shrink-0">{opt.icon}</span>}
+                  <span className="truncate">{opt.label}</span>
+                </span>
+                {isSelected && <Check className="w-3.5 h-3.5 shrink-0" />}
+              </button>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}

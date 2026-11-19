@@ -1,5 +1,8 @@
-import { SVG_ICONS, MODE_COLORS, TOOLBAR_ID } from "./constants"
+import { escapeHtml } from "~core/escapeHtml"
+import { t } from "~core/i18n"
 import type { ElementMoveType, ElementToysMode } from "~core/types"
+
+import { SVG_ICONS, MODE_COLORS, TOOLBAR_ID } from "./constants"
 
 export interface ToolbarHandlers {
   onModeChange: (mode: ElementToysMode) => void
@@ -148,20 +151,24 @@ export class ToolbarView {
     const el = this.domElement
     const isMoveActive = currentMode === "move"
 
+    const flowLabel = t("features.elementToys.toolbar.flow")
+    const freeLabel = t("features.elementToys.toolbar.free")
+    const modeLabel = moveType === "relative" ? flowLabel : freeLabel
+
     el.innerHTML = `
       <div style="display:flex;align-items:center;gap:5px;padding:0 6px 0 4px;color:#fbbf24;font-weight:700;font-size:11.5px;letter-spacing:0.02em;">
         ${SVG_ICONS.logo}
-        <span>Element Toys</span>
+        <span>${escapeHtml(t("features.elementToys.toolbar.title"))}</span>
       </div>
       <div style="width:1px;height:16px;background:rgba(255,255,255,0.15);margin:0 2px;"></div>
       
       <!-- Mode Buttons -->
       <div style="display:flex;align-items:center;gap:3px;" id="__et_modes__">
-        <button type="button" data-mode="zap" title="Zap: Click to eliminate element from DOM" style="${getModeButtonStyle("zap", currentMode === "zap")}">
-          ${SVG_ICONS.zap}<span>Zap</span>
+        <button type="button" data-mode="zap" title="${escapeHtml(t("features.elementToys.toolbar.zapTip"))}" style="${getModeButtonStyle("zap", currentMode === "zap")}">
+          ${SVG_ICONS.zap}<span>${escapeHtml(t("features.elementToys.toolbar.zap"))}</span>
         </button>
-        <button type="button" data-mode="edit" title="Edit Text: Click any text to edit inline" style="${getModeButtonStyle("edit", currentMode === "edit")}">
-          ${SVG_ICONS.edit}<span>Edit</span>
+        <button type="button" data-mode="edit" title="${escapeHtml(t("features.elementToys.toolbar.editTip"))}" style="${getModeButtonStyle("edit", currentMode === "edit")}">
+          ${SVG_ICONS.edit}<span>${escapeHtml(t("features.elementToys.toolbar.edit"))}</span>
         </button>
 
         <!-- Move Button with embedded Flow / Free switcher -->
@@ -169,46 +176,46 @@ export class ToolbarView {
           isMoveActive
             ? `
           <div style="display:flex;align-items:center;background:#10b981;border-radius:9999px;padding:2px 3px;gap:3px;box-shadow:0 2px 8px #10b98166;">
-            <button type="button" data-mode="move" title="Move Tool Active (Press +/- to adjust parent scope)" style="display:flex;align-items:center;gap:4px;border:none;background:transparent;color:#ffffff;font-size:11.5px;font-weight:700;cursor:pointer;padding:2px 4px;">
-              ${SVG_ICONS.move}<span>Move</span>
+            <button type="button" data-mode="move" title="${escapeHtml(t("features.elementToys.toolbar.moveActiveTip"))}" style="display:flex;align-items:center;gap:4px;border:none;background:transparent;color:#ffffff;font-size:11.5px;font-weight:700;cursor:pointer;padding:2px 4px;">
+              ${SVG_ICONS.move}<span>${escapeHtml(t("features.elementToys.toolbar.move"))}</span>
             </button>
             <div style="display:flex;align-items:center;background:rgba(0,0,0,0.28);border-radius:9999px;padding:1px 2px;gap:2px;">
-              <button type="button" data-sub-move="relative" title="Flow Mode: Reorders in DOM layout across containers & pushes other elements" style="${getSubMoveBtnStyle(moveType === "relative")}">Flow</button>
-              <button type="button" data-sub-move="absolute" title="Free Mode: Freeform transform without altering layout" style="${getSubMoveBtnStyle(moveType === "absolute")}">Free</button>
+              <button type="button" data-sub-move="relative" title="${escapeHtml(t("features.elementToys.toolbar.flowTip"))}" style="${getSubMoveBtnStyle(moveType === "relative")}">${escapeHtml(flowLabel)}</button>
+              <button type="button" data-sub-move="absolute" title="${escapeHtml(t("features.elementToys.toolbar.freeTip"))}" style="${getSubMoveBtnStyle(moveType === "absolute")}">${escapeHtml(freeLabel)}</button>
             </div>
           </div>
         `
             : `
-          <button type="button" data-mode="move" title="Move: Click to activate Move mode (Flow / Free)" style="${getModeButtonStyle("move", false)}">
-            ${SVG_ICONS.move}<span>Move (${moveType === "relative" ? "Flow" : "Free"})</span>
+          <button type="button" data-mode="move" title="${escapeHtml(t("features.elementToys.toolbar.moveTip"))}" style="${getModeButtonStyle("move", false)}">
+            ${SVG_ICONS.move}<span>${escapeHtml(t("features.elementToys.toolbar.moveLabel", { mode: modeLabel }))}</span>
           </button>
         `
         }
 
-        <button type="button" data-mode="hide" title="Hide: Click to soft-hide without shifting layout" style="${getModeButtonStyle("hide", currentMode === "hide")}">
-          ${SVG_ICONS.hide}<span>Hide</span>
+        <button type="button" data-mode="hide" title="${escapeHtml(t("features.elementToys.toolbar.hideTip"))}" style="${getModeButtonStyle("hide", currentMode === "hide")}">
+          ${SVG_ICONS.hide}<span>${escapeHtml(t("features.elementToys.toolbar.hide"))}</span>
         </button>
       </div>
 
       <div style="width:1px;height:16px;background:rgba(255,255,255,0.15);margin:0 2px;"></div>
 
       <!-- Undo Button -->
-      <button type="button" id="__et_undo__" title="Undo Last Action (Ctrl+Z)" ${undoCount === 0 ? "disabled" : ""} style="${getActionButtonStyle(undoCount === 0)}">
+      <button type="button" id="__et_undo__" title="${escapeHtml(t("features.elementToys.toolbar.undoTip"))}" ${undoCount === 0 ? "disabled" : ""} style="${getActionButtonStyle(undoCount === 0)}">
         ${SVG_ICONS.undo}
-        <span>Undo</span>
+        <span>${escapeHtml(t("features.elementToys.toolbar.undo"))}</span>
         ${undoCount > 0 ? `<span style="background:rgba(255,255,255,0.2);padding:1px 5px;border-radius:10px;font-size:10px;">${undoCount}</span>` : ""}
       </button>
 
       <!-- Settings Button -->
-      <button type="button" id="__et_settings__" title="Open Element Toys Settings" style="display:flex;align-items:center;gap:3.5px;padding:4px 8px;border-radius:9999px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:#e4e4e7;cursor:pointer;font-size:11.5px;font-weight:500;transition:all 0.15s ease;">
+      <button type="button" id="__et_settings__" title="${escapeHtml(t("features.elementToys.toolbar.settingsTip"))}" style="display:flex;align-items:center;gap:3.5px;padding:4px 8px;border-radius:9999px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:#e4e4e7;cursor:pointer;font-size:11.5px;font-weight:500;transition:all 0.15s ease;">
         ${SVG_ICONS.settings}
-        <span>Settings</span>
+        <span>${escapeHtml(t("features.elementToys.toolbar.settings"))}</span>
       </button>
 
       <!-- Exit Button -->
-      <button type="button" id="__et_exit__" title="Exit Element Toys (Esc)" style="display:flex;align-items:center;gap:3px;padding:4px 8px;border-radius:9999px;border:none;background:rgba(255,255,255,0.08);color:#a1a1aa;cursor:pointer;font-size:11px;font-weight:600;transition:all 0.15s ease;">
+      <button type="button" id="__et_exit__" title="${escapeHtml(t("features.elementToys.toolbar.exitTip"))}" style="display:flex;align-items:center;gap:3px;padding:4px 8px;border-radius:9999px;border:none;background:rgba(255,255,255,0.08);color:#a1a1aa;cursor:pointer;font-size:11px;font-weight:600;transition:all 0.15s ease;">
         ${SVG_ICONS.exit}
-        <span>Exit</span>
+        <span>${escapeHtml(t("features.elementToys.toolbar.exit"))}</span>
       </button>
     `
 

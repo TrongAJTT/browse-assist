@@ -1,4 +1,4 @@
-import { Eye, MousePointerClick } from "lucide-react"
+import { Bell, Droplets, Eye, MousePointerClick, PauseCircle } from "lucide-react"
 import type React from "react"
 import { useEffect, useState } from "react"
 
@@ -6,6 +6,10 @@ import { useStorage } from "@plasmohq/storage/hook"
 
 import { EdgePositionPicker } from "~components/EdgePositionPicker"
 import { FeatureShortcutRow } from "~components/FeatureShortcutRow"
+import {
+  OPACITY_DROPDOWN_OPTIONS,
+  SelectDropdown
+} from "~components/SelectDropdown"
 import { SettingToggleRow } from "~components/SettingToggleRow"
 import { SubSettingsLayout } from "~components/SubSettingsLayout"
 import { openBrowserShortcutsPage } from "~core/shortcutsHelper"
@@ -18,6 +22,7 @@ import {
   type PictureInPictureConfig,
   normalizeEdgePlacement
 } from "~core/types"
+import { useI18n } from "~core/useI18n"
 
 interface PictureInPictureSettingsViewProps {
   onBack: () => void
@@ -30,6 +35,7 @@ interface PictureInPictureSettingsViewProps {
 export const PictureInPictureSettingsView: React.FC<
   PictureInPictureSettingsViewProps
 > = ({ onBack }) => {
+  const { t } = useI18n()
   const [settings, setSettings] = useStorage<FeatureSettings>(
     STORAGE_KEYS.SETTINGS,
     DEFAULT_SETTINGS
@@ -43,7 +49,7 @@ export const PictureInPictureSettingsView: React.FC<
         if (cmd?.shortcut) {
           setShortcut(cmd.shortcut)
         } else {
-          setShortcut("Not configured")
+          setShortcut("")
         }
       })
     }
@@ -110,15 +116,17 @@ export const PictureInPictureSettingsView: React.FC<
 
   return (
     <SubSettingsLayout
-      title="Picture-in-Picture"
+      title={t("features.pictureInPicture.settings.shortTitle")}
       enabled={isMasterEnabled}
       onToggle={handleToggleMaster}
       onBack={onBack}>
       <div className="space-y-4">
         {/* Shortcut Section */}
         <FeatureShortcutRow
-          title="Global Shortcut"
-          description="Toggle floating video window"
+          title={t("features.pictureInPicture.settings.globalShortcut")}
+          description={t(
+            "features.pictureInPicture.settings.globalShortcutDesc"
+          )}
           shortcut={shortcut}
           iconColorClass="text-indigo-400"
           onConfigureShortcuts={handleOpenShortcutsPage}
@@ -126,38 +134,57 @@ export const PictureInPictureSettingsView: React.FC<
 
         {/* Options */}
         <div className="space-y-2 pt-2 border-t border-border-divider">
-          <span className="section-header">Display & Feedback</span>
+          <span className="section-header">
+            {t("features.pictureInPicture.settings.displayFeedback")}
+          </span>
 
           <div className="divide-y divide-border-divider">
             {/* Show Badge */}
             <SettingToggleRow
               icon={<Eye className="w-5 h-5 text-accent" />}
-              title="Extension Badge Indicator"
-              description="Show “PiP” badge on extension icon whenever a video is playing in PiP."
+              title={t("features.pictureInPicture.settings.extensionBadge")}
+              description={t(
+                "features.pictureInPicture.settings.extensionBadgeDesc"
+              )}
               enabled={currentConfig.showBadge}
               onToggle={() => handleToggleOption("showBadge")}
             />
 
             {/* Show Action Toast */}
             <SettingToggleRow
-              icon={<Eye className="w-5 h-5 text-emerald-400" />}
-              title="Action Toast Notification"
-              description="Display brief confirmation toast when entering or exiting PiP."
+              icon={<Bell className="w-5 h-5 text-emerald-400" />}
+              title={t("features.pictureInPicture.settings.actionToast")}
+              description={t(
+                "features.pictureInPicture.settings.actionToastDesc"
+              )}
               enabled={currentConfig.showToast}
               onToggle={() => handleToggleOption("showToast")}
+            />
+
+            {/* Auto-Pause on Exit PiP */}
+            <SettingToggleRow
+              icon={<PauseCircle className="w-5 h-5 text-amber-400" />}
+              title={t("features.pictureInPicture.settings.autoPauseOnExit")}
+              description={t(
+                "features.pictureInPicture.settings.autoPauseOnExitDesc"
+              )}
+              enabled={Boolean(currentConfig.autoPauseOnExit)}
+              onToggle={() => handleToggleOption("autoPauseOnExit")}
             />
 
             {/* Hover PiP Button */}
             <SettingToggleRow
               icon={<MousePointerClick className="w-5 h-5 text-indigo-400" />}
-              title="Hover Video PiP Button"
+              title={t("features.pictureInPicture.settings.hoverButton")}
               badge={{
-                text: "Unstable",
+                text: t("common.unstable"),
                 bgClass: "bg-amber-500/10",
                 colorClass: "text-amber-400",
                 borderClass: "border-amber-500/25"
               }}
-              description="Show a floating PiP trigger inside playing videos. May be unstable or blocked on some custom web video players."
+              description={t(
+                "features.pictureInPicture.settings.hoverButtonDesc"
+              )}
               enabled={currentConfig.hoverButton}
               onToggle={() => handleToggleOption("hoverButton")}
             />
@@ -167,18 +194,54 @@ export const PictureInPictureSettingsView: React.FC<
         {/* Hover Button Corner Position (when enabled) */}
         {currentConfig.hoverButton && (
           <div className="space-y-2 pt-2 border-t border-border-divider">
-            <span className="section-header">Button Position</span>
+            <span className="section-header">
+              {t("features.pictureInPicture.settings.buttonPosition")}
+            </span>
             <div className="space-y-1.5">
               <span className="text-xs font-semibold text-content-primary">
-                Edge & Alignment
+                {t("features.pictureInPicture.settings.edgeAlignment")}
               </span>
               <p className="text-[11px] text-content-muted leading-snug">
-                Drag or click along the edges to anchor the floating PiP button inside the video frame.
+                {t("features.pictureInPicture.settings.edgeAlignmentDesc")}
               </p>
               <EdgePositionPicker
                 value={currentPlacement}
                 onChange={handleSelectPlacement}
                 allowedEdges={["top", "right", "bottom", "left"]}
+              />
+            </div>
+
+            <div className="flex items-center justify-between gap-3 pt-2">
+              <div className="flex items-start gap-3 flex-1 min-w-0">
+                <Droplets className="w-5 h-5 text-sky-400 shrink-0 mt-0.5" />
+                <div className="flex flex-col min-w-0">
+                  <span className="text-xs font-semibold text-content-primary">
+                    {t("common.buttonOpacity")}
+                  </span>
+                  <p className="text-[11px] text-content-muted mt-0.5 leading-snug">
+                    {t(
+                      "features.pictureInPicture.settings.buttonOpacityDesc"
+                    )}
+                  </p>
+                </div>
+              </div>
+
+              <SelectDropdown<string>
+                value={String(currentConfig.hoverButtonOpacity ?? 1)}
+                options={OPACITY_DROPDOWN_OPTIONS}
+                onChange={(val) => {
+                  const opacity = parseFloat(val)
+                  if (Number.isNaN(opacity)) return
+                  setSettings((prev) => ({
+                    ...(prev ?? DEFAULT_SETTINGS),
+                    pictureInPictureConfig: {
+                      ...(prev?.pictureInPictureConfig ??
+                        DEFAULT_SETTINGS.pictureInPictureConfig),
+                      hoverButtonOpacity: opacity
+                    }
+                  }))
+                }}
+                ariaLabel={t("common.buttonOpacity")}
               />
             </div>
           </div>
