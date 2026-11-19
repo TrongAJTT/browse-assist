@@ -6,6 +6,7 @@
 import type { PlasmoCSConfig } from "plasmo"
 
 import { isColorPickerSupported } from "~core/browserDetect"
+import { clearFabDismissedOnTab, isFabDismissedOnTab } from "~core/fab"
 import { setLocale } from "~core/i18n"
 import { MESSAGE_TYPES } from "~core/messaging"
 import { getStoredSettings, subscribeToSettings } from "~core/storage"
@@ -70,8 +71,27 @@ export const config: PlasmoCSConfig = {
 }
 
 let isElementToysEnabled = true
+let latestSettings: FeatureSettings | null = null
 
 function applySettings(nextSettings: FeatureSettings): void {
+  // If the user explicitly re-enabled a feature in Popup after turning it off,
+  // clear its per-tab dismissal so the FAB reappears as expected.
+  if (latestSettings) {
+    if (!latestSettings.quickScroll && nextSettings.quickScroll) {
+      clearFabDismissedOnTab("quickScroll")
+    }
+    if (!latestSettings.quickHub && nextSettings.quickHub) {
+      clearFabDismissedOnTab("quickHub")
+    }
+    if (
+      !latestSettings.pictureInPictureConfig?.hoverButton &&
+      nextSettings.pictureInPictureConfig?.hoverButton
+    ) {
+      clearFabDismissedOnTab("pipHover")
+    }
+  }
+  latestSettings = nextSettings
+
   setLocale(nextSettings?.language ?? "auto")
   isElementToysEnabled = Boolean(nextSettings?.elementToys)
   // Allow Right Click is managed per-tab on-demand, not auto-activated globally.
@@ -91,7 +111,7 @@ function applySettings(nextSettings: FeatureSettings): void {
   }
 
   // Quick Scroll Buttons
-  if (nextSettings.quickScroll) {
+  if (nextSettings.quickScroll && !isFabDismissedOnTab("quickScroll")) {
     activateQuickScroll(nextSettings.quickScrollConfig, nextSettings.theme)
   } else {
     deactivateQuickScroll()
@@ -140,7 +160,7 @@ function applySettings(nextSettings: FeatureSettings): void {
   }
 
   // Quick Hub
-  if (nextSettings.quickHub) {
+  if (nextSettings.quickHub && !isFabDismissedOnTab("quickHub")) {
     activateQuickHub(nextSettings.quickHubConfig)
   } else {
     deactivateQuickHub()
@@ -200,6 +220,10 @@ async function init(): Promise<void> {
         return true
       }
       if (msgType === MESSAGE_TYPES.TOGGLE_QUICK_HUB) {
+        if (isFabDismissedOnTab("quickHub") && latestSettings?.quickHub) {
+          clearFabDismissedOnTab("quickHub")
+          activateQuickHub(latestSettings.quickHubConfig)
+        }
         toggleQuickHubMenu()
         sendResponse({ success: true })
         return true

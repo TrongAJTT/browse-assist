@@ -6,10 +6,24 @@
  */
 
 import { isColorPickerSupported } from "~core/browserDetect"
+import {
+  dismissFabOnTab,
+  FAB_MENU_ICONS,
+  isFabContextMenuOpen,
+  isFabRepositioning,
+  openFabContextMenu,
+  startFabReposition
+} from "~core/fab"
 import { t } from "~core/i18n"
 import { cleanUrl, copyToClipboard, showCopiedFeedback } from "~core/linkUtils"
-import { getStoredSettings, subscribeToSettings } from "~core/storage"
+import {
+  getStoredSettings,
+  subscribeToSettings,
+  updateFeatureSetting,
+  updateStoredSettings
+} from "~core/storage"
 import { detectPageTheme, observePageTheme } from "~core/themeDetect"
+import { showContentToast } from "~core/toast"
 import {
   DEFAULT_QUICK_HUB_CONFIG,
   normalizeEdgePlacement,
@@ -603,7 +617,15 @@ export function toggleQuickHubMenu(): void {
  * Checks proximity between mouse coordinate and floating trigger button.
  */
 function handleMouseMove(e: MouseEvent): void {
-  if (!currentConfig.hoverToReveal || isMenuOpen || !triggerBtn) return
+  if (
+    !currentConfig.hoverToReveal ||
+    isMenuOpen ||
+    isFabContextMenuOpen() ||
+    isFabRepositioning() ||
+    !triggerBtn
+  ) {
+    return
+  }
 
   const rect = triggerBtn.getBoundingClientRect()
   const btnCenterX = rect.left + rect.width / 2
@@ -682,6 +704,105 @@ function createDOM(): void {
   triggerBtn.addEventListener("click", (e) => {
     e.stopPropagation()
     toggleQuickHubMenu()
+  })
+  triggerBtn.addEventListener("contextmenu", (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    closeMenu()
+
+    if (hideTimeout) {
+      clearTimeout(hideTimeout)
+      hideTimeout = null
+    }
+    if (currentConfig.hoverToReveal && triggerBtn) {
+      triggerBtn.classList.remove("qh-hidden")
+      triggerBtn.classList.add("qh-visible")
+    }
+
+    const currentPlacement = normalizeEdgePlacement(
+      currentConfig.placement ?? currentConfig.corner,
+      DEFAULT_QUICK_HUB_CONFIG.placement
+    )
+
+    openFabContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+      theme: detectedTheme,
+      items: [
+        {
+          id: "move",
+          label: t("content.fabMenu.movePosition"),
+          iconSvg: FAB_MENU_ICONS.move,
+          onSelect: () => {
+            if (currentConfig.hoverToReveal && triggerBtn) {
+              triggerBtn.classList.remove("qh-hidden")
+              triggerBtn.classList.add("qh-visible")
+            }
+            startFabReposition({
+              initialPlacement: currentPlacement,
+              allowedEdges: ["left", "right", "top", "bottom"],
+              getBounds: () => ({
+                left: 0,
+                top: 0,
+                width: window.innerWidth,
+                height: window.innerHeight
+              }),
+              onPreview: (placement) => {
+                currentConfig = { ...currentConfig, placement }
+                if (styleElement) {
+                  styleElement.textContent = getShadowStyles(
+                    currentConfig,
+                    detectedTheme
+                  )
+                }
+              },
+              onCommit: async (placement) => {
+                currentConfig = { ...currentConfig, placement }
+                updateStyles()
+                await updateStoredSettings((cur) => ({
+                  ...cur,
+                  quickHubConfig: {
+                    ...cur.quickHubConfig,
+                    placement
+                  }
+                }))
+              },
+              onEnd: () => {
+                updateStyles()
+              }
+            })
+          }
+        },
+        {
+          id: "hide-tab",
+          label: t("content.fabMenu.hideOnTab"),
+          iconSvg: FAB_MENU_ICONS.eyeOff,
+          onSelect: () => {
+            dismissFabOnTab("quickHub")
+            deactivate()
+            showContentToast({
+              message: t("content.fabMenu.hiddenOnTab", {
+                feature: t("features.quickHub.title")
+              }),
+              type: "info",
+              duration: 1800
+            })
+          }
+        },
+        {
+          id: "disable",
+          label: t("content.fabMenu.disableFeature", {
+            feature: t("features.quickHub.title")
+          }),
+          iconSvg: FAB_MENU_ICONS.power,
+          danger: true,
+          dividerBefore: true,
+          onSelect: () => {
+            void updateFeatureSetting("quickHub", false)
+          }
+        }
+      ]
+    })
   })
 
   // Popup Menu

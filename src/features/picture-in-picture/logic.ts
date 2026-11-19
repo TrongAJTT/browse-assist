@@ -4,8 +4,16 @@
  * and dispatching status updates to the background service worker.
  */
 
+import {
+  dismissFabOnTab,
+  FAB_MENU_ICONS,
+  isFabDismissedOnTab,
+  openFabContextMenu,
+  startFabReposition
+} from "~core/fab"
 import { t } from "~core/i18n"
 import { MESSAGE_TYPES, sendToBackground } from "~core/messaging"
+import { updateStoredSettings } from "~core/storage"
 import { removeContentToast, showContentToast } from "~core/toast"
 import {
   DEFAULT_PICTURE_IN_PICTURE_CONFIG,
@@ -30,6 +38,7 @@ let hoverButtonElement: HTMLButtonElement | null = null
 let hoveredVideoElement: HTMLVideoElement | null = null
 let hoverHideTimeout: ReturnType<typeof setTimeout> | null = null
 let isPointerOverHoverButton = false
+let isFabInteractionLocked = false
 
 /**
  * Creates and mounts the floating PiP button element into the DOM.
@@ -95,12 +104,124 @@ function ensureHoverButton(): HTMLButtonElement {
 
   btn.addEventListener("mouseleave", () => {
     isPointerOverHoverButton = false
+    if (isFabInteractionLocked) return
     const idleOpacity = String(currentConfig.hoverButtonOpacity ?? 1)
     btn.style.opacity = idleOpacity
     btn.style.background = "rgba(18, 18, 22, 0.85)"
     btn.style.borderColor = "rgba(255, 255, 255, 0.2)"
     btn.style.transform = "scale(1)"
     hideHoverButtonNow()
+  })
+
+  btn.addEventListener("contextmenu", (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    e.stopImmediatePropagation()
+
+    const targetVideo = hoveredVideoElement
+    if (!targetVideo) return
+
+    isFabInteractionLocked = true
+    if (hoverHideTimeout) {
+      clearTimeout(hoverHideTimeout)
+      hoverHideTimeout = null
+    }
+    btn.style.opacity = "1"
+    btn.style.transform = "scale(1)"
+
+    const currentPlacement = normalizeEdgePlacement(
+      currentConfig.placement ?? currentConfig.buttonPosition,
+      DEFAULT_PICTURE_IN_PICTURE_CONFIG.placement
+    )
+
+    let startedReposition = false
+
+    openFabContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+      onClose: () => {
+        if (!startedReposition) {
+          isFabInteractionLocked = false
+        }
+      },
+      items: [
+        {
+          id: "move",
+          label: t("content.fabMenu.movePosition"),
+          iconSvg: FAB_MENU_ICONS.move,
+          onSelect: () => {
+            startedReposition = true
+            isFabInteractionLocked = true
+            startFabReposition({
+              initialPlacement: currentPlacement,
+              allowedEdges: ["left", "right", "top", "bottom"],
+              getBounds: () => {
+                const r = targetVideo.getBoundingClientRect()
+                return {
+                  left: r.left,
+                  top: r.top,
+                  width: r.width,
+                  height: r.height
+                }
+              },
+              onPreview: (placement) => {
+                currentConfig = { ...currentConfig, placement }
+                showHoverButtonForVideo(targetVideo)
+              },
+              onCommit: async (placement) => {
+                currentConfig = { ...currentConfig, placement }
+                showHoverButtonForVideo(targetVideo)
+                await updateStoredSettings((cur) => ({
+                  ...cur,
+                  pictureInPictureConfig: {
+                    ...cur.pictureInPictureConfig,
+                    placement
+                  }
+                }))
+              },
+              onEnd: () => {
+                isFabInteractionLocked = false
+              }
+            })
+          }
+        },
+        {
+          id: "hide-tab",
+          label: t("content.fabMenu.hideOnTab"),
+          iconSvg: FAB_MENU_ICONS.eyeOff,
+          onSelect: () => {
+            isFabInteractionLocked = false
+            dismissFabOnTab("pipHover")
+            hideHoverButtonNow()
+            showContentToast({
+              message: t("content.fabMenu.hiddenOnTab", {
+                feature: t("features.pictureInPicture.title")
+              }),
+              type: "info",
+              duration: 1800
+            })
+          }
+        },
+        {
+          id: "disable-hover",
+          label: t("content.fabMenu.disablePipHoverButton"),
+          iconSvg: FAB_MENU_ICONS.power,
+          danger: true,
+          dividerBefore: true,
+          onSelect: () => {
+            isFabInteractionLocked = false
+            hideHoverButtonNow()
+            void updateStoredSettings((cur) => ({
+              ...cur,
+              pictureInPictureConfig: {
+                ...cur.pictureInPictureConfig,
+                hoverButton: false
+              }
+            }))
+          }
+        }
+      ]
+    })
   })
 
   btn.addEventListener("click", async (e) => {
@@ -137,7 +258,9 @@ function ensureHoverButton(): HTMLButtonElement {
  * Positions and shows the floating PiP hover button inside the video corner.
  */
 function showHoverButtonForVideo(video: HTMLVideoElement): void {
-  if (!currentConfig.hoverButton || !isActive) return
+  if (!currentConfig.hoverButton || !isActive || isFabDismissedOnTab("pipHover")) {
+    return
+  }
 
   // Do not show button if this video is already in PiP
   if (document.pictureInPictureElement === video) {
@@ -221,7 +344,7 @@ function showHoverButtonForVideo(video: HTMLVideoElement): void {
   // Auto-hide after 2.5s of no pointer motion
   if (hoverHideTimeout) clearTimeout(hoverHideTimeout)
   hoverHideTimeout = setTimeout(() => {
-    if (!isPointerOverHoverButton) {
+    if (!isPointerOverHoverButton && !isFabInteractionLocked) {
       btn.style.opacity = "0"
       btn.style.transform = "scale(0.92)"
     }
@@ -245,7 +368,14 @@ function hideHoverButtonNow(): void {
  * Utilizes the shared multi-layer penetration video detector.
  */
 function onWindowPointerMove(e: PointerEvent): void {
-  if (!isActive || !currentConfig.hoverButton) return
+  if (
+    !isActive ||
+    !currentConfig.hoverButton ||
+    isFabDismissedOnTab("pipHover") ||
+    isFabInteractionLocked
+  ) {
+    return
+  }
 
   // If pointer is directly interacting with our hover button, keep it
   if (isPointerOverHoverButton) return

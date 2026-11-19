@@ -262,6 +262,15 @@ export const ja: TranslationDict = {
       text: "テキストをコピーしました",
       imageLink: "画像リンクをコピーしました",
       linkUrl: "リンク URL をコピーしました"
+    },
+    fabMenu: {
+      movePosition: "位置を移動",
+      hideOnTab: "このタブで非表示",
+      disableFeature: "{{feature}}を無効化",
+      disablePipHoverButton: "PiP ホバーボタンを無効化",
+      dragHint: "端にカーソルを合わせてクリックで配置 • Esc でキャンセル",
+      positionSaved: "位置を保存しました",
+      hiddenOnTab: "このタブで{{feature}}を非表示にしました"
     }
   },
   about: {

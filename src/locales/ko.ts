@@ -258,6 +258,15 @@ export const ko: TranslationDict = {
       text: "텍스트 복사됨",
       imageLink: "이미지 링크 복사됨",
       linkUrl: "링크 URL 복사됨"
+    },
+    fabMenu: {
+      movePosition: "위치 이동",
+      hideOnTab: "이 탭에서 숨기기",
+      disableFeature: "{{feature}} 끄기",
+      disablePipHoverButton: "PiP 호버 버튼 끄기",
+      dragHint: "가장자리로 이동 후 클릭하여 배치 • Esc로 취소",
+      positionSaved: "위치가 저장되었습니다",
+      hiddenOnTab: "이 탭에서 {{feature}} 숨김"
     }
   },
   about: {

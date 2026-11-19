@@ -34,11 +34,20 @@ export async function updateFeatureSetting(
   key: FeatureKey,
   enabled: boolean
 ): Promise<FeatureSettings> {
-  const current = await getStoredSettings()
-  const next: FeatureSettings = {
+  return updateStoredSettings((current) => ({
     ...current,
     [key]: enabled
-  }
+  }))
+}
+
+/**
+ * Atomically reads, transforms, and persists the full FeatureSettings object.
+ */
+export async function updateStoredSettings(
+  updater: (current: FeatureSettings) => FeatureSettings
+): Promise<FeatureSettings> {
+  const current = await getStoredSettings()
+  const next = updater(current)
   await extensionStorage.set(STORAGE_KEYS.SETTINGS, next)
   return next
 }

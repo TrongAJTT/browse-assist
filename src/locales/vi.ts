@@ -262,6 +262,15 @@ export const vi: TranslationDict = {
       text: "Đã sao chép văn bản",
       imageLink: "Đã sao chép liên kết ảnh",
       linkUrl: "Đã sao chép URL liên kết"
+    },
+    fabMenu: {
+      movePosition: "Di chuyển vị trí",
+      hideOnTab: "Ẩn trên tab này",
+      disableFeature: "Tắt {{feature}}",
+      disablePipHoverButton: "Tắt nút PiP khi di chuột",
+      dragHint: "Di chuyển chuột tới cạnh & nhấp để đặt • Esc để hủy",
+      positionSaved: "Đã lưu vị trí",
+      hiddenOnTab: "Đã ẩn {{feature}} trên tab này"
     }
   },
   about: {

@@ -265,6 +265,15 @@ export const en = {
       text: "Copied Text",
       imageLink: "Copied Image Link",
       linkUrl: "Copied Link URL"
+    },
+    fabMenu: {
+      movePosition: "Move position",
+      hideOnTab: "Hide on this tab",
+      disableFeature: "Disable {{feature}}",
+      disablePipHoverButton: "Disable PiP hover button",
+      dragHint: "Move cursor to an edge & click to place • Esc to cancel",
+      positionSaved: "Position saved",
+      hiddenOnTab: "{{feature}} hidden on this tab"
     }
   },
   about: {

@@ -254,6 +254,15 @@ export const zh_CN: TranslationDict = {
       text: "已复制文本",
       imageLink: "已复制图片链接",
       linkUrl: "已复制链接 URL"
+    },
+    fabMenu: {
+      movePosition: "移动位置",
+      hideOnTab: "在当前标签页隐藏",
+      disableFeature: "关闭{{feature}}",
+      disablePipHoverButton: "关闭 PiP 悬浮按钮",
+      dragHint: "移动至边缘并点击放置 • 按 Esc 取消",
+      positionSaved: "位置已保存",
+      hiddenOnTab: "已在当前标签页隐藏{{feature}}"
     }
   },
   about: {

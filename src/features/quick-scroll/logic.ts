@@ -4,8 +4,18 @@
  * Features smart page luminance detection for dynamic light/dark contrast.
  */
 
+import {
+  dismissFabOnTab,
+  FAB_MENU_ICONS,
+  isFabContextMenuOpen,
+  isFabRepositioning,
+  openFabContextMenu,
+  startFabReposition
+} from "~core/fab"
 import { t } from "~core/i18n"
+import { updateFeatureSetting, updateStoredSettings } from "~core/storage"
 import { detectPageTheme } from "~core/themeDetect"
+import { showContentToast } from "~core/toast"
 import {
   DEFAULT_QUICK_SCROLL_CONFIG,
   normalizeEdgePlacement,
@@ -281,6 +291,93 @@ function createShadowDOM(): void {
   containerElement = document.createElement("div")
   containerElement.className = "qs-container"
   applyPlacementStyle()
+  containerElement.addEventListener("contextmenu", (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    if (hideTimer) {
+      clearTimeout(hideTimer)
+      hideTimer = null
+    }
+    containerElement?.classList.remove("qs-dimmed")
+
+    const currentPlacement = normalizeEdgePlacement(
+      currentConfig.placement ?? currentConfig.position,
+      DEFAULT_QUICK_SCROLL_CONFIG.placement
+    )
+
+    openFabContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+      theme: detectedTheme,
+      items: [
+        {
+          id: "move",
+          label: t("content.fabMenu.movePosition"),
+          iconSvg: FAB_MENU_ICONS.move,
+          onSelect: () => {
+            containerElement?.classList.remove("qs-dimmed")
+            startFabReposition({
+              initialPlacement: currentPlacement,
+              allowedEdges: ["left", "right"],
+              getBounds: () => ({
+                left: 0,
+                top: 0,
+                width: window.innerWidth,
+                height: window.innerHeight
+              }),
+              onPreview: (placement) => {
+                currentConfig = { ...currentConfig, placement }
+                applyPlacementStyle()
+              },
+              onCommit: async (placement) => {
+                currentConfig = { ...currentConfig, placement }
+                applyPlacementStyle()
+                await updateStoredSettings((cur) => ({
+                  ...cur,
+                  quickScrollConfig: {
+                    ...cur.quickScrollConfig,
+                    placement
+                  }
+                }))
+              },
+              onEnd: () => {
+                updateButtonsVisibility()
+              }
+            })
+          }
+        },
+        {
+          id: "hide-tab",
+          label: t("content.fabMenu.hideOnTab"),
+          iconSvg: FAB_MENU_ICONS.eyeOff,
+          onSelect: () => {
+            dismissFabOnTab("quickScroll")
+            deactivate()
+            showContentToast({
+              message: t("content.fabMenu.hiddenOnTab", {
+                feature: t("features.quickScroll.title")
+              }),
+              type: "info",
+              duration: 1800
+            })
+          }
+        },
+        {
+          id: "disable",
+          label: t("content.fabMenu.disableFeature", {
+            feature: t("features.quickScroll.title")
+          }),
+          iconSvg: FAB_MENU_ICONS.power,
+          danger: true,
+          dividerBefore: true,
+          onSelect: () => {
+            void updateFeatureSetting("quickScroll", false)
+          }
+        }
+      ]
+    })
+  })
 
   // Button Scroll to Top
   btnTop = document.createElement("button")
@@ -546,7 +643,9 @@ function updateButtonsVisibility(): void {
 
     if (hideTimer) clearTimeout(hideTimer)
     hideTimer = window.setTimeout(() => {
-      containerElement?.classList.add("qs-dimmed")
+      if (!isFabContextMenuOpen() && !isFabRepositioning()) {
+        containerElement?.classList.add("qs-dimmed")
+      }
     }, 2400)
   } else {
     if (hideTimer) {

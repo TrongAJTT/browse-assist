@@ -262,6 +262,15 @@ export const es: TranslationDict = {
       text: "Texto copiado",
       imageLink: "Enlace de imagen copiado",
       linkUrl: "URL del enlace copiada"
+    },
+    fabMenu: {
+      movePosition: "Mover posición",
+      hideOnTab: "Ocultar en esta pestaña",
+      disableFeature: "Desactivar {{feature}}",
+      disablePipHoverButton: "Desactivar botón flotante de PiP",
+      dragHint: "Mueve el cursor a un borde y haz clic • Esc para cancelar",
+      positionSaved: "Posición guardada",
+      hiddenOnTab: "{{feature}} oculto en esta pestaña"
     }
   },
   about: {
