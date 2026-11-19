@@ -17,9 +17,10 @@ export const MAX_DRAG_DISTANCE = 220
  */
 export const RADIAL_VIEWBOX_SIZE = 220
 export const RADIAL_CENTER = 110 // (cx, cy)
-export const RADIAL_INNER_RADIUS = MIN_DRAG_DISTANCE // 50px
-export const RADIAL_OUTER_RADIUS = 98
-export const RADIAL_GAP_DEGREES = 2.5
+export const RADIAL_INNER_RADIUS = MIN_DRAG_DISTANCE // 50px (deadzone boundary)
+export const RADIAL_SECTOR_INNER_RADIUS = 54 // 4px breathing gap outside center hub
+export const RADIAL_OUTER_RADIUS = 96
+export const RADIAL_GAP_DEGREES = 3.2
 
 /**
  * Radial Pie Menu Opacity & Visual Styling Tokens
@@ -30,21 +31,79 @@ export const RADIAL_OPACITY_IDLE = 1
 export const RADIAL_OPACITY_ACTIVE = 1
 
 export const RADIAL_BG_IDLE = `rgba(30, 41, 59, ${RADIAL_OPACITY_IDLE})`
-export const RADIAL_BG_ACTIVE = `rgba(56, 189, 248, ${RADIAL_OPACITY_ACTIVE})`
+export const RADIAL_BG_DISABLED = "#161f30"
+export const RADIAL_BG_ACTIVE = `rgba(99, 102, 241, ${RADIAL_OPACITY_ACTIVE})`
 
-export const RADIAL_STROKE_IDLE = "rgba(148, 163, 184, 0.35)"
-export const RADIAL_STROKE_ACTIVE = "#ffffff"
+export const RADIAL_STROKE_IDLE = "rgba(148, 163, 184, 0.22)"
+export const RADIAL_STROKE_DISABLED = "rgba(148, 163, 184, 0.10)"
+export const RADIAL_STROKE_ACTIVE = "#a5b4fc"
 
 export const RADIAL_STROKE_WIDTH_IDLE = 1.2
-export const RADIAL_STROKE_WIDTH_ACTIVE = 2.0
+export const RADIAL_STROKE_WIDTH_ACTIVE = 1.8
 
-export const RADIAL_GLOW_ACTIVE = "drop-shadow(0 0 10px rgba(56, 189, 248, 0.80))"
+export const RADIAL_GLOW_ACTIVE = "drop-shadow(0 0 12px rgba(99, 102, 241, 0.55))"
 
 export const RADIAL_DEADZONE_BG = "#2b161d"
-export const RADIAL_DEADZONE_STROKE = "rgba(239, 68, 68, 0.75)"
+export const RADIAL_DEADZONE_STROKE = "rgba(248, 113, 113, 0.78)"
 
 export const RADIAL_CENTER_BG = "#0f172a"
-export const RADIAL_CENTER_STROKE = "rgba(56, 189, 248, 0.55)"
+export const RADIAL_CENTER_STROKE = "rgba(148, 163, 184, 0.28)"
+
+export type RadialTheme = "indigo" | "emerald" | "amber" | "sky" | "violet" | "muted"
+
+export const RADIAL_THEME_PALETTE: Record<
+  RadialTheme,
+  {
+    fill: string
+    stroke: string
+    glow: string
+    pillBorder: string
+    iconColor: string
+  }
+> = {
+  indigo: {
+    fill: "#6366f1",
+    stroke: "#c7d2fe",
+    glow: "drop-shadow(0 0 12px rgba(99, 102, 241, 0.65))",
+    pillBorder: "rgba(129, 140, 248, 0.5)",
+    iconColor: "#818cf8"
+  },
+  sky: {
+    fill: "#0ea5e9",
+    stroke: "#bae6fd",
+    glow: "drop-shadow(0 0 12px rgba(14, 165, 233, 0.65))",
+    pillBorder: "rgba(56, 189, 248, 0.5)",
+    iconColor: "#38bdf8"
+  },
+  emerald: {
+    fill: "#10b981",
+    stroke: "#a7f3d0",
+    glow: "drop-shadow(0 0 12px rgba(16, 185, 129, 0.65))",
+    pillBorder: "rgba(52, 211, 153, 0.5)",
+    iconColor: "#34d399"
+  },
+  amber: {
+    fill: "#f59e0b",
+    stroke: "#fde68a",
+    glow: "drop-shadow(0 0 12px rgba(245, 158, 11, 0.65))",
+    pillBorder: "rgba(251, 191, 36, 0.5)",
+    iconColor: "#fbbf24"
+  },
+  violet: {
+    fill: "#8b5cf6",
+    stroke: "#ddd6fe",
+    glow: "drop-shadow(0 0 12px rgba(139, 92, 246, 0.65))",
+    pillBorder: "rgba(167, 139, 250, 0.5)",
+    iconColor: "#a78bfa"
+  },
+  muted: {
+    fill: "#334155",
+    stroke: "#64748b",
+    glow: "none",
+    pillBorder: "rgba(148, 163, 184, 0.35)",
+    iconColor: "#94a3b8"
+  }
+}
 
 /**
  * Super Drag Available Action Options for Settings Dropdown
