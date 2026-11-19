@@ -3,6 +3,9 @@ import type { TranslationDict } from "./en"
 export const ko: TranslationDict = {
   common: {
     appName: "Browse Assist",
+    appSlogan: "웹 브라우징을 한 단계 업그레이드",
+    appDescription:
+      "웹 브라우징의 생산성과 편의성을 높여주는 가볍고 모듈화된 유틸리티 모음입니다.",
     enabled: "사용",
     disabled: "사용 안 함",
     reset: "초기화",
@@ -77,8 +80,13 @@ export const ko: TranslationDict = {
     appearance: "모양",
     themeMode: "테마 모드",
     themeModeDesc: "라이트, 다크 또는 시스템 테마를 따릅니다.",
+    themeDark: "다크",
+    themeLight: "라이트",
+    themeSystem: "시스템",
     viewMode: "보기 모드",
     viewModeDesc: "자세한 목록 또는 컴팩트 타일 그리드.",
+    viewModeList: "목록",
+    viewModeGrid: "그리드",
     language: "언어",
     languageDesc: "인터페이스 언어를 선택하거나 브라우저 설정을 따릅니다.",
     languageAuto: "자동 (브라우저)",
@@ -88,6 +96,10 @@ export const ko: TranslationDict = {
     rememberLastView: "마지막 화면 기억",
     rememberLastViewDesc: "이전에 보던 설정 페이지에서 팝업을 다시 엽니다.",
     sessionTimeout: "세션 시간 제한",
+    minutesShort: "{{count}}분",
+    tickOneMin: "1분",
+    tickTenMinDefault: "10분 (기본값)",
+    tickSixtyMin: "60분",
     customizeMenu: "메뉴 사용자 지정",
     customizeMenuDesc:
       "드래그하여 순서를 바꾸거나 팝업에서 표시 여부를 전환합니다.",
@@ -106,6 +118,7 @@ export const ko: TranslationDict = {
     buyMeACoffeeDesc: "커피 한 잔으로 프로젝트 유지 관리 후원",
     githubSponsorsDesc: "GitHub를 통해 월간 또는 일회성 후원",
     vietqrDesc: "VietQR을 통한 즉시 계좌 이체 (베트남)",
+    authorDonateLabel: "작성자 후원 페이지",
     authorDonateDesc: "작성자에게 직접 후원"
   },
   dialogs: {
@@ -168,8 +181,8 @@ export const ko: TranslationDict = {
         desc: "화면 스포이드 돋보기로 색상 코드 확인 및 복사"
       },
       quickHub: {
-        name: "Quick Hub 단축키",
-        desc: "키보드로 화면 Quick Hub 플로팅 메뉴 전환"
+        name: "빠른 허브 단축키",
+        desc: "키보드로 화면 빠른 허브 플로팅 메뉴 전환"
       },
       volume: {
         name: "동영상 볼륨 제어",
@@ -208,13 +221,13 @@ export const ko: TranslationDict = {
         desc: "추적 매개변수(utm_*, fbclid)를 제거하고 링크 또는 마크다운 복사"
       },
       quickHubZone: {
-        name: "Quick Hub 트리거 영역",
+        name: "빠른 허브 트리거 영역",
         desc: "화면 모서리에 마우스를 올려 빠른 도구 런처 열기"
       }
     },
     storage: {
       title: "확장 저장소 및 데이터",
-      desc: "브라우저에 저장된 Browse Assist의 모든 데이터와 설정(사용자 지정 구성, 단축키, Quick Hub 순서, 색상 기록)을 영구적으로 삭제합니다.",
+      desc: "브라우저에 저장된 Browse Assist의 모든 데이터와 설정(사용자 지정 구성, 단축키, 빠른 허브 순서, 색상 기록)을 영구적으로 삭제합니다.",
       clearAll: "모든 데이터 지우기...",
       cleared: "모든 확장 프로그램 데이터가 삭제되고 기본값으로 초기화되었습니다.",
       footer:
@@ -225,7 +238,7 @@ export const ko: TranslationDict = {
       body: "브라우저 프로필에 저장된 Browse Assist의 모든 데이터가 영구적으로 삭제됩니다.",
       listHeader: "다음 항목이 삭제됩니다:",
       item1: "모든 활성 기능 토글 상태 및 세부 설정",
-      item2: "Quick Hub 순서, 고정된 동작 및 숨겨진 모듈",
+      item2: "빠른 허브 순서, 고정된 동작 및 숨겨진 모듈",
       item3: "스포이드 색상 추출기의 색상 기록",
       item4: "테마 환경설정 및 팝업 탐색 기록",
       warning:
@@ -255,11 +268,17 @@ export const ko: TranslationDict = {
     policy: "개인정보처리방침",
     openSourceLibraries: "오픈 소스 라이브러리",
     declaredPermissions: "선언된 권한",
+    permissionNames: {
+      storage: "저장소",
+      contextMenus: "우클릭 메뉴",
+      clipboardWrite: "클립보드",
+      search: "검색"
+    },
     permissions: {
       storage: "사용자 설정과 기능 환경설정을 로컬에 저장합니다.",
       contextMenus: "깔끔한 링크 복사 등 빠른 우클릭 메뉴 작업을 제공합니다.",
       clipboardWrite: "추출한 색상 코드와 마크다운 링크를 클립보드에 복사합니다.",
-      search: "Super Drag 시 선택한 텍스트를 기본 검색 엔진으로 검색합니다."
+      search: "슈퍼 드래그 시 선택한 텍스트를 기본 검색 엔진으로 검색합니다."
     }
   },
   features: {
@@ -442,7 +461,7 @@ export const ko: TranslationDict = {
           "화살표, PageUp/Down 및 Space 키 스크롤을 부드럽게 보간합니다.",
         aggressiveMode: "강력 가로채기",
         aggressiveModeDesc:
-          "모든 사이트에서 부드러운 스크롤을 강제합니다. Canvas/웹 앱(Figma, Maps) 보호를 위해 꺼 두세요."
+          "모든 사이트에서 부드러운 스크롤을 강제합니다. Canvas/웹 앱(Figma, Maps) 보호를 위해 꺼 두십시오."
       }
     },
     mouseZoom: {
@@ -601,7 +620,7 @@ export const ko: TranslationDict = {
         notSupported: "이 페이지/브라우저에서는 EyeDropper가 지원되지 않습니다",
         pickedAndCopied: "색상 추출 및 복사됨",
         picked: "색상 추출됨",
-        couldNotOpen: "Color Picker를 열 수 없습니다",
+        couldNotOpen: "색상 추출기를 열 수 없습니다",
         permissionRequired: "사용자 상호작용이 필요하거나 허용되지 않았습니다",
         palette: {
           pickedColor: "추출한 색상",
@@ -617,18 +636,18 @@ export const ko: TranslationDict = {
       description:
         "모든 웹페이지에서 요소를 검사, 제거, 텍스트 편집 또는 재배치합니다.",
       settings: {
-        launchTooltip: "페이지에서 Element Toys 실행",
+        launchTooltip: "페이지에서 요소 도구 실행",
         shortcutTitle: "실행 단축키",
-        shortcutDesc: "활성 페이지에서 플로팅 Element Toys 도구 모음 열기",
+        shortcutDesc: "활성 페이지에서 플로팅 요소 도구 도구 모음 열기",
         inspectorBadge: "요소 검사기 배지",
         showDimensions: "요소 크기 표시",
         showDimensionsDesc: "호버 배지에 너비 × 높이(px)를 측정하여 표시합니다",
         showTags: "태그 및 클래스 이름 표시",
         showTagsDesc:
           "HTML 태그 이름과 CSS 클래스 선택자(예: div.banner#hero)를 표시합니다",
-        behaviorSection: "Element Toys 동작",
+        behaviorSection: "요소 도구 동작",
         defaultTool: "실행 시 기본 도구",
-        defaultToolDesc: "Element Toys 활성화 시 선택되는 도구",
+        defaultToolDesc: "요소 도구 활성화 시 선택되는 도구",
         modes: {
           zap: "제거 (Zap)",
           edit: "편집",
@@ -643,7 +662,7 @@ export const ko: TranslationDict = {
           "스크롤을 잠그던 모달 오버레이를 제거하면 스크롤(overflow: auto)을 복원합니다",
         showToast: "플로팅 알림 표시",
         showToastDesc: "작업이 실행될 때 페이지에 확인 배너를 표시합니다",
-        howToUse: "Element Toys 사용 방법",
+        howToUse: "요소 도구 사용 방법",
         tipShortcutPrefix: "누르기:",
         tipShortcutSuffix: "키를 눌러 페이지 내 플로팅 HUD 도구 모음을 엽니다.",
         tipNoShortcutPrefix: "위에서 단축키를 지정하거나",
@@ -707,12 +726,12 @@ export const ko: TranslationDict = {
       }
     },
     quickHub: {
-      title: "Quick Hub",
+      title: "빠른 허브",
       description: "화면 모서리 호버로 활성화되는 빠른 유틸리티 허브.",
       settings: {
         floatingPlacement: "플로팅 버튼 위치",
         floatingPlacementDesc:
-          "화면 가장자리를 따라 드래그하거나 클릭하여 Quick Hub 트리거를 고정합니다.",
+          "화면 가장자리를 따라 드래그하거나 클릭하여 빠른 허브 트리거를 고정합니다.",
         buttonShapeDesc: "플로팅 트리거 버튼 모양을 사용자 지정합니다.",
         buttonOpacityDesc: "플로팅 트리거 버튼의 투명도를 조정합니다.",
         customizeMenu: "메뉴 사용자 지정",
@@ -724,7 +743,7 @@ export const ko: TranslationDict = {
           "커서를 모서리 근처로 옮길 때만 버튼을 표시합니다. 끄면 30% 투명도로 계속 표시됩니다.",
         keyboardShortcut: "키보드 단축키",
         globalHotkey: "전역 단축키 (선택 사항)",
-        globalHotkeyDesc: "활성 웹페이지에서 Quick Hub 메뉴를 전환합니다.",
+        globalHotkeyDesc: "활성 웹페이지에서 빠른 허브 메뉴를 전환합니다.",
         disabledInSettings: "{{feature}} 기능이 확장 설정에서 비활성화되었습니다",
         hiddenInMenu: "{{feature}} 기능이 팝업 메뉴에서 숨겨져 있습니다",
         quickScrollTopOnly: "Quick Scroll이 '위만' 모드로 설정되어 있습니다",
@@ -733,7 +752,7 @@ export const ko: TranslationDict = {
           pipDesc: "플로팅 Picture-in-Picture 창에서 동영상 보기",
           colorPickerTitle: "화면에서 색상 추출",
           colorPickerDesc: "스포이드 픽셀 돋보기 및 즉시 HEX 복사",
-          elementToysTitle: "Element Toys",
+          elementToysTitle: "요소 도구",
           elementToysDesc: "요소 검사, 제거, 텍스트 편집 또는 이동",
           scrollTopTitle: "맨 위로 스크롤",
           scrollTopDesc: "페이지 맨 위로 부드럽게 이동",
@@ -748,8 +767,8 @@ export const ko: TranslationDict = {
       logic: {
         noToolsActive:
           "활성화된 도구가 없습니다. Browse Assist 팝업에서 기능을 켜세요.",
-        triggerTooltip: "Quick Hub (빠른 도구)",
-        triggerAria: "Quick Hub",
+        triggerTooltip: "빠른 허브 (빠른 도구)",
+        triggerAria: "빠른 허브",
         cleanUrlCopied: "깔끔한 URL 복사됨"
       }
     },

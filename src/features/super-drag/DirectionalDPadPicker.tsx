@@ -25,15 +25,14 @@ import { getSuperDragActionOptions } from "./constants"
 
 interface DirectionMeta {
   key: DragDirection
-  label: string
   Icon: React.ComponentType<{ className?: string }>
 }
 
 const DIRECTIONS: Record<DragDirection, DirectionMeta> = {
-  up: { key: "up", label: "Top", Icon: ArrowUp },
-  left: { key: "left", label: "Left", Icon: ArrowLeft },
-  right: { key: "right", label: "Right", Icon: ArrowRight },
-  down: { key: "down", label: "Bottom", Icon: ArrowDown }
+  up: { key: "up", Icon: ArrowUp },
+  left: { key: "left", Icon: ArrowLeft },
+  right: { key: "right", Icon: ArrowRight },
+  down: { key: "down", Icon: ArrowDown }
 }
 
 /**

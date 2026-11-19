@@ -22,7 +22,7 @@ import { GlobalDialogHost } from "~components/GlobalDialogHost"
 import { PreferencesSettingsView } from "~components/PreferencesSettingsView"
 import { AppIcon } from "~core/assets"
 import { isColorPickerSupported } from "~core/browserDetect"
-import { APP_INFO, DONATE_OPTIONS } from "~core/constants"
+import { DONATE_OPTIONS } from "~core/constants"
 import {
   FEATURE_CATALOG,
   FEATURE_CATEGORIES,
@@ -360,10 +360,10 @@ function IndexPopup() {
           <AppIcon className="w-8 h-8 rounded-md shadow-md shadow-accent-glow" />
           <div>
             <h1 className="text-sm font-bold tracking-tight text-content-primary leading-none">
-              {APP_INFO.name}
+              {t("common.appName")}
             </h1>
             <p className="text-[11px] text-content-muted font-normal mt-1">
-              {APP_INFO.slogan}
+              {t("common.appSlogan")}
             </p>
           </div>
         </div>
@@ -422,11 +422,14 @@ function IndexPopup() {
                     href={option.url}
                     target="_blank"
                     rel="noopener noreferrer"
+                    title={t(option.descriptionKey)}
                     onClick={() => setIsDonateOpen(false)}
                     className="flex items-center justify-between px-3 py-2 text-xs text-content-secondary hover:text-content-primary hover:bg-app-surface transition-colors">
                     <div className="flex items-center gap-2">
                       {getDonateIcon(option.iconName)}
-                      <span className="font-medium">{option.label}</span>
+                      <span className="font-medium">
+                        {option.labelKey ? t(option.labelKey) : option.label}
+                      </span>
                     </div>
                     <ExternalLink className="w-3 h-3 text-content-muted" />
                   </a>

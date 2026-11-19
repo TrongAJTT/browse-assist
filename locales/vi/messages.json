@@ -6,18 +6,18 @@
     "message": "Bộ công cụ tiện ích nhẹ, mô-đun hóa giúp tăng năng suất và nâng tầm trải nghiệm duyệt web."
   },
   "cmdPiP": {
-    "message": "Bật/tắt Picture-in-Picture cho video đang phát"
+    "message": "Bật/tắt Hình trong hình (PiP) cho video đang phát"
   },
   "cmdAllowRightClick": {
-    "message": "Bật/tắt Mở khóa chuột phải trên tab hiện tại"
+    "message": "Bật/tắt Cho phép chuột phải trên tab hiện tại"
   },
   "cmdColorPicker": {
     "message": "Chấm màu từ màn hình"
   },
   "cmdElementToys": {
-    "message": "Kích hoạt Element Toys để kiểm tra và chỉnh sửa phần tử trang"
+    "message": "Kích hoạt Công cụ phần tử để kiểm tra và chỉnh sửa phần tử trang"
   },
   "cmdQuickHub": {
-    "message": "Bật/tắt menu nhanh Quick Hub trên trang"
+    "message": "Bật/tắt Trung tâm nhanh trên màn hình"
   }
 }

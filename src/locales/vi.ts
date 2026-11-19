@@ -3,6 +3,9 @@ import type { TranslationDict } from "./en"
 export const vi: TranslationDict = {
   common: {
     appName: "Browse Assist",
+    appSlogan: "Tăng tốc trải nghiệm duyệt web của bạn",
+    appDescription:
+      "Bộ công cụ tiện ích nhẹ, mô-đun hóa giúp tăng năng suất và nâng tầm trải nghiệm duyệt web.",
     enabled: "Đang bật",
     disabled: "Đang tắt",
     reset: "Đặt lại",
@@ -77,8 +80,13 @@ export const vi: TranslationDict = {
     appearance: "Giao diện",
     themeMode: "Chế độ màu",
     themeModeDesc: "Sáng, tối hoặc đồng bộ theo hệ điều hành.",
+    themeDark: "Tối",
+    themeLight: "Sáng",
+    themeSystem: "Hệ thống",
     viewMode: "Kiểu hiển thị",
     viewModeDesc: "Danh sách chi tiết hoặc lưới ô gọn.",
+    viewModeList: "Danh sách",
+    viewModeGrid: "Lưới",
     language: "Ngôn ngữ",
     languageDesc: "Chọn ngôn ngữ giao diện hoặc theo trình duyệt.",
     languageAuto: "Tự động (Trình duyệt)",
@@ -90,6 +98,10 @@ export const vi: TranslationDict = {
     rememberLastViewDesc:
       "Mở lại popup tại trang cài đặt bạn đang xem trước đó.",
     sessionTimeout: "Thời gian lưu phiên",
+    minutesShort: "{{count}} phút",
+    tickOneMin: "1 phút",
+    tickTenMinDefault: "10 phút (Mặc định)",
+    tickSixtyMin: "60 phút",
     customizeMenu: "Tùy chỉnh Menu",
     customizeMenuDesc:
       "Kéo thả để sắp xếp thứ tự hiển thị hoặc ẩn/hiện các tính năng.",
@@ -108,6 +120,7 @@ export const vi: TranslationDict = {
     buyMeACoffeeDesc: "Ủng hộ duy trì dự án bằng một ly cà phê",
     githubSponsorsDesc: "Tài trợ qua GitHub theo tháng hoặc một lần",
     vietqrDesc: "Chuyển khoản ngân hàng nhanh qua VietQR (Việt Nam)",
+    authorDonateLabel: "Trang ủng hộ tác giả",
     authorDonateDesc: "Ủng hộ trực tiếp cho tác giả"
   },
   dialogs: {
@@ -171,8 +184,8 @@ export const vi: TranslationDict = {
         desc: "Bật kính lúp chấm màu màn hình để kiểm tra và sao chép mã màu"
       },
       quickHub: {
-        name: "Phím tắt Quick Hub",
-        desc: "Bật/tắt bảng công cụ nổi Quick Hub bằng bàn phím"
+        name: "Phím tắt Trung tâm nhanh",
+        desc: "Bật/tắt bảng công cụ nổi Trung tâm nhanh bằng bàn phím"
       },
       volume: {
         name: "Điều chỉnh âm lượng video",
@@ -208,16 +221,16 @@ export const vi: TranslationDict = {
       },
       cleanLink: {
         name: "Sao chép liên kết sạch",
-        desc: "Loại bỏ tham số theo dõi (utm_*, fbclid) và sao chép link sạch/Markdown"
+        desc: "Loại bỏ tham số theo dõi (utm_*, fbclid) và sao chép liên kết sạch/Markdown"
       },
       quickHubZone: {
-        name: "Vùng kích hoạt Quick Hub",
+        name: "Vùng kích hoạt Trung tâm nhanh",
         desc: "Đưa chuột vào vùng góc màn hình để mở bảng công cụ nhanh"
       }
     },
     storage: {
       title: "Bộ nhớ & Dữ liệu Tiện ích",
-      desc: "Xóa vĩnh viễn mọi dữ liệu và cài đặt của Browse Assist đã lưu trong trình duyệt. Thao tác này sẽ xóa cấu hình tùy chỉnh, phím tắt, thứ tự Quick Hub và lịch sử chấm màu.",
+      desc: "Xóa vĩnh viễn mọi dữ liệu và cài đặt của Browse Assist đã lưu trong trình duyệt. Thao tác này sẽ xóa cấu hình tùy chỉnh, phím tắt, thứ tự Trung tâm nhanh và lịch sử chấm màu.",
       clearAll: "Xóa toàn bộ dữ liệu...",
       cleared:
         "Toàn bộ dữ liệu tiện ích đã được xóa và khôi phục về mặc định.",
@@ -229,7 +242,7 @@ export const vi: TranslationDict = {
       body: "Thao tác này sẽ xóa vĩnh viễn mọi dữ liệu của Browse Assist trên hồ sơ trình duyệt của bạn.",
       listHeader: "Những mục sau sẽ bị xóa:",
       item1: "Trạng thái bật/tắt của tất cả tính năng & cấu hình con",
-      item2: "Thứ tự Quick Hub, tác vụ ghim & mô-đun đang ẩn",
+      item2: "Thứ tự Trung tâm nhanh, tác vụ ghim & mô-đun đang ẩn",
       item3: "Lịch sử màu trong công cụ Chấm màu",
       item4: "Tùy chọn giao diện và bộ nhớ điều hướng popup",
       warning:
@@ -247,7 +260,7 @@ export const vi: TranslationDict = {
       pageMarkdown: "Đã sao chép trang Markdown",
       quote: "Đã sao chép trích dẫn",
       text: "Đã sao chép văn bản",
-      imageLink: "Đã sao chép link ảnh",
+      imageLink: "Đã sao chép liên kết ảnh",
       linkUrl: "Đã sao chép URL liên kết"
     }
   },
@@ -259,6 +272,12 @@ export const vi: TranslationDict = {
     policy: "Chính sách",
     openSourceLibraries: "Thư viện mã nguồn mở",
     declaredPermissions: "Quyền đã khai báo",
+    permissionNames: {
+      storage: "Lưu trữ",
+      contextMenus: "Menu ngữ cảnh",
+      clipboardWrite: "Bảng nhớ tạm",
+      search: "Tìm kiếm"
+    },
     permissions: {
       storage: "Lưu trữ cài đặt và tùy chọn cá nhân cục bộ trên thiết bị.",
       contextMenus:
@@ -266,7 +285,7 @@ export const vi: TranslationDict = {
       clipboardWrite:
         "Sao chép mã màu đã chọn và liên kết định dạng Markdown.",
       search:
-        "Tìm kiếm văn bản đã chọn bằng công cụ tìm kiếm mặc định khi dùng Super Drag."
+        "Tìm kiếm văn bản đã chọn bằng công cụ tìm kiếm mặc định khi dùng Siêu kéo thả."
     }
   },
   features: {
@@ -353,7 +372,7 @@ export const vi: TranslationDict = {
         directionalGestures: "Cử chỉ theo hướng",
         actions: {
           open_bg_tab: "Tab nền",
-          open_active_tab: "Tab hiện tại",
+          open_active_tab: "Tab mới (chuyển tới)",
           open_window_active: "Cửa sổ mới",
           open_incognito_active: "Cửa sổ ẩn danh",
           none: "Không làm gì",
@@ -361,7 +380,7 @@ export const vi: TranslationDict = {
           copy_link_text: "Sao chép chữ liên kết",
           copy_link_url: "Sao chép URL liên kết",
           copy_markdown: "Sao chép Markdown",
-          copy_image_link: "Sao chép link ảnh",
+          copy_image_link: "Sao chép liên kết ảnh",
           search_image: "Tìm kiếm hình ảnh"
         }
       },
@@ -387,8 +406,8 @@ export const vi: TranslationDict = {
         shortSearchImage: "Tìm kiếm hình ảnh",
         dropCopyText: "Thả để sao chép văn bản",
         shortCopyText: "Sao chép văn bản",
-        dropCopyImageLink: "Thả để sao chép link ảnh",
-        shortCopyImageLink: "Sao chép link ảnh",
+        dropCopyImageLink: "Thả để sao chép liên kết ảnh",
+        shortCopyImageLink: "Sao chép liên kết ảnh",
         dropCopyLinkUrl: "Thả để sao chép URL liên kết",
         shortCopyLinkUrl: "Sao chép URL liên kết",
         noAction: "Không có hành động",
@@ -633,9 +652,9 @@ export const vi: TranslationDict = {
       description:
         "Kiểm tra, xóa, sửa chữ hoặc di chuyển phần tử trực tiếp trên trang web.",
       settings: {
-        launchTooltip: "Khởi chạy Element Toys trên trang",
+        launchTooltip: "Khởi chạy Công cụ phần tử trên trang",
         shortcutTitle: "Phím tắt kích hoạt",
-        shortcutDesc: "Mở thanh công cụ Element Toys nổi trên trang hiện tại",
+        shortcutDesc: "Mở thanh công cụ Công cụ phần tử nổi trên trang hiện tại",
         inspectorBadge: "Nhãn kiểm tra phần tử",
         showDimensions: "Hiện kích thước phần tử",
         showDimensionsDesc:
@@ -643,11 +662,11 @@ export const vi: TranslationDict = {
         showTags: "Hiện tên thẻ & Class",
         showTagsDesc:
           "Hiển thị tên thẻ HTML và bộ chọn CSS class (ví dụ div.banner#hero)",
-        behaviorSection: "Hành vi Element Toys",
+        behaviorSection: "Hành vi Công cụ phần tử",
         defaultTool: "Công cụ mặc định khi mở",
-        defaultToolDesc: "Công cụ được chọn sẵn khi kích hoạt Element Toys",
+        defaultToolDesc: "Công cụ được chọn sẵn khi kích hoạt Công cụ phần tử",
         modes: {
-          zap: "Xóa (Zap)",
+          zap: "Loại bỏ (Zap)",
           edit: "Sửa chữ",
           move: "Di chuyển",
           hide: "Ẩn"
@@ -661,7 +680,7 @@ export const vi: TranslationDict = {
         showToast: "Hiện thông báo nổi",
         showToastDesc:
           "Hiển thị biểu ngữ xác nhận trên trang khi thực hiện thao tác",
-        howToUse: "Hướng dẫn sử dụng Element Toys",
+        howToUse: "Hướng dẫn sử dụng Công cụ phần tử",
         tipShortcutPrefix: "Nhấn",
         tipShortcutSuffix: "để mở thanh công cụ HUD nổi ngay trên trang.",
         tipNoShortcutPrefix: "Gán phím tắt ở trên hoặc nhấp",
@@ -681,7 +700,7 @@ export const vi: TranslationDict = {
       },
       toolbar: {
         title: "Công cụ phần tử",
-        zap: "Xóa",
+        zap: "Loại bỏ",
         zapTip: "Xóa: Nhấp để loại bỏ phần tử khỏi DOM",
         edit: "Sửa chữ",
         editTip: "Sửa chữ: Nhấp vào văn bản bất kỳ để sửa trực tiếp",
@@ -732,19 +751,19 @@ export const vi: TranslationDict = {
       settings: {
         floatingPlacement: "Vị trí nút nổi",
         floatingPlacementDesc:
-          "Kéo hoặc nhấp dọc theo các cạnh màn hình để neo nút kích hoạt Quick Hub.",
+          "Kéo hoặc nhấp dọc theo các cạnh màn hình để neo nút kích hoạt Trung tâm nhanh.",
         buttonShapeDesc: "Tùy chỉnh hình dạng của nút kích hoạt nổi.",
         buttonOpacityDesc: "Điều chỉnh độ trong suốt của nút kích hoạt nổi.",
         customizeMenu: "Tùy chỉnh Menu",
         customizeMenuDesc:
-          "Kéo để sắp xếp lại thứ tự trong Quick Hub, hoặc bật/tắt để ẩn các công cụ ít dùng.",
+          "Kéo để sắp xếp lại thứ tự trong Trung tâm nhanh, hoặc bật/tắt để ẩn các công cụ ít dùng.",
         behaviorProximity: "Hành vi & Vùng nhận diện",
         hoverProximity: "Hiện khi di chuột gần góc",
         hoverProximityDesc:
           "Chỉ hiện nút nổi khi đưa chuột lại gần góc màn hình. Khi tắt, nút luôn hiện ở độ mờ 30%.",
         keyboardShortcut: "Phím tắt bàn phím",
         globalHotkey: "Phím tắt toàn cục (Tùy chọn)",
-        globalHotkeyDesc: "Bật/tắt bảng Quick Hub trên trang web hiện tại.",
+        globalHotkeyDesc: "Bật/tắt bảng Trung tâm nhanh trên trang web hiện tại.",
         disabledInSettings: "{{feature}} đang bị tắt trong cài đặt tiện ích",
         hiddenInMenu: "{{feature}} đang bị ẩn trong menu popup",
         quickScrollTopOnly: "Quick Scroll đang đặt ở chế độ 'Chỉ lên đầu'",
@@ -753,7 +772,7 @@ export const vi: TranslationDict = {
           pipDesc: "Mở video trong cửa sổ nổi picture-in-picture",
           colorPickerTitle: "Chấm màu màn hình",
           colorPickerDesc: "Kính lúp chấm màu pixel và sao chép mã màu nhanh",
-          elementToysTitle: "Element Toys",
+          elementToysTitle: "Công cụ phần tử",
           elementToysDesc: "Kiểm tra, xóa, sửa chữ hoặc di chuyển phần tử",
           scrollTopTitle: "Cuộn lên đầu trang",
           scrollTopDesc: "Nhảy mượt mà lên đầu trang web",

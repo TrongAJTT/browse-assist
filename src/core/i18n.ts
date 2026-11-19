@@ -55,12 +55,7 @@ export function resolveBrowserLocale(rawLang?: string): SupportedLocale {
   if (raw.startsWith("ja")) return "ja"
   if (raw.startsWith("ko")) return "ko"
   if (raw.startsWith("zh")) {
-    if (
-      raw.includes("tw") ||
-      raw.includes("hk") ||
-      raw.includes("mo") ||
-      raw.includes("hant")
-    ) {
+    if (/(?:^|[-_])(tw|hk|mo|hant)(?:$|[-_])/.test(raw)) {
       return "zh_TW"
     }
     return "zh_CN"

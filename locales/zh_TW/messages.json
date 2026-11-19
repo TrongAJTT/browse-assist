@@ -15,9 +15,9 @@
     "message": "從螢幕取色"
   },
   "cmdElementToys": {
-    "message": "啟用 Element Toys 以檢查並編輯頁面元素"
+    "message": "啟用元素工具以檢查並編輯頁面元素"
   },
   "cmdQuickHub": {
-    "message": "切換螢幕上的 Quick Hub 快捷選單"
+    "message": "切換螢幕上的快捷中心選單"
   }
 }

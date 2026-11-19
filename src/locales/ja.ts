@@ -3,6 +3,9 @@ import type { TranslationDict } from "./en"
 export const ja: TranslationDict = {
   common: {
     appName: "Browse Assist",
+    appSlogan: "ブラウジング体験をパワーアップ",
+    appDescription:
+      "ブラウジングの快適さと生産性を高める、軽量でモジュラーな便利ツール集。",
     enabled: "有効",
     disabled: "無効",
     reset: "リセット",
@@ -77,8 +80,13 @@ export const ja: TranslationDict = {
     appearance: "外観",
     themeMode: "テーマモード",
     themeModeDesc: "ライト、ダーク、またはシステムテーマに合わせます。",
+    themeDark: "ダーク",
+    themeLight: "ライト",
+    themeSystem: "システム",
     viewMode: "表示モード",
     viewModeDesc: "詳細リストまたはコンパクトタイル表示。",
+    viewModeList: "リスト",
+    viewModeGrid: "グリッド",
     language: "言語",
     languageDesc: "表示言語を選択するかブラウザ設定に従います。",
     languageAuto: "自動 (ブラウザ)",
@@ -90,6 +98,10 @@ export const ja: TranslationDict = {
     rememberLastViewDesc:
       "前回開いていた設定ページからポップアップを再開します。",
     sessionTimeout: "セッション有効期限",
+    minutesShort: "{{count}} 分",
+    tickOneMin: "1 分",
+    tickTenMinDefault: "10 分 (既定)",
+    tickSixtyMin: "60 分",
     customizeMenu: "メニューのカスタマイズ",
     customizeMenuDesc:
       "ドラッグで並び替え、アイコンでポップアップ内の表示/非表示を切り替えます。",
@@ -108,6 +120,7 @@ export const ja: TranslationDict = {
     buyMeACoffeeDesc: "コーヒー1杯でプロジェクトの維持を支援",
     githubSponsorsDesc: "GitHub 経由で毎月または単発でスポンサー",
     vietqrDesc: "VietQR 経由の即時銀行振込 (ベトナム)",
+    authorDonateLabel: "作者の寄付ページ",
     authorDonateDesc: "作者への直接寄付"
   },
   dialogs: {
@@ -163,7 +176,7 @@ export const ja: TranslationDict = {
         desc: "現在のタブでコンテキストメニューとコピーの制限を解除します"
       },
       elementToys: {
-        name: "要素ツール (Element Toys)",
+        name: "要素ツール (要素ツール)",
         desc: "ページ要素の削除、編集、非表示、移動を有効にします"
       },
       colorPicker: {
@@ -171,8 +184,8 @@ export const ja: TranslationDict = {
         desc: "画面スポイト拡大鏡を起動してカラーコードをコピーします"
       },
       quickHub: {
-        name: "Quick Hub ショートカット",
-        desc: "キーボードで画面上の Quick Hub メニューを切り替えます"
+        name: "クイックハブ ショートカット",
+        desc: "キーボードで画面上の クイックハブ メニューを切り替えます"
       },
       volume: {
         name: "動画音量コントロール",
@@ -211,13 +224,13 @@ export const ja: TranslationDict = {
         desc: "追跡パラメータ (utm_*, fbclid) を除いてコピーまたは Markdown 化"
       },
       quickHubZone: {
-        name: "Quick Hub トリガーゾーン",
+        name: "クイックハブ トリガーゾーン",
         desc: "画面の隅にホバーしてクイックツールランチャーを展開"
       }
     },
     storage: {
       title: "拡張機能のストレージとデータ",
-      desc: "ブラウザに保存された Browse Assist のすべてのデータと設定（カスタム設定、ショートカット、Quick Hub の並び順、カラー履歴）を完全に消去します。",
+      desc: "ブラウザに保存された Browse Assist のすべてのデータと設定（カスタム設定、ショートカット、クイックハブ の並び順、カラー履歴）を完全に消去します。",
       clearAll: "すべてのデータを消去...",
       cleared:
         "すべての拡張機能データを消去し、初期状態にリセットしました。",
@@ -229,7 +242,7 @@ export const ja: TranslationDict = {
       body: "ブラウザプロファイルに保存されている Browse Assist の全データが完全に削除されます。",
       listHeader: "以下が削除されます：",
       item1: "すべての機能の有効/無効状態と詳細設定",
-      item2: "Quick Hub の並び順、固定アクション、非表示モジュール",
+      item2: "クイックハブ の並び順、固定アクション、非表示モジュール",
       item3: "スポイトカラーピッカーの色履歴",
       item4: "テーマ設定とポップアップ画面の記憶",
       warning:
@@ -259,6 +272,12 @@ export const ja: TranslationDict = {
     policy: "プライバシーポリシー",
     openSourceLibraries: "オープンソースライブラリ",
     declaredPermissions: "宣言された権限",
+    permissionNames: {
+      storage: "ストレージ",
+      contextMenus: "コンテキストメニュー",
+      clipboardWrite: "クリップボード",
+      search: "検索"
+    },
     permissions: {
       storage: "カスタム設定と機能の設定をローカルに保存します。",
       contextMenus:
@@ -266,7 +285,7 @@ export const ja: TranslationDict = {
       clipboardWrite:
         "取得したカラーコードや Markdown リンクをクリップボードにコピーします。",
       search:
-        "Super Drag で選択したテキストを既定の検索エンジンで検索します。"
+        "スーパードラッグ で選択したテキストを既定の検索エンジンで検索します。"
     }
   },
   features: {
@@ -611,7 +630,7 @@ export const ja: TranslationDict = {
         notSupported: "このページ/ブラウザでは EyeDropper に対応していません",
         pickedAndCopied: "色を取得してコピーしました",
         picked: "色を取得しました",
-        couldNotOpen: "Color Picker を開けませんでした",
+        couldNotOpen: "カラーピッカーを開けませんでした",
         permissionRequired: "ユーザー操作が必要か許可されていません",
         palette: {
           pickedColor: "取得した色",
@@ -627,7 +646,7 @@ export const ja: TranslationDict = {
       description:
         "あらゆる Web ページ上の要素を検査、削除、テキスト編集、または再配置します。",
       settings: {
-        launchTooltip: "ページ上で Element Toys を起動",
+        launchTooltip: "ページ上で 要素ツール を起動",
         shortcutTitle: "起動ショートカット",
         shortcutDesc: "アクティブなページにフローティングツールバーを開く",
         inspectorBadge: "要素インスペクターバッジ",
@@ -636,9 +655,9 @@ export const ja: TranslationDict = {
         showTags: "タグ名とクラス名を表示",
         showTagsDesc:
           "HTML タグ名と CSS クラスセレクタ (例: div.banner#hero) を表示します",
-        behaviorSection: "Element Toys の動作",
+        behaviorSection: "要素ツール の動作",
         defaultTool: "起動時の既定ツール",
-        defaultToolDesc: "Element Toys 起動時に選択されるツール",
+        defaultToolDesc: "要素ツール 起動時に選択されるツール",
         modes: {
           zap: "削除 (Zap)",
           edit: "編集",
@@ -653,7 +672,7 @@ export const ja: TranslationDict = {
           "スクロールをロックしていたオーバーレイを削除した際にスクロールを復元します",
         showToast: "フローティング通知を表示",
         showToastDesc: "操作の実行時にページ上に確認バナーを表示します",
-        howToUse: "Element Toys の使い方",
+        howToUse: "要素ツール の使い方",
         tipShortcutPrefix: "押す：",
         tipShortcutSuffix: "でページ内のフローティング HUD バーを開きます。",
         tipNoShortcutPrefix: "上でショートカットを割り当てるか、",
@@ -717,25 +736,25 @@ export const ja: TranslationDict = {
       }
     },
     quickHub: {
-      title: "Quick Hub",
+      title: "クイックハブ",
       description:
         "画面の隅にマウスを合わせることで呼び出せるクイックツールハブ。",
       settings: {
         floatingPlacement: "フローティングボタンの配置",
         floatingPlacementDesc:
-          "画面端に沿ってドラッグまたはクリックし、Quick Hub ボタンを配置します。",
+          "画面端に沿ってドラッグまたはクリックし、クイックハブ ボタンを配置します。",
         buttonShapeDesc: "フローティングボタンの形状をカスタマイズします。",
         buttonOpacityDesc: "フローティングボタンの透明度を調整します。",
         customizeMenu: "メニューのカスタマイズ",
         customizeMenuDesc:
-          "ドラッグで Quick Hub の項目順を変更したり、使わない機能を非表示にします。",
+          "ドラッグで クイックハブ の項目順を変更したり、使わない機能を非表示にします。",
         behaviorProximity: "動作と近接表示",
         hoverProximity: "隅へのホバーで表示",
         hoverProximityDesc:
           "カーソルを隅に近づけたときのみボタンを表示します。無効時は 30% の不透明度で常時表示されます。",
         keyboardShortcut: "キーボードショートカット",
         globalHotkey: "グローバルホットキー (任意)",
-        globalHotkeyDesc: "アクティブなページで Quick Hub メニューを切り替えます。",
+        globalHotkeyDesc: "アクティブなページで クイックハブ メニューを切り替えます。",
         disabledInSettings: "{{feature}} は拡張機能の設定で無効です",
         hiddenInMenu: "{{feature}} はポップアップメニューで非表示です",
         quickScrollTopOnly: "Quick Scroll が「上のみ」に設定されています",
@@ -744,7 +763,7 @@ export const ja: TranslationDict = {
           pipDesc: "フローティング PiP ウィンドウで動画を視聴",
           colorPickerTitle: "画面から色を取得",
           colorPickerDesc: "拡大鏡スポイトと即時 HEX コピー",
-          elementToysTitle: "Element Toys",
+          elementToysTitle: "要素ツール",
           elementToysDesc: "要素の検査、削除、編集、または移動",
           scrollTopTitle: "先頭へスクロール",
           scrollTopDesc: "ページの先頭へ滑らかに移動",
@@ -759,8 +778,8 @@ export const ja: TranslationDict = {
       logic: {
         noToolsActive:
           "有効なツールがありません。Browse Assist ポップアップで有効にしてください。",
-        triggerTooltip: "Quick Hub (クイックツール)",
-        triggerAria: "Quick Hub",
+        triggerTooltip: "クイックハブ (クイックツール)",
+        triggerAria: "クイックハブ",
         cleanUrlCopied: "クリーン URL をコピーしました"
       }
     },

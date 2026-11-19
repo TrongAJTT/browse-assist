@@ -3,13 +3,16 @@ import type { TranslationDict } from "./en"
 export const zh_TW: TranslationDict = {
   common: {
     appName: "Browse Assist",
+    appSlogan: "全面升級你的網頁瀏覽體驗",
+    appDescription:
+      "輕量、模組化的瀏覽器效率工具集，全面提升網頁瀏覽體驗。",
     enabled: "已啟用",
     disabled: "已停用",
     reset: "重設",
     clear: "清除",
     cancel: "取消",
     gotIt: "知道了",
-    viewportScreen: "視口螢幕",
+    viewportScreen: "可視區域",
     unassigned: "未指定",
     launch: "啟動",
     all: "全部",
@@ -17,7 +20,7 @@ export const zh_TW: TranslationDict = {
     customizeShortcuts: "在瀏覽器快捷鍵設定中自訂",
     shortcutNotAssignedTip: "未指派快捷鍵，點擊在瀏覽器設定中設定",
     customizeShortcutTip: "點擊在瀏覽器設定中自訂快捷鍵",
-    backTip: "返回 (退格鍵或 `)",
+    backTip: "返回 (Backspace 鍵或 `)",
     toggleFeatureAria: "切換 {{feature}}",
     resetOrder: "重設順序",
     show: "顯示",
@@ -76,8 +79,13 @@ export const zh_TW: TranslationDict = {
     appearance: "外觀",
     themeMode: "主題模式",
     themeModeDesc: "淺色、深色或跟隨系統主題。",
+    themeDark: "深色",
+    themeLight: "淺色",
+    themeSystem: "跟隨系統",
     viewMode: "檢視模式",
     viewModeDesc: "詳細清單或精簡磚塊網格。",
+    viewModeList: "清單",
+    viewModeGrid: "網格",
     language: "語言",
     languageDesc: "選擇介面語言或跟隨瀏覽器。",
     languageAuto: "自動 (瀏覽器)",
@@ -87,6 +95,10 @@ export const zh_TW: TranslationDict = {
     rememberLastView: "記住上次檢視",
     rememberLastViewDesc: "重新開啟彈出視窗時回到上次瀏覽的設定頁面。",
     sessionTimeout: "工作階段逾時",
+    minutesShort: "{{count}} 分鐘",
+    tickOneMin: "1 分鐘",
+    tickTenMinDefault: "10 分鐘 (預設)",
+    tickSixtyMin: "60 分鐘",
     customizeMenu: "自訂選單",
     customizeMenuDesc: "拖曳以重新排序，或切換功能在彈出視窗中的顯示狀態。",
     presets: "預設方案",
@@ -104,6 +116,7 @@ export const zh_TW: TranslationDict = {
     buyMeACoffeeDesc: "買杯咖啡支持專案持續維護",
     githubSponsorsDesc: "透過 GitHub 按月或單次贊助",
     vietqrDesc: "透過 VietQR 即時銀行轉帳 (越南)",
+    authorDonateLabel: "作者贊助頁面",
     authorDonateDesc: "直接向作者贊助"
   },
   dialogs: {
@@ -165,8 +178,8 @@ export const zh_TW: TranslationDict = {
         desc: "啟動螢幕像素放大鏡以擷取並複製色彩代碼"
       },
       quickHub: {
-        name: "Quick Hub 快捷鍵",
-        desc: "透過鍵盤切換螢幕上的 Quick Hub 懸浮選單"
+        name: "快捷中心 快捷鍵",
+        desc: "透過鍵盤切換螢幕上的 快捷中心 懸浮選單"
       },
       volume: {
         name: "影片音量控制",
@@ -205,13 +218,13 @@ export const zh_TW: TranslationDict = {
         desc: "移除追蹤參數 (utm_*, fbclid) 並複製純淨或 Markdown 連結"
       },
       quickHubZone: {
-        name: "Quick Hub 觸發區",
+        name: "快捷中心 觸發區",
         desc: "滑鼠懸停螢幕角落觸發區以展開快捷工具"
       }
     },
     storage: {
       title: "擴充功能儲存與資料",
-      desc: "永久清除 Browse Assist 在瀏覽器中儲存的所有資料與設定，包括自訂設定、快捷鍵偏好、Quick Hub 排序及取色紀錄。",
+      desc: "永久清除 Browse Assist 在瀏覽器中儲存的所有資料與設定，包括自訂設定、快捷鍵偏好、快捷中心 排序及取色紀錄。",
       clearAll: "清除所有資料...",
       cleared: "所有擴充功能資料已清除並恢復為預設值。",
       footer:
@@ -222,7 +235,7 @@ export const zh_TW: TranslationDict = {
       body: "這將永久刪除 Browse Assist 在您瀏覽器設定檔中儲存的所有資料。",
       listHeader: "以下內容將被刪除：",
       item1: "所有功能開關狀態及子設定",
-      item2: "Quick Hub 排序、置頂操作及隱藏模組",
+      item2: "快捷中心 排序、置頂操作及隱藏模組",
       item3: "取色器中的色彩歷史紀錄",
       item4: "主題偏好與彈出視窗導覽記憶",
       warning: "⚠️ 此操作無法復原。所有設定將立即恢復為預設狀態。",
@@ -251,11 +264,17 @@ export const zh_TW: TranslationDict = {
     policy: "隱私權政策",
     openSourceLibraries: "開源函式庫",
     declaredPermissions: "已宣告權限",
+    permissionNames: {
+      storage: "儲存空間",
+      contextMenus: "右鍵選單",
+      clipboardWrite: "剪貼簿",
+      search: "搜尋"
+    },
     permissions: {
       storage: "在本機永久儲存自訂設定與功能偏好。",
       contextMenus: "在右鍵選單中提供快速操作（例如複製純淨連結）。",
       clipboardWrite: "將擷取的色彩代碼與 Markdown 連結複製到剪貼簿。",
-      search: "在 Super Drag 時使用預設搜尋引擎搜尋選取文字。"
+      search: "在 超級拖曳 時使用預設搜尋引擎搜尋選取文字。"
     }
   },
   features: {
@@ -331,7 +350,7 @@ export const zh_TW: TranslationDict = {
         directionalGestures: "方向手勢",
         actions: {
           open_bg_tab: "背景分頁",
-          open_active_tab: "目前分頁",
+          open_active_tab: "前景新分頁",
           open_window_active: "新視窗",
           open_incognito_active: "無痕視窗",
           none: "無（不執行動作）",
@@ -422,7 +441,7 @@ export const zh_TW: TranslationDict = {
           "為方向鍵、PageUp/Down 與空白鍵提供平滑插值捲動。",
         aggressiveMode: "強力攔截模式",
         aggressiveModeDesc:
-          "在所有網站強制啟用平滑捲動。建議停用以保護畫布與 Web 應用（如 Figma、地圖）。"
+          "在所有網站強制啟用平滑捲動。建議停用以保護畫布與 Web 應用（如 Konva、Figma、地圖）。"
       }
     },
     mouseZoom: {
@@ -583,17 +602,17 @@ export const zh_TW: TranslationDict = {
       title: "元素工具",
       description: "在任意網頁上檢查、移除、編輯文字或重新定位頁面元素。",
       settings: {
-        launchTooltip: "在目前頁面啟動 Element Toys",
+        launchTooltip: "在目前頁面啟動 元素工具",
         shortcutTitle: "啟用快捷鍵",
-        shortcutDesc: "在目前頁面開啟 Element Toys 懸浮工具列",
+        shortcutDesc: "在目前頁面開啟 元素工具 懸浮工具列",
         inspectorBadge: "元素檢查器徽章",
         showDimensions: "顯示元素尺寸",
         showDimensionsDesc: "在懸停徽章上測量並顯示 寬 × 高 (px)",
         showTags: "顯示標籤與類別名稱",
         showTagsDesc: "顯示 HTML 標籤名及 CSS 類別選擇器（如 div.banner#hero）",
-        behaviorSection: "Element Toys 行為",
+        behaviorSection: "元素工具 行為",
         defaultTool: "啟動時預設工具",
-        defaultToolDesc: "啟用 Element Toys 時預設選取的工具",
+        defaultToolDesc: "啟用 元素工具 時預設選取的工具",
         modes: {
           zap: "移除 (Zap)",
           edit: "編輯",
@@ -607,7 +626,7 @@ export const zh_TW: TranslationDict = {
           "如果移除的元素是鎖定捲動的遮罩層，自動恢復捲動 (overflow: auto)",
         showToast: "顯示懸浮提示",
         showToastDesc: "執行操作時在頁面上顯示確認橫幅",
-        howToUse: "如何使用 Element Toys",
+        howToUse: "如何使用 元素工具",
         tipShortcutPrefix: "按",
         tipShortcutSuffix: "在頁面內開啟懸浮 HUD 工具列。",
         tipNoShortcutPrefix: "在上方設定快捷鍵或點擊",
@@ -669,24 +688,24 @@ export const zh_TW: TranslationDict = {
       }
     },
     quickHub: {
-      title: "Quick Hub",
+      title: "快捷中心",
       description: "螢幕快捷工具中心，支援角落懸停智慧喚醒。",
       settings: {
         floatingPlacement: "懸浮按鈕位置",
         floatingPlacementDesc:
-          "沿著螢幕邊緣拖曳或點擊，將 Quick Hub 觸發按鈕錨定到任意位置。",
+          "沿著螢幕邊緣拖曳或點擊，將 快捷中心 觸發按鈕錨定到任意位置。",
         buttonShapeDesc: "自訂懸浮觸發按鈕的形狀。",
         buttonOpacityDesc: "調整懸浮觸發按鈕的透明度。",
         customizeMenu: "自訂選單",
         customizeMenuDesc:
-          "拖曳項目以調整 Quick Hub 中的順序，或切換隱藏不常用的工具。",
+          "拖曳項目以調整 快捷中心 中的順序，或切換隱藏不常用的工具。",
         behaviorProximity: "行為與喚醒感應",
         hoverProximity: "靠近角落時顯示",
         hoverProximityDesc:
           "僅當游標靠近角落時顯示懸浮按鈕。停用後按鈕將保持 30% 不透明度常駐顯示。",
         keyboardShortcut: "鍵盤快捷鍵",
         globalHotkey: "全域熱鍵 (可選)",
-        globalHotkeyDesc: "在目前網頁切換 Quick Hub 選單。",
+        globalHotkeyDesc: "在目前網頁切換 快捷中心 選單。",
         disabledInSettings: "{{feature}} 已在擴充功能設定中停用",
         hiddenInMenu: "{{feature}} 已在彈出選單中隱藏",
         quickScrollTopOnly: "Quick Scroll 已設定為「僅頂部」模式",
@@ -695,7 +714,7 @@ export const zh_TW: TranslationDict = {
           pipDesc: "在懸浮子母畫面視窗中觀看影片",
           colorPickerTitle: "從螢幕擷取色彩",
           colorPickerDesc: "像素放大鏡取色並即時複製 HEX",
-          elementToysTitle: "Element Toys",
+          elementToysTitle: "元素工具",
           elementToysDesc: "檢查、移除、編輯文字或移動頁面元素",
           scrollTopTitle: "捲動到頂部",
           scrollTopDesc: "平滑跳轉至頁面頂部",
@@ -709,8 +728,8 @@ export const zh_TW: TranslationDict = {
       },
       logic: {
         noToolsActive: "尚無可用工具，請在 Browse Assist 彈出視窗中啟用功能。",
-        triggerTooltip: "Quick Hub (快捷工具)",
-        triggerAria: "Quick Hub",
+        triggerTooltip: "快捷中心 (快捷工具)",
+        triggerAria: "快捷中心",
         cleanUrlCopied: "已複製純淨 URL"
       }
     },

@@ -4,6 +4,7 @@ import type { TranslationKey } from "./i18n"
 export interface DonateOption {
   id: string
   label: string
+  labelKey?: TranslationKey
   url: string
   descriptionKey: TranslationKey
   iconName: "coffee" | "github" | "heart" | "qr"
@@ -34,6 +35,7 @@ export const DONATE_OPTIONS: DonateOption[] = [
   {
     id: "author-donate",
     label: "Author Donation Page",
+    labelKey: "donate.authorDonateLabel",
     url: "https://www.trongajtt.com/sponsor",
     descriptionKey: "donate.authorDonateDesc",
     iconName: "heart"
@@ -41,11 +43,12 @@ export const DONATE_OPTIONS: DonateOption[] = [
 ]
 
 export const APP_INFO = {
-  name: packageJson.displayName || "Browse Assist",
+  name: "Browse Assist",
   version: packageJson.version,
   slogan:
     (packageJson as { slogan?: string }).slogan || "PowerToys for Web Browsing",
-  description: packageJson.description,
+  description:
+    "A lightweight, modular collection of quality-of-life tools designed to boost productivity and elevate your browsing flow.",
   author: packageJson.author?.split("<")[0]?.trim() || "TrongAJTT",
   authorUrl: "https://github.com/TrongAJTT",
   homePageUrl:

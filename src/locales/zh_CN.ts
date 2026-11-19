@@ -3,6 +3,9 @@ import type { TranslationDict } from "./en"
 export const zh_CN: TranslationDict = {
   common: {
     appName: "Browse Assist",
+    appSlogan: "全面提升你的网页浏览体验",
+    appDescription:
+      "轻量、模块化的浏览器效率工具集，全面提升网页浏览体验。",
     enabled: "已启用",
     disabled: "已禁用",
     reset: "重置",
@@ -76,8 +79,13 @@ export const zh_CN: TranslationDict = {
     appearance: "外观",
     themeMode: "主题模式",
     themeModeDesc: "浅色、深色或跟随系统主题。",
+    themeDark: "深色",
+    themeLight: "浅色",
+    themeSystem: "跟随系统",
     viewMode: "视图模式",
     viewModeDesc: "详细列表或紧凑磁贴网格。",
+    viewModeList: "列表",
+    viewModeGrid: "网格",
     language: "语言",
     languageDesc: "选择界面语言或跟随浏览器。",
     languageAuto: "自动 (浏览器)",
@@ -87,6 +95,10 @@ export const zh_CN: TranslationDict = {
     rememberLastView: "记住上次视图",
     rememberLastViewDesc: "重新打开弹窗时回到上次浏览的设置页面。",
     sessionTimeout: "会话超时",
+    minutesShort: "{{count}} 分钟",
+    tickOneMin: "1 分钟",
+    tickTenMinDefault: "10 分钟 (默认)",
+    tickSixtyMin: "60 分钟",
     customizeMenu: "自定义菜单",
     customizeMenuDesc: "拖动以重新排序，或切换功能在弹窗中的显示状态。",
     presets: "预设方案",
@@ -104,6 +116,7 @@ export const zh_CN: TranslationDict = {
     buyMeACoffeeDesc: "买杯咖啡支持项目持续维护",
     githubSponsorsDesc: "通过 GitHub 按月或单次赞助",
     vietqrDesc: "通过 VietQR 即时银行转账 (越南)",
+    authorDonateLabel: "作者捐赠页面",
     authorDonateDesc: "直接向作者捐赠"
   },
   dialogs: {
@@ -165,8 +178,8 @@ export const zh_CN: TranslationDict = {
         desc: "启动屏幕像素放大镜以拾取并复制颜色代码"
       },
       quickHub: {
-        name: "Quick Hub 快捷键",
-        desc: "通过键盘切换屏幕上的 Quick Hub 悬浮菜单"
+        name: "快捷中心 快捷键",
+        desc: "通过键盘切换屏幕上的 快捷中心 悬浮菜单"
       },
       volume: {
         name: "视频音量控制",
@@ -205,13 +218,13 @@ export const zh_CN: TranslationDict = {
         desc: "去除追踪参数 (utm_*, fbclid) 并复制纯净或 Markdown 链接"
       },
       quickHubZone: {
-        name: "Quick Hub 触发区",
+        name: "快捷中心 触发区",
         desc: "鼠标悬停屏幕角落触发区以展开快捷工具"
       }
     },
     storage: {
       title: "扩展存储与数据",
-      desc: "永久清除 Browse Assist 在浏览器中保存的所有数据与设置，包括自定义配置、快捷键偏好、Quick Hub 排序及取色记录。",
+      desc: "永久清除 Browse Assist 在浏览器中保存的所有数据与设置，包括自定义配置、快捷键偏好、快捷中心 排序及取色记录。",
       clearAll: "清除所有数据...",
       cleared: "所有扩展数据已清除并恢复为出厂默认设置。",
       footer:
@@ -222,7 +235,7 @@ export const zh_CN: TranslationDict = {
       body: "这将永久删除 Browse Assist 在您浏览器配置文件中存储的所有数据。",
       listHeader: "以下内容将被删除：",
       item1: "所有功能开关状态及子配置",
-      item2: "Quick Hub 排序、置顶操作及隐藏模块",
+      item2: "快捷中心 排序、置顶操作及隐藏模块",
       item3: "取色器中的颜色历史记录",
       item4: "主题偏好与弹窗导航记忆",
       warning: "⚠️ 此操作不可撤销。所有设置将立即恢复为默认状态。",
@@ -251,11 +264,17 @@ export const zh_CN: TranslationDict = {
     policy: "隐私政策",
     openSourceLibraries: "开源库",
     declaredPermissions: "已声明权限",
+    permissionNames: {
+      storage: "存储",
+      contextMenus: "右键菜单",
+      clipboardWrite: "剪贴板",
+      search: "搜索"
+    },
     permissions: {
       storage: "在本地持久化保存自定义设置与功能偏好。",
       contextMenus: "在右键菜单中提供快捷操作（如复制纯净链接）。",
       clipboardWrite: "将拾取的颜色代码和 Markdown 链接复制到剪贴板。",
-      search: "在 Super Drag 时使用默认搜索引擎搜索选中文本。"
+      search: "在 超级拖拽 时使用默认搜索引擎搜索选中文本。"
     }
   },
   features: {
@@ -331,7 +350,7 @@ export const zh_CN: TranslationDict = {
         directionalGestures: "方向手势",
         actions: {
           open_bg_tab: "后台标签页",
-          open_active_tab: "当前标签页",
+          open_active_tab: "前台新标签页",
           open_window_active: "新窗口",
           open_incognito_active: "无痕窗口",
           none: "无（不执行操作）",
@@ -422,7 +441,7 @@ export const zh_CN: TranslationDict = {
           "为方向键、PageUp/Down 和空格键提供平滑插值滚动。",
         aggressiveMode: "强力拦截模式",
         aggressiveModeDesc:
-          "在所有网站强制启用平滑滚动。建议关闭以保护画布及 Web 应用（如 Figma、地图）。"
+          "在所有网站强制启用平滑滚动。建议关闭以保护画布及 Web 应用（如 Konva、Figma、地图）。"
       }
     },
     mouseZoom: {
@@ -583,17 +602,17 @@ export const zh_CN: TranslationDict = {
       title: "元素工具",
       description: "在任意网页上检查、移除、编辑文本或重新定位页面元素。",
       settings: {
-        launchTooltip: "在当前页面启动 Element Toys",
+        launchTooltip: "在当前页面启动 元素工具",
         shortcutTitle: "激活快捷键",
-        shortcutDesc: "在当前页面打开 Element Toys 悬浮工具栏",
+        shortcutDesc: "在当前页面打开 元素工具 悬浮工具栏",
         inspectorBadge: "元素检查器徽章",
         showDimensions: "显示元素尺寸",
         showDimensionsDesc: "在悬停徽章上测量并显示 宽 × 高 (px)",
         showTags: "显示标签与类名",
         showTagsDesc: "显示 HTML 标签名及 CSS 类选择器（如 div.banner#hero）",
-        behaviorSection: "Element Toys 行为",
+        behaviorSection: "元素工具 行为",
         defaultTool: "启动时默认工具",
-        defaultToolDesc: "激活 Element Toys 时默认选中的工具",
+        defaultToolDesc: "激活 元素工具 时默认选中的工具",
         modes: {
           zap: "移除 (Zap)",
           edit: "编辑",
@@ -607,7 +626,7 @@ export const zh_CN: TranslationDict = {
           "如果移除的元素是锁定滚动的遮罩层，自动恢复滚动 (overflow: auto)",
         showToast: "显示悬浮提示",
         showToastDesc: "执行操作时在页面上显示确认横幅",
-        howToUse: "如何使用 Element Toys",
+        howToUse: "如何使用 元素工具",
         tipShortcutPrefix: "按",
         tipShortcutSuffix: "在页面内打开悬浮 HUD 工具栏。",
         tipNoShortcutPrefix: "在上方设置快捷键或点击",
@@ -669,24 +688,24 @@ export const zh_CN: TranslationDict = {
       }
     },
     quickHub: {
-      title: "Quick Hub",
+      title: "快捷中心",
       description: "屏幕快捷工具中心，支持角落悬停智能唤醒。",
       settings: {
         floatingPlacement: "悬浮按钮位置",
         floatingPlacementDesc:
-          "沿着屏幕边缘拖动或点击，将 Quick Hub 触发按钮锚定到任意位置。",
+          "沿着屏幕边缘拖动或点击，将 快捷中心 触发按钮锚定到任意位置。",
         buttonShapeDesc: "自定义悬浮触发按钮的形状。",
         buttonOpacityDesc: "调整悬浮触发按钮的透明度。",
         customizeMenu: "自定义菜单",
         customizeMenuDesc:
-          "拖动项目以调整 Quick Hub 中的顺序，或切换隐藏不常用的工具。",
+          "拖动项目以调整 快捷中心 中的顺序，或切换隐藏不常用的工具。",
         behaviorProximity: "行为与唤醒感应",
         hoverProximity: "靠近角落时显现",
         hoverProximityDesc:
           "仅当光标靠近角落时显示悬浮按钮。关闭后按钮将保持 30% 不透明度常驻显示。",
         keyboardShortcut: "键盘快捷键",
         globalHotkey: "全局热键 (可选)",
-        globalHotkeyDesc: "在当前网页切换 Quick Hub 菜单。",
+        globalHotkeyDesc: "在当前网页切换 快捷中心 菜单。",
         disabledInSettings: "{{feature}} 已在扩展设置中禁用",
         hiddenInMenu: "{{feature}} 已在弹窗菜单中隐藏",
         quickScrollTopOnly: "Quick Scroll 已设置为“仅顶部”模式",
@@ -695,7 +714,7 @@ export const zh_CN: TranslationDict = {
           pipDesc: "在悬浮画中画窗口中观看视频",
           colorPickerTitle: "从屏幕拾取颜色",
           colorPickerDesc: "像素放大镜取色并即时复制 HEX",
-          elementToysTitle: "Element Toys",
+          elementToysTitle: "元素工具",
           elementToysDesc: "检查、移除、编辑文本或移动页面元素",
           scrollTopTitle: "滚动到顶部",
           scrollTopDesc: "平滑跳转至页面顶部",
@@ -709,8 +728,8 @@ export const zh_CN: TranslationDict = {
       },
       logic: {
         noToolsActive: "暂无可用工具，请在 Browse Assist 弹窗中启用功能。",
-        triggerTooltip: "Quick Hub (快捷工具)",
-        triggerAria: "Quick Hub",
+        triggerTooltip: "快捷中心 (快捷工具)",
+        triggerAria: "快捷中心",
         cleanUrlCopied: "已复制纯净 URL"
       }
     },

@@ -3,13 +3,16 @@ import type { TranslationDict } from "./en"
 export const es: TranslationDict = {
   common: {
     appName: "Browse Assist",
+    appSlogan: "Potencia tu navegación web",
+    appDescription:
+      "Una colección ligera y modular de herramientas prácticas para mejorar tu productividad y fluidez al navegar.",
     enabled: "Activado",
     disabled: "Desactivado",
     reset: "Restablecer",
     clear: "Limpiar",
     cancel: "Cancelar",
     gotIt: "Entendido",
-    viewportScreen: "Pantalla de vista",
+    viewportScreen: "Área visible",
     unassigned: "Sin asignar",
     launch: "Lanzar",
     all: "Todo",
@@ -77,8 +80,13 @@ export const es: TranslationDict = {
     appearance: "Apariencia",
     themeMode: "Tema",
     themeModeDesc: "Claro, oscuro o según el tema del sistema.",
+    themeDark: "Oscuro",
+    themeLight: "Claro",
+    themeSystem: "Sistema",
     viewMode: "Modo de vista",
     viewModeDesc: "Lista detallada o cuadrícula compacta.",
+    viewModeList: "Lista",
+    viewModeGrid: "Cuadrícula",
     language: "Idioma",
     languageDesc: "Elige el idioma de la interfaz o sigue al navegador.",
     languageAuto: "Auto (Navegador)",
@@ -90,6 +98,10 @@ export const es: TranslationDict = {
     rememberLastViewDesc:
       "Reabrir el popup en la última página de ajustes visitada.",
     sessionTimeout: "Tiempo de sesión",
+    minutesShort: "{{count}} min",
+    tickOneMin: "1 min",
+    tickTenMinDefault: "10 min (Predeterminado)",
+    tickSixtyMin: "60 min",
     customizeMenu: "Personalizar menú",
     customizeMenuDesc:
       "Arrastra elementos para reordenarlos o alterna su visibilidad en el popup.",
@@ -108,6 +120,7 @@ export const es: TranslationDict = {
     buyMeACoffeeDesc: "Apoya el mantenimiento del proyecto con un café",
     githubSponsorsDesc: "Patrocina en GitHub de forma mensual o puntual",
     vietqrDesc: "Transferencia bancaria instantánea vía VietQR (Vietnam)",
+    authorDonateLabel: "Página de donación del autor",
     authorDonateDesc: "Donación directa al autor"
   },
   dialogs: {
@@ -171,8 +184,8 @@ export const es: TranslationDict = {
         desc: "Activar lupa cuentagotas para inspeccionar y copiar colores"
       },
       quickHub: {
-        name: "Atajo de Quick Hub",
-        desc: "Alternar el menú flotante Quick Hub mediante teclado"
+        name: "Atajo de Centro rápido",
+        desc: "Alternar el menú flotante Centro rápido mediante teclado"
       },
       volume: {
         name: "Control de volumen de video",
@@ -211,13 +224,13 @@ export const es: TranslationDict = {
         desc: "Eliminar parámetros de rastreo (utm_*, fbclid) y copiar limpio o Markdown"
       },
       quickHubZone: {
-        name: "Zona de activación Quick Hub",
+        name: "Zona de activación Centro rápido",
         desc: "Pasa el cursor por la esquina para abrir las herramientas rápidas"
       }
     },
     storage: {
       title: "Almacenamiento y Datos",
-      desc: "Borra permanentemente todos los datos y ajustes guardados por Browse Assist en tu navegador, incluyendo configuraciones, atajos, orden de Quick Hub e historial de colores.",
+      desc: "Borra permanentemente todos los datos y ajustes guardados por Browse Assist en tu navegador, incluyendo configuraciones, atajos, orden de Centro rápido e historial de colores.",
       clearAll: "Borrar todos los datos...",
       cleared:
         "Todos los datos de la extensión se han borrado y restablecido.",
@@ -229,7 +242,7 @@ export const es: TranslationDict = {
       body: "Esto eliminará permanentemente todos los datos almacenados por Browse Assist en tu perfil.",
       listHeader: "Se eliminará lo siguiente:",
       item1: "Estados y subconfiguraciones de todas las funciones",
-      item2: "Orden de Quick Hub, acciones fijadas y módulos ocultos",
+      item2: "Orden de Centro rápido, acciones fijadas y módulos ocultos",
       item3: "Historial de colores en Selector de color",
       item4: "Preferencias de tema y memoria de navegación",
       warning:
@@ -259,6 +272,12 @@ export const es: TranslationDict = {
     policy: "Privacidad",
     openSourceLibraries: "Bibliotecas de código abierto",
     declaredPermissions: "Permisos declarados",
+    permissionNames: {
+      storage: "Almacenamiento",
+      contextMenus: "Menús contextuales",
+      clipboardWrite: "Portapapeles",
+      search: "Búsqueda"
+    },
     permissions: {
       storage: "Guardar localmente los ajustes y preferencias de funciones.",
       contextMenus:
@@ -266,7 +285,7 @@ export const es: TranslationDict = {
       clipboardWrite:
         "Copiar códigos de color y enlaces en formato Markdown.",
       search:
-        "Buscar texto seleccionado con el buscador predeterminado en Super Drag."
+        "Buscar texto seleccionado con el buscador predeterminado en Súper Arrastre."
     }
   },
   features: {
@@ -307,7 +326,7 @@ export const es: TranslationDict = {
           cleanLinkCopy:
             "Elimina parámetros de rastreo (utm_*, fbclid, si) antes de copiar.",
           markdownLinkCopy:
-            "Copia un hipervínculo en Markdown, ideal para Obsidian, Notion y GitHub.",
+            "Copia un enlace en Markdown, ideal para Obsidian, Notion y GitHub.",
           copyCleanPageUrl:
             "Clic derecho en cualquier parte de la página para copiar su URL sin rastreadores.",
           copyPageMarkdown:
@@ -332,10 +351,10 @@ export const es: TranslationDict = {
         searchTextDesc:
           "Arrastra texto seleccionado en 4 direcciones para buscar, abrir ventanas o copiar.",
         textDisabled: "El arrastre de texto resaltado está desactivado.",
-        openLinks: "Abrir hipervínculos",
+        openLinks: "Abrir enlaces",
         openLinksDesc:
           "Arrastra enlaces para abrir en pestañas, ventanas o copiar URL o texto.",
-        linksDisabled: "El arrastre de hipervínculos está desactivado.",
+        linksDisabled: "El arrastre de enlaces está desactivado.",
         dragImages: "Arrastrar imágenes",
         dragImagesDesc:
           "Arrastra imágenes para ver en pestañas, ventanas o copiar URL directa.",
@@ -449,7 +468,7 @@ export const es: TranslationDict = {
           "Interpola suavemente con Flechas, RePág/AvPág y Espacio.",
         aggressiveMode: "Intercepción agresiva",
         aggressiveModeDesc:
-          "Fuerza el desplazamiento suave en todos los sitios. Desactívalo para proteger apps canvas (Figma, Maps)."
+          "Fuerza el desplazamiento suave en todos los sitios. Desactívalo para proteger apps canvas (Konva, Figma, Maps)."
       }
     },
     mouseZoom: {
@@ -618,7 +637,7 @@ export const es: TranslationDict = {
         notSupported: "EyeDropper no es compatible en esta página o navegador",
         pickedAndCopied: "Color capturado y copiado",
         picked: "Color capturado",
-        couldNotOpen: "No se pudo abrir Color Picker",
+        couldNotOpen: "No se pudo abrir el Selector de color",
         permissionRequired: "Se requiere interacción del usuario o permiso",
         palette: {
           pickedColor: "Color capturado",
@@ -634,9 +653,9 @@ export const es: TranslationDict = {
       description:
         "Inspecciona, elimina, edita texto o mueve elementos en cualquier página web.",
       settings: {
-        launchTooltip: "Lanzar Element Toys en la página",
+        launchTooltip: "Lanzar Herramientas de elementos en la página",
         shortcutTitle: "Atajo de activación",
-        shortcutDesc: "Abre la barra flotante de Element Toys en la página",
+        shortcutDesc: "Abre la barra flotante de Herramientas de elementos en la página",
         inspectorBadge: "Insignia del inspector",
         showDimensions: "Mostrar dimensiones",
         showDimensionsDesc:
@@ -644,9 +663,9 @@ export const es: TranslationDict = {
         showTags: "Mostrar etiquetas y clases",
         showTagsDesc:
           "Muestra etiqueta HTML y selectores CSS (ej. div.banner#hero)",
-        behaviorSection: "Comportamiento de Element Toys",
+        behaviorSection: "Comportamiento de Herramientas de elementos",
         defaultTool: "Herramienta predeterminada",
-        defaultToolDesc: "Herramienta seleccionada al activar Element Toys",
+        defaultToolDesc: "Herramienta seleccionada al activar Herramientas de elementos",
         modes: {
           zap: "Eliminar",
           edit: "Editar",
@@ -662,7 +681,7 @@ export const es: TranslationDict = {
         showToast: "Mostrar aviso flotante",
         showToastDesc:
           "Muestra un banner de confirmación en la página al ejecutar acciones",
-        howToUse: "Cómo usar Element Toys",
+        howToUse: "Cómo usar Herramientas de elementos",
         tipShortcutPrefix: "Pulsa",
         tipShortcutSuffix: "para abrir la barra HUD flotante en la página.",
         tipNoShortcutPrefix: "Asigna un atajo arriba o haz clic en",
@@ -699,9 +718,9 @@ export const es: TranslationDict = {
         undo: "Deshacer",
         undoTip: "Deshacer última acción (Ctrl+Z)",
         settings: "Ajustes",
-        settingsTip: "Abrir ajustes de Element Toys",
+        settingsTip: "Abrir ajustes de Herramientas de elementos",
         exit: "Salir",
-        exitTip: "Salir de Element Toys (Esc)"
+        exitTip: "Salir de Herramientas de elementos (Esc)"
       },
       overlay: {
         clickToZap: "Clic para eliminar",
@@ -716,8 +735,8 @@ export const es: TranslationDict = {
         textUpdated: "Texto actualizado",
         undone: "Acción deshecha",
         undoneDetail: "Revertido: {{action}}",
-        closed: "Element Toys cerrado",
-        active: "Element Toys activo",
+        closed: "Herramientas de elementos cerrado",
+        active: "Herramientas de elementos activo",
         activeDetail: "Elige herramientas arriba • Esc para salir",
         scope: "Alcance: <{{tag}}>",
         scopeDetail: "Nivel +{{depth}} (Pulsa - para reducir)",
@@ -726,25 +745,25 @@ export const es: TranslationDict = {
       }
     },
     quickHub: {
-      title: "Quick Hub",
+      title: "Centro rápido",
       description:
         "Centro rápido de utilidades en pantalla con activación en esquinas.",
       settings: {
         floatingPlacement: "Ubicación del botón flotante",
         floatingPlacementDesc:
-          "Arrastra o haz clic en el perímetro para anclar el botón de Quick Hub.",
+          "Arrastra o haz clic en el perímetro para anclar el botón de Centro rápido.",
         buttonShapeDesc: "Personaliza la forma del botón flotante.",
         buttonOpacityDesc: "Ajusta la transparencia del botón flotante.",
         customizeMenu: "Personalizar menú",
         customizeMenuDesc:
-          "Arrastra elementos para reordenar o alterna su visibilidad en Quick Hub.",
+          "Arrastra elementos para reordenar o alterna su visibilidad en Centro rápido.",
         behaviorProximity: "Comportamiento y proximidad",
         hoverProximity: "Mostrar al acercar el cursor",
         hoverProximityDesc:
           "Muestra el botón flotante solo al acercar el cursor a la esquina. Si se desactiva, permanece al 30% de opacidad.",
         keyboardShortcut: "Atajo de teclado",
         globalHotkey: "Atajo global (Opcional)",
-        globalHotkeyDesc: "Alterna el menú Quick Hub en la página activa.",
+        globalHotkeyDesc: "Alterna el menú Centro rápido en la página activa.",
         disabledInSettings: "{{feature}} está desactivado en los ajustes",
         hiddenInMenu: "{{feature}} está oculto en el menú popup",
         quickScrollTopOnly: "Quick Scroll está configurado como 'Solo Arriba'",
@@ -753,7 +772,7 @@ export const es: TranslationDict = {
           pipDesc: "Ver video en ventana flotante picture-in-picture",
           colorPickerTitle: "Capturar color de pantalla",
           colorPickerDesc: "Lupa cuentagotas y copia instantánea en hex",
-          elementToysTitle: "Element Toys",
+          elementToysTitle: "Herramientas de elementos",
           elementToysDesc: "Inspeccionar, eliminar, editar o mover elementos",
           scrollTopTitle: "Subir al inicio",
           scrollTopDesc: "Saltar suavemente al inicio de la página",
@@ -768,8 +787,8 @@ export const es: TranslationDict = {
       logic: {
         noToolsActive:
           "Sin herramientas activas. Actívalas en el popup de Browse Assist.",
-        triggerTooltip: "Quick Hub (Herramientas rápidas)",
-        triggerAria: "Quick Hub",
+        triggerTooltip: "Centro rápido (Herramientas rápidas)",
+        triggerAria: "Centro rápido",
         cleanUrlCopied: "URL limpia copiada"
       }
     },

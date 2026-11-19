@@ -23,12 +23,12 @@ export const AboutView: React.FC<AboutViewProps> = ({ onBack }) => {
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
               <h2 className="text-sm font-bold text-content-primary tracking-tight">
-                {APP_INFO.name}
+                {t("common.appName")}
               </h2>
               <span className="badge-kbd">v{APP_INFO.version}</span>
             </div>
             <p className="text-xs text-content-muted mt-0.5 leading-snug">
-              {APP_INFO.description}
+              {t("common.appDescription")}
             </p>
           </div>
         </div>
@@ -105,7 +105,8 @@ export const AboutView: React.FC<AboutViewProps> = ({ onBack }) => {
                 <div className="flex items-center justify-left gap-3">
                   <div className="flex items-center gap-1.5">
                     <span className="font-semibold text-content-primary">
-                      {perm.name}
+                      {t(`about.permissionNames.${perm.key}` as TranslationKey) ||
+                        perm.name}
                     </span>
                   </div>
                   <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-app-card border border-border-subtle text-content-muted">

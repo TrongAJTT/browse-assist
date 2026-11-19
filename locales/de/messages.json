@@ -15,9 +15,9 @@
     "message": "Farbe vom Bildschirm aufnehmen"
   },
   "cmdElementToys": {
-    "message": "Element Toys zum Inspizieren und Bearbeiten von Seitenelementen aktivieren"
+    "message": "Element-Werkzeuge zum Inspizieren und Bearbeiten von Seitenelementen aktivieren"
   },
   "cmdQuickHub": {
-    "message": "Quick-Hub-Menü auf dem Bildschirm umschalten"
+    "message": "Schnellmenü auf dem Bildschirm umschalten"
   }
 }

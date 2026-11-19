@@ -54,37 +54,6 @@ interface PreferencesSettingsViewProps {
   onBack: () => void
 }
 
-const THEME_OPTIONS: SelectDropdownOption<ThemeMode>[] = [
-  {
-    id: "dark",
-    label: "Dark",
-    icon: <Moon className="w-3.5 h-3.5" />
-  },
-  {
-    id: "light",
-    label: "Light",
-    icon: <Sun className="w-3.5 h-3.5" />
-  },
-  {
-    id: "system",
-    label: "System",
-    icon: <Laptop className="w-3.5 h-3.5" />
-  }
-]
-
-const VIEW_MODE_OPTIONS: SelectDropdownOption<ViewMode>[] = [
-  {
-    id: "list",
-    label: "List",
-    icon: <List className="w-3.5 h-3.5" />
-  },
-  {
-    id: "grid",
-    label: "Grid",
-    icon: <LayoutGrid className="w-3.5 h-3.5" />
-  }
-]
-
 /**
  * Preferences / General Settings view.
  * Configures appearance theme mode, menu order/visibility, and popup navigation memory.
@@ -93,6 +62,43 @@ export const PreferencesSettingsView: React.FC<
   PreferencesSettingsViewProps
 > = ({ onBack }) => {
   const { t, locale } = useI18n()
+
+  const themeOptions: SelectDropdownOption<ThemeMode>[] = useMemo(
+    () => [
+      {
+        id: "dark",
+        label: t("preferences.themeDark"),
+        icon: <Moon className="w-3.5 h-3.5" />
+      },
+      {
+        id: "light",
+        label: t("preferences.themeLight"),
+        icon: <Sun className="w-3.5 h-3.5" />
+      },
+      {
+        id: "system",
+        label: t("preferences.themeSystem"),
+        icon: <Laptop className="w-3.5 h-3.5" />
+      }
+    ],
+    [t]
+  )
+
+  const viewModeOptions: SelectDropdownOption<ViewMode>[] = useMemo(
+    () => [
+      {
+        id: "list",
+        label: t("preferences.viewModeList"),
+        icon: <List className="w-3.5 h-3.5" />
+      },
+      {
+        id: "grid",
+        label: t("preferences.viewModeGrid"),
+        icon: <LayoutGrid className="w-3.5 h-3.5" />
+      }
+    ],
+    [t]
+  )
   const [settings, setSettings] = useStorage<FeatureSettings>(
     STORAGE_KEYS.SETTINGS,
     DEFAULT_SETTINGS
@@ -328,7 +334,7 @@ export const PreferencesSettingsView: React.FC<
 
               <SelectDropdown<ThemeMode>
                 value={currentTheme}
-                options={THEME_OPTIONS}
+                options={themeOptions}
                 onChange={handleSelectTheme}
                 ariaLabel={t("preferences.themeMode")}
               />
@@ -349,7 +355,7 @@ export const PreferencesSettingsView: React.FC<
 
               <SelectDropdown<ViewMode>
                 value={currentViewMode}
-                options={VIEW_MODE_OPTIONS}
+                options={viewModeOptions}
                 onChange={handleSelectViewMode}
                 ariaLabel={t("preferences.viewMode")}
               />
@@ -521,15 +527,17 @@ export const PreferencesSettingsView: React.FC<
                   <Slider
                     label={t("preferences.sessionTimeout")}
                     value={currentNav.sessionTimeoutMinutes}
-                    valueDisplay={`${currentNav.sessionTimeoutMinutes} min`}
+                    valueDisplay={t("preferences.minutesShort", {
+                      count: currentNav.sessionTimeoutMinutes
+                    })}
                     min={1}
                     max={60}
                     step={1}
                     onChange={handleUpdateTimeout}
                     ticks={[
-                      { label: "1 min" },
-                      { label: "10 min (Default)" },
-                      { label: "60 min" }
+                      { label: t("preferences.tickOneMin") },
+                      { label: t("preferences.tickTenMinDefault") },
+                      { label: t("preferences.tickSixtyMin") }
                     ]}
                   />
                 </div>

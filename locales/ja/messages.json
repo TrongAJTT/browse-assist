@@ -15,9 +15,9 @@
     "message": "画面から色を取得する"
   },
   "cmdElementToys": {
-    "message": "Element Toys を起動してページ要素を検査・操作する"
+    "message": "要素ツールを起動してページ要素を検査・操作する"
   },
   "cmdQuickHub": {
-    "message": "画面上の Quick Hub メニューを切り替える"
+    "message": "画面上のクイックハブを切り替える"
   }
 }

@@ -15,9 +15,9 @@
     "message": "Seleccionar color de la pantalla"
   },
   "cmdElementToys": {
-    "message": "Activar Element Toys para inspeccionar y manipular elementos de la página"
+    "message": "Activar Herramientas de elementos para inspeccionar y manipular elementos de la página"
   },
   "cmdQuickHub": {
-    "message": "Alternar el menú Quick Hub en pantalla"
+    "message": "Alternar el Centro rápido en pantalla"
   }
 }

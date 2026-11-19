@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 
+import { APP_INFO } from "~core/constants"
 import {
   getCurrentLocale,
   LOCALE_TABLES,
@@ -46,8 +47,10 @@ describe("i18n core (rosetta)", () => {
     expect(resolveBrowserLocale("en-US")).toBe("en")
     expect(resolveBrowserLocale("zh-TW")).toBe("zh_TW")
     expect(resolveBrowserLocale("zh-HK")).toBe("zh_TW")
+    expect(resolveBrowserLocale("zh-MO")).toBe("zh_TW")
     expect(resolveBrowserLocale("zh-Hant")).toBe("zh_TW")
     expect(resolveBrowserLocale("zh-CN")).toBe("zh_CN")
+    expect(resolveBrowserLocale("zh-Hans-SG")).toBe("zh_CN")
     expect(resolveBrowserLocale("ja-JP")).toBe("ja")
     expect(resolveBrowserLocale("pt-BR")).toBe("en")
   })
@@ -96,11 +99,18 @@ describe("i18n core (rosetta)", () => {
         const enVal = getNestedValue(en as unknown as Record<string, unknown>, key)
         const locVal = getNestedValue(dict as unknown as Record<string, unknown>, key)
         expect(locVal.trim().length, `Empty value in ${localeCode}.${key}`).toBeGreaterThan(0)
+        expect(locVal, `Raw manifest token in ${localeCode}.${key}`).not.toContain("__MSG_")
         expect(
           extractPlaceholders(locVal),
           `Placeholder mismatch in ${localeCode}.${key}`
         ).toEqual(extractPlaceholders(enVal))
       }
     }
+  })
+
+  it("never exposes raw Chrome manifest __MSG_ tokens in APP_INFO", () => {
+    expect(APP_INFO.name).not.toContain("__MSG_")
+    expect(APP_INFO.description).not.toContain("__MSG_")
+    expect(APP_INFO.slogan).not.toContain("__MSG_")
   })
 })

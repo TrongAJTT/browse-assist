@@ -5,6 +5,9 @@ type DeepString<T> = {
 export const en = {
   common: {
     appName: "Browse Assist",
+    appSlogan: "Supercharge Your Web Browsing",
+    appDescription:
+      "A lightweight, modular collection of quality-of-life tools designed to boost productivity and elevate your browsing flow.",
     enabled: "Enabled",
     disabled: "Disabled",
     reset: "Reset",
@@ -79,8 +82,13 @@ export const en = {
     appearance: "Appearance",
     themeMode: "Theme Mode",
     themeModeDesc: "Light, dark, or match your OS theme.",
+    themeDark: "Dark",
+    themeLight: "Light",
+    themeSystem: "System",
     viewMode: "View Mode",
     viewModeDesc: "Detailed list or compact tile grid.",
+    viewModeList: "List",
+    viewModeGrid: "Grid",
     language: "Language",
     languageDesc: "Choose interface language or follow browser.",
     languageAuto: "Auto (Browser)",
@@ -92,6 +100,10 @@ export const en = {
     rememberLastViewDesc:
       "Reopen the popup on the settings page you were previously browsing.",
     sessionTimeout: "Session Timeout",
+    minutesShort: "{{count}} min",
+    tickOneMin: "1 min",
+    tickTenMinDefault: "10 min (Default)",
+    tickSixtyMin: "60 min",
     customizeMenu: "Customize Menu",
     customizeMenuDesc:
       "Drag items to reorder them in the popup, or toggle visibility to hide features.",
@@ -110,6 +122,7 @@ export const en = {
     buyMeACoffeeDesc: "Support project maintenance with a coffee",
     githubSponsorsDesc: "Sponsor via GitHub on a monthly or one-off basis",
     vietqrDesc: "Instant bank transfer via VietQR (Vietnam)",
+    authorDonateLabel: "Author Donation Page",
     authorDonateDesc: "Direct donation to the author"
   },
   dialogs: {
@@ -262,6 +275,12 @@ export const en = {
     policy: "Policy",
     openSourceLibraries: "Open Source Libraries",
     declaredPermissions: "Declared Permissions",
+    permissionNames: {
+      storage: "Storage",
+      contextMenus: "Context Menus",
+      clipboardWrite: "Clipboard",
+      search: "Search"
+    },
     permissions: {
       storage: "Persist custom settings and features preferences locally.",
       contextMenus: "Provide quick actions on right-click like clean link copy.",

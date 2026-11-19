@@ -3,6 +3,9 @@ import type { TranslationDict } from "./en"
 export const de: TranslationDict = {
   common: {
     appName: "Browse Assist",
+    appSlogan: "Turbo für dein Webbrowsing",
+    appDescription:
+      "Eine leichte, modulare Sammlung praktischer Werkzeuge für mehr Produktivität und angenehmeres Surfen.",
     enabled: "Aktiviert",
     disabled: "Deaktiviert",
     reset: "Zurücksetzen",
@@ -77,8 +80,13 @@ export const de: TranslationDict = {
     appearance: "Erscheinungsbild",
     themeMode: "Farbschema",
     themeModeDesc: "Hell, dunkel oder Systemdesign folgen.",
+    themeDark: "Dunkel",
+    themeLight: "Hell",
+    themeSystem: "System",
     viewMode: "Ansichtsmodus",
     viewModeDesc: "Detaillierte Liste oder kompaktes Kachelraster.",
+    viewModeList: "Liste",
+    viewModeGrid: "Raster",
     language: "Sprache",
     languageDesc: "Oberflächensprache wählen oder Browser folgen.",
     languageAuto: "Auto (Browser)",
@@ -90,6 +98,10 @@ export const de: TranslationDict = {
     rememberLastViewDesc:
       "Popup auf der zuletzt geöffneten Einstellungsseite wieder öffnen.",
     sessionTimeout: "Sitzungs-Timeout",
+    minutesShort: "{{count}} Min.",
+    tickOneMin: "1 Min.",
+    tickTenMinDefault: "10 Min. (Standard)",
+    tickSixtyMin: "60 Min.",
     customizeMenu: "Menü anpassen",
     customizeMenuDesc:
       "Elemente zum Sortieren ziehen oder Sichtbarkeit im Popup umschalten.",
@@ -108,6 +120,7 @@ export const de: TranslationDict = {
     buyMeACoffeeDesc: "Projektpflege mit einem Kaffee unterstützen",
     githubSponsorsDesc: "Monatlich oder einmalig über GitHub unterstützen",
     vietqrDesc: "Sofortüberweisung über VietQR (Vietnam)",
+    authorDonateLabel: "Spendenseite des Autors",
     authorDonateDesc: "Direkte Spende an den Autor"
   },
   dialogs: {
@@ -115,7 +128,7 @@ export const de: TranslationDict = {
       title: "Firefox-Tastenkürzel einrichten",
       intro:
         "Tastenkürzel können direkt in den Erweiterungseinstellungen Ihres Browsers angepasst werden:",
-      step1Prefix: "Öffnen Sie einen neuen Tab in Firefox und gehen Sie zu",
+      step1Prefix: "Einen neuen Tab in Firefox öffnen und folgende Adresse aufrufen:",
       copyUrlTip: "Klicken, um URL zu kopieren",
       step2Prefix: "Klicken Sie auf das",
       step2Target: "Zahnrad-Symbol ⚙",
@@ -260,6 +273,12 @@ export const de: TranslationDict = {
     policy: "Datenschutz",
     openSourceLibraries: "Open-Source-Bibliotheken",
     declaredPermissions: "Deklarierte Berechtigungen",
+    permissionNames: {
+      storage: "Speicher",
+      contextMenus: "Kontextmenüs",
+      clipboardWrite: "Zwischenablage",
+      search: "Suche"
+    },
     permissions: {
       storage: "Einstellungen und Präferenzen lokal speichern.",
       contextMenus:
@@ -267,7 +286,7 @@ export const de: TranslationDict = {
       clipboardWrite:
         "Ausgewählte Farbcodes und Markdown-Links in die Zwischenablage kopieren.",
       search:
-        "Markierten Text beim Super Drag mit der Standardsuchmaschine suchen."
+        "Markierten Text beim Super-Ziehen mit der Standardsuchmaschine suchen."
     }
   },
   features: {
@@ -450,7 +469,7 @@ export const de: TranslationDict = {
           "Scrollen mit Pfeiltasten, Bild Auf/Ab und Leertaste sanft interpolieren.",
         aggressiveMode: "Aggressives Abfangen",
         aggressiveModeDesc:
-          "Sanftes Scrollen auf allen Websites erzwingen. Deaktiviert lassen, um Canvas- & Web-Apps (z. B. Figma, Maps) zu schützen."
+          "Sanftes Scrollen auf allen Websites erzwingen. Deaktiviert lassen, um Canvas- & Web-Apps (z. B. Konva, Figma, Maps) zu schützen."
       }
     },
     mouseZoom: {
@@ -474,7 +493,7 @@ export const de: TranslationDict = {
           "Nach unten scrollen zum Hineinzoomen, nach oben zum Herauszoomen.",
         showZoomToast: "Zoom-Hinweis anzeigen",
         showZoomToastDesc:
-          "Schwebendes Prozent-Abzeichen oben rechts auf der Seite anzeigen."
+          "Schwebendes Prozent-Badge oben rechts auf der Seite anzeigen."
       },
       logic: {
         pageZoom: "Seitenzoom"
@@ -620,7 +639,7 @@ export const de: TranslationDict = {
         notSupported: "EyeDropper wird auf dieser Seite/diesem Browser nicht unterstützt",
         pickedAndCopied: "Farbe aufgenommen & kopiert",
         picked: "Farbe aufgenommen",
-        couldNotOpen: "Color Picker konnte nicht geöffnet werden",
+        couldNotOpen: "Farbpipette konnte nicht geöffnet werden",
         permissionRequired: "Benutzerinteraktion erforderlich oder nicht erlaubt",
         palette: {
           pickedColor: "Aufgenommene Farbe",
@@ -636,7 +655,7 @@ export const de: TranslationDict = {
       description:
         "Elemente auf jeder Webseite inspizieren, entfernen, bearbeiten oder verschieben.",
       settings: {
-        launchTooltip: "Element Toys auf der Seite starten",
+        launchTooltip: "Element-Werkzeuge auf der Seite starten",
         shortcutTitle: "Aktivierungs-Tastenkürzel",
         shortcutDesc: "Schwebende Element-Toys-Leiste auf aktiver Seite öffnen",
         inspectorBadge: "Element-Inspektor-Abzeichen",
@@ -648,7 +667,7 @@ export const de: TranslationDict = {
           "HTML-Tagnamen und CSS-Klassenselektoren anzeigen (z. B. div.banner#hero)",
         behaviorSection: "Element-Toys-Verhalten",
         defaultTool: "Standard-Werkzeug beim Start",
-        defaultToolDesc: "Ausgewähltes Werkzeug beim Aktivieren von Element Toys",
+        defaultToolDesc: "Ausgewähltes Werkzeug beim Aktivieren von Element-Werkzeuge",
         modes: {
           zap: "Entfernen (Zap)",
           edit: "Bearbeiten",
@@ -664,7 +683,7 @@ export const de: TranslationDict = {
         showToast: "Schwebenden Hinweis anzeigen",
         showToastDesc:
           "Bestätigungsbanner auf der Seite anzeigen, wenn Aktionen ausgeführt werden",
-        howToUse: "Verwendung von Element Toys",
+        howToUse: "Verwendung von Element-Werkzeuge",
         tipShortcutPrefix: "Drücke",
         tipShortcutSuffix: "um die schwebende HUD-Leiste auf der Seite zu öffnen.",
         tipNoShortcutPrefix: "Lege oben ein Tastenkürzel fest oder klicke",
@@ -729,7 +748,7 @@ export const de: TranslationDict = {
       }
     },
     quickHub: {
-      title: "Quick Hub",
+      title: "Schnellmenü",
       description:
         "Schnellzugriffs-Menü auf dem Bildschirm mit Aktivierung an den Ecken.",
       settings: {
@@ -756,7 +775,7 @@ export const de: TranslationDict = {
           pipDesc: "Video im schwebenden Bild-im-Bild-Fenster ansehen",
           colorPickerTitle: "Farbe vom Bildschirm aufnehmen",
           colorPickerDesc: "Pixellupe und sofortiges Hex-Kopieren",
-          elementToysTitle: "Element Toys",
+          elementToysTitle: "Element-Werkzeuge",
           elementToysDesc: "Elemente inspizieren, entfernen, bearbeiten oder verschieben",
           scrollTopTitle: "Nach oben scrollen",
           scrollTopDesc: "Sanft zum Seitenanfang springen",
@@ -771,8 +790,8 @@ export const de: TranslationDict = {
       logic: {
         noToolsActive:
           "Keine Werkzeuge aktiv. Funktionen im Browse-Assist-Popup aktivieren.",
-        triggerTooltip: "Quick Hub (Schnellwerkzeuge)",
-        triggerAria: "Quick Hub",
+        triggerTooltip: "Schnellmenü (Schnellwerkzeuge)",
+        triggerAria: "Schnellmenü",
         cleanUrlCopied: "Saubere URL kopiert"
       }
     },

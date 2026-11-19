@@ -15,9 +15,9 @@
     "message": "화면에서 색상 추출"
   },
   "cmdElementToys": {
-    "message": "페이지 요소를 검사 및 조작하는 Element Toys 활성화"
+    "message": "페이지 요소를 검사 및 조작하는 요소 도구 활성화"
   },
   "cmdQuickHub": {
-    "message": "화면 내 Quick Hub 메뉴 전환"
+    "message": "화면 내 빠른 허브 메뉴 전환"
   }
 }
