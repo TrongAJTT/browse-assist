@@ -16,9 +16,12 @@ import {
 import { t } from "~core/i18n"
 import { cleanUrl, copyToClipboard, showCopiedFeedback } from "~core/linkUtils"
 import { openExtensionPopup } from "~core/popupHelper"
+import { isFeatureBlockedOnUrl } from "~core/siteRules"
 import {
   getStoredSettings,
+  getStoredSiteRules,
   subscribeToSettings,
+  subscribeToSiteRules,
   updateFeatureSetting,
   updateStoredSettings
 } from "~core/storage"
@@ -26,13 +29,16 @@ import { detectPageTheme, observePageTheme } from "~core/themeDetect"
 import { showContentToast } from "~core/toast"
 import {
   DEFAULT_QUICK_HUB_CONFIG,
+  DEFAULT_SITE_RULES,
   normalizeEdgePlacement,
   normalizeQuickHubActionOrder,
   normalizeQuickHubHiddenActions,
   type EdgePlacement,
+  type FeatureKey,
   type FeatureSettings,
   type QuickHubActionId,
-  type QuickHubConfig
+  type QuickHubConfig,
+  type SiteRule
 } from "~core/types"
 import {
   isRightClickActive,
@@ -47,7 +53,9 @@ import { captureActiveVideoFrame } from "~features/video-wheel-control/logic"
 let isActive = false
 let currentConfig: QuickHubConfig = { ...DEFAULT_QUICK_HUB_CONFIG }
 let cachedSettings: FeatureSettings | null = null
+let cachedSiteRules: SiteRule[] = DEFAULT_SITE_RULES
 let settingsUnsubscribe: (() => void) | null = null
+let siteRulesUnsubscribe: (() => void) | null = null
 
 // DOM elements
 let hostElement: HTMLDivElement | null = null
@@ -404,7 +412,51 @@ function getShadowStyles(
       color: #94a3b8;
       line-height: 1.4;
     }
+
+    .qh-item:disabled,
+    .qh-item.qh-item-blocked {
+      opacity: 0.48;
+      cursor: not-allowed;
+    }
+
+    .qh-item:disabled:hover,
+    .qh-item.qh-item-blocked:hover {
+      background: transparent;
+      transform: none;
+    }
+
+    .qh-site-off-badge {
+      margin-left: auto;
+      padding: 2px 6px;
+      border-radius: 5px;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: #fbbf24;
+      background: rgba(245, 158, 11, 0.16);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      flex-shrink: 0;
+    }
   `
+}
+
+function markButtonIfSiteBlocked(
+  btn: HTMLButtonElement,
+  featureKey: FeatureKey
+): boolean {
+  if (
+    !isFeatureBlockedOnUrl(featureKey, window.location.href, cachedSiteRules)
+  ) {
+    return false
+  }
+  btn.disabled = true
+  btn.classList.add("qh-item-blocked")
+  btn.title = t("siteRules.siteOffQuickHubTip")
+  const badge = document.createElement("span")
+  badge.className = "qh-site-off-badge"
+  badge.textContent = t("siteRules.siteOffBadge")
+  btn.appendChild(badge)
+  return true
 }
 
 const ACTION_RENDERERS: Record<
@@ -427,10 +479,12 @@ const ACTION_RENDERERS: Record<
         <span class="qh-item-name">${t("features.quickHub.settings.actions.pipTitle")}</span>
       </div>
     `
-    btn.addEventListener("click", () => {
-      closeMenu()
-      togglePictureInPicture().catch(() => {})
-    })
+    if (!markButtonIfSiteBlocked(btn, "pictureInPicture")) {
+      btn.addEventListener("click", () => {
+        closeMenu()
+        togglePictureInPicture().catch(() => {})
+      })
+    }
     list.appendChild(btn)
     return true
   },
@@ -451,10 +505,12 @@ const ACTION_RENDERERS: Record<
         <span class="qh-item-name">${t("features.quickHub.settings.actions.colorPickerTitle")}</span>
       </div>
     `
-    btn.addEventListener("click", () => {
-      closeMenu()
-      pickColor().catch(() => {})
-    })
+    if (!markButtonIfSiteBlocked(btn, "colorPicker")) {
+      btn.addEventListener("click", () => {
+        closeMenu()
+        pickColor().catch(() => {})
+      })
+    }
     list.appendChild(btn)
     return true
   },
@@ -474,10 +530,12 @@ const ACTION_RENDERERS: Record<
         <span class="qh-item-name">${t("features.quickHub.settings.actions.elementToysTitle")}</span>
       </div>
     `
-    btn.addEventListener("click", () => {
-      closeMenu()
-      startElementToys()
-    })
+    if (!markButtonIfSiteBlocked(btn, "elementToys")) {
+      btn.addEventListener("click", () => {
+        closeMenu()
+        startElementToys()
+      })
+    }
     list.appendChild(btn)
     return true
   },
@@ -497,10 +555,12 @@ const ACTION_RENDERERS: Record<
         <span class="qh-item-name">${t("features.quickHub.settings.actions.scrollTopTitle")}</span>
       </div>
     `
-    btn.addEventListener("click", () => {
-      closeMenu()
-      window.scrollTo({ top: 0, behavior: "smooth" })
-    })
+    if (!markButtonIfSiteBlocked(btn, "quickScroll")) {
+      btn.addEventListener("click", () => {
+        closeMenu()
+        window.scrollTo({ top: 0, behavior: "smooth" })
+      })
+    }
     list.appendChild(btn)
     return true
   },
@@ -521,14 +581,16 @@ const ACTION_RENDERERS: Record<
         <span class="qh-item-name">${t("features.quickHub.settings.actions.scrollBottomTitle")}</span>
       </div>
     `
-    btn.addEventListener("click", () => {
-      closeMenu()
-      const scrollHeight = Math.max(
-        document.body.scrollHeight,
-        document.documentElement.scrollHeight
-      )
-      window.scrollTo({ top: scrollHeight, behavior: "smooth" })
-    })
+    if (!markButtonIfSiteBlocked(btn, "quickScroll")) {
+      btn.addEventListener("click", () => {
+        closeMenu()
+        const scrollHeight = Math.max(
+          document.body.scrollHeight,
+          document.documentElement.scrollHeight
+        )
+        window.scrollTo({ top: scrollHeight, behavior: "smooth" })
+      })
+    }
     list.appendChild(btn)
     return true
   },
@@ -548,10 +610,12 @@ const ACTION_RENDERERS: Record<
         <span class="qh-item-name">${t("features.quickHub.settings.actions.resetZoomTitle")}</span>
       </div>
     `
-    btn.addEventListener("click", () => {
-      closeMenu()
-      resetMouseZoom()
-    })
+    if (!markButtonIfSiteBlocked(btn, "mouseZoom")) {
+      btn.addEventListener("click", () => {
+        closeMenu()
+        resetMouseZoom()
+      })
+    }
     list.appendChild(btn)
     return true
   },
@@ -571,15 +635,17 @@ const ACTION_RENDERERS: Record<
         <span class="qh-item-name">${t("features.quickHub.settings.actions.cleanUrlTitle")}</span>
       </div>
     `
-    btn.addEventListener("click", async () => {
-      const rawUrl = window.location.href
-      const cleaned = cleanUrl(rawUrl)
-      const ok = await copyToClipboard(cleaned)
-      closeMenu()
-      if (ok) {
-        showCopiedFeedback(t("features.quickHub.logic.cleanUrlCopied"), cleaned)
-      }
-    })
+    if (!markButtonIfSiteBlocked(btn, "contextMenuActions")) {
+      btn.addEventListener("click", async () => {
+        const rawUrl = window.location.href
+        const cleaned = cleanUrl(rawUrl)
+        const ok = await copyToClipboard(cleaned)
+        closeMenu()
+        if (ok) {
+          showCopiedFeedback(t("features.quickHub.logic.cleanUrlCopied"), cleaned)
+        }
+      })
+    }
     list.appendChild(btn)
     return true
   },
@@ -621,16 +687,18 @@ const ACTION_RENDERERS: Record<
         <span class="qh-item-name">${t("features.quickHub.settings.actions.copyMarkdownTitle")}</span>
       </div>
     `
-    btn.addEventListener("click", async () => {
-      const cleaned = cleanUrl(window.location.href)
-      const title = (document.title || cleaned).replace(/[[\]]/g, "\\$&")
-      const markdown = `[${title}](${cleaned})`
-      const ok = await copyToClipboard(markdown)
-      closeMenu()
-      if (ok) {
-        showCopiedFeedback(t("features.quickHub.logic.markdownCopied"), markdown)
-      }
-    })
+    if (!markButtonIfSiteBlocked(btn, "contextMenuActions")) {
+      btn.addEventListener("click", async () => {
+        const cleaned = cleanUrl(window.location.href)
+        const title = (document.title || cleaned).replace(/[[\]]/g, "\\$&")
+        const markdown = `[${title}](${cleaned})`
+        const ok = await copyToClipboard(markdown)
+        closeMenu()
+        if (ok) {
+          showCopiedFeedback(t("features.quickHub.logic.markdownCopied"), markdown)
+        }
+      })
+    }
     list.appendChild(btn)
     return true
   },
@@ -650,17 +718,19 @@ const ACTION_RENDERERS: Record<
         <span class="qh-item-name">${t("features.quickHub.settings.actions.videoScreenshotTitle")}</span>
       </div>
     `
-    btn.addEventListener("click", async () => {
-      closeMenu()
-      const captured = await captureActiveVideoFrame()
-      if (!captured) {
-        showContentToast({
-          message: t("features.quickHub.logic.noVideoFound"),
-          type: "warning",
-          duration: 1800
-        })
-      }
-    })
+    if (!markButtonIfSiteBlocked(btn, "videoWheelControl")) {
+      btn.addEventListener("click", async () => {
+        closeMenu()
+        const captured = await captureActiveVideoFrame()
+        if (!captured) {
+          showContentToast({
+            message: t("features.quickHub.logic.noVideoFound"),
+            type: "warning",
+            duration: 1800
+          })
+        }
+      })
+    }
     list.appendChild(btn)
     return true
   }
@@ -971,10 +1041,11 @@ export function activate(config?: QuickHubConfig): void {
   if (isActive || typeof window === "undefined") return
   isActive = true
 
-  // Hydrate settings
-  getStoredSettings()
-    .then((settings) => {
+  // Hydrate settings & site rules
+  Promise.all([getStoredSettings(), getStoredSiteRules()])
+    .then(([settings, rules]) => {
       cachedSettings = settings
+      cachedSiteRules = rules
       if (settings?.quickHubConfig) {
         currentConfig = { ...currentConfig, ...settings.quickHubConfig }
       }
@@ -989,6 +1060,13 @@ export function activate(config?: QuickHubConfig): void {
       currentConfig = { ...currentConfig, ...newSettings.quickHubConfig }
       updateStyles()
     }
+    if (isMenuOpen) {
+      renderMenuContent()
+    }
+  })
+
+  siteRulesUnsubscribe = subscribeToSiteRules((newRules) => {
+    cachedSiteRules = newRules
     if (isMenuOpen) {
       renderMenuContent()
     }
@@ -1017,6 +1095,11 @@ export function deactivate(): void {
   if (settingsUnsubscribe) {
     settingsUnsubscribe()
     settingsUnsubscribe = null
+  }
+
+  if (siteRulesUnsubscribe) {
+    siteRulesUnsubscribe()
+    siteRulesUnsubscribe = null
   }
 
   window.removeEventListener("pointermove", handleMouseMove)

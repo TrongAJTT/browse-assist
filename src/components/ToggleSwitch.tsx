@@ -1,9 +1,13 @@
-import { ChevronRight, Keyboard } from "lucide-react"
+import { ChevronRight, Keyboard, ShieldOff } from "lucide-react"
 import React, { useEffect, useRef, useState } from "react"
 
 import { ShortcutBadge } from "~components/ShortcutBadge"
 import { Switch } from "~components/Switch"
 import { openBrowserShortcutsPage } from "~core/shortcutsHelper"
+import {
+  useFeatureKey,
+  useSiteExclusion
+} from "~core/siteExclusionContext"
 import type { ViewMode } from "~core/types"
 import { useI18n } from "~core/useI18n"
 import { useViewMode } from "~core/viewModeContext"
@@ -133,8 +137,34 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
   onConfigure,
   variant
 }) => {
+  const { t } = useI18n()
   const contextViewMode = useViewMode()
   const effectiveViewMode = variant ?? contextViewMode
+  const featureKey = useFeatureKey()
+  const { isFullyPaused, blockedFeatures, hostname, onOpenSiteRules } =
+    useSiteExclusion()
+
+  const isSiteBlocked = Boolean(
+    featureKey &&
+      featureKey !== "allowRightClick" &&
+      (isFullyPaused || blockedFeatures.has(featureKey))
+  )
+
+  const handleOpenSiteRules = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    onOpenSiteRules?.()
+  }
+
+  const siteOffPill = isSiteBlocked ? (
+    <button
+      type="button"
+      onClick={handleOpenSiteRules}
+      title={t("siteRules.siteOffTip", { host: hostname ?? "" })}
+      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-500/15 text-amber-400 border border-amber-500/35 hover:bg-amber-500/25 transition-colors shrink-0 max-w-full">
+      <ShieldOff className="w-2.5 h-2.5 shrink-0" />
+      <span className="truncate">{t("siteRules.siteOffBadge")}</span>
+    </button>
+  ) : null
 
   const handleItemClick = () => {
     if (disabled) return
@@ -153,9 +183,11 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
       <div
         title={description}
         className={`relative flex flex-col justify-between p-2.5 rounded-xl border transition-all duration-150 group select-none ${
-          enabled
-            ? "bg-app-surface border-border-focus shadow-sm hover:border-accent"
-            : "bg-app-surface/40 border-border-subtle hover:border-border-subtle/80 opacity-75 hover:opacity-100"
+          isSiteBlocked
+            ? "bg-amber-500/5 border-amber-500/35 opacity-80 hover:opacity-100"
+            : enabled
+              ? "bg-app-surface border-border-focus shadow-sm hover:border-accent"
+              : "bg-app-surface/40 border-border-subtle hover:border-border-subtle/80 opacity-75 hover:opacity-100"
         } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}>
         {/* Top row: Icon + Badge/Shortcut (left) and Action buttons (Chevron config + Switch) (right) */}
         <div className="flex items-center justify-between gap-1.5 min-w-0">
@@ -163,9 +195,11 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
             <div className="shrink-0 flex items-center justify-center transition-transform duration-200 ease-out group-hover:scale-110">
               {icon}
             </div>
-            {hasBadge && (
-              <GridMarqueeBadge badge={badge} shortcut={shortcut} />
-            )}
+            {isSiteBlocked
+              ? siteOffPill
+              : hasBadge && (
+                  <GridMarqueeBadge badge={badge} shortcut={shortcut} />
+                )}
           </div>
 
           <div className="flex items-center gap-1 shrink-0">
@@ -229,10 +263,13 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
           <div className="flex items-center gap-1.5 flex-wrap">
             <span
               className={`text-[13px] font-semibold truncate transition-colors ${
-                enabled ? "text-content-primary" : "text-content-secondary"
+                enabled && !isSiteBlocked
+                  ? "text-content-primary"
+                  : "text-content-secondary"
               }`}>
               {title}
             </span>
+            {siteOffPill}
             {badge && (
               <span className="badge-success">
                 {badge}

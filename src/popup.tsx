@@ -13,7 +13,7 @@ import {
   Shield,
   X
 } from "lucide-react"
-import { Fragment, useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 import { Storage } from "@plasmohq/storage"
 import { useStorage } from "@plasmohq/storage/hook"
@@ -37,7 +37,11 @@ import {
   getActiveTab,
   sendToBackground
 } from "~core/messaging"
-import { getUrlExclusionSummary } from "~core/siteRules"
+import { getUrlExclusionSummary, extractHostname } from "~core/siteRules"
+import {
+  FeatureKeyContext,
+  SiteExclusionContext
+} from "~core/siteExclusionContext"
 import { useI18n } from "~core/useI18n"
 import { ViewModeContext } from "~core/viewModeContext"
 import {
@@ -125,12 +129,26 @@ function IndexPopup() {
   }, [])
 
   const resolvedSiteRules = siteRules ?? DEFAULT_SITE_RULES
+  const currentHostname = useMemo(
+    () => (currentTabUrl ? extractHostname(currentTabUrl) : null),
+    [currentTabUrl]
+  )
   const currentSiteSummary = useMemo(() => {
     if (!currentTabUrl) {
       return { isFullyPaused: false, blockedFeatures: new Set<FeatureKey>() }
     }
     return getUrlExclusionSummary(currentTabUrl, resolvedSiteRules)
   }, [currentTabUrl, resolvedSiteRules])
+
+  const siteExclusionValue = useMemo(
+    () => ({
+      isFullyPaused: currentSiteSummary.isFullyPaused,
+      blockedFeatures: currentSiteSummary.blockedFeatures,
+      hostname: currentHostname,
+      onOpenSiteRules: () => setCurrentView("site-rules")
+    }),
+    [currentSiteSummary, currentHostname]
+  )
 
   const openSiteRulesInOptions = () => {
     if (
@@ -614,34 +632,38 @@ function IndexPopup() {
             )}
 
             <ViewModeContext.Provider value={activeViewMode}>
-              {filteredFeatures.length === 0 ? (
-                <div className="py-10 text-center space-y-2">
-                  <p className="text-xs text-content-muted">
-                    {t("popup.noResults")}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSearchQuery("")
-                      setSelectedCategory("all")
-                    }}
-                    className="text-[11px] font-medium text-accent hover:underline">
-                    {t("popup.resetFilters")}
-                  </button>
-                </div>
-              ) : (
-                /* PowerToys-style Utilities List with Dividers or Compact Tile Grid */
-                <main
-                  className={
-                    activeViewMode === "grid"
-                      ? "grid grid-cols-2 gap-2 py-0.5"
-                      : "divide-y divide-border-divider"
-                  }>
-                  {filteredFeatures.map((key) => (
-                    <Fragment key={key}>{featureToggleMap[key]}</Fragment>
-                  ))}
-                </main>
-              )}
+              <SiteExclusionContext.Provider value={siteExclusionValue}>
+                {filteredFeatures.length === 0 ? (
+                  <div className="py-10 text-center space-y-2">
+                    <p className="text-xs text-content-muted">
+                      {t("popup.noResults")}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSearchQuery("")
+                        setSelectedCategory("all")
+                      }}
+                      className="text-[11px] font-medium text-accent hover:underline">
+                      {t("popup.resetFilters")}
+                    </button>
+                  </div>
+                ) : (
+                  /* PowerToys-style Utilities List with Dividers or Compact Tile Grid */
+                  <main
+                    className={
+                      activeViewMode === "grid"
+                        ? "grid grid-cols-2 gap-2 py-0.5"
+                        : "divide-y divide-border-divider"
+                    }>
+                    {filteredFeatures.map((key) => (
+                      <FeatureKeyContext.Provider key={key} value={key}>
+                        {featureToggleMap[key]}
+                      </FeatureKeyContext.Provider>
+                    ))}
+                  </main>
+                )}
+              </SiteExclusionContext.Provider>
             </ViewModeContext.Provider>
           </div>
         ) : currentView === "context-menu-actions-settings" ? (
