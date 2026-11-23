@@ -790,7 +790,11 @@ export const zh_TW: TranslationDict = {
         triggerAria: "快捷中心",
         cleanUrlCopied: "已複製純淨 URL",
         markdownCopied: "已複製頁面 Markdown",
-        noVideoFound: "目前頁面找不到可擷取的影片"
+        noVideoFound: "目前頁面找不到可擷取的影片",
+        siteRulesAdd: "有干擾？新增規則",
+        siteRulesAddTip: "某項功能影響了目前頁面體驗？新增網站規則。",
+        siteRulesActive: "已啟用規則 ({{count}})",
+        siteRulesActiveTip: "檢視或編輯目前網站的規則。"
       }
     },
     imageHoverPreview: {

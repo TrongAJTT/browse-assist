@@ -850,7 +850,11 @@ export const vi: TranslationDict = {
         triggerAria: "Trung tâm nhanh",
         cleanUrlCopied: "Đã sao chép URL sạch",
         markdownCopied: "Đã sao chép trang Markdown",
-        noVideoFound: "Không tìm thấy video đang phát trên trang này"
+        noVideoFound: "Không tìm thấy video đang phát trên trang này",
+        siteRulesAdd: "Gặp lỗi? Thêm quy tắc",
+        siteRulesAddTip: "Có công cụ làm phiền trên trang này? Thêm quy tắc trang.",
+        siteRulesActive: "Đang có quy tắc ({{count}})",
+        siteRulesActiveTip: "Xem hoặc chỉnh sửa quy tắc áp dụng trên trang này."
       }
     },
     imageHoverPreview: {

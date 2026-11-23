@@ -853,7 +853,11 @@ export const de: TranslationDict = {
         triggerAria: "Schnellmenü",
         cleanUrlCopied: "Saubere URL kopiert",
         markdownCopied: "Seiten-Markdown kopiert",
-        noVideoFound: "Kein aktives Video auf dieser Seite gefunden"
+        noVideoFound: "Kein aktives Video auf dieser Seite gefunden",
+        siteRulesAdd: "Problem? Regel erstellen",
+        siteRulesAddTip: "Stört eine Funktion auf dieser Seite? Website-Regel hinzufügen.",
+        siteRulesActive: "Website-Regeln aktiv ({{count}})",
+        siteRulesActiveTip: "Aktive Regeln für diese Website anzeigen oder bearbeiten."
       }
     },
     imageHoverPreview: {

@@ -849,7 +849,11 @@ export const en = {
         triggerAria: "Quick Hub",
         cleanUrlCopied: "Clean URL Copied",
         markdownCopied: "Page Markdown Copied",
-        noVideoFound: "No active video found on this page"
+        noVideoFound: "No active video found on this page",
+        siteRulesAdd: "Site issue? Add rule",
+        siteRulesAddTip: "A feature interfering with this page? Add a site rule.",
+        siteRulesActive: "Site rules active ({{count}})",
+        siteRulesActiveTip: "View or edit rules active on this site."
       }
     },
     imageHoverPreview: {

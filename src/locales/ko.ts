@@ -830,7 +830,11 @@ export const ko: TranslationDict = {
         triggerAria: "빠른 허브",
         cleanUrlCopied: "깔끔한 URL 복사됨",
         markdownCopied: "페이지 Markdown 복사됨",
-        noVideoFound: "이 페이지에서 활성 동영상을 찾을 수 없습니다"
+        noVideoFound: "이 페이지에서 활성 동영상을 찾을 수 없습니다",
+        siteRulesAdd: "문제 시 규칙 추가",
+        siteRulesAddTip: "이 페이지에서 기능이 방해되나요? 사이트 규칙을 추가하세요.",
+        siteRulesActive: "적용 중인 규칙 ({{count}})",
+        siteRulesActiveTip: "이 사이트에 적용 중인 규칙 보기 또는 편집."
       }
     },
     imageHoverPreview: {

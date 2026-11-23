@@ -850,7 +850,11 @@ export const fr: TranslationDict = {
         triggerAria: "Menu rapide",
         cleanUrlCopied: "URL propre copiée",
         markdownCopied: "Page Markdown copiée",
-        noVideoFound: "Aucune vidéo active trouvée sur cette page"
+        noVideoFound: "Aucune vidéo active trouvée sur cette page",
+        siteRulesAdd: "Un souci ? Ajouter règle",
+        siteRulesAddTip: "Une fonction gêne sur cette page ? Ajoutez une règle de site.",
+        siteRulesActive: "Règles actives ({{count}})",
+        siteRulesActiveTip: "Voir ou modifier les règles actives sur ce site."
       }
     },
     imageHoverPreview: {

@@ -4,12 +4,18 @@ const {
   mockGetStoredSettings,
   mockSubscribeToSettings,
   mockGetStoredSiteRules,
-  mockSubscribeToSiteRules
+  mockSubscribeToSiteRules,
+  mockOpenExtensionPopup
 } = vi.hoisted(() => ({
   mockGetStoredSettings: vi.fn(),
   mockSubscribeToSettings: vi.fn(() => () => {}),
   mockGetStoredSiteRules: vi.fn(),
-  mockSubscribeToSiteRules: vi.fn(() => () => {})
+  mockSubscribeToSiteRules: vi.fn(() => () => {}),
+  mockOpenExtensionPopup: vi.fn().mockResolvedValue(undefined)
+}))
+
+vi.mock("~core/popupHelper", () => ({
+  openExtensionPopup: mockOpenExtensionPopup
 }))
 
 vi.mock("~core/storage", () => ({
@@ -41,6 +47,7 @@ describe("quick-hub content logic", () => {
     document.documentElement.removeAttribute("data-theme")
 
     mockGetStoredSiteRules.mockResolvedValue([])
+    mockOpenExtensionPopup.mockResolvedValue(undefined)
     mockGetStoredSettings.mockResolvedValue({
       ...DEFAULT_SETTINGS,
       quickHub: true,
@@ -78,6 +85,7 @@ describe("quick-hub content logic", () => {
   it("adapts trigger styles to detected page theme and applies buttonShape & buttonOpacity", async () => {
     document.documentElement.setAttribute("data-theme", "light")
     mockGetStoredSiteRules.mockResolvedValue([])
+    mockOpenExtensionPopup.mockResolvedValue(undefined)
     mockGetStoredSettings.mockResolvedValue({
       ...DEFAULT_SETTINGS,
       quickHub: true,
@@ -159,5 +167,35 @@ describe("quick-hub content logic", () => {
     expect(
       blockedItem!.querySelector(".qh-site-off-badge")?.textContent
     ).toBe("Site off")
+
+    const activeFooterBtn = capturedShadowRoot!.querySelector(
+      ".qh-footer-btn.qh-footer-active"
+    ) as HTMLButtonElement | null
+    expect(activeFooterBtn).not.toBeNull()
+    expect(
+      activeFooterBtn!.querySelector(".qh-footer-label")?.textContent
+    ).toBe("Site rules active (1)")
+
+    activeFooterBtn!.click()
+    expect(mockOpenExtensionPopup).toHaveBeenCalledWith("site-rules")
+  })
+
+  it("shows add-rule footer when no site rules apply to current page", async () => {
+    activate(DEFAULT_QUICK_HUB_CONFIG)
+
+    await vi.waitFor(() => {
+      expect(capturedShadowRoot?.querySelector(".qh-trigger")).toBeTruthy()
+    })
+
+    toggleQuickHubMenu()
+
+    const footerBtn = capturedShadowRoot!.querySelector(
+      ".qh-footer-btn"
+    ) as HTMLButtonElement | null
+    expect(footerBtn).not.toBeNull()
+    expect(footerBtn!.classList.contains("qh-footer-active")).toBe(false)
+    expect(footerBtn!.querySelector(".qh-footer-label")?.textContent).toBe(
+      "Site issue? Add rule"
+    )
   })
 })

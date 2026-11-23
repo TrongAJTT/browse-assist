@@ -850,7 +850,11 @@ export const es: TranslationDict = {
         triggerAria: "Centro rápido",
         cleanUrlCopied: "URL limpia copiada",
         markdownCopied: "Markdown de la página copiado",
-        noVideoFound: "No se encontró ningún video activo en esta página"
+        noVideoFound: "No se encontró ningún video activo en esta página",
+        siteRulesAdd: "¿Fallos? Añadir regla",
+        siteRulesAddTip: "¿Alguna función interfiere en esta página? Añade una regla de sitio.",
+        siteRulesActive: "Reglas activas ({{count}})",
+        siteRulesActiveTip: "Ver o editar las reglas activas en este sitio."
       }
     },
     imageHoverPreview: {

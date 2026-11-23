@@ -841,7 +841,11 @@ export const ja: TranslationDict = {
         triggerAria: "クイックハブ",
         cleanUrlCopied: "クリーン URL をコピーしました",
         markdownCopied: "ページの Markdown をコピーしました",
-        noVideoFound: "このページに再生可能な動画が見つかりません"
+        noVideoFound: "このページに再生可能な動画が見つかりません",
+        siteRulesAdd: "不具合？ルールを追加",
+        siteRulesAddTip: "このページで機能が干渉していますか？サイトルールを追加します。",
+        siteRulesActive: "適用中のルール ({{count}})",
+        siteRulesActiveTip: "このサイトに適用中のルールを表示・編集します。"
       }
     },
     imageHoverPreview: {

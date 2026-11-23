@@ -790,7 +790,11 @@ export const zh_CN: TranslationDict = {
         triggerAria: "快捷中心",
         cleanUrlCopied: "已复制纯净 URL",
         markdownCopied: "已复制页面 Markdown",
-        noVideoFound: "当前页面未找到可截取的视频"
+        noVideoFound: "当前页面未找到可截取的视频",
+        siteRulesAdd: "有干扰？添加规则",
+        siteRulesAddTip: "某项功能影响了当前页面体验？添加站点规则。",
+        siteRulesActive: "已启用规则 ({{count}})",
+        siteRulesActiveTip: "查看或编辑当前站点的规则。"
       }
     },
     imageHoverPreview: {
