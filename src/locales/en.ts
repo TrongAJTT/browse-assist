@@ -299,6 +299,39 @@ export const en = {
       search: "Search selected text with default search engine on Super Drag."
     }
   },
+  siteRules: {
+    title: "Site Rules",
+    appBarTip: "Site Rules (Shift+Click to open in Options)",
+    openInOptionsTip: "Open Site Rules in Options",
+    openRulesTip: "Configure rules for this site",
+    optionsDesc:
+      "Disable Browse Assist or specific features on matching domains or wildcard (*) URLs.",
+    currentSite: "Current Site",
+    pauseAllOnSite: "Pause all",
+    quickExcludeDesc: "Click a feature below to disable it on this domain:",
+    pause: "Pause",
+    resume: "Resume",
+    pauseSiteTip: "Pause all features on {host}",
+    resumeSiteTip: "Resume features on {host}",
+    statusPaused: "Paused",
+    statusExcludedCount: "{count} excluded",
+    addRuleTitle: "Add Rule",
+    wildcardHint: "Supports * wildcard",
+    patternPlaceholder: "figma.com, *.google.com, docs.google.com/app/*",
+    scopeAll: "All features",
+    scopeSelected: "Selected",
+    addButton: "Add",
+    invalidPattern: "Enter a valid domain or wildcard URL pattern (not just *).",
+    selectAtLeastOne: "Select at least one feature to exclude.",
+    savedRulesTitle: "Saved Rules",
+    emptyTitle: "No site rules yet",
+    emptyDesc:
+      "Add a domain (figma.com) or wildcard URL (docs.google.com/spreadsheets/*) to disable features where needed.",
+    matchesThisTab: "This tab",
+    editTip: "Edit rule",
+    deleteTip: "Delete rule",
+    save: "Save"
+  },
   features: {
     allowRightClick: {
       title: "Allow Right Click",

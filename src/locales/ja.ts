@@ -299,6 +299,39 @@ export const ja: TranslationDict = {
         "スーパードラッグ で選択したテキストを既定の検索エンジンで検索します。"
     }
   },
+  siteRules: {
+    title: "サイトルール",
+    appBarTip: "サイトルール (Shift+クリックでオプションを開く)",
+    openInOptionsTip: "オプションでサイトルールを開く",
+    openRulesTip: "このサイトのルールを設定",
+    optionsDesc:
+      "一致するドメインやワイルドカード (*) URL で Browse Assist 全体または特定機能を無効化します。",
+    currentSite: "現在のサイト",
+    pauseAllOnSite: "すべて一時停止",
+    quickExcludeDesc: "このドメインで無効化する機能をクリックして選択:",
+    pause: "一時停止",
+    resume: "再開",
+    pauseSiteTip: "{host} のすべての機能を一時停止",
+    resumeSiteTip: "{host} の機能を再開",
+    statusPaused: "停止中",
+    statusExcludedCount: "{count}件除外",
+    addRuleTitle: "ルールを追加",
+    wildcardHint: "ワイルドカード * 対応",
+    patternPlaceholder: "figma.com, *.google.com, docs.google.com/app/*",
+    scopeAll: "すべての機能",
+    scopeSelected: "選択した機能",
+    addButton: "追加",
+    invalidPattern: "有効なドメインまたは URL パターンを入力してください (* のみ不可)。",
+    selectAtLeastOne: "除外する機能を1つ以上選択してください。",
+    savedRulesTitle: "保存済みのルール",
+    emptyTitle: "サイトルールはまだありません",
+    emptyDesc:
+      "ドメイン (figma.com) やワイルドカード URL (docs.google.com/spreadsheets/*) を追加して機能を個別に無効化できます。",
+    matchesThisTab: "このタブ",
+    editTip: "ルールを編集",
+    deleteTip: "ルールを削除",
+    save: "保存"
+  },
   features: {
     allowRightClick: {
       title: "右クリック許可",

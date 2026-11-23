@@ -292,6 +292,39 @@ export const ko: TranslationDict = {
       search: "슈퍼 드래그 시 선택한 텍스트를 기본 검색 엔진으로 검색합니다."
     }
   },
+  siteRules: {
+    title: "사이트 규칙",
+    appBarTip: "사이트 규칙 (Shift+클릭으로 옵션에서 열기)",
+    openInOptionsTip: "옵션에서 사이트 규칙 열기",
+    openRulesTip: "이 사이트의 규칙 설정",
+    optionsDesc:
+      "일치하는 도메인 또는 와일드카드(*) URL에서 Browse Assist 전체 또는 특정 기능을 비활성화합니다.",
+    currentSite: "현재 사이트",
+    pauseAllOnSite: "모두 일시중지",
+    quickExcludeDesc: "이 도메인에서 비활성화할 기능을 클릭하세요:",
+    pause: "일시중지",
+    resume: "재개",
+    pauseSiteTip: "{host}에서 모든 기능 일시중지",
+    resumeSiteTip: "{host}에서 기능 재개",
+    statusPaused: "일시중지됨",
+    statusExcludedCount: "{count}개 제외됨",
+    addRuleTitle: "규칙 추가",
+    wildcardHint: "* 와일드카드 지원",
+    patternPlaceholder: "figma.com, *.google.com, docs.google.com/app/*",
+    scopeAll: "모든 기능",
+    scopeSelected: "선택한 기능",
+    addButton: "추가",
+    invalidPattern: "유효한 도메인 또는 와일드카드 URL 패턴을 입력하세요(* 단독 불가).",
+    selectAtLeastOne: "제외할 기능을 하나 이상 선택하세요.",
+    savedRulesTitle: "저장된 규칙",
+    emptyTitle: "아직 사이트 규칙이 없습니다",
+    emptyDesc:
+      "도메인(figma.com) 또는 와일드카드 URL(docs.google.com/spreadsheets/*)을 추가해 필요한 사이트에서 기능을 끌 수 있습니다.",
+    matchesThisTab: "현재 탭",
+    editTip: "규칙 수정",
+    deleteTip: "규칙 삭제",
+    save: "저장"
+  },
   features: {
     allowRightClick: {
       title: "우클릭 허용",

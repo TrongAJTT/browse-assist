@@ -299,6 +299,39 @@ export const vi: TranslationDict = {
         "Tìm kiếm văn bản đã chọn bằng công cụ tìm kiếm mặc định khi dùng Siêu kéo thả."
     }
   },
+  siteRules: {
+    title: "Quy tắc trang web",
+    appBarTip: "Quy tắc trang web (Shift+Click để mở trong Tùy chọn)",
+    openInOptionsTip: "Mở Quy tắc trang web trong Tùy chọn",
+    openRulesTip: "Cấu hình quy tắc cho trang này",
+    optionsDesc:
+      "Tắt toàn bộ Browse Assist hoặc từng tính năng riêng lẻ theo tên miền hoặc mẫu URL wildcard (*).",
+    currentSite: "Trang hiện tại",
+    pauseAllOnSite: "Tạm dừng tất cả",
+    quickExcludeDesc: "Nhấn vào tính năng bên dưới để tắt riêng trên tên miền này:",
+    pause: "Tạm dừng",
+    resume: "Tiếp tục",
+    pauseSiteTip: "Tạm dừng mọi tính năng trên {host}",
+    resumeSiteTip: "Bật lại các tính năng trên {host}",
+    statusPaused: "Đã tạm dừng",
+    statusExcludedCount: "Tắt {count}",
+    addRuleTitle: "Thêm quy tắc",
+    wildcardHint: "Hỗ trợ ký tự đại diện *",
+    patternPlaceholder: "figma.com, *.google.com, docs.google.com/app/*",
+    scopeAll: "Tất cả tính năng",
+    scopeSelected: "Chọn lọc",
+    addButton: "Thêm",
+    invalidPattern: "Vui lòng nhập tên miền hoặc mẫu URL hợp lệ (không chỉ là *).",
+    selectAtLeastOne: "Hãy chọn ít nhất một tính năng để loại trừ.",
+    savedRulesTitle: "Quy tắc đã lưu",
+    emptyTitle: "Chưa có quy tắc nào",
+    emptyDesc:
+      "Thêm tên miền (figma.com) hoặc mẫu URL wildcard (docs.google.com/spreadsheets/*) để tắt tính năng khi cần.",
+    matchesThisTab: "Tab hiện tại",
+    editTip: "Sửa quy tắc",
+    deleteTip: "Xóa quy tắc",
+    save: "Lưu"
+  },
   features: {
     allowRightClick: {
       title: "Cho phép chuột phải",

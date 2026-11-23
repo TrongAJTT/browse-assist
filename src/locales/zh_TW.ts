@@ -288,6 +288,39 @@ export const zh_TW: TranslationDict = {
       search: "在 超級拖曳 時使用預設搜尋引擎搜尋選取文字。"
     }
   },
+  siteRules: {
+    title: "網站規則",
+    appBarTip: "網站規則 (Shift+點擊在選項頁開啟)",
+    openInOptionsTip: "在選項頁開啟網站規則",
+    openRulesTip: "設定目前網站規則",
+    optionsDesc:
+      "在符合的網域或萬用字元 (*) 網址上停用 Browse Assist 或特定功能。",
+    currentSite: "目前網站",
+    pauseAllOnSite: "全部暫停",
+    quickExcludeDesc: "點擊下方功能以在此網域上單獨停用：",
+    pause: "暫停",
+    resume: "恢復",
+    pauseSiteTip: "在 {host} 上暫停所有功能",
+    resumeSiteTip: "在 {host} 上恢復功能",
+    statusPaused: "已暫停",
+    statusExcludedCount: "已排除 {count} 項",
+    addRuleTitle: "新增規則",
+    wildcardHint: "支援 * 萬用字元",
+    patternPlaceholder: "figma.com, *.google.com, docs.google.com/app/*",
+    scopeAll: "全部功能",
+    scopeSelected: "指定功能",
+    addButton: "新增",
+    invalidPattern: "請輸入有效的網域或萬用字元 URL（不可僅輸入 *）。",
+    selectAtLeastOne: "請至少選擇一個要排除的功能。",
+    savedRulesTitle: "已儲存規則",
+    emptyTitle: "尚無網站規則",
+    emptyDesc:
+      "新增網域 (figma.com) 或萬用字元 URL (docs.google.com/spreadsheets/*) 以在特定網頁停用功能。",
+    matchesThisTab: "目前分頁",
+    editTip: "編輯規則",
+    deleteTip: "刪除規則",
+    save: "儲存"
+  },
   features: {
     allowRightClick: {
       title: "允許右鍵",

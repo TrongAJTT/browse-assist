@@ -5,6 +5,7 @@ import {
   ChevronRight,
   ExternalLink,
   Info,
+  Shield,
   Sliders,
   Trash2,
   X
@@ -15,6 +16,7 @@ import { useStorage } from "@plasmohq/storage/hook"
 
 import { GlobalDialogHost } from "~components/GlobalDialogHost"
 import { ShortcutBadge } from "~components/ShortcutBadge"
+import { SiteRulesManager } from "~components/SiteRulesManager"
 import { Switch } from "~components/Switch"
 import { AppIcon } from "~core/assets"
 import { isColorPickerSupported } from "~core/browserDetect"
@@ -27,10 +29,12 @@ import { openBrowserShortcutsPage } from "~core/shortcutsHelper"
 import { clearAllExtensionData } from "~core/storage"
 import {
   DEFAULT_SETTINGS,
+  DEFAULT_SITE_RULES,
   STORAGE_KEYS,
   getFeatureSettingsView,
   type FeatureKey,
-  type FeatureSettings
+  type FeatureSettings,
+  type SiteRule
 } from "~core/types"
 import { useI18n } from "~core/useI18n"
 
@@ -46,6 +50,20 @@ function OptionsPage() {
     STORAGE_KEYS.SETTINGS,
     DEFAULT_SETTINGS
   )
+  const [siteRules, setSiteRules] = useStorage<SiteRule[]>(
+    STORAGE_KEYS.SITE_RULES,
+    DEFAULT_SITE_RULES
+  )
+
+  useEffect(() => {
+    if (
+      typeof window !== "undefined" &&
+      window.location.hash === "#site-rules"
+    ) {
+      const target = document.getElementById("site-rules")
+      target?.scrollIntoView({ behavior: "smooth", block: "start" })
+    }
+  }, [])
   const [commands, setCommands] = useState<Record<string, string>>({})
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [isClearing, setIsClearing] = useState(false)
@@ -598,6 +616,29 @@ function OptionsPage() {
               </tbody>
             </table>
           </div>
+        </section>
+
+        {/* Per-Site Rules & Exclusions */}
+        <section id="site-rules" className="mt-10 space-y-4 scroll-mt-6">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <Shield className="w-4 h-4 text-accent" />
+              <h2 className="text-base font-semibold text-content-primary">
+                {t("siteRules.title")}
+              </h2>
+            </div>
+            <p className="text-xs text-content-muted leading-relaxed">
+              {t("siteRules.optionsDesc")}
+            </p>
+          </div>
+
+          <SiteRulesManager
+            variant="options"
+            rules={siteRules ?? DEFAULT_SITE_RULES}
+            onChangeRules={(updater) =>
+              setSiteRules((prev) => updater(prev ?? DEFAULT_SITE_RULES))
+            }
+          />
         </section>
 
         {/* Storage Management & Danger Zone */}

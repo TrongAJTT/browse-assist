@@ -300,6 +300,39 @@ export const fr: TranslationDict = {
         "Rechercher le texte sélectionné avec le moteur par défaut via Super glisser-déposer."
     }
   },
+  siteRules: {
+    title: "Règles de site",
+    appBarTip: "Règles de site (Maj+Clic pour ouvrir dans Options)",
+    openInOptionsTip: "Ouvrir les règles de site dans les Options",
+    openRulesTip: "Configurer les règles pour ce site",
+    optionsDesc:
+      "Désactivez Browse Assist ou certaines fonctionnalités sur des domaines ou URLs avec joker (*).",
+    currentSite: "Site actuel",
+    pauseAllOnSite: "Tout suspendre",
+    quickExcludeDesc: "Cliquez sur une fonctionnalité pour la désactiver sur ce domaine :",
+    pause: "Suspendre",
+    resume: "Reprendre",
+    pauseSiteTip: "Suspendre toutes les fonctionnalités sur {host}",
+    resumeSiteTip: "Reprendre les fonctionnalités sur {host}",
+    statusPaused: "Suspendu",
+    statusExcludedCount: "{count} exclue(s)",
+    addRuleTitle: "Ajouter une règle",
+    wildcardHint: "Prend en charge *",
+    patternPlaceholder: "figma.com, *.google.com, docs.google.com/app/*",
+    scopeAll: "Toutes",
+    scopeSelected: "Sélection",
+    addButton: "Ajouter",
+    invalidPattern: "Saisissez un domaine ou modèle d'URL valide (pas uniquement *).",
+    selectAtLeastOne: "Sélectionnez au moins une fonctionnalité à exclure.",
+    savedRulesTitle: "Règles enregistrées",
+    emptyTitle: "Aucune règle de site",
+    emptyDesc:
+      "Ajoutez un domaine (figma.com) ou une URL avec joker (docs.google.com/spreadsheets/*) pour désactiver des fonctionnalités.",
+    matchesThisTab: "Cet onglet",
+    editTip: "Modifier la règle",
+    deleteTip: "Supprimer la règle",
+    save: "Enregistrer"
+  },
   features: {
     allowRightClick: {
       title: "Autoriser le clic droit",

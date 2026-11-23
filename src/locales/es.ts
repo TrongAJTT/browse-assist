@@ -299,6 +299,39 @@ export const es: TranslationDict = {
         "Buscar texto seleccionado con el buscador predeterminado en Súper Arrastre."
     }
   },
+  siteRules: {
+    title: "Reglas de sitio",
+    appBarTip: "Reglas de sitio (Mayús+Clic para abrir en Opciones)",
+    openInOptionsTip: "Abrir Reglas de sitio en Opciones",
+    openRulesTip: "Configurar reglas para este sitio",
+    optionsDesc:
+      "Desactiva Browse Assist o funciones específicas en dominios o URLs con comodín (*).",
+    currentSite: "Sitio actual",
+    pauseAllOnSite: "Pausar todo",
+    quickExcludeDesc: "Haz clic en una función para desactivarla en este dominio:",
+    pause: "Pausar",
+    resume: "Reanudar",
+    pauseSiteTip: "Pausar todas las funciones en {host}",
+    resumeSiteTip: "Reanudar funciones en {host}",
+    statusPaused: "En pausa",
+    statusExcludedCount: "{count} excluidas",
+    addRuleTitle: "Añadir regla",
+    wildcardHint: "Admite comodín *",
+    patternPlaceholder: "figma.com, *.google.com, docs.google.com/app/*",
+    scopeAll: "Todas",
+    scopeSelected: "Seleccionadas",
+    addButton: "Añadir",
+    invalidPattern: "Introduce un dominio o patrón URL válido (no solo *).",
+    selectAtLeastOne: "Selecciona al menos una función para excluir.",
+    savedRulesTitle: "Reglas guardadas",
+    emptyTitle: "Aún no hay reglas de sitio",
+    emptyDesc:
+      "Añade un dominio (figma.com) o URL con comodín (docs.google.com/spreadsheets/*) para desactivar funciones donde sea necesario.",
+    matchesThisTab: "Esta pestaña",
+    editTip: "Editar regla",
+    deleteTip: "Eliminar regla",
+    save: "Guardar"
+  },
   features: {
     allowRightClick: {
       title: "Permitir clic derecho",

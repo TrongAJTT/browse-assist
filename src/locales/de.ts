@@ -300,6 +300,39 @@ export const de: TranslationDict = {
         "Markierten Text beim Super-Ziehen mit der Standardsuchmaschine suchen."
     }
   },
+  siteRules: {
+    title: "Website-Regeln",
+    appBarTip: "Website-Regeln (Umschalt+Klick für Optionen)",
+    openInOptionsTip: "Website-Regeln in den Optionen öffnen",
+    openRulesTip: "Regeln für diese Website konfigurieren",
+    optionsDesc:
+      "Browse Assist oder einzelne Funktionen für bestimmte Domains oder Platzhalter-URLs (*) deaktivieren.",
+    currentSite: "Aktuelle Website",
+    pauseAllOnSite: "Alle pausieren",
+    quickExcludeDesc: "Funktion anklicken, um sie auf dieser Domain zu deaktivieren:",
+    pause: "Pausieren",
+    resume: "Fortsetzen",
+    pauseSiteTip: "Alle Funktionen auf {host} pausieren",
+    resumeSiteTip: "Funktionen auf {host} fortsetzen",
+    statusPaused: "Pausiert",
+    statusExcludedCount: "{count} ausgenommen",
+    addRuleTitle: "Regel hinzufügen",
+    wildcardHint: "Unterstützt *-Platzhalter",
+    patternPlaceholder: "figma.com, *.google.com, docs.google.com/app/*",
+    scopeAll: "Alle Funktionen",
+    scopeSelected: "Ausgewählt",
+    addButton: "Hinzufügen",
+    invalidPattern: "Gültige Domain oder URL mit Platzhalter eingeben (nicht nur *).",
+    selectAtLeastOne: "Mindestens eine Funktion auswählen.",
+    savedRulesTitle: "Gespeicherte Regeln",
+    emptyTitle: "Noch keine Website-Regeln",
+    emptyDesc:
+      "Domain (figma.com) oder Platzhalter-URL (docs.google.com/spreadsheets/*) hinzufügen, um Funktionen gezielt zu deaktivieren.",
+    matchesThisTab: "Dieser Tab",
+    editTip: "Regel bearbeiten",
+    deleteTip: "Regel löschen",
+    save: "Speichern"
+  },
   features: {
     allowRightClick: {
       title: "Rechtsklick erlauben",

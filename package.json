@@ -62,6 +62,7 @@
     "short_name": "Browse Assist",
     "permissions": [
       "storage",
+      "activeTab",
       "contextMenus",
       "clipboardWrite",
       "search"

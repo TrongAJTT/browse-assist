@@ -288,6 +288,39 @@ export const zh_CN: TranslationDict = {
       search: "在 超级拖拽 时使用默认搜索引擎搜索选中文本。"
     }
   },
+  siteRules: {
+    title: "站点规则",
+    appBarTip: "站点规则 (Shift+点击在选项页打开)",
+    openInOptionsTip: "在选项页打开站点规则",
+    openRulesTip: "配置当前站点规则",
+    optionsDesc:
+      "在匹配的域名或通配符 (*) 网址上禁用 Browse Assist 或特定功能。",
+    currentSite: "当前站点",
+    pauseAllOnSite: "全部暂停",
+    quickExcludeDesc: "点击下方功能以在此域名上单独禁用：",
+    pause: "暂停",
+    resume: "恢复",
+    pauseSiteTip: "在 {host} 上暂停所有功能",
+    resumeSiteTip: "在 {host} 上恢复功能",
+    statusPaused: "已暂停",
+    statusExcludedCount: "已排除 {count} 项",
+    addRuleTitle: "添加规则",
+    wildcardHint: "支持 * 通配符",
+    patternPlaceholder: "figma.com, *.google.com, docs.google.com/app/*",
+    scopeAll: "全部功能",
+    scopeSelected: "指定功能",
+    addButton: "添加",
+    invalidPattern: "请输入有效的域名或通配符 URL（不能仅输入 *）。",
+    selectAtLeastOne: "请至少选择一个要排除的功能。",
+    savedRulesTitle: "已保存规则",
+    emptyTitle: "暂无站点规则",
+    emptyDesc:
+      "添加域名 (figma.com) 或通配符 URL (docs.google.com/spreadsheets/*) 以在特定网页禁用功能。",
+    matchesThisTab: "当前标签",
+    editTip: "编辑规则",
+    deleteTip: "删除规则",
+    save: "保存"
+  },
   features: {
     allowRightClick: {
       title: "允许右键",

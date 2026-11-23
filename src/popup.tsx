@@ -10,6 +10,7 @@ import {
   QrCode,
   Search,
   Settings as SettingsIcon,
+  Shield,
   X
 } from "lucide-react"
 import { Fragment, useEffect, useMemo, useRef, useState } from "react"
@@ -18,8 +19,11 @@ import { Storage } from "@plasmohq/storage"
 import { useStorage } from "@plasmohq/storage/hook"
 
 import { AboutView } from "~components/AboutView"
+import { CurrentSiteBar } from "~components/CurrentSiteBar"
 import { GlobalDialogHost } from "~components/GlobalDialogHost"
 import { PreferencesSettingsView } from "~components/PreferencesSettingsView"
+import { SiteRulesManager } from "~components/SiteRulesManager"
+import { SubSettingsLayout } from "~components/SubSettingsLayout"
 import { AppIcon } from "~core/assets"
 import { isColorPickerSupported } from "~core/browserDetect"
 import { DONATE_OPTIONS } from "~core/constants"
@@ -31,20 +35,28 @@ import {
 } from "~core/featureCatalog"
 import {
   MESSAGE_TYPES,
+  getActiveTab,
   sendToBackground
 } from "~core/messaging"
+import {
+  extractHostname,
+  getUrlExclusionSummary,
+  togglePauseSiteRule
+} from "~core/siteRules"
 import { useI18n } from "~core/useI18n"
 import { ViewModeContext } from "~core/viewModeContext"
 import {
   DEFAULT_FEATURE_LAYOUT_CONFIG,
   DEFAULT_POPUP_NAVIGATION_CONFIG,
   DEFAULT_SETTINGS,
+  DEFAULT_SITE_RULES,
   STORAGE_KEYS,
   normalizeFeatureHidden,
   normalizeFeatureOrder,
   type ActiveView,
   type FeatureKey,
-  type FeatureSettings
+  type FeatureSettings,
+  type SiteRule
 } from "~core/types"
 import { AllowRightClickToggle } from "~features/allow-right-click/Toggle"
 import { ColorPickerSettingsView } from "~features/color-picker/SettingsView"
@@ -103,6 +115,44 @@ function IndexPopup() {
     STORAGE_KEYS.SETTINGS,
     DEFAULT_SETTINGS
   )
+  const [siteRules, setSiteRules] = useStorage<SiteRule[]>(
+    STORAGE_KEYS.SITE_RULES,
+    DEFAULT_SITE_RULES
+  )
+  const [currentTabUrl, setCurrentTabUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    getActiveTab().then((tab) => {
+      if (tab?.url) {
+        setCurrentTabUrl(tab.url)
+      }
+    })
+  }, [])
+
+  const resolvedSiteRules = siteRules ?? DEFAULT_SITE_RULES
+  const currentHostname = useMemo(
+    () => (currentTabUrl ? extractHostname(currentTabUrl) : null),
+    [currentTabUrl]
+  )
+  const currentSiteSummary = useMemo(() => {
+    if (!currentTabUrl) {
+      return { isFullyPaused: false, blockedFeatures: new Set<FeatureKey>() }
+    }
+    return getUrlExclusionSummary(currentTabUrl, resolvedSiteRules)
+  }, [currentTabUrl, resolvedSiteRules])
+
+  const openSiteRulesInOptions = () => {
+    if (
+      typeof chrome !== "undefined" &&
+      chrome.runtime?.getURL &&
+      chrome.tabs?.create
+    ) {
+      chrome.tabs.create({
+        url: chrome.runtime.getURL("options.html#site-rules")
+      })
+      window.close()
+    }
+  }
 
   const popupNav = settings?.popupNavigation ?? DEFAULT_POPUP_NAVIGATION_CONFIG
   const navRef = useRef(popupNav)
@@ -372,8 +422,37 @@ function IndexPopup() {
           </div>
         </div>
 
-        {/* Action icons: Preferences, About & Donate */}
+        {/* Action icons: Site Rules, Preferences, About & Donate */}
         <div className="flex items-center gap-1">
+          {/* Site Rules Button (Click: Popup view, Shift+Click: Options #site-rules) */}
+          <button
+            type="button"
+            title={t("siteRules.appBarTip")}
+            onClick={(e) => {
+              if (e.shiftKey) {
+                openSiteRulesInOptions()
+                return
+              }
+              setCurrentView("site-rules")
+            }}
+            className={`relative p-1.5 rounded-lg transition-all focus:outline-none ${
+              currentView === "site-rules"
+                ? "bg-accent-subtle text-accent ring-1 ring-accent-glow"
+                : "text-content-muted hover:text-content-primary hover:bg-app-surface active:scale-95"
+            }`}>
+            <Shield className="w-4 h-4" />
+            {(currentSiteSummary.isFullyPaused ||
+              currentSiteSummary.blockedFeatures.size > 0) && (
+              <span
+                className={`absolute top-1 right-1 w-1.5 h-1.5 rounded-full ${
+                  currentSiteSummary.isFullyPaused
+                    ? "bg-rose-400"
+                    : "bg-amber-400"
+                }`}
+              />
+            )}
+          </button>
+
           {/* Preferences / Settings Button */}
           <button
             type="button"
@@ -481,6 +560,23 @@ function IndexPopup() {
 
         {currentView === "main" ? (
           <div>
+            {currentHostname && (
+              <CurrentSiteBar
+                hostname={currentHostname}
+                isFullyPaused={currentSiteSummary.isFullyPaused}
+                blockedCount={currentSiteSummary.blockedFeatures.size}
+                onTogglePause={() =>
+                  setSiteRules((prev) =>
+                    togglePauseSiteRule(
+                      prev ?? DEFAULT_SITE_RULES,
+                      currentHostname
+                    )
+                  )
+                }
+                onOpenRules={() => setCurrentView("site-rules")}
+              />
+            )}
+
             {/* Search & Category Filter Bar (Optional, off by default) */}
             {showSearchAndFilter && (
               <div className="mb-2.5 space-y-2">
@@ -598,6 +694,28 @@ function IndexPopup() {
           <QuickHubSettingsView onBack={() => setCurrentView("main")} />
         ) : currentView === "image-hover-preview-settings" ? (
           <ImageHoverPreviewSettingsView onBack={() => setCurrentView("main")} />
+        ) : currentView === "site-rules" ? (
+          <SubSettingsLayout
+            title={t("siteRules.title")}
+            onBack={() => setCurrentView("main")}
+            rightActions={
+              <button
+                type="button"
+                onClick={openSiteRulesInOptions}
+                title={t("siteRules.openInOptionsTip")}
+                className="p-1.5 rounded-lg text-content-muted hover:text-content-primary hover:bg-app-surface transition-colors">
+                <ExternalLink className="w-3.5 h-3.5" />
+              </button>
+            }>
+            <SiteRulesManager
+              variant="popup"
+              rules={resolvedSiteRules}
+              onChangeRules={(updater) =>
+                setSiteRules((prev) => updater(prev ?? DEFAULT_SITE_RULES))
+              }
+              currentUrl={currentTabUrl}
+            />
+          </SubSettingsLayout>
         ) : currentView === "preferences" ? (
           <PreferencesSettingsView onBack={() => setCurrentView("main")} />
         ) : (
