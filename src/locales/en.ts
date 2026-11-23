@@ -829,6 +829,7 @@ export const en = {
         animation: "Entrance Animation",
         animationDesc: "Motion effect when the preview card appears.",
         animZoom: "Zoom",
+        animMorph: "Morph",
         animFade: "Fade",
         animSlide: "Slide",
         animNone: "None",

@@ -811,6 +811,7 @@ export const ko: TranslationDict = {
         animation: "등장 애니메이션",
         animationDesc: "미리보기 카드가 나타날 때의 전환 효과.",
         animZoom: "확대",
+        animMorph: "모프",
         animFade: "페이드",
         animSlide: "슬라이드",
         animNone: "없음",

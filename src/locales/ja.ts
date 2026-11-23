@@ -822,6 +822,7 @@ export const ja: TranslationDict = {
         animation: "表示アニメーション",
         animationDesc: "プレビューカードが表示される際の動き。",
         animZoom: "ズーム",
+        animMorph: "モーフ",
         animFade: "フェード",
         animSlide: "スライド",
         animNone: "なし",

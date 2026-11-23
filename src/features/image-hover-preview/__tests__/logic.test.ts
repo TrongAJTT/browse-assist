@@ -207,4 +207,63 @@ describe("image-hover-preview content logic", () => {
     expect(style.textContent).toContain("@keyframes ihp-slide-in")
     expect(style.textContent).toContain("prefers-reduced-motion: reduce")
   })
+
+  it("plays FLIP morph animation for <img> targets and falls back to zoom for links", () => {
+    document.body.innerHTML = `
+      <img id="thumb" src="https://example.com/morph.jpg" />
+      <a id="imglink" href="https://example.com/link.jpg">Image Link</a>
+    `
+    const thumb = document.getElementById("thumb") as HTMLImageElement
+    thumb.getBoundingClientRect = () =>
+      ({ width: 100, height: 80, top: 40, left: 40 }) as DOMRect
+    const link = document.getElementById("imglink")!
+
+    activate({
+      ...DEFAULT_IMAGE_HOVER_PREVIEW_CONFIG,
+      delayMs: 0,
+      animation: "morph"
+    })
+
+    // 1) Hover <img>: invokes card.animate() with FLIP transform keyframes
+    thumb.dispatchEvent(
+      new MouseEvent("mouseover", {
+        bubbles: true,
+        shiftKey: true,
+        clientX: 90,
+        clientY: 80
+      })
+    )
+
+    const card = capturedShadowRoot!.querySelector(".ihp-card") as HTMLElement
+    const animateSpy = vi.fn().mockReturnValue({ cancel: vi.fn() })
+    card.animate = animateSpy
+
+    const previewImg = capturedShadowRoot!.querySelector(
+      ".ihp-img"
+    ) as HTMLImageElement
+    Object.defineProperty(previewImg, "naturalWidth", {
+      value: 800,
+      configurable: true
+    })
+    Object.defineProperty(previewImg, "naturalHeight", {
+      value: 600,
+      configurable: true
+    })
+    previewImg.onload?.(new Event("load"))
+
+    expect(card.dataset.animation).toBe("morph")
+    expect(animateSpy).toHaveBeenCalledTimes(1)
+    const [keyframes] = animateSpy.mock.calls[0]
+    expect(keyframes[0].transform).toContain("translate(")
+    expect(keyframes[0].transform).toContain("scale(")
+    expect(keyframes[1].transform).toBe("translate(0px, 0px) scale(1)")
+
+    // 2) Hover <a> text link: falls back to zoom
+    link.dispatchEvent(
+      new MouseEvent("mouseover", { bubbles: true, shiftKey: true })
+    )
+    previewImg.onload?.(new Event("load"))
+    expect(card.dataset.animation).toBe("zoom")
+    expect(animateSpy).toHaveBeenCalledTimes(1)
+  })
 })

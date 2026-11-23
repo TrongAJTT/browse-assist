@@ -52,6 +52,7 @@ export const ImageHoverPreviewSettingsView: React.FC<
 
   const animationOptions: SelectDropdownOption<ImageHoverPreviewAnimation>[] = [
     { id: "zoom", label: t("features.imageHoverPreview.settings.animZoom") },
+    { id: "morph", label: t("features.imageHoverPreview.settings.animMorph") },
     { id: "fade", label: t("features.imageHoverPreview.settings.animFade") },
     { id: "slide", label: t("features.imageHoverPreview.settings.animSlide") },
     { id: "none", label: t("features.imageHoverPreview.settings.animNone") }

@@ -769,6 +769,7 @@ export const zh_TW: TranslationDict = {
         animation: "進場動畫",
         animationDesc: "預覽卡片出現時的過渡效果。",
         animZoom: "縮放",
+        animMorph: "變形",
         animFade: "淡入",
         animSlide: "滑動",
         animNone: "無",

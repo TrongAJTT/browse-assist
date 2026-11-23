@@ -830,6 +830,7 @@ export const vi: TranslationDict = {
         animation: "Hiệu ứng xuất hiện",
         animationDesc: "Hiệu ứng chuyển động khi khung xem trước mở ra.",
         animZoom: "Phóng nhẹ",
+        animMorph: "Morph",
         animFade: "Mờ dần",
         animSlide: "Trượt nhẹ",
         animNone: "Tắt",

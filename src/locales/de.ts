@@ -834,6 +834,7 @@ export const de: TranslationDict = {
         animation: "Einblend-Animation",
         animationDesc: "Bewegungseffekt beim Einblenden der Vorschaukarte.",
         animZoom: "Zoom",
+        animMorph: "Morph",
         animFade: "Einblenden",
         animSlide: "Gleiten",
         animNone: "Keine",

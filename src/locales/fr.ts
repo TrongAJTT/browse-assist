@@ -831,6 +831,7 @@ export const fr: TranslationDict = {
         animation: "Animation d'entrée",
         animationDesc: "Effet de transition à l'apparition de l'aperçu.",
         animZoom: "Zoom",
+        animMorph: "Morph",
         animFade: "Fondu",
         animSlide: "Glissement",
         animNone: "Aucune",

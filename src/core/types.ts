@@ -549,7 +549,12 @@ export const DEFAULT_QUICK_HUB_CONFIG: QuickHubConfig = {
 }
 
 export type ImageHoverPreviewModifier = "shift" | "alt" | "ctrl"
-export type ImageHoverPreviewAnimation = "zoom" | "fade" | "slide" | "none"
+export type ImageHoverPreviewAnimation =
+  | "zoom"
+  | "morph"
+  | "fade"
+  | "slide"
+  | "none"
 
 export interface ImageHoverPreviewConfig {
   triggerModifier: ImageHoverPreviewModifier
