@@ -1,5 +1,6 @@
 import {
   Check,
+  ChevronDown,
   Globe,
   Pencil,
   Plus,
@@ -70,6 +71,9 @@ export const SiteRulesManager: React.FC<SiteRulesManagerProps> = ({
       ),
     []
   )
+
+  // Current-site per-feature drawer state (collapsed by default to keep popup compact)
+  const [isQuickExcludeOpen, setIsQuickExcludeOpen] = useState(false)
 
   // Add-rule modal & form state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
@@ -217,53 +221,79 @@ export const SiteRulesManager: React.FC<SiteRulesManagerProps> = ({
   const renderScopeSummary = (scope: SiteRuleScope) => {
     if (scope === "all") {
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-rose-500/15 text-rose-400 border border-rose-500/25">
+        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-500/15 text-rose-400 border border-rose-500/25">
           <ShieldOff className="w-2.5 h-2.5" />
           {t("siteRules.scopeAll")}
         </span>
       )
     }
 
+    const titles = scope.map((key) => getLocalizedFeatureMeta(key, t).title)
+    const maxVisible = isOptions ? 4 : 2
+    const visibleTitles = titles.slice(0, maxVisible)
+    const overflowCount = titles.length - visibleTitles.length
+    const fullTitleTooltip = overflowCount > 0 ? titles.join(", ") : undefined
+
     return (
-      <div className="flex flex-wrap gap-1">
-        {scope.map((key) => {
-          const meta = getLocalizedFeatureMeta(key, t)
-          return (
-            <span
-              key={key}
-              className="px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-app-elevated text-content-secondary border border-border-subtle">
-              {meta.title}
-            </span>
-          )
-        })}
+      <div
+        className="flex items-center gap-1 flex-wrap"
+        title={fullTitleTooltip}>
+        {visibleTitles.map((title, idx) => (
+          <span
+            key={scope[idx]}
+            className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-app-elevated text-content-secondary border border-border-subtle truncate max-w-[130px]">
+            {title}
+          </span>
+        ))}
+        {overflowCount > 0 && (
+          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-app-elevated text-content-muted border border-border-subtle">
+            +{overflowCount}
+          </span>
+        )}
       </div>
     )
   }
 
   return (
-    <div className={isOptions ? "space-y-5" : "space-y-4"}>
+    <div className={isOptions ? "space-y-4" : "space-y-3"}>
       {/* 1. Current Site Quick Controls (Popup when on http/https tab) */}
       {currentHostname && (
-        <div className="p-3 rounded-xl bg-app-surface border border-border-subtle space-y-3">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2 min-w-0">
+        <div className="rounded-xl bg-app-surface border border-border-subtle overflow-hidden">
+          <div className="px-3 py-2 flex items-center justify-between gap-2">
+            <button
+              type="button"
+              onClick={() => setIsQuickExcludeOpen((prev) => !prev)}
+              className="flex items-center gap-2 min-w-0 flex-1 text-left group focus:outline-none">
               <Globe className="w-4 h-4 text-accent shrink-0" />
-              <div className="min-w-0">
-                <div className="text-[11px] text-content-muted leading-none">
-                  {t("siteRules.currentSite")}
-                </div>
-                <div className="text-xs font-bold text-content-primary truncate mt-1">
-                  {currentHostname}
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <span className="text-xs font-bold text-content-primary truncate group-hover:text-accent transition-colors">
+                    {currentHostname}
+                  </span>
+                  {currentSummary.blockedFeatures.size > 0 &&
+                    !currentSummary.isFullyPaused && (
+                      <span className="badge-warning shrink-0">
+                        {t("siteRules.statusExcludedCount", {
+                          count: currentSummary.blockedFeatures.size
+                        })}
+                      </span>
+                    )}
                 </div>
               </div>
-            </div>
+              <ChevronDown
+                className={`w-3.5 h-3.5 text-content-muted shrink-0 transition-transform duration-150 ${
+                  isQuickExcludeOpen ? "rotate-180" : ""
+                }`}
+              />
+            </button>
 
-            <div className="flex items-center gap-2 shrink-0">
-              <span className="text-[11px] font-medium text-content-secondary">
+            <div className="flex items-center gap-1.5 pl-2 border-l border-border-divider shrink-0">
+              <span className="text-[10px] font-medium text-content-muted">
                 {t("siteRules.pauseAllOnSite")}
               </span>
               <Switch
                 checked={currentSummary.isFullyPaused}
+                size="sm"
                 onChange={() =>
                   onChangeRules((prev) =>
                     togglePauseSiteRule(prev, currentHostname)
@@ -274,39 +304,41 @@ export const SiteRulesManager: React.FC<SiteRulesManagerProps> = ({
             </div>
           </div>
 
-          <div className="pt-2 border-t border-border-divider space-y-2">
-            <p className="text-[11px] text-content-muted">
-              {t("siteRules.quickExcludeDesc")}
-            </p>
-            <div className="flex flex-wrap gap-1.5">
-              {ruleConfigurableFeatures.map((raw) => {
-                const meta = getLocalizedFeatureMeta(raw.key, t)
-                const isBlocked =
-                  currentSummary.isFullyPaused ||
-                  currentSummary.blockedFeatures.has(raw.key)
-                const IconComp = raw.icon
-                return (
-                  <button
-                    key={raw.key}
-                    type="button"
-                    disabled={currentSummary.isFullyPaused}
-                    onClick={() =>
-                      onChangeRules((prev) =>
-                        toggleFeatureOnSiteRule(prev, currentHostname, raw.key)
-                      )
-                    }
-                    className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-[11px] font-medium border transition-all disabled:opacity-50 ${
-                      isBlocked
-                        ? "bg-rose-500/15 border-rose-500/35 text-rose-400 line-through"
-                        : "bg-app-elevated border-border-subtle text-content-secondary hover:text-content-primary hover:border-accent/40"
-                    }`}>
-                    <IconComp className="w-3 h-3 shrink-0" />
-                    <span>{meta.title}</span>
-                  </button>
-                )
-              })}
+          {isQuickExcludeOpen && (
+            <div className="px-3 pb-2.5 pt-2 border-t border-border-divider space-y-1.5">
+              <p className="text-[10px] text-content-muted">
+                {t("siteRules.quickExcludeDesc")}
+              </p>
+              <div className="grid grid-cols-2 gap-1">
+                {ruleConfigurableFeatures.map((raw) => {
+                  const meta = getLocalizedFeatureMeta(raw.key, t)
+                  const isBlocked =
+                    currentSummary.isFullyPaused ||
+                    currentSummary.blockedFeatures.has(raw.key)
+                  const IconComp = raw.icon
+                  return (
+                    <button
+                      key={raw.key}
+                      type="button"
+                      disabled={currentSummary.isFullyPaused}
+                      onClick={() =>
+                        onChangeRules((prev) =>
+                          toggleFeatureOnSiteRule(prev, currentHostname, raw.key)
+                        )
+                      }
+                      className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10.5px] font-medium border transition-all disabled:opacity-50 min-w-0 ${
+                        isBlocked
+                          ? "bg-rose-500/15 border-rose-500/35 text-rose-400 line-through"
+                          : "bg-app-elevated border-border-subtle text-content-secondary hover:text-content-primary hover:border-accent/40"
+                      }`}>
+                      <IconComp className="w-3 h-3 shrink-0" />
+                      <span className="truncate">{meta.title}</span>
+                    </button>
+                  )
+                })}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
 
@@ -342,7 +374,7 @@ export const SiteRulesManager: React.FC<SiteRulesManagerProps> = ({
             </p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="rounded-xl bg-app-surface border border-border-subtle divide-y divide-border-divider overflow-hidden">
             {rules.map((rule) => {
               const isMatchingCurrent = Boolean(
                 currentUrl &&
@@ -354,10 +386,10 @@ export const SiteRulesManager: React.FC<SiteRulesManagerProps> = ({
               return (
                 <div
                   key={rule.id}
-                  className={`p-3 rounded-xl border transition-colors ${
+                  className={`px-3 py-2 transition-colors ${
                     rule.enabled
-                      ? "bg-app-surface border-border-subtle"
-                      : "bg-app-surface/50 border-border-divider opacity-70"
+                      ? "hover:bg-app-surface-hover/40"
+                      : "opacity-60 bg-app-surface/40"
                   }`}>
                   {isEditing ? (
                     <div className="space-y-2.5">
@@ -450,14 +482,14 @@ export const SiteRulesManager: React.FC<SiteRulesManagerProps> = ({
                       </div>
                     </div>
                   ) : (
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0 flex-1 space-y-1.5">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-xs font-mono font-semibold text-content-primary break-all">
+                    <div className="flex items-center justify-between gap-2.5">
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span className="text-xs font-mono font-semibold text-content-primary truncate">
                             {rule.pattern}
                           </span>
                           {isMatchingCurrent && (
-                            <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-accent-subtle text-accent border border-accent/30">
+                            <span className="badge-accent shrink-0">
                               {t("siteRules.matchesThisTab")}
                             </span>
                           )}
@@ -465,12 +497,12 @@ export const SiteRulesManager: React.FC<SiteRulesManagerProps> = ({
                         {renderScopeSummary(rule.scope)}
                       </div>
 
-                      <div className="flex items-center gap-1.5 shrink-0">
+                      <div className="flex items-center gap-1 shrink-0">
                         <button
                           type="button"
                           onClick={() => startEditing(rule)}
                           title={t("siteRules.editTip")}
-                          className="p-1.5 rounded-lg text-content-muted hover:text-content-primary hover:bg-app-elevated transition-colors">
+                          className="p-1 rounded-md text-content-muted hover:text-content-primary hover:bg-app-elevated transition-colors">
                           <Pencil className="w-3.5 h-3.5" />
                         </button>
                         <button
@@ -481,11 +513,12 @@ export const SiteRulesManager: React.FC<SiteRulesManagerProps> = ({
                             )
                           }
                           title={t("siteRules.deleteTip")}
-                          className="p-1.5 rounded-lg text-content-muted hover:text-rose-400 hover:bg-rose-500/10 transition-colors">
+                          className="p-1 rounded-md text-content-muted hover:text-rose-400 hover:bg-rose-500/10 transition-colors">
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                         <Switch
                           checked={rule.enabled}
+                          size="sm"
                           onChange={(enabled) =>
                             onChangeRules((prev) =>
                               prev.map((r) =>

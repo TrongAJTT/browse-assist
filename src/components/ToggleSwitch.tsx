@@ -160,7 +160,7 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
       type="button"
       onClick={handleOpenSiteRules}
       title={t("siteRules.siteOffTip", { host: hostname ?? "" })}
-      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-500/15 text-amber-400 border border-amber-500/35 hover:bg-amber-500/25 transition-colors shrink-0 max-w-full">
+      className="badge-warning hover:opacity-85 transition-opacity shrink-0 max-w-full">
       <ShieldOff className="w-2.5 h-2.5 shrink-0" />
       <span className="truncate">{t("siteRules.siteOffBadge")}</span>
     </button>
