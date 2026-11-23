@@ -831,6 +831,12 @@ export const de: TranslationDict = {
         instant: "Sofort",
         displaySize: "Anzeigegröße",
         maxViewportSize: "Maximale Viewport-Größe",
+        animation: "Einblend-Animation",
+        animationDesc: "Bewegungseffekt beim Einblenden der Vorschaukarte.",
+        animZoom: "Zoom",
+        animFade: "Einblenden",
+        animSlide: "Gleiten",
+        animNone: "Keine",
         behavior: "Verhalten",
         previewImageLinks: "Bildlinks in Vorschau anzeigen",
         previewImageLinksDesc:

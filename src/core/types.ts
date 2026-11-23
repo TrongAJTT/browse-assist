@@ -549,10 +549,12 @@ export const DEFAULT_QUICK_HUB_CONFIG: QuickHubConfig = {
 }
 
 export type ImageHoverPreviewModifier = "shift" | "alt" | "ctrl"
+export type ImageHoverPreviewAnimation = "zoom" | "fade" | "slide" | "none"
 
 export interface ImageHoverPreviewConfig {
   triggerModifier: ImageHoverPreviewModifier
   delayMs: number
+  animation: ImageHoverPreviewAnimation
   previewImageLinks: boolean
   showDimensions: boolean
   maxSizePercent: number
@@ -561,6 +563,7 @@ export interface ImageHoverPreviewConfig {
 export const DEFAULT_IMAGE_HOVER_PREVIEW_CONFIG: ImageHoverPreviewConfig = {
   triggerModifier: "shift",
   delayMs: 250,
+  animation: "zoom",
   previewImageLinks: true,
   showDimensions: true,
   maxSizePercent: 65

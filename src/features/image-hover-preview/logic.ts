@@ -105,6 +105,34 @@ function ensureShadowDOM(): void {
       margin: 0;
       padding: 0;
     }
+    @keyframes ihp-zoom-in {
+      from {
+        opacity: 0;
+        transform: scale(0.93);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    @keyframes ihp-fade-in {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+    @keyframes ihp-slide-in {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
     .ihp-card {
       position: fixed;
       display: none;
@@ -117,14 +145,26 @@ function ensureShadowDOM(): void {
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       pointer-events: none;
-      opacity: 0;
-      transform: scale(0.96);
-      transition: opacity 0.14s ease-out, transform 0.14s ease-out;
     }
     .ihp-card.ihp-visible {
       display: flex;
-      opacity: 1;
-      transform: scale(1);
+    }
+    .ihp-card.ihp-visible[data-animation="zoom"] {
+      animation: ihp-zoom-in 0.16s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .ihp-card.ihp-visible[data-animation="fade"] {
+      animation: ihp-fade-in 0.14s ease-out both;
+    }
+    .ihp-card.ihp-visible[data-animation="slide"] {
+      animation: ihp-slide-in 0.16s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .ihp-card.ihp-visible[data-animation="none"] {
+      animation: none;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .ihp-card.ihp-visible {
+        animation: none !important;
+      }
     }
     .ihp-img {
       display: block;
@@ -235,6 +275,8 @@ function showPreviewFor(src: string, targetEl: HTMLElement): void {
     } else {
       currentBadge.style.display = "none"
     }
+    currentCard.dataset.animation =
+      currentConfig.animation ?? DEFAULT_IMAGE_HOVER_PREVIEW_CONFIG.animation
     currentCard.classList.add("ihp-visible")
   }
 

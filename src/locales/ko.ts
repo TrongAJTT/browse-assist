@@ -808,6 +808,12 @@ export const ko: TranslationDict = {
         instant: "즉시",
         displaySize: "표시 크기",
         maxViewportSize: "최대 뷰포트 크기",
+        animation: "등장 애니메이션",
+        animationDesc: "미리보기 카드가 나타날 때의 전환 효과.",
+        animZoom: "확대",
+        animFade: "페이드",
+        animSlide: "슬라이드",
+        animNone: "없음",
         behavior: "동작",
         previewImageLinks: "이미지 링크 미리보기",
         previewImageLinksDesc:

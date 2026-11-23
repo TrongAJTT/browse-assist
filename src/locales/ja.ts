@@ -819,6 +819,12 @@ export const ja: TranslationDict = {
         instant: "即時",
         displaySize: "表示サイズ",
         maxViewportSize: "最大ビューポートサイズ",
+        animation: "表示アニメーション",
+        animationDesc: "プレビューカードが表示される際の動き。",
+        animZoom: "ズーム",
+        animFade: "フェード",
+        animSlide: "スライド",
+        animNone: "なし",
         behavior: "動作",
         previewImageLinks: "画像リンクをプレビュー",
         previewImageLinksDesc:

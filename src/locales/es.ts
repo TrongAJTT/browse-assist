@@ -828,6 +828,12 @@ export const es: TranslationDict = {
         instant: "Instantáneo",
         displaySize: "Tamaño de visualización",
         maxViewportSize: "Tamaño máximo en pantalla",
+        animation: "Animación de entrada",
+        animationDesc: "Efecto visual al aparecer la vista previa.",
+        animZoom: "Zoom",
+        animFade: "Desvanecer",
+        animSlide: "Deslizar",
+        animNone: "Ninguna",
         behavior: "Comportamiento",
         previewImageLinks: "Previsualizar enlaces de imagen",
         previewImageLinksDesc:

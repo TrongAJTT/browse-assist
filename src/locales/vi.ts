@@ -827,6 +827,12 @@ export const vi: TranslationDict = {
         instant: "Tức thì",
         displaySize: "Kích thước hiển thị",
         maxViewportSize: "Kích thước tối đa theo màn hình",
+        animation: "Hiệu ứng xuất hiện",
+        animationDesc: "Hiệu ứng chuyển động khi khung xem trước mở ra.",
+        animZoom: "Phóng nhẹ",
+        animFade: "Mờ dần",
+        animSlide: "Trượt nhẹ",
+        animNone: "Tắt",
         behavior: "Hành vi",
         previewImageLinks: "Xem trước liên kết ảnh",
         previewImageLinksDesc:

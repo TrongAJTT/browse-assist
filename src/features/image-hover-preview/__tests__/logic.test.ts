@@ -168,4 +168,43 @@ describe("image-hover-preview content logic", () => {
     )
     expect(card.classList.contains("ihp-visible")).toBe(false)
   })
+
+  it("applies configured entrance animation to the preview card", () => {
+    document.body.innerHTML = `<img id="thumb" src="https://example.com/anim.jpg" />`
+    const thumb = document.getElementById("thumb") as HTMLImageElement
+    thumb.getBoundingClientRect = () =>
+      ({ width: 80, height: 80, top: 10, left: 10 }) as DOMRect
+
+    activate({
+      ...DEFAULT_IMAGE_HOVER_PREVIEW_CONFIG,
+      delayMs: 0,
+      animation: "slide"
+    })
+
+    thumb.dispatchEvent(
+      new MouseEvent("mouseover", { bubbles: true, shiftKey: true })
+    )
+
+    const previewImg = capturedShadowRoot!.querySelector(
+      ".ihp-img"
+    ) as HTMLImageElement
+    Object.defineProperty(previewImg, "naturalWidth", {
+      value: 600,
+      configurable: true
+    })
+    Object.defineProperty(previewImg, "naturalHeight", {
+      value: 400,
+      configurable: true
+    })
+    previewImg.onload?.(new Event("load"))
+
+    const card = capturedShadowRoot!.querySelector(".ihp-card") as HTMLElement
+    const style = capturedShadowRoot!.querySelector("style")!
+    expect(card.classList.contains("ihp-visible")).toBe(true)
+    expect(card.dataset.animation).toBe("slide")
+    expect(style.textContent).toContain("@keyframes ihp-zoom-in")
+    expect(style.textContent).toContain("@keyframes ihp-fade-in")
+    expect(style.textContent).toContain("@keyframes ihp-slide-in")
+    expect(style.textContent).toContain("prefers-reduced-motion: reduce")
+  })
 })

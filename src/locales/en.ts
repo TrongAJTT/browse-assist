@@ -826,6 +826,12 @@ export const en = {
         instant: "Instant",
         displaySize: "Display Size",
         maxViewportSize: "Max Viewport Size",
+        animation: "Entrance Animation",
+        animationDesc: "Motion effect when the preview card appears.",
+        animZoom: "Zoom",
+        animFade: "Fade",
+        animSlide: "Slide",
+        animNone: "None",
         behavior: "Behavior",
         previewImageLinks: "Preview Image Links",
         previewImageLinksDesc:
