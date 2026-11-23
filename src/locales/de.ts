@@ -331,6 +331,7 @@ export const de: TranslationDict = {
     invalidPattern: "Gültige Domain oder URL mit Platzhalter eingeben (nicht nur *).",
     selectAtLeastOne: "Mindestens eine Funktion auswählen.",
     savedRulesTitle: "Gespeicherte Regeln",
+    searchPlaceholder: "Regeln nach Domain oder Funktion suchen...",
     emptyTitle: "Noch keine Website-Regeln",
     emptyDesc:
       "Domain (figma.com) oder Platzhalter-URL (docs.google.com/spreadsheets/*) hinzufügen, um Funktionen gezielt zu deaktivieren.",

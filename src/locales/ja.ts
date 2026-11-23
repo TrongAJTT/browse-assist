@@ -330,6 +330,7 @@ export const ja: TranslationDict = {
     invalidPattern: "有効なドメインまたは URL パターンを入力してください (* のみ不可)。",
     selectAtLeastOne: "除外する機能を1つ以上選択してください。",
     savedRulesTitle: "保存済みのルール",
+    searchPlaceholder: "ドメインや機能名でルールを検索...",
     emptyTitle: "サイトルールはまだありません",
     emptyDesc:
       "ドメイン (figma.com) やワイルドカード URL (docs.google.com/spreadsheets/*) を追加して機能を個別に無効化できます。",

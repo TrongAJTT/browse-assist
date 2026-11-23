@@ -330,6 +330,7 @@ export const es: TranslationDict = {
     invalidPattern: "Introduce un dominio o patrón URL válido (no solo *).",
     selectAtLeastOne: "Selecciona al menos una función para excluir.",
     savedRulesTitle: "Reglas guardadas",
+    searchPlaceholder: "Buscar reglas por dominio o función...",
     emptyTitle: "Aún no hay reglas de sitio",
     emptyDesc:
       "Añade un dominio (figma.com) o URL con comodín (docs.google.com/spreadsheets/*) para desactivar funciones donde sea necesario.",

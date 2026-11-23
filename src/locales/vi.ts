@@ -330,6 +330,7 @@ export const vi: TranslationDict = {
     invalidPattern: "Vui lòng nhập tên miền hoặc mẫu URL hợp lệ (không chỉ là *).",
     selectAtLeastOne: "Hãy chọn ít nhất một tính năng để loại trừ.",
     savedRulesTitle: "Quy tắc đã lưu",
+    searchPlaceholder: "Tìm theo tên miền hoặc tính năng...",
     emptyTitle: "Chưa có quy tắc nào",
     emptyDesc:
       "Thêm tên miền (figma.com) hoặc mẫu URL wildcard (docs.google.com/spreadsheets/*) để tắt tính năng khi cần.",

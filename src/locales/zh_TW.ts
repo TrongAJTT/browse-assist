@@ -319,6 +319,7 @@ export const zh_TW: TranslationDict = {
     invalidPattern: "請輸入有效的網域或萬用字元 URL（不可僅輸入 *）。",
     selectAtLeastOne: "請至少選擇一個要排除的功能。",
     savedRulesTitle: "已儲存規則",
+    searchPlaceholder: "依網域或功能名稱搜尋規則...",
     emptyTitle: "尚無網站規則",
     emptyDesc:
       "新增網域 (figma.com) 或萬用字元 URL (docs.google.com/spreadsheets/*) 以在特定網頁停用功能。",

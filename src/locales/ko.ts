@@ -323,6 +323,7 @@ export const ko: TranslationDict = {
     invalidPattern: "유효한 도메인 또는 와일드카드 URL 패턴을 입력하세요(* 단독 불가).",
     selectAtLeastOne: "제외할 기능을 하나 이상 선택하세요.",
     savedRulesTitle: "저장된 규칙",
+    searchPlaceholder: "도메인 또는 기능으로 규칙 검색...",
     emptyTitle: "아직 사이트 규칙이 없습니다",
     emptyDesc:
       "도메인(figma.com) 또는 와일드카드 URL(docs.google.com/spreadsheets/*)을 추가해 필요한 사이트에서 기능을 끌 수 있습니다.",

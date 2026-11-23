@@ -331,6 +331,7 @@ export const fr: TranslationDict = {
     invalidPattern: "Saisissez un domaine ou modèle d'URL valide (pas uniquement *).",
     selectAtLeastOne: "Sélectionnez au moins une fonctionnalité à exclure.",
     savedRulesTitle: "Règles enregistrées",
+    searchPlaceholder: "Rechercher par domaine ou fonctionnalité...",
     emptyTitle: "Aucune règle de site",
     emptyDesc:
       "Ajoutez un domaine (figma.com) ou une URL avec joker (docs.google.com/spreadsheets/*) pour désactiver des fonctionnalités.",

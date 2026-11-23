@@ -319,6 +319,7 @@ export const zh_CN: TranslationDict = {
     invalidPattern: "请输入有效的域名或通配符 URL（不能仅输入 *）。",
     selectAtLeastOne: "请至少选择一个要排除的功能。",
     savedRulesTitle: "已保存规则",
+    searchPlaceholder: "按域名或功能名称搜索规则...",
     emptyTitle: "暂无站点规则",
     emptyDesc:
       "添加域名 (figma.com) 或通配符 URL (docs.google.com/spreadsheets/*) 以在特定网页禁用功能。",

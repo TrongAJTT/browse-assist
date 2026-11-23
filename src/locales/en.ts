@@ -330,6 +330,7 @@ export const en = {
     invalidPattern: "Enter a valid domain or wildcard URL pattern (not just *).",
     selectAtLeastOne: "Select at least one feature to exclude.",
     savedRulesTitle: "Saved Rules",
+    searchPlaceholder: "Search rules by domain or feature...",
     emptyTitle: "No site rules yet",
     emptyDesc:
       "Add a domain (figma.com) or wildcard URL (docs.google.com/spreadsheets/*) to disable features where needed.",
