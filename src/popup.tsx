@@ -19,7 +19,6 @@ import { Storage } from "@plasmohq/storage"
 import { useStorage } from "@plasmohq/storage/hook"
 
 import { AboutView } from "~components/AboutView"
-import { CurrentSiteBar } from "~components/CurrentSiteBar"
 import { GlobalDialogHost } from "~components/GlobalDialogHost"
 import { PreferencesSettingsView } from "~components/PreferencesSettingsView"
 import { SiteRulesManager } from "~components/SiteRulesManager"
@@ -38,11 +37,7 @@ import {
   getActiveTab,
   sendToBackground
 } from "~core/messaging"
-import {
-  extractHostname,
-  getUrlExclusionSummary,
-  togglePauseSiteRule
-} from "~core/siteRules"
+import { getUrlExclusionSummary } from "~core/siteRules"
 import { useI18n } from "~core/useI18n"
 import { ViewModeContext } from "~core/viewModeContext"
 import {
@@ -130,10 +125,6 @@ function IndexPopup() {
   }, [])
 
   const resolvedSiteRules = siteRules ?? DEFAULT_SITE_RULES
-  const currentHostname = useMemo(
-    () => (currentTabUrl ? extractHostname(currentTabUrl) : null),
-    [currentTabUrl]
-  )
   const currentSiteSummary = useMemo(() => {
     if (!currentTabUrl) {
       return { isFullyPaused: false, blockedFeatures: new Set<FeatureKey>() }
@@ -560,23 +551,6 @@ function IndexPopup() {
 
         {currentView === "main" ? (
           <div>
-            {currentHostname && (
-              <CurrentSiteBar
-                hostname={currentHostname}
-                isFullyPaused={currentSiteSummary.isFullyPaused}
-                blockedCount={currentSiteSummary.blockedFeatures.size}
-                onTogglePause={() =>
-                  setSiteRules((prev) =>
-                    togglePauseSiteRule(
-                      prev ?? DEFAULT_SITE_RULES,
-                      currentHostname
-                    )
-                  )
-                }
-                onOpenRules={() => setCurrentView("site-rules")}
-              />
-            )}
-
             {/* Search & Category Filter Bar (Optional, off by default) */}
             {showSearchAndFilter && (
               <div className="mb-2.5 space-y-2">
