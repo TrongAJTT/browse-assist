@@ -97,6 +97,7 @@ function IndexPopup() {
       : null
   const initialViewFromUrl =
     (urlParams?.get("view") as ActiveView | null) || null
+  const initialSiteUrlFromUrl = urlParams?.get("siteUrl") || null
 
   const [currentView, setCurrentView] = useState<ActiveView>(
     initialViewFromUrl || "main"
@@ -121,12 +122,37 @@ function IndexPopup() {
   const [currentTabUrl, setCurrentTabUrl] = useState<string | null>(null)
 
   useEffect(() => {
-    getActiveTab().then((tab) => {
-      if (tab?.url) {
+    let cancelled = false
+    async function resolveCurrentTabUrl() {
+      const tab = await getActiveTab()
+      if (!cancelled && tab?.url && extractHostname(tab.url)) {
         setCurrentTabUrl(tab.url)
+        return
       }
-    })
-  }, [])
+      if (
+        !cancelled &&
+        initialSiteUrlFromUrl &&
+        extractHostname(initialSiteUrlFromUrl)
+      ) {
+        setCurrentTabUrl(initialSiteUrlFromUrl)
+        return
+      }
+      try {
+        const stored = await sessionStorage.get<{
+          siteUrl?: string
+        }>(STORAGE_KEYS.LAST_VIEW)
+        if (!cancelled && stored?.siteUrl && extractHostname(stored.siteUrl)) {
+          setCurrentTabUrl(stored.siteUrl)
+        }
+      } catch {
+        // Ignore storage read errors
+      }
+    }
+    resolveCurrentTabUrl()
+    return () => {
+      cancelled = true
+    }
+  }, [initialSiteUrlFromUrl])
 
   const resolvedSiteRules = siteRules ?? DEFAULT_SITE_RULES
   const currentHostname = useMemo(

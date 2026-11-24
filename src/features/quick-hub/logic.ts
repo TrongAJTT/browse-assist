@@ -847,7 +847,9 @@ function renderMenuContent(): void {
   `
   footerBtn.addEventListener("click", () => {
     closeMenu()
-    Promise.resolve(openExtensionPopup("site-rules")).catch(() => {})
+    Promise.resolve(
+      openExtensionPopup("site-rules", window.location.href)
+    ).catch(() => {})
   })
   footer.appendChild(footerBtn)
   menuCard.appendChild(footer)

@@ -102,7 +102,7 @@ export interface MessageRegistry {
 
   // Navigation & Settings
   [MESSAGE_TYPES.OPEN_POPUP]: {
-    request: { view?: string }
+    request: { view?: string; siteUrl?: string }
     response: { ok: boolean }
   }
 }

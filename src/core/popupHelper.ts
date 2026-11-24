@@ -17,17 +17,24 @@ const localStorage = new Storage({ area: "local" })
  * @param view - The target sub-view to display (defaults to "main")
  */
 export async function openExtensionPopup(
-  view: ActiveView = "main"
+  view: ActiveView = "main",
+  siteUrl?: string
 ): Promise<void> {
-  // 1. Persist intended target view into local storage so popup.tsx restores it immediately
+  // 1. Persist intended target view (and optional source tab URL) so popup.tsx restores it immediately
   try {
     await localStorage.set(STORAGE_KEYS.LAST_VIEW, {
       view,
+      ...(siteUrl ? { siteUrl } : {}),
       timestamp: Date.now()
     })
   } catch {
     // Ignore storage errors
   }
+
+  const query = new URLSearchParams()
+  if (view !== "main") query.set("view", view)
+  if (siteUrl) query.set("siteUrl", siteUrl)
+  const queryString = query.toString() ? `?${query.toString()}` : ""
 
   // 2. Extension context with direct chrome.action or chrome.windows API
   if (typeof chrome !== "undefined") {
@@ -44,9 +51,7 @@ export async function openExtensionPopup(
     // Try opening as a dedicated sleek popup window (standard dimensions: 444x600 matching popup)
     if (typeof chrome.windows?.create === "function") {
       try {
-        const popupUrl = chrome.runtime.getURL(
-          `popup.html${view !== "main" ? `?view=${encodeURIComponent(view)}` : ""}`
-        )
+        const popupUrl = chrome.runtime.getURL(`popup.html${queryString}`)
         await chrome.windows.create({
           url: popupUrl,
           type: "popup",
@@ -62,7 +67,10 @@ export async function openExtensionPopup(
 
     // If in content script or restricted tab context, request background service worker to open
     try {
-      await sendToBackground(MESSAGE_TYPES.OPEN_POPUP, { view })
+      await sendToBackground(MESSAGE_TYPES.OPEN_POPUP, {
+        view,
+        ...(siteUrl ? { siteUrl } : {})
+      })
       return
     } catch {
       // Fall through to window.open
@@ -73,10 +81,8 @@ export async function openExtensionPopup(
   if (typeof window !== "undefined") {
     const popupUrl =
       typeof chrome !== "undefined" && chrome.runtime?.getURL
-        ? chrome.runtime.getURL(
-            `popup.html${view !== "main" ? `?view=${encodeURIComponent(view)}` : ""}`
-          )
-        : `popup.html${view !== "main" ? `?view=${encodeURIComponent(view)}` : ""}`
+        ? chrome.runtime.getURL(`popup.html${queryString}`)
+        : `popup.html${queryString}`
     window.open(
       popupUrl,
       "BrowseAssistPopup",

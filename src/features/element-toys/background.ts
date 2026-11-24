@@ -20,14 +20,15 @@ function onCommandListener(command: string): void {
  * Listens for OPEN_POPUP requests from in-page HUD toolbar.
  */
 function onMessageListener(
-  message: { type?: string; action?: string; view?: string },
-  _sender: chrome.runtime.MessageSender,
+  message: { type?: string; action?: string; view?: string; siteUrl?: string },
+  sender: chrome.runtime.MessageSender,
   sendResponse: (response?: { ok: boolean }) => void
 ): boolean | void {
   const msgType = message?.type || message?.action
   if (msgType === MESSAGE_TYPES.OPEN_POPUP) {
     const targetView = (message?.view as ActiveView) || "element-toys-settings"
-    openExtensionPopup(targetView).catch((err) => {
+    const sourceUrl = message?.siteUrl || sender.tab?.url
+    openExtensionPopup(targetView, sourceUrl).catch((err) => {
       console.error("Failed to open popup:", err)
     })
     sendResponse({ ok: true })

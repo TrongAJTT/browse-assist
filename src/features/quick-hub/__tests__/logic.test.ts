@@ -177,7 +177,10 @@ describe("quick-hub content logic", () => {
     ).toBe("Site rules active (1)")
 
     activeFooterBtn!.click()
-    expect(mockOpenExtensionPopup).toHaveBeenCalledWith("site-rules")
+    expect(mockOpenExtensionPopup).toHaveBeenCalledWith(
+      "site-rules",
+      window.location.href
+    )
   })
 
   it("shows add-rule footer when no site rules apply to current page", async () => {
