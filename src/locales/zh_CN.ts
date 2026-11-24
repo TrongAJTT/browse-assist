@@ -288,6 +288,46 @@ export const zh_CN: TranslationDict = {
       search: "在 超级拖拽 时使用默认搜索引擎搜索选中文本。"
     }
   },
+  siteRules: {
+    title: "站点规则",
+    appBarTip: "站点规则 (Shift+点击在选项页打开)",
+    openInOptionsTip: "在选项页打开站点规则",
+    openRulesTip: "配置当前站点规则",
+    optionsDesc:
+      "在匹配的域名或通配符 (*) 网址上禁用 Browse Assist 或特定功能。",
+    currentSite: "当前站点",
+    pauseAllOnSite: "全部暂停",
+    quickExcludeDesc: "点击下方功能以在此域名上单独禁用：",
+    pause: "暂停",
+    resume: "恢复",
+    pauseSiteTip: "在 {{host}} 上暂停所有功能",
+    resumeSiteTip: "在 {{host}} 上恢复功能",
+    statusPaused: "已暂停",
+    statusExcludedCount: "已排除 {{count}} 项",
+    siteOffBadge: "当前站点已禁用",
+    siteOffTip: "已在 {{host}} 上被站点规则禁用，点击管理。",
+    siteOffQuickHubTip: "已在当前站点被站点规则禁用",
+    addRuleTitle: "添加规则",
+    useCurrentDomain: "使用 {{host}}",
+    useCurrentDomainTip: "快速填入当前站点域名 ({{host}})",
+    alreadyInList: "已在列表中",
+    wildcardHint: "支持 * 通配符",
+    patternPlaceholder: "figma.com, *.google.com, docs.google.com/app/*",
+    scopeAll: "全部功能",
+    scopeSelected: "指定功能",
+    addButton: "添加",
+    invalidPattern: "请输入有效的域名或通配符 URL（不能仅输入 *）。",
+    selectAtLeastOne: "请至少选择一个要排除的功能。",
+    savedRulesTitle: "已保存规则",
+    searchPlaceholder: "按域名或功能名称搜索规则...",
+    emptyTitle: "暂无站点规则",
+    emptyDesc:
+      "添加域名 (figma.com) 或通配符 URL (docs.google.com/spreadsheets/*) 以在特定网页禁用功能。",
+    matchesThisTab: "当前标签",
+    editTip: "编辑规则",
+    deleteTip: "删除规则",
+    save: "保存"
+  },
   features: {
     allowRightClick: {
       title: "允许右键",
@@ -751,7 +791,11 @@ export const zh_CN: TranslationDict = {
         triggerAria: "快捷中心",
         cleanUrlCopied: "已复制纯净 URL",
         markdownCopied: "已复制页面 Markdown",
-        noVideoFound: "当前页面未找到可截取的视频"
+        noVideoFound: "当前页面未找到可截取的视频",
+        siteRulesAdd: "有干扰？添加规则",
+        siteRulesAddTip: "某项功能影响了当前页面体验？添加站点规则。",
+        siteRulesActive: "已启用规则 ({{count}})",
+        siteRulesActiveTip: "查看或编辑当前站点的规则。"
       }
     },
     imageHoverPreview: {
@@ -766,6 +810,13 @@ export const zh_CN: TranslationDict = {
         instant: "即时",
         displaySize: "显示尺寸",
         maxViewportSize: "最大视口占比",
+        animation: "入场动画",
+        animationDesc: "预览卡片出现时的过渡效果。",
+        animZoom: "缩放",
+        animMorph: "变形",
+        animFade: "淡入",
+        animSlide: "滑动",
+        animNone: "无",
         behavior: "行为",
         previewImageLinks: "预览图片链接",
         previewImageLinksDesc: "悬停指向图片文件的超链接时也显示图片预览。",

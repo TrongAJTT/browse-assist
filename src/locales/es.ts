@@ -299,6 +299,46 @@ export const es: TranslationDict = {
         "Buscar texto seleccionado con el buscador predeterminado en Súper Arrastre."
     }
   },
+  siteRules: {
+    title: "Reglas de sitio",
+    appBarTip: "Reglas de sitio (Mayús+Clic para abrir en Opciones)",
+    openInOptionsTip: "Abrir Reglas de sitio en Opciones",
+    openRulesTip: "Configurar reglas para este sitio",
+    optionsDesc:
+      "Desactiva Browse Assist o funciones específicas en dominios o URLs con comodín (*).",
+    currentSite: "Sitio actual",
+    pauseAllOnSite: "Pausar todo",
+    quickExcludeDesc: "Haz clic en una función para desactivarla en este dominio:",
+    pause: "Pausar",
+    resume: "Reanudar",
+    pauseSiteTip: "Pausar todas las funciones en {{host}}",
+    resumeSiteTip: "Reanudar funciones en {{host}}",
+    statusPaused: "En pausa",
+    statusExcludedCount: "{{count}} excluidas",
+    siteOffBadge: "Desact. aquí",
+    siteOffTip: "Desactivado en {{host}} por Reglas de sitio. Clic para gestionar.",
+    siteOffQuickHubTip: "Desactivado en este sitio por Reglas de sitio",
+    addRuleTitle: "Añadir regla",
+    useCurrentDomain: "Usar {{host}}",
+    useCurrentDomainTip: "Rellenar dominio del sitio actual ({{host}})",
+    alreadyInList: "Ya está en la lista",
+    wildcardHint: "Admite comodín *",
+    patternPlaceholder: "figma.com, *.google.com, docs.google.com/app/*",
+    scopeAll: "Todas",
+    scopeSelected: "Seleccionadas",
+    addButton: "Añadir",
+    invalidPattern: "Introduce un dominio o patrón URL válido (no solo *).",
+    selectAtLeastOne: "Selecciona al menos una función para excluir.",
+    savedRulesTitle: "Reglas guardadas",
+    searchPlaceholder: "Buscar reglas por dominio o función...",
+    emptyTitle: "Aún no hay reglas de sitio",
+    emptyDesc:
+      "Añade un dominio (figma.com) o URL con comodín (docs.google.com/spreadsheets/*) para desactivar funciones donde sea necesario.",
+    matchesThisTab: "Esta pestaña",
+    editTip: "Editar regla",
+    deleteTip: "Eliminar regla",
+    save: "Guardar"
+  },
   features: {
     allowRightClick: {
       title: "Permitir clic derecho",
@@ -811,7 +851,11 @@ export const es: TranslationDict = {
         triggerAria: "Centro rápido",
         cleanUrlCopied: "URL limpia copiada",
         markdownCopied: "Markdown de la página copiado",
-        noVideoFound: "No se encontró ningún video activo en esta página"
+        noVideoFound: "No se encontró ningún video activo en esta página",
+        siteRulesAdd: "¿Fallos? Añadir regla",
+        siteRulesAddTip: "¿Alguna función interfiere en esta página? Añade una regla de sitio.",
+        siteRulesActive: "Reglas activas ({{count}})",
+        siteRulesActiveTip: "Ver o editar las reglas activas en este sitio."
       }
     },
     imageHoverPreview: {
@@ -828,6 +872,13 @@ export const es: TranslationDict = {
         instant: "Instantáneo",
         displaySize: "Tamaño de visualización",
         maxViewportSize: "Tamaño máximo en pantalla",
+        animation: "Animación de entrada",
+        animationDesc: "Efecto visual al aparecer la vista previa.",
+        animZoom: "Zoom",
+        animMorph: "Morph",
+        animFade: "Desvanecer",
+        animSlide: "Deslizar",
+        animNone: "Ninguna",
         behavior: "Comportamiento",
         previewImageLinks: "Previsualizar enlaces de imagen",
         previewImageLinksDesc:

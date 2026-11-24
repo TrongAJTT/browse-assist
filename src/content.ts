@@ -9,8 +9,19 @@ import { isColorPickerSupported } from "~core/browserDetect"
 import { clearFabDismissedOnTab, isFabDismissedOnTab } from "~core/fab"
 import { setLocale } from "~core/i18n"
 import { MESSAGE_TYPES } from "~core/messaging"
-import { getStoredSettings, subscribeToSettings } from "~core/storage"
-import type { FeatureSettings } from "~core/types"
+import {
+  getStoredSettings,
+  getStoredSiteRules,
+  subscribeToSettings,
+  subscribeToSiteRules
+} from "~core/storage"
+import { hasPathWildcardRules, isFeatureBlockedOnUrl } from "~core/siteRules"
+import {
+  DEFAULT_SITE_RULES,
+  type FeatureKey,
+  type FeatureSettings,
+  type SiteRule
+} from "~core/types"
 import {
   activate as activateRightClick,
   deactivate as deactivateRightClick,
@@ -72,8 +83,34 @@ export const config: PlasmoCSConfig = {
 
 let isElementToysEnabled = true
 let latestSettings: FeatureSettings | null = null
+let latestSiteRules: SiteRule[] = DEFAULT_SITE_RULES
+let lastEvaluatedUrl = window.location.href
+let spaWatchTimer: number | null = null
+
+function isFeatureAllowed(
+  feature: FeatureKey,
+  globallyEnabled: boolean
+): boolean {
+  if (!globallyEnabled) return false
+  return !isFeatureBlockedOnUrl(feature, window.location.href, latestSiteRules)
+}
+
+function syncSpaWatcher(): void {
+  const needsTimer = hasPathWildcardRules(latestSiteRules)
+  if (needsTimer && spaWatchTimer === null) {
+    spaWatchTimer = window.setInterval(() => {
+      if (window.location.href !== lastEvaluatedUrl && latestSettings) {
+        applySettings(latestSettings)
+      }
+    }, 1000)
+  } else if (!needsTimer && spaWatchTimer !== null) {
+    window.clearInterval(spaWatchTimer)
+    spaWatchTimer = null
+  }
+}
 
 function applySettings(nextSettings: FeatureSettings): void {
+  lastEvaluatedUrl = window.location.href
   // If the user explicitly re-enabled a feature in Popup after turning it off,
   // clear its per-tab dismissal so the FAB reappears as expected.
   if (latestSettings) {
@@ -93,81 +130,110 @@ function applySettings(nextSettings: FeatureSettings): void {
   latestSettings = nextSettings
 
   setLocale(nextSettings?.language ?? "auto")
-  isElementToysEnabled = Boolean(nextSettings?.elementToys)
+  isElementToysEnabled = isFeatureAllowed(
+    "elementToys",
+    Boolean(nextSettings?.elementToys)
+  )
   // Allow Right Click is managed per-tab on-demand, not auto-activated globally.
 
   // Context Menu Actions
-  if (nextSettings.contextMenuActions) {
+  if (
+    isFeatureAllowed(
+      "contextMenuActions",
+      Boolean(nextSettings.contextMenuActions)
+    )
+  ) {
     activateContextMenuActions()
   } else {
     deactivateContextMenuActions()
   }
 
   // Super Drag
-  if (nextSettings.superDrag) {
+  if (isFeatureAllowed("superDrag", Boolean(nextSettings.superDrag))) {
     activateSuperDrag(nextSettings.superDragConfig)
   } else {
     deactivateSuperDrag()
   }
 
   // Quick Scroll Buttons
-  if (nextSettings.quickScroll && !isFabDismissedOnTab("quickScroll")) {
+  if (
+    isFeatureAllowed("quickScroll", Boolean(nextSettings.quickScroll)) &&
+    !isFabDismissedOnTab("quickScroll")
+  ) {
     activateQuickScroll(nextSettings.quickScrollConfig, nextSettings.theme)
   } else {
     deactivateQuickScroll()
   }
 
   // Smooth Scroll
-  if (nextSettings.smoothScroll) {
+  if (isFeatureAllowed("smoothScroll", Boolean(nextSettings.smoothScroll))) {
     activateSmoothScroll(nextSettings.smoothScrollConfig)
   } else {
     deactivateSmoothScroll()
   }
 
   // Mouse Pin-to-Zoom
-  if (nextSettings.mouseZoom) {
+  if (isFeatureAllowed("mouseZoom", Boolean(nextSettings.mouseZoom))) {
     activateMouseZoom(nextSettings.mouseZoomConfig)
   } else {
     deactivateMouseZoom()
   }
 
   // Universal Picture-in-Picture
-  if (nextSettings.pictureInPicture) {
+  if (
+    isFeatureAllowed("pictureInPicture", Boolean(nextSettings.pictureInPicture))
+  ) {
     activatePiP(nextSettings.pictureInPictureConfig)
   } else {
     deactivatePiP()
   }
 
   // Video Wheel Control
-  if (nextSettings.videoWheelControl) {
+  if (
+    isFeatureAllowed(
+      "videoWheelControl",
+      Boolean(nextSettings.videoWheelControl)
+    )
+  ) {
     activateVideoWheelControl(nextSettings.videoWheelControlConfig)
   } else {
     deactivateVideoWheelControl()
   }
 
   // ColorPick Eyedropper (Chromium only)
-  if (isColorPickerSupported && nextSettings.colorPicker) {
+  if (
+    isColorPickerSupported &&
+    isFeatureAllowed("colorPicker", Boolean(nextSettings.colorPicker))
+  ) {
     activateColorPicker(nextSettings.colorPickerConfig)
   } else {
     deactivateColorPicker()
   }
 
   // Element Toys
-  if (nextSettings.elementToys) {
+  if (isFeatureAllowed("elementToys", Boolean(nextSettings.elementToys))) {
     activateElementToys(nextSettings.elementToysConfig)
   } else {
     deactivateElementToys()
   }
 
   // Quick Hub
-  if (nextSettings.quickHub && !isFabDismissedOnTab("quickHub")) {
+  if (
+    isFeatureAllowed("quickHub", Boolean(nextSettings.quickHub)) &&
+    !isFabDismissedOnTab("quickHub")
+  ) {
     activateQuickHub(nextSettings.quickHubConfig)
   } else {
     deactivateQuickHub()
   }
 
   // Image Hover Preview
-  if (nextSettings.imageHoverPreview) {
+  if (
+    isFeatureAllowed(
+      "imageHoverPreview",
+      Boolean(nextSettings.imageHoverPreview)
+    )
+  ) {
     activateImageHoverPreview(nextSettings.imageHoverPreviewConfig)
   } else {
     deactivateImageHoverPreview()
@@ -179,13 +245,35 @@ function applySettings(nextSettings: FeatureSettings): void {
  */
 async function init(): Promise<void> {
   try {
-    const initialSettings = await getStoredSettings()
+    const [initialSettings, initialRules] = await Promise.all([
+      getStoredSettings(),
+      getStoredSiteRules()
+    ])
+    latestSiteRules = initialRules
     applySettings(initialSettings)
+    syncSpaWatcher()
 
-    // Watch for live setting updates from popup
+    // Watch for live setting updates from popup / options
     subscribeToSettings((updatedSettings) => {
       applySettings(updatedSettings)
     })
+
+    // Watch for live site-rule updates from popup / options
+    subscribeToSiteRules((updatedRules) => {
+      latestSiteRules = updatedRules
+      syncSpaWatcher()
+      if (latestSettings) {
+        applySettings(latestSettings)
+      }
+    })
+
+    const handleUrlChange = () => {
+      if (window.location.href !== lastEvaluatedUrl && latestSettings) {
+        applySettings(latestSettings)
+      }
+    }
+    window.addEventListener("popstate", handleUrlChange)
+    window.addEventListener("hashchange", handleUrlChange)
 
     // Listen for tab-scoped commands (e.g. per-tab Allow Right Click)
     chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
@@ -220,6 +308,12 @@ async function init(): Promise<void> {
         return true
       }
       if (msgType === MESSAGE_TYPES.TOGGLE_QUICK_HUB) {
+        if (
+          !isFeatureAllowed("quickHub", Boolean(latestSettings?.quickHub))
+        ) {
+          sendResponse({ success: false })
+          return true
+        }
         if (isFabDismissedOnTab("quickHub") && latestSettings?.quickHub) {
           clearFabDismissedOnTab("quickHub")
           activateQuickHub(latestSettings.quickHubConfig)

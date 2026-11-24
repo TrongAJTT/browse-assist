@@ -299,6 +299,46 @@ export const ja: TranslationDict = {
         "スーパードラッグ で選択したテキストを既定の検索エンジンで検索します。"
     }
   },
+  siteRules: {
+    title: "サイトルール",
+    appBarTip: "サイトルール (Shift+クリックでオプションを開く)",
+    openInOptionsTip: "オプションでサイトルールを開く",
+    openRulesTip: "このサイトのルールを設定",
+    optionsDesc:
+      "一致するドメインやワイルドカード (*) URL で Browse Assist 全体または特定機能を無効化します。",
+    currentSite: "現在のサイト",
+    pauseAllOnSite: "すべて一時停止",
+    quickExcludeDesc: "このドメインで無効化する機能をクリックして選択:",
+    pause: "一時停止",
+    resume: "再開",
+    pauseSiteTip: "{{host}} のすべての機能を一時停止",
+    resumeSiteTip: "{{host}} の機能を再開",
+    statusPaused: "停止中",
+    statusExcludedCount: "{{count}}件除外",
+    siteOffBadge: "このサイトで停止",
+    siteOffTip: "サイトルールにより {{host}} で無効化されています。クリックして管理。",
+    siteOffQuickHubTip: "サイトルールによりこのサイトで無効化されています",
+    addRuleTitle: "ルールを追加",
+    useCurrentDomain: "{{host}} を入力",
+    useCurrentDomainTip: "現在のサイトのドメインを入力 ({{host}})",
+    alreadyInList: "リストに登録済み",
+    wildcardHint: "ワイルドカード * 対応",
+    patternPlaceholder: "figma.com, *.google.com, docs.google.com/app/*",
+    scopeAll: "すべての機能",
+    scopeSelected: "選択した機能",
+    addButton: "追加",
+    invalidPattern: "有効なドメインまたは URL パターンを入力してください (* のみ不可)。",
+    selectAtLeastOne: "除外する機能を1つ以上選択してください。",
+    savedRulesTitle: "保存済みのルール",
+    searchPlaceholder: "ドメインや機能名でルールを検索...",
+    emptyTitle: "サイトルールはまだありません",
+    emptyDesc:
+      "ドメイン (figma.com) やワイルドカード URL (docs.google.com/spreadsheets/*) を追加して機能を個別に無効化できます。",
+    matchesThisTab: "このタブ",
+    editTip: "ルールを編集",
+    deleteTip: "ルールを削除",
+    save: "保存"
+  },
   features: {
     allowRightClick: {
       title: "右クリック許可",
@@ -802,7 +842,11 @@ export const ja: TranslationDict = {
         triggerAria: "クイックハブ",
         cleanUrlCopied: "クリーン URL をコピーしました",
         markdownCopied: "ページの Markdown をコピーしました",
-        noVideoFound: "このページに再生可能な動画が見つかりません"
+        noVideoFound: "このページに再生可能な動画が見つかりません",
+        siteRulesAdd: "不具合？ルールを追加",
+        siteRulesAddTip: "このページで機能が干渉していますか？サイトルールを追加します。",
+        siteRulesActive: "適用中のルール ({{count}})",
+        siteRulesActiveTip: "このサイトに適用中のルールを表示・編集します。"
       }
     },
     imageHoverPreview: {
@@ -819,6 +863,13 @@ export const ja: TranslationDict = {
         instant: "即時",
         displaySize: "表示サイズ",
         maxViewportSize: "最大ビューポートサイズ",
+        animation: "表示アニメーション",
+        animationDesc: "プレビューカードが表示される際の動き。",
+        animZoom: "ズーム",
+        animMorph: "モーフ",
+        animFade: "フェード",
+        animSlide: "スライド",
+        animNone: "なし",
         behavior: "動作",
         previewImageLinks: "画像リンクをプレビュー",
         previewImageLinksDesc:

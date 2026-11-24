@@ -21,6 +21,7 @@ let dimensionsBadge: HTMLDivElement | null = null
 
 let hoverTimer: number | null = null
 let activeTarget: HTMLElement | null = null
+let activeAnimation: Animation | null = null
 let lastPointerTarget: EventTarget | null = null
 let lastPointerX = 0
 let lastPointerY = 0
@@ -105,6 +106,34 @@ function ensureShadowDOM(): void {
       margin: 0;
       padding: 0;
     }
+    @keyframes ihp-zoom-in {
+      from {
+        opacity: 0;
+        transform: scale(0.93);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    @keyframes ihp-fade-in {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+    @keyframes ihp-slide-in {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
     .ihp-card {
       position: fixed;
       display: none;
@@ -117,14 +146,27 @@ function ensureShadowDOM(): void {
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       pointer-events: none;
-      opacity: 0;
-      transform: scale(0.96);
-      transition: opacity 0.14s ease-out, transform 0.14s ease-out;
     }
     .ihp-card.ihp-visible {
       display: flex;
-      opacity: 1;
-      transform: scale(1);
+    }
+    .ihp-card.ihp-visible[data-animation="zoom"] {
+      animation: ihp-zoom-in 0.16s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .ihp-card.ihp-visible[data-animation="fade"] {
+      animation: ihp-fade-in 0.14s ease-out both;
+    }
+    .ihp-card.ihp-visible[data-animation="slide"] {
+      animation: ihp-slide-in 0.16s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .ihp-card.ihp-visible[data-animation="none"],
+    .ihp-card.ihp-visible[data-animation="morph"] {
+      animation: none;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .ihp-card.ihp-visible {
+        animation: none !important;
+      }
     }
     .ihp-img {
       display: block;
@@ -163,8 +205,18 @@ function ensureShadowDOM(): void {
   shadowRoot.appendChild(cardElement)
 }
 
-function positionCard(naturalWidth: number, naturalHeight: number): void {
-  if (!cardElement || !previewImg) return
+interface CardRect {
+  left: number
+  top: number
+  width: number
+  height: number
+}
+
+function positionCard(
+  naturalWidth: number,
+  naturalHeight: number
+): CardRect | null {
+  if (!cardElement || !previewImg) return null
 
   const maxPercent = Math.max(30, Math.min(90, currentConfig.maxSizePercent || 65)) / 100
   const maxW = Math.floor(window.innerWidth * maxPercent)
@@ -188,6 +240,71 @@ function positionCard(naturalWidth: number, naturalHeight: number): void {
 
   cardElement.style.left = `${left}px`
   cardElement.style.top = `${top}px`
+
+  return { left, top, width: displayW, height: displayH }
+}
+
+function prefersReducedMotion(): boolean {
+  return (
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  )
+}
+
+function playMorphAnimation(
+  card: HTMLElement,
+  targetEl: HTMLElement,
+  cardRect: CardRect
+): boolean {
+  if (prefersReducedMotion() || typeof card.animate !== "function") {
+    return false
+  }
+  if (!(targetEl instanceof HTMLImageElement)) {
+    return false
+  }
+
+  const sourceRect = targetEl.getBoundingClientRect()
+  if (sourceRect.width <= 0 || sourceRect.height <= 0) {
+    return false
+  }
+
+  const dx =
+    sourceRect.left +
+    sourceRect.width / 2 -
+    (cardRect.left + cardRect.width / 2)
+  const dy =
+    sourceRect.top +
+    sourceRect.height / 2 -
+    (cardRect.top + cardRect.height / 2)
+  const startScale = Math.max(
+    0.2,
+    Math.min(
+      1,
+      sourceRect.width / cardRect.width,
+      sourceRect.height / cardRect.height
+    )
+  )
+
+  activeAnimation?.cancel()
+  activeAnimation = card.animate(
+    [
+      {
+        opacity: 0.45,
+        transform: `translate(${dx}px, ${dy}px) scale(${startScale})`
+      },
+      {
+        opacity: 1,
+        transform: "translate(0px, 0px) scale(1)"
+      }
+    ],
+    {
+      duration: 200,
+      easing: "cubic-bezier(0.16, 1, 0.3, 1)",
+      fill: "both"
+    }
+  )
+
+  return true
 }
 
 export function hidePreview(): void {
@@ -196,6 +313,8 @@ export function hidePreview(): void {
     hoverTimer = null
   }
   activeTarget = null
+  activeAnimation?.cancel()
+  activeAnimation = null
   if (cardElement) {
     cardElement.classList.remove("ihp-visible")
   }
@@ -228,14 +347,24 @@ function showPreviewFor(src: string, targetEl: HTMLElement): void {
       }
     }
 
-    positionCard(nw, nh)
+    const cardRect = positionCard(nw, nh)
     if (currentConfig.showDimensions) {
       currentBadge.textContent = `${nw} × ${nh}`
       currentBadge.style.display = "block"
     } else {
       currentBadge.style.display = "none"
     }
+    const configuredAnimation =
+      currentConfig.animation ?? DEFAULT_IMAGE_HOVER_PREVIEW_CONFIG.animation
+    currentCard.dataset.animation = configuredAnimation
     currentCard.classList.add("ihp-visible")
+
+    if (
+      configuredAnimation === "morph" &&
+      (!cardRect || !playMorphAnimation(currentCard, targetEl, cardRect))
+    ) {
+      currentCard.dataset.animation = "zoom"
+    }
   }
 
   currentImg.onerror = () => {

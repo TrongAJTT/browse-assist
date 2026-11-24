@@ -299,6 +299,46 @@ export const vi: TranslationDict = {
         "Tìm kiếm văn bản đã chọn bằng công cụ tìm kiếm mặc định khi dùng Siêu kéo thả."
     }
   },
+  siteRules: {
+    title: "Quy tắc trang web",
+    appBarTip: "Quy tắc trang web (Shift+Click để mở trong Tùy chọn)",
+    openInOptionsTip: "Mở Quy tắc trang web trong Tùy chọn",
+    openRulesTip: "Cấu hình quy tắc cho trang này",
+    optionsDesc:
+      "Tắt toàn bộ Browse Assist hoặc từng tính năng riêng lẻ theo tên miền hoặc mẫu URL wildcard (*).",
+    currentSite: "Trang hiện tại",
+    pauseAllOnSite: "Tạm dừng tất cả",
+    quickExcludeDesc: "Nhấn vào tính năng bên dưới để tắt riêng trên tên miền này:",
+    pause: "Tạm dừng",
+    resume: "Tiếp tục",
+    pauseSiteTip: "Tạm dừng mọi tính năng trên {{host}}",
+    resumeSiteTip: "Bật lại các tính năng trên {{host}}",
+    statusPaused: "Đã tạm dừng",
+    statusExcludedCount: "Tắt {{count}}",
+    siteOffBadge: "Tắt trên trang",
+    siteOffTip: "Đang bị tắt trên {{host}} bởi Quy tắc trang web. Nhấn để chỉnh.",
+    siteOffQuickHubTip: "Đang bị tắt trên trang này bởi Quy tắc trang web",
+    addRuleTitle: "Thêm quy tắc",
+    useCurrentDomain: "Dùng {{host}}",
+    useCurrentDomainTip: "Điền nhanh tên miền trang hiện tại ({{host}})",
+    alreadyInList: "Đã có trong danh sách",
+    wildcardHint: "Hỗ trợ ký tự đại diện *",
+    patternPlaceholder: "figma.com, *.google.com, docs.google.com/app/*",
+    scopeAll: "Tất cả tính năng",
+    scopeSelected: "Chọn lọc",
+    addButton: "Thêm",
+    invalidPattern: "Vui lòng nhập tên miền hoặc mẫu URL hợp lệ (không chỉ là *).",
+    selectAtLeastOne: "Hãy chọn ít nhất một tính năng để loại trừ.",
+    savedRulesTitle: "Quy tắc đã lưu",
+    searchPlaceholder: "Tìm theo tên miền hoặc tính năng...",
+    emptyTitle: "Chưa có quy tắc nào",
+    emptyDesc:
+      "Thêm tên miền (figma.com) hoặc mẫu URL wildcard (docs.google.com/spreadsheets/*) để tắt tính năng khi cần.",
+    matchesThisTab: "Tab hiện tại",
+    editTip: "Sửa quy tắc",
+    deleteTip: "Xóa quy tắc",
+    save: "Lưu"
+  },
   features: {
     allowRightClick: {
       title: "Cho phép chuột phải",
@@ -811,7 +851,11 @@ export const vi: TranslationDict = {
         triggerAria: "Trung tâm nhanh",
         cleanUrlCopied: "Đã sao chép URL sạch",
         markdownCopied: "Đã sao chép trang Markdown",
-        noVideoFound: "Không tìm thấy video đang phát trên trang này"
+        noVideoFound: "Không tìm thấy video đang phát trên trang này",
+        siteRulesAdd: "Gặp lỗi? Thêm quy tắc",
+        siteRulesAddTip: "Có công cụ làm phiền trên trang này? Thêm quy tắc trang.",
+        siteRulesActive: "Đang có quy tắc ({{count}})",
+        siteRulesActiveTip: "Xem hoặc chỉnh sửa quy tắc áp dụng trên trang này."
       }
     },
     imageHoverPreview: {
@@ -827,6 +871,13 @@ export const vi: TranslationDict = {
         instant: "Tức thì",
         displaySize: "Kích thước hiển thị",
         maxViewportSize: "Kích thước tối đa theo màn hình",
+        animation: "Hiệu ứng xuất hiện",
+        animationDesc: "Hiệu ứng chuyển động khi khung xem trước mở ra.",
+        animZoom: "Phóng nhẹ",
+        animMorph: "Morph",
+        animFade: "Mờ dần",
+        animSlide: "Trượt nhẹ",
+        animNone: "Tắt",
         behavior: "Hành vi",
         previewImageLinks: "Xem trước liên kết ảnh",
         previewImageLinksDesc:

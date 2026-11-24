@@ -1,7 +1,7 @@
 {
   "name": "browse-assist",
   "displayName": "__MSG_extName__",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "__MSG_extDescription__",
   "slogan": "Supercharge Your Web Browsing",
   "homepage": "https://www.trongajtt.com/apps/browse-assist",
@@ -59,8 +59,10 @@
   },
   "manifest": {
     "default_locale": "en",
+    "short_name": "Browse Assist",
     "permissions": [
       "storage",
+      "activeTab",
       "contextMenus",
       "clipboardWrite",
       "search"

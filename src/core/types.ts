@@ -31,6 +31,7 @@ export type ActiveView =
   | "element-toys-settings"
   | "quick-hub-settings"
   | "image-hover-preview-settings"
+  | "site-rules"
   | "preferences"
   | "about"
 
@@ -549,10 +550,17 @@ export const DEFAULT_QUICK_HUB_CONFIG: QuickHubConfig = {
 }
 
 export type ImageHoverPreviewModifier = "shift" | "alt" | "ctrl"
+export type ImageHoverPreviewAnimation =
+  | "zoom"
+  | "morph"
+  | "fade"
+  | "slide"
+  | "none"
 
 export interface ImageHoverPreviewConfig {
   triggerModifier: ImageHoverPreviewModifier
   delayMs: number
+  animation: ImageHoverPreviewAnimation
   previewImageLinks: boolean
   showDimensions: boolean
   maxSizePercent: number
@@ -561,6 +569,7 @@ export interface ImageHoverPreviewConfig {
 export const DEFAULT_IMAGE_HOVER_PREVIEW_CONFIG: ImageHoverPreviewConfig = {
   triggerModifier: "shift",
   delayMs: 250,
+  animation: "zoom",
   previewImageLinks: true,
   showDimensions: true,
   maxSizePercent: 65
@@ -751,10 +760,28 @@ export const DEFAULT_SETTINGS: FeatureSettings = {
 }
 
 /**
+ * Scope of a per-site exclusion rule:
+ * - `"all"`: disables all content-script features on matching URLs
+ * - `FeatureKey[]`: disables only the listed features on matching URLs
+ */
+export type SiteRuleScope = "all" | FeatureKey[]
+
+export interface SiteRule {
+  id: string
+  /** Domain (e.g. "figma.com") or wildcard URL pattern (e.g. "docs.google.com/spreadsheets/*") */
+  pattern: string
+  enabled: boolean
+  scope: SiteRuleScope
+}
+
+export const DEFAULT_SITE_RULES: SiteRule[] = []
+
+/**
  * Storage keys used across extension contexts.
  */
 export const STORAGE_KEYS = {
   SETTINGS: "browse_assist_settings",
+  SITE_RULES: "browse_assist_site_rules",
   COLOR_HISTORY: "browse_assist_color_history",
   LAST_VIEW: "browse_assist_last_view"
 } as const

@@ -6,7 +6,7 @@
 
   ### *The Open-Source "PowerToys" for Web Browsing*
 
-  [![Version](https://img.shields.io/badge/Version-1.1.0-6366f1.svg)](package.json)
+  [![Version](https://img.shields.io/badge/Version-1.2.0-6366f1.svg)](package.json)
   [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
   [![Manifest V3](https://img.shields.io/badge/Manifest-V3-success.svg)](https://developer.chrome.com/docs/extensions/mv3/intro/)
   [![Framework](https://img.shields.io/badge/Framework-Plasmo-purple.svg)](https://docs.plasmo.com/)
@@ -41,7 +41,7 @@
 
 Traditional extension suites often inject bloated multi-megabyte frameworks into every tab, draining battery and tracking user telemetry. **Browse Assist** takes the opposite approach inspired by the **Microsoft PowerToys** philosophy:
 
-1. **⚡ Native-Speed & Zero Bloat**: Content scripts remain dormant until invoked by hotkeys or gestures. Lightweight Manifest V3 bundle (**< 450 KB**).
+1. **⚡ Native-Speed & Zero Bloat**: Content scripts remain dormant until invoked by hotkeys or gestures. Lightweight Manifest V3 package (**< 1 MB**).
 2. **🛡️ 100% Local-First & Zero Telemetry**: Zero remote servers, zero analytics SDKs, and zero tracking cookies. All user preferences persist strictly inside your browser's sandboxed `chrome.storage.sync` / `chrome.storage.local`.
 3. **🧩 Modular Customization**: Turn off any tool you don't need. Reorder popup cards and Quick Hub actions, customize FAB edge placement via right-click or hold-drag, switch between Grid and List views, and choose from **9 languages** (`en`, `vi`, `de`, `es`, `fr`, `ja`, `ko`, `zh_CN`, `zh_TW`).
 4. **🔒 Isolated UI (Shadow DOM)**: In-page overlays, toolbars, indicators, and toasts render inside isolated Shadow DOM hosts (`src/core/shadowHost.ts`), preventing CSS conflicts with host websites.
@@ -63,7 +63,8 @@ Traditional extension suites often inject bloated multi-megabyte frameworks into
 | 9 | **Color Picker** | `Alt + Shift + C` / Quick Hub | Magnifier eyedropper zooming into cursor pixels to copy HEX, RGB, or HSL color codes with recent color history (Chromium engines). |
 | 10 | **Element Toys** | `Alt + Shift + Z` / Quick Hub | Point-and-click targeting mode: **Zap** (DOM removal with scroll unfreeze), **Edit** (live text), **Move** (Flow/Free reposition & resize), and **Hide**. |
 | 11 | **Mouse Pin-to-Zoom** | `Alt` + Wheel | Smoothly zooms in/out of exact page areas centered directly under the cursor. |
-| 12 | **Image Hover Preview** | Hover on images / links | Preview `<img>` elements and image links in full size on hover, with optional modifier key, delay, and dimensions badge. |
+| 12 | **Image Hover Preview** | Hover on images / links | Preview `<img>` elements and image links in full size on hover, with entrance animations (*Morph*, *Zoom*, *Fade*, *Slide*, *None*), optional modifier key, delay, and dimensions badge. |
+| 13 | **Per-Site Rules & Exclusions** | Shield icon / Quick Hub | Disable all or specific features per domain or `*` wildcard pattern, with live SPA awareness, `Site off` status badges, and quick rule creation from the Popup or Options (`#site-rules`). |
 
 ---
 
@@ -71,16 +72,16 @@ Traditional extension suites often inject bloated multi-megabyte frameworks into
 
 <div align="center">
   <img src="https://cdn.trongajtt.com/apps/browse-assist/screenshot_1_1280x800.webp" width="48%" alt="Supercharge Your Web Browsing - Popup Dashboard" />
-  <img src="https://cdn.trongajtt.com/apps/browse-assist/screenshot_2_1280x800.webp" width="48%" alt="Super Drag & Quick Actions - Circular Radial Indicator" />
+  <img src="https://cdn.trongajtt.com/apps/browse-assist/screenshot_2_1280x800.webp" width="48%" alt="Super Drag & Quick Scroll - Circular Radial Indicator & Floating Buttons" />
 </div>
 
 <div align="center" style="margin-top: 10px;">
   <img src="https://cdn.trongajtt.com/apps/browse-assist/screenshot_3_1280x800.webp" width="48%" alt="Smart Video & PiP Controls" />
-  <img src="https://cdn.trongajtt.com/apps/browse-assist/screenshot_4_1280x800.webp" width="48%" alt="Quick Scroll Buttons" />
+  <img src="https://cdn.trongajtt.com/apps/browse-assist/screenshot_4_1280x800.webp" width="48%" alt="Instant Image Hover Preview with Smooth Morph Animation" />
 </div>
 
 <div align="center" style="margin-top: 10px;">
-  <img src="https://cdn.trongajtt.com/apps/browse-assist/screenshot_5_1280x800.webp" width="60%" alt="Customizable Quick Hub" />
+  <img src="https://cdn.trongajtt.com/apps/browse-assist/screenshot_5_1280x800.webp" width="60%" alt="Quick Hub & Per-Site Rules" />
 </div>
 
 ---
@@ -145,7 +146,8 @@ Browse Assist strictly complies with the **Least Privilege Principle** and the *
 
 | Permission | Real-World Application | External Transmission |
 |---|---|:---:|
-| `storage` | Stores your preferences, presets, and toggle states locally. | **0 KB** |
+| `storage` | Stores your preferences, presets, site rules, and toggle states locally. | **0 KB** |
+| `activeTab` | Reads the active tab's hostname only when you open the Popup or Site Rules to suggest/apply per-site exclusions. | **None** |
 | `contextMenus` / `menus` | Registers clean link and markdown copy options in the right-click menu. | **None** |
 | `clipboardWrite` | Writes clean URLs, markdown links, or colors to clipboard **only on click**. | **None** |
 | `search` | Triggers default search provider queries when using Super Drag gestures. | **None** |

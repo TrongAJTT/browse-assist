@@ -6,7 +6,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
-## [1.1.1] - 2026-11-19
+## [1.2.0] - 2026-11-24
+
+### Added
+- **Per-Site Rules & Exclusions (`src/core/siteRules.ts`)**:
+  - Disable all features or specific individual features per website using domain (`figma.com`, `*.figma.com`) or wildcard (`*`) URL patterns (`docs.google.com/spreadsheets/*`).
+  - Real-time enforcement across Popup, Options, and Content Scripts via `STORAGE_KEYS.SITE_RULES` (`browse_assist_site_rules`), calling `deactivate()` immediately without page reload and re-evaluating on SPA route changes.
+  - Shared responsive `SiteRulesManager` UI accessible from the AppBar **Shield** icon in Popup (`Click`: Popup view, `Shift+Click`: jumps to `#site-rules` in Options) and the `#site-rules` section in Options.
+  - Compact List Tile View with a collapsible per-feature exclusion drawer for the active site, unified Add/Edit modal (with active-tab domain auto-fill/quick-fill and duplicate guard), and an inline search bar in the *Saved Rules* header (shown when `>= 6` rules exist).
+  - Visual **`Site off`** status badges on excluded feature cards/rows in Popup (`ToggleSwitch`) and disabled **`Site off`** actions in Quick Hub.
+- **Quick Hub Site Rules Footer**: Persistent 2-state footer at the bottom of the Quick Hub menu (*Site issue? Add rule* or *Site rules active (N)*) that opens Popup directly to the `Site Rules` view.
+- **Image Hover Preview — Entrance Animations**:
+  - Added configurable `animation` presets (`zoom`, `morph`, `fade`, `slide`, `none`) using CSS `@keyframes` and Web Animations API (WAAPI) uniform-scale FLIP morphing from source `<img>` bounds, with `zoom` fallback for text links and `prefers-reduced-motion` support.
+- **Extension Identity & Manifest**:
+  - Updated `extName` to **Browse Assist: Web Interaction** with localized slogans across all 9 locales (`locales/*/messages.json`), and added `"short_name": "Browse Assist"` and `"activeTab"` permission in `package.json`.
+- **Automated Tests**: Expanded Vitest suite to **23 test files / 100 passing tests** (including `src/core/__tests__/siteRules.test.ts` and new Quick Hub / Image Hover Preview tests).
+
+### Changed
+- **Theme Contrast & Badge Polish**: Added theme-aware `.badge-warning` tokens in `src/style.css` for crisp contrast in both Light Mode and Dark Mode, and applied `.badge-accent` to active-tab rule badges.
+
+### Fixed
+- **Localization Interpolation**: Fixed Rosetta `{{count}}` / `{{host}}` double-brace placeholders across all 9 locale dictionaries (`src/locales/*.ts`).
+
+---
+
+## [1.1.0] - 2026-11-19
 
 ### Added
 - **Image Hover Preview**: New feature to preview `<img>` elements and image links in full size on hover, with configurable modifier key, delay, dimensions badge, settings UI, and unit tests.

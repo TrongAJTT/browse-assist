@@ -300,6 +300,46 @@ export const de: TranslationDict = {
         "Markierten Text beim Super-Ziehen mit der Standardsuchmaschine suchen."
     }
   },
+  siteRules: {
+    title: "Website-Regeln",
+    appBarTip: "Website-Regeln (Umschalt+Klick für Optionen)",
+    openInOptionsTip: "Website-Regeln in den Optionen öffnen",
+    openRulesTip: "Regeln für diese Website konfigurieren",
+    optionsDesc:
+      "Browse Assist oder einzelne Funktionen für bestimmte Domains oder Platzhalter-URLs (*) deaktivieren.",
+    currentSite: "Aktuelle Website",
+    pauseAllOnSite: "Alle pausieren",
+    quickExcludeDesc: "Funktion anklicken, um sie auf dieser Domain zu deaktivieren:",
+    pause: "Pausieren",
+    resume: "Fortsetzen",
+    pauseSiteTip: "Alle Funktionen auf {{host}} pausieren",
+    resumeSiteTip: "Funktionen auf {{host}} fortsetzen",
+    statusPaused: "Pausiert",
+    statusExcludedCount: "{{count}} ausgenommen",
+    siteOffBadge: "Auf Site aus",
+    siteOffTip: "Auf {{host}} durch Website-Regeln deaktiviert. Klicken zum Verwalten.",
+    siteOffQuickHubTip: "Auf dieser Website durch Website-Regeln deaktiviert",
+    addRuleTitle: "Regel hinzufügen",
+    useCurrentDomain: "{{host}} verwenden",
+    useCurrentDomainTip: "Aktuelle Website-Domain einfügen ({{host}})",
+    alreadyInList: "Bereits in der Liste",
+    wildcardHint: "Unterstützt *-Platzhalter",
+    patternPlaceholder: "figma.com, *.google.com, docs.google.com/app/*",
+    scopeAll: "Alle Funktionen",
+    scopeSelected: "Ausgewählt",
+    addButton: "Hinzufügen",
+    invalidPattern: "Gültige Domain oder URL mit Platzhalter eingeben (nicht nur *).",
+    selectAtLeastOne: "Mindestens eine Funktion auswählen.",
+    savedRulesTitle: "Gespeicherte Regeln",
+    searchPlaceholder: "Regeln nach Domain oder Funktion suchen...",
+    emptyTitle: "Noch keine Website-Regeln",
+    emptyDesc:
+      "Domain (figma.com) oder Platzhalter-URL (docs.google.com/spreadsheets/*) hinzufügen, um Funktionen gezielt zu deaktivieren.",
+    matchesThisTab: "Dieser Tab",
+    editTip: "Regel bearbeiten",
+    deleteTip: "Regel löschen",
+    save: "Speichern"
+  },
   features: {
     allowRightClick: {
       title: "Rechtsklick erlauben",
@@ -814,7 +854,11 @@ export const de: TranslationDict = {
         triggerAria: "Schnellmenü",
         cleanUrlCopied: "Saubere URL kopiert",
         markdownCopied: "Seiten-Markdown kopiert",
-        noVideoFound: "Kein aktives Video auf dieser Seite gefunden"
+        noVideoFound: "Kein aktives Video auf dieser Seite gefunden",
+        siteRulesAdd: "Problem? Regel erstellen",
+        siteRulesAddTip: "Stört eine Funktion auf dieser Seite? Website-Regel hinzufügen.",
+        siteRulesActive: "Website-Regeln aktiv ({{count}})",
+        siteRulesActiveTip: "Aktive Regeln für diese Website anzeigen oder bearbeiten."
       }
     },
     imageHoverPreview: {
@@ -831,6 +875,13 @@ export const de: TranslationDict = {
         instant: "Sofort",
         displaySize: "Anzeigegröße",
         maxViewportSize: "Maximale Viewport-Größe",
+        animation: "Einblend-Animation",
+        animationDesc: "Bewegungseffekt beim Einblenden der Vorschaukarte.",
+        animZoom: "Zoom",
+        animMorph: "Morph",
+        animFade: "Einblenden",
+        animSlide: "Gleiten",
+        animNone: "Keine",
         behavior: "Verhalten",
         previewImageLinks: "Bildlinks in Vorschau anzeigen",
         previewImageLinksDesc:

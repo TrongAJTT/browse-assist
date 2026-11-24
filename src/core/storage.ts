@@ -2,9 +2,11 @@ import { Storage, type StorageWatchCallback } from "@plasmohq/storage"
 
 import {
   DEFAULT_SETTINGS,
+  DEFAULT_SITE_RULES,
   STORAGE_KEYS,
   type FeatureKey,
-  type FeatureSettings
+  type FeatureSettings,
+  type SiteRule
 } from "./types"
 
 /**
@@ -73,6 +75,50 @@ export function subscribeToSettings(
   return () => {
     extensionStorage.unwatch({
       [STORAGE_KEYS.SETTINGS]: handler
+    })
+  }
+}
+
+/**
+ * Retrieves the per-site exclusion rules from storage.
+ */
+export async function getStoredSiteRules(): Promise<SiteRule[]> {
+  const rules = await extensionStorage.get<SiteRule[]>(STORAGE_KEYS.SITE_RULES)
+  return Array.isArray(rules) ? rules : DEFAULT_SITE_RULES
+}
+
+/**
+ * Atomically reads, transforms, and persists the SiteRule[] list.
+ */
+export async function updateStoredSiteRules(
+  updater: (current: SiteRule[]) => SiteRule[]
+): Promise<SiteRule[]> {
+  const current = await getStoredSiteRules()
+  const next = updater(current)
+  await extensionStorage.set(STORAGE_KEYS.SITE_RULES, next)
+  return next
+}
+
+/**
+ * Subscribes to per-site rule updates in real time across any extension context.
+ */
+export function subscribeToSiteRules(
+  callback: (rules: SiteRule[]) => void
+): () => void {
+  const handler: StorageWatchCallback = (change) => {
+    const next = Array.isArray(change.newValue)
+      ? (change.newValue as SiteRule[])
+      : DEFAULT_SITE_RULES
+    callback(next)
+  }
+
+  extensionStorage.watch({
+    [STORAGE_KEYS.SITE_RULES]: handler
+  })
+
+  return () => {
+    extensionStorage.unwatch({
+      [STORAGE_KEYS.SITE_RULES]: handler
     })
   }
 }

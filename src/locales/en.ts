@@ -299,6 +299,46 @@ export const en = {
       search: "Search selected text with default search engine on Super Drag."
     }
   },
+  siteRules: {
+    title: "Site Rules",
+    appBarTip: "Site Rules (Shift+Click to open in Options)",
+    openInOptionsTip: "Open Site Rules in Options",
+    openRulesTip: "Configure rules for this site",
+    optionsDesc:
+      "Disable Browse Assist or specific features on matching domains or wildcard (*) URLs.",
+    currentSite: "Current Site",
+    pauseAllOnSite: "Pause all",
+    quickExcludeDesc: "Click a feature below to disable it on this domain:",
+    pause: "Pause",
+    resume: "Resume",
+    pauseSiteTip: "Pause all features on {{host}}",
+    resumeSiteTip: "Resume features on {{host}}",
+    statusPaused: "Paused",
+    statusExcludedCount: "{{count}} excluded",
+    siteOffBadge: "Site off",
+    siteOffTip: "Disabled on {{host}} by Site Rules. Click to manage.",
+    siteOffQuickHubTip: "Disabled on this site by Site Rules",
+    addRuleTitle: "Add Rule",
+    useCurrentDomain: "Use {{host}}",
+    useCurrentDomainTip: "Fill current site domain ({{host}})",
+    alreadyInList: "Already in list",
+    wildcardHint: "Supports * wildcard",
+    patternPlaceholder: "figma.com, *.google.com, docs.google.com/app/*",
+    scopeAll: "All features",
+    scopeSelected: "Selected",
+    addButton: "Add",
+    invalidPattern: "Enter a valid domain or wildcard URL pattern (not just *).",
+    selectAtLeastOne: "Select at least one feature to exclude.",
+    savedRulesTitle: "Saved Rules",
+    searchPlaceholder: "Search rules by domain or feature...",
+    emptyTitle: "No site rules yet",
+    emptyDesc:
+      "Add a domain (figma.com) or wildcard URL (docs.google.com/spreadsheets/*) to disable features where needed.",
+    matchesThisTab: "This tab",
+    editTip: "Edit rule",
+    deleteTip: "Delete rule",
+    save: "Save"
+  },
   features: {
     allowRightClick: {
       title: "Allow Right Click",
@@ -810,7 +850,11 @@ export const en = {
         triggerAria: "Quick Hub",
         cleanUrlCopied: "Clean URL Copied",
         markdownCopied: "Page Markdown Copied",
-        noVideoFound: "No active video found on this page"
+        noVideoFound: "No active video found on this page",
+        siteRulesAdd: "Site issue? Add rule",
+        siteRulesAddTip: "A feature interfering with this page? Add a site rule.",
+        siteRulesActive: "Site rules active ({{count}})",
+        siteRulesActiveTip: "View or edit rules active on this site."
       }
     },
     imageHoverPreview: {
@@ -826,6 +870,13 @@ export const en = {
         instant: "Instant",
         displaySize: "Display Size",
         maxViewportSize: "Max Viewport Size",
+        animation: "Entrance Animation",
+        animationDesc: "Motion effect when the preview card appears.",
+        animZoom: "Zoom",
+        animMorph: "Morph",
+        animFade: "Fade",
+        animSlide: "Slide",
+        animNone: "None",
         behavior: "Behavior",
         previewImageLinks: "Preview Image Links",
         previewImageLinksDesc:

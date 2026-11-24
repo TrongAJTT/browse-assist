@@ -1,4 +1,4 @@
-import { Clock, Command, Link2, Maximize2, Ruler } from "lucide-react"
+import { Clock, Command, Link2, Maximize2, Ruler, Sparkles } from "lucide-react"
 import type React from "react"
 
 import { useStorage } from "@plasmohq/storage/hook"
@@ -15,6 +15,7 @@ import {
   DEFAULT_SETTINGS,
   STORAGE_KEYS,
   type FeatureSettings,
+  type ImageHoverPreviewAnimation,
   type ImageHoverPreviewConfig,
   type ImageHoverPreviewModifier
 } from "~core/types"
@@ -47,6 +48,14 @@ export const ImageHoverPreviewSettingsView: React.FC<
     { id: "150", label: "150ms" },
     { id: "250", label: "250ms" },
     { id: "450", label: "450ms" }
+  ]
+
+  const animationOptions: SelectDropdownOption<ImageHoverPreviewAnimation>[] = [
+    { id: "zoom", label: t("features.imageHoverPreview.settings.animZoom") },
+    { id: "morph", label: t("features.imageHoverPreview.settings.animMorph") },
+    { id: "fade", label: t("features.imageHoverPreview.settings.animFade") },
+    { id: "slide", label: t("features.imageHoverPreview.settings.animSlide") },
+    { id: "none", label: t("features.imageHoverPreview.settings.animNone") }
   ]
 
   const isMasterEnabled =
@@ -147,6 +156,30 @@ export const ImageHoverPreviewSettingsView: React.FC<
             step={5}
             onChange={(val) => updateConfig({ maxSizePercent: val })}
           />
+
+          <div className="flex items-center justify-between gap-3 pt-2">
+            <div className="flex items-start gap-3 flex-1 min-w-0">
+              <Sparkles className="w-5 h-5 text-violet-400 shrink-0 mt-0.5" />
+              <div className="flex flex-col min-w-0">
+                <span className="text-xs font-semibold text-content-primary">
+                  {t("features.imageHoverPreview.settings.animation")}
+                </span>
+                <p className="text-[11px] text-content-muted mt-0.5 leading-snug">
+                  {t("features.imageHoverPreview.settings.animationDesc")}
+                </p>
+              </div>
+            </div>
+
+            <SelectDropdown<ImageHoverPreviewAnimation>
+              value={
+                currentConfig.animation ??
+                DEFAULT_IMAGE_HOVER_PREVIEW_CONFIG.animation
+              }
+              options={animationOptions}
+              onChange={(animation) => updateConfig({ animation })}
+              ariaLabel={t("features.imageHoverPreview.settings.animation")}
+            />
+          </div>
         </div>
 
         {/* Behavior Toggles */}

@@ -16,9 +16,12 @@ import {
 import { t } from "~core/i18n"
 import { cleanUrl, copyToClipboard, showCopiedFeedback } from "~core/linkUtils"
 import { openExtensionPopup } from "~core/popupHelper"
+import { isFeatureBlockedOnUrl, matchesSitePattern } from "~core/siteRules"
 import {
   getStoredSettings,
+  getStoredSiteRules,
   subscribeToSettings,
+  subscribeToSiteRules,
   updateFeatureSetting,
   updateStoredSettings
 } from "~core/storage"
@@ -26,13 +29,16 @@ import { detectPageTheme, observePageTheme } from "~core/themeDetect"
 import { showContentToast } from "~core/toast"
 import {
   DEFAULT_QUICK_HUB_CONFIG,
+  DEFAULT_SITE_RULES,
   normalizeEdgePlacement,
   normalizeQuickHubActionOrder,
   normalizeQuickHubHiddenActions,
   type EdgePlacement,
+  type FeatureKey,
   type FeatureSettings,
   type QuickHubActionId,
-  type QuickHubConfig
+  type QuickHubConfig,
+  type SiteRule
 } from "~core/types"
 import {
   isRightClickActive,
@@ -47,7 +53,9 @@ import { captureActiveVideoFrame } from "~features/video-wheel-control/logic"
 let isActive = false
 let currentConfig: QuickHubConfig = { ...DEFAULT_QUICK_HUB_CONFIG }
 let cachedSettings: FeatureSettings | null = null
+let cachedSiteRules: SiteRule[] = DEFAULT_SITE_RULES
 let settingsUnsubscribe: (() => void) | null = null
+let siteRulesUnsubscribe: (() => void) | null = null
 
 // DOM elements
 let hostElement: HTMLDivElement | null = null
@@ -74,6 +82,7 @@ const ZOOM_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" st
 const LINK_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`
 const RIGHT_CLICK_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 9 5 12 1.8-5.2L21 14Z"/><path d="M7.2 2.2 8 5.1"/><path d="m5.1 8-2.9-.8"/><path d="M14 4.1 12 6"/><path d="m6 12-1.9 2"/></svg>`
 const MARKDOWN_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="m10 13-2 2 2 2"/><path d="m14 17 2-2-2-2"/></svg>`
+const SHIELD_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>`
 const CAMERA_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>`
 
 function getPlacementCss(placement: EdgePlacement): {
@@ -404,7 +413,98 @@ function getShadowStyles(
       color: #94a3b8;
       line-height: 1.4;
     }
+
+    .qh-item:disabled,
+    .qh-item.qh-item-blocked {
+      opacity: 0.48;
+      cursor: not-allowed;
+    }
+
+    .qh-item:disabled:hover,
+    .qh-item.qh-item-blocked:hover {
+      background: transparent;
+      transform: none;
+    }
+
+    .qh-site-off-badge {
+      margin-left: auto;
+      padding: 2px 6px;
+      border-radius: 5px;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: #fbbf24;
+      background: rgba(245, 158, 11, 0.16);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      flex-shrink: 0;
+    }
+
+    .qh-footer {
+      margin-top: 4px;
+      padding-top: 4px;
+      border-top: 1px solid ${isDark ? "rgba(148, 163, 184, 0.14)" : "rgba(15, 23, 42, 0.08)"};
+    }
+
+    .qh-footer-btn {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      width: 100%;
+      padding: 6px 10px;
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      color: ${isDark ? "#94a3b8" : "#64748b"};
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.12s ease, color 0.12s ease;
+      outline: none;
+    }
+
+    .qh-footer-btn:hover,
+    .qh-footer-btn:focus-visible {
+      background: ${isDark ? "rgba(99, 102, 241, 0.18)" : "rgba(79, 70, 229, 0.08)"};
+      color: ${isDark ? "#c7d2fe" : "#4338ca"};
+    }
+
+    .qh-footer-btn.qh-footer-active {
+      color: ${isDark ? "#fbbf24" : "#b45309"};
+    }
+
+    .qh-footer-btn.qh-footer-active:hover,
+    .qh-footer-btn.qh-footer-active:focus-visible {
+      background: ${isDark ? "rgba(245, 158, 11, 0.16)" : "rgba(217, 119, 6, 0.12)"};
+      color: ${isDark ? "#fcd34d" : "#92400e"};
+    }
+
+    .qh-footer-label {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   `
+}
+
+function markButtonIfSiteBlocked(
+  btn: HTMLButtonElement,
+  featureKey: FeatureKey
+): boolean {
+  if (
+    !isFeatureBlockedOnUrl(featureKey, window.location.href, cachedSiteRules)
+  ) {
+    return false
+  }
+  btn.disabled = true
+  btn.classList.add("qh-item-blocked")
+  btn.title = t("siteRules.siteOffQuickHubTip")
+  const badge = document.createElement("span")
+  badge.className = "qh-site-off-badge"
+  badge.textContent = t("siteRules.siteOffBadge")
+  btn.appendChild(badge)
+  return true
 }
 
 const ACTION_RENDERERS: Record<
@@ -427,10 +527,12 @@ const ACTION_RENDERERS: Record<
         <span class="qh-item-name">${t("features.quickHub.settings.actions.pipTitle")}</span>
       </div>
     `
-    btn.addEventListener("click", () => {
-      closeMenu()
-      togglePictureInPicture().catch(() => {})
-    })
+    if (!markButtonIfSiteBlocked(btn, "pictureInPicture")) {
+      btn.addEventListener("click", () => {
+        closeMenu()
+        togglePictureInPicture().catch(() => {})
+      })
+    }
     list.appendChild(btn)
     return true
   },
@@ -451,10 +553,12 @@ const ACTION_RENDERERS: Record<
         <span class="qh-item-name">${t("features.quickHub.settings.actions.colorPickerTitle")}</span>
       </div>
     `
-    btn.addEventListener("click", () => {
-      closeMenu()
-      pickColor().catch(() => {})
-    })
+    if (!markButtonIfSiteBlocked(btn, "colorPicker")) {
+      btn.addEventListener("click", () => {
+        closeMenu()
+        pickColor().catch(() => {})
+      })
+    }
     list.appendChild(btn)
     return true
   },
@@ -474,10 +578,12 @@ const ACTION_RENDERERS: Record<
         <span class="qh-item-name">${t("features.quickHub.settings.actions.elementToysTitle")}</span>
       </div>
     `
-    btn.addEventListener("click", () => {
-      closeMenu()
-      startElementToys()
-    })
+    if (!markButtonIfSiteBlocked(btn, "elementToys")) {
+      btn.addEventListener("click", () => {
+        closeMenu()
+        startElementToys()
+      })
+    }
     list.appendChild(btn)
     return true
   },
@@ -497,10 +603,12 @@ const ACTION_RENDERERS: Record<
         <span class="qh-item-name">${t("features.quickHub.settings.actions.scrollTopTitle")}</span>
       </div>
     `
-    btn.addEventListener("click", () => {
-      closeMenu()
-      window.scrollTo({ top: 0, behavior: "smooth" })
-    })
+    if (!markButtonIfSiteBlocked(btn, "quickScroll")) {
+      btn.addEventListener("click", () => {
+        closeMenu()
+        window.scrollTo({ top: 0, behavior: "smooth" })
+      })
+    }
     list.appendChild(btn)
     return true
   },
@@ -521,14 +629,16 @@ const ACTION_RENDERERS: Record<
         <span class="qh-item-name">${t("features.quickHub.settings.actions.scrollBottomTitle")}</span>
       </div>
     `
-    btn.addEventListener("click", () => {
-      closeMenu()
-      const scrollHeight = Math.max(
-        document.body.scrollHeight,
-        document.documentElement.scrollHeight
-      )
-      window.scrollTo({ top: scrollHeight, behavior: "smooth" })
-    })
+    if (!markButtonIfSiteBlocked(btn, "quickScroll")) {
+      btn.addEventListener("click", () => {
+        closeMenu()
+        const scrollHeight = Math.max(
+          document.body.scrollHeight,
+          document.documentElement.scrollHeight
+        )
+        window.scrollTo({ top: scrollHeight, behavior: "smooth" })
+      })
+    }
     list.appendChild(btn)
     return true
   },
@@ -548,10 +658,12 @@ const ACTION_RENDERERS: Record<
         <span class="qh-item-name">${t("features.quickHub.settings.actions.resetZoomTitle")}</span>
       </div>
     `
-    btn.addEventListener("click", () => {
-      closeMenu()
-      resetMouseZoom()
-    })
+    if (!markButtonIfSiteBlocked(btn, "mouseZoom")) {
+      btn.addEventListener("click", () => {
+        closeMenu()
+        resetMouseZoom()
+      })
+    }
     list.appendChild(btn)
     return true
   },
@@ -571,15 +683,17 @@ const ACTION_RENDERERS: Record<
         <span class="qh-item-name">${t("features.quickHub.settings.actions.cleanUrlTitle")}</span>
       </div>
     `
-    btn.addEventListener("click", async () => {
-      const rawUrl = window.location.href
-      const cleaned = cleanUrl(rawUrl)
-      const ok = await copyToClipboard(cleaned)
-      closeMenu()
-      if (ok) {
-        showCopiedFeedback(t("features.quickHub.logic.cleanUrlCopied"), cleaned)
-      }
-    })
+    if (!markButtonIfSiteBlocked(btn, "contextMenuActions")) {
+      btn.addEventListener("click", async () => {
+        const rawUrl = window.location.href
+        const cleaned = cleanUrl(rawUrl)
+        const ok = await copyToClipboard(cleaned)
+        closeMenu()
+        if (ok) {
+          showCopiedFeedback(t("features.quickHub.logic.cleanUrlCopied"), cleaned)
+        }
+      })
+    }
     list.appendChild(btn)
     return true
   },
@@ -621,16 +735,18 @@ const ACTION_RENDERERS: Record<
         <span class="qh-item-name">${t("features.quickHub.settings.actions.copyMarkdownTitle")}</span>
       </div>
     `
-    btn.addEventListener("click", async () => {
-      const cleaned = cleanUrl(window.location.href)
-      const title = (document.title || cleaned).replace(/[[\]]/g, "\\$&")
-      const markdown = `[${title}](${cleaned})`
-      const ok = await copyToClipboard(markdown)
-      closeMenu()
-      if (ok) {
-        showCopiedFeedback(t("features.quickHub.logic.markdownCopied"), markdown)
-      }
-    })
+    if (!markButtonIfSiteBlocked(btn, "contextMenuActions")) {
+      btn.addEventListener("click", async () => {
+        const cleaned = cleanUrl(window.location.href)
+        const title = (document.title || cleaned).replace(/[[\]]/g, "\\$&")
+        const markdown = `[${title}](${cleaned})`
+        const ok = await copyToClipboard(markdown)
+        closeMenu()
+        if (ok) {
+          showCopiedFeedback(t("features.quickHub.logic.markdownCopied"), markdown)
+        }
+      })
+    }
     list.appendChild(btn)
     return true
   },
@@ -650,17 +766,19 @@ const ACTION_RENDERERS: Record<
         <span class="qh-item-name">${t("features.quickHub.settings.actions.videoScreenshotTitle")}</span>
       </div>
     `
-    btn.addEventListener("click", async () => {
-      closeMenu()
-      const captured = await captureActiveVideoFrame()
-      if (!captured) {
-        showContentToast({
-          message: t("features.quickHub.logic.noVideoFound"),
-          type: "warning",
-          duration: 1800
-        })
-      }
-    })
+    if (!markButtonIfSiteBlocked(btn, "videoWheelControl")) {
+      btn.addEventListener("click", async () => {
+        closeMenu()
+        const captured = await captureActiveVideoFrame()
+        if (!captured) {
+          showContentToast({
+            message: t("features.quickHub.logic.noVideoFound"),
+            type: "warning",
+            duration: 1800
+          })
+        }
+      })
+    }
     list.appendChild(btn)
     return true
   }
@@ -699,6 +817,42 @@ function renderMenuContent(): void {
   }
 
   menuCard.appendChild(list)
+
+  // Persistent Site Rules Footer
+  const matchingRules = cachedSiteRules.filter(
+    (r) => r.enabled && matchesSitePattern(window.location.href, r.pattern)
+  )
+  const footer = document.createElement("div")
+  footer.className = "qh-footer"
+
+  const footerBtn = document.createElement("button")
+  footerBtn.type = "button"
+  footerBtn.className =
+    matchingRules.length > 0
+      ? "qh-footer-btn qh-footer-active"
+      : "qh-footer-btn"
+  footerBtn.title =
+    matchingRules.length > 0
+      ? t("features.quickHub.logic.siteRulesActiveTip")
+      : t("features.quickHub.logic.siteRulesAddTip")
+  footerBtn.innerHTML = `
+    <span class="qh-icon-box">${SHIELD_SVG}</span>
+    <span class="qh-footer-label">${
+      matchingRules.length > 0
+        ? t("features.quickHub.logic.siteRulesActive", {
+            count: matchingRules.length
+          })
+        : t("features.quickHub.logic.siteRulesAdd")
+    }</span>
+  `
+  footerBtn.addEventListener("click", () => {
+    closeMenu()
+    Promise.resolve(
+      openExtensionPopup("site-rules", window.location.href)
+    ).catch(() => {})
+  })
+  footer.appendChild(footerBtn)
+  menuCard.appendChild(footer)
 }
 
 function openMenu(): void {
@@ -971,10 +1125,11 @@ export function activate(config?: QuickHubConfig): void {
   if (isActive || typeof window === "undefined") return
   isActive = true
 
-  // Hydrate settings
-  getStoredSettings()
-    .then((settings) => {
+  // Hydrate settings & site rules
+  Promise.all([getStoredSettings(), getStoredSiteRules()])
+    .then(([settings, rules]) => {
       cachedSettings = settings
+      cachedSiteRules = rules
       if (settings?.quickHubConfig) {
         currentConfig = { ...currentConfig, ...settings.quickHubConfig }
       }
@@ -989,6 +1144,13 @@ export function activate(config?: QuickHubConfig): void {
       currentConfig = { ...currentConfig, ...newSettings.quickHubConfig }
       updateStyles()
     }
+    if (isMenuOpen) {
+      renderMenuContent()
+    }
+  })
+
+  siteRulesUnsubscribe = subscribeToSiteRules((newRules) => {
+    cachedSiteRules = newRules
     if (isMenuOpen) {
       renderMenuContent()
     }
@@ -1017,6 +1179,11 @@ export function deactivate(): void {
   if (settingsUnsubscribe) {
     settingsUnsubscribe()
     settingsUnsubscribe = null
+  }
+
+  if (siteRulesUnsubscribe) {
+    siteRulesUnsubscribe()
+    siteRulesUnsubscribe = null
   }
 
   window.removeEventListener("pointermove", handleMouseMove)
